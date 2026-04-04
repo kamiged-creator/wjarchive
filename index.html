@@ -40,7 +40,7 @@
     img{max-width:100%;display:block}
     a{text-decoration:none;color:inherit}
     button,input,textarea,select{font:inherit}
-    .wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
     .topbar{
       position:sticky;top:0;z-index:20;
@@ -49,9 +49,9 @@
       border-bottom:1px solid var(--line);
     }
     .topbar-inner{
-      min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 0;
+      min-height:72px;display:grid;gap:12px;padding:20px 0 14px;
     }
-    .brand{display:flex;flex-direction:column;gap:2px}
+    .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px}
     .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
     .brand-sub{font-size:12px;color:var(--muted)}
     .nav{display:flex;gap:10px;flex-wrap:wrap}
@@ -271,6 +271,31 @@
     .stat-note{margin-top:12px;font-size:12px;color:var(--muted)}
 
 
+    
+    .top-tools{display:grid;gap:12px;width:100%}
+    .top-nav-row{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
+    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:2px 6px 8px}
+    .top-left-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-left:2px}
+    .top-right-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:2px}
+    .news-mini{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:34px;padding:0 12px;border-radius:12px;
+      border:1px solid rgba(139,104,71,.18);
+      background:rgba(231,214,196,.42);
+      color:#6b5746;font-size:13px;font-weight:700;
+      box-shadow:none;
+    }
+    .news-mini:hover{
+      background:rgba(231,214,196,.62);
+      border-color:rgba(139,104,71,.28);
+      color:var(--text);
+    }
+    .accordion-item.news-accent{
+      background:linear-gradient(180deg, rgba(231,214,196,.34), rgba(255,253,249,.90));
+      border-color:rgba(139,104,71,.18);
+    }
+
+
     .lang-select{
       min-height:40px;
       height:40px;
@@ -293,7 +318,8 @@
       .artist-photo{min-height:440px;background-position:center top}
     }
     @media (max-width: 680px){
-      .topbar-inner{align-items:flex-start;flex-direction:column}
+      .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 0 12px}
+      .wrap{padding:0 18px}
       .hero{padding-top:34px}
       .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
       .asset-preview{grid-template-columns:1fr}
@@ -302,6 +328,18 @@
       .admin-head{align-items:flex-start;flex-direction:column}
       .viewer-body h3{font-size:22px}
       .artist-photo{min-height:360px}
+      .top-tools{width:100%}
+      .top-nav-row,.top-sub-row{width:100%}
+      .top-sub-row{padding:2px 2px 6px}
+      .top-left-tools,.top-right-tools{display:flex;align-items:center}
+      .top-left-tools{justify-content:flex-start;padding-left:0}
+      .top-right-tools{justify-content:flex-end;padding-right:0}
+      .news-mini{
+        min-height:30px;
+        padding:0 10px;
+        border-radius:10px;
+        font-size:12px;
+      }
       .lang-select{
         min-height:34px;
         height:34px;
@@ -326,21 +364,30 @@
         <div class="brand-title">이원주</div>
         <div class="brand-sub">작품 포트폴리오</div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <nav class="nav">
-          <a href="#about">작가 소개</a>
-          <a href="#works">작품</a>
-          <a href="#note">작가 노트</a>
-          <a href="#contact">문의</a>
-        </nav>
-        <select class="lang-select" aria-label="언어 선택">
-          <option value="global" selected>Global</option>
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-          <option value="ja">日本語</option>
-          <option value="vi">Tiếng Việt</option>
-          <option value="es">Español</option>
-        </select>
+      <div class="top-tools">
+        <div class="top-nav-row">
+          <nav class="nav">
+            <a href="#about">작가 소개</a>
+            <a href="#works">작품</a>
+            <a href="#note">작가 노트</a>
+            <a href="#contact">문의</a>
+          </nav>
+        </div>
+        <div class="top-sub-row">
+          <div class="top-left-tools">
+            <select class="lang-select" aria-label="언어 선택">
+              <option value="global" selected>Global</option>
+              <option value="ko">한국어</option>
+              <option value="en">English</option>
+              <option value="ja">日本語</option>
+              <option value="vi">Tiếng Việt</option>
+              <option value="es">Español</option>
+            </select>
+          </div>
+          <div class="top-right-tools">
+            <a class="news-mini" href="#news">소식</a>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -425,6 +472,27 @@
             쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.
           </p>
         </article>
+      </div>
+    </section>
+
+    <section id="news">
+      <div class="wrap">
+        <div class="accordion">
+          <article class="accordion-item news-accent" id="newsAccordion">
+            <button class="accordion-btn" type="button" data-accordion="newsAccordion">
+              <span>소식</span>
+              <span>＋</span>
+            </button>
+            <div class="accordion-panel">
+              <p style="margin:2px 0 10px;">최근 작업, 전시 준비, 업데이트 소식</p>
+              <div class="contact-list" id="newsDisplayList">
+                <div class="contact-item">2026.04 · 사이트 글로벌 도메인 연결 작업 진행</div>
+                <div class="contact-item">2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화</div>
+                <div class="contact-item">2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비</div>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -612,7 +680,7 @@
 
             <div class="admin-card">
               <h3>4. 사이트 문구 편집</h3>
-              <p>문의 내용과 전시 이력을 관리자에서 직접 바꾸고 바로 화면에 반영할 수 있습니다.</p>
+              <p>문의 내용, 전시 이력, 소식란을 관리자에서 직접 바꾸고 바로 화면에 반영할 수 있습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div>
                   <label class="label" for="contactEditor">문의 내용</label>
@@ -624,12 +692,17 @@
                   <textarea class="editor-area" id="exhibitionEditor" placeholder="한 줄에 하나씩 입력&#10;예: 2026 · 이원주 개인전 《빛의 결》"></textarea>
                   <div class="mini-note">한 줄이 카드 한 줄로 들어갑니다.</div>
                 </div>
+                <div>
+                  <label class="label" for="newsEditor">소식란</label>
+                  <textarea class="editor-area" id="newsEditor" placeholder="한 줄에 하나씩 입력&#10;예: 2026.04 · 새 작품 업로드&#10;예: 2026.03 · 전시 준비 중"></textarea>
+                  <div class="mini-note">한 줄이 소식 카드 한 줄로 들어갑니다.</div>
+                </div>
                 <div class="hero-actions" style="margin-top:4px">
                   <button class="btn primary" type="button" id="saveTextContentBtn">문구 저장</button>
                   <button class="btn" type="button" id="applyTextContentBtn">화면 반영</button>
                   <button class="btn subtle" type="button" id="resetTextContentBtn">기본값 복원</button>
                 </div>
-                <div class="status" id="textContentStatus">문의 / 전시 이력 문구를 수정할 수 있습니다.</div>
+                <div class="status" id="textContentStatus">문의 / 전시 이력 / 소식란 문구를 수정할 수 있습니다.</div>
               </div>
             </div>
 
@@ -1515,6 +1588,11 @@
         '2026 · 이원주 개인전 예정',
         '2025 · 서예·전각 그룹전 참여',
         '2024 · 작업 아카이브 및 발표전'
+      ],
+      news: [
+        '2026.04 · 사이트 글로벌 도메인 연결 작업 진행',
+        '2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화',
+        '2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비'
       ]
     };
 
@@ -1540,22 +1618,26 @@
       }
       const contactLines = saved?.contact?.length ? saved.contact : defaultTextContent.contact;
       const exhibitionLines = saved?.exhibition?.length ? saved.exhibition : defaultTextContent.exhibition;
+      const newsLines = saved?.news?.length ? saved.news : defaultTextContent.news;
 
       if(qs('#contactEditor')) qs('#contactEditor').value = contactLines.join('\n');
       if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = exhibitionLines.join('\n');
+      if(qs('#newsEditor')) qs('#newsEditor').value = newsLines.join('\n');
 
       renderListItems('#contactDisplayList', contactLines);
       renderListItems('#exhibitionDisplayList', exhibitionLines);
+      renderListItems('#newsDisplayList', newsLines);
     }
 
     function applyEditableTextContent(save){
       const contactLines = linesFromTextarea(qs('#contactEditor')?.value);
       const exhibitionLines = linesFromTextarea(qs('#exhibitionEditor')?.value);
+      const newsLines = linesFromTextarea(qs('#newsEditor')?.value);
       const status = qs('#textContentStatus');
 
-      if(!contactLines.length || !exhibitionLines.length){
+      if(!contactLines.length || !exhibitionLines.length || !newsLines.length){
         if(status){
-          status.textContent = '문의 내용과 전시 이력에 각각 한 줄 이상 입력해 주세요.';
+          status.textContent = '문의 내용, 전시 이력, 소식란에 각각 한 줄 이상 입력해 주세요.';
           status.className = 'status bad';
         }
         return;
@@ -1563,11 +1645,13 @@
 
       renderListItems('#contactDisplayList', contactLines);
       renderListItems('#exhibitionDisplayList', exhibitionLines);
+      renderListItems('#newsDisplayList', newsLines);
 
       if(save){
         localStorage.setItem('wonjuSiteTextContent', JSON.stringify({
           contact: contactLines,
-          exhibition: exhibitionLines
+          exhibition: exhibitionLines,
+          news: newsLines
         }));
         if(status){
           status.textContent = '문구가 저장되었고 화면에도 반영되었습니다.';
@@ -1585,8 +1669,10 @@
       localStorage.removeItem('wonjuSiteTextContent');
       if(qs('#contactEditor')) qs('#contactEditor').value = defaultTextContent.contact.join('\n');
       if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = defaultTextContent.exhibition.join('\n');
+      if(qs('#newsEditor')) qs('#newsEditor').value = defaultTextContent.news.join('\n');
       renderListItems('#contactDisplayList', defaultTextContent.contact);
       renderListItems('#exhibitionDisplayList', defaultTextContent.exhibition);
+      renderListItems('#newsDisplayList', defaultTextContent.news);
       const status = qs('#textContentStatus');
       if(status){
         status.textContent = '기본 문구로 복원되었습니다.';
