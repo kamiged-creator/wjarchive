@@ -143,6 +143,30 @@
     .work-meta{font-size:13px;color:var(--muted);margin-bottom:10px}
     .work-text{margin:0;color:var(--muted);font-size:14px}
 
+    .pagination{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:22px;
+    }
+    .page-btn{
+      min-width:44px;
+      height:44px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.62);
+      color:var(--muted);
+      font-weight:800;
+      cursor:pointer;
+    }
+    .page-btn.active{
+      background:var(--text);
+      color:#fff;
+      border-color:transparent;
+    }
+
 
     .accordion{display:grid;gap:14px}
     .accordion-item{
@@ -185,6 +209,8 @@
     .viewer-body h3{margin:0 0 8px;font-size:28px}
     .viewer-meta{color:#d4c7ba;font-size:13px;margin-bottom:12px}
     .viewer-desc{color:#eee4d8}
+    .viewer-youtube{margin-top:14px}
+    .viewer-youtube .btn{width:auto;box-shadow:none;background:#fff;color:var(--text)}
     .viewer-close{margin-top:18px;background:#2a231f;color:#fff;border:none}
 
     .admin-overlay{
@@ -269,6 +295,16 @@
     .stat-label{font-size:12px;color:var(--muted);margin-bottom:4px}
     .stat-value{font-size:18px;font-weight:800;letter-spacing:-.02em;word-break:break-word}
     .stat-note{margin-top:12px;font-size:12px;color:var(--muted)}
+
+    .admin-bottom-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      padding-top:12px;
+      border-top:1px solid var(--line);
+    }
 
 
     
@@ -458,6 +494,7 @@
           <button class="filter-btn" type="button" data-category="기타">기타</button>
         </div>
         <div class="gallery" id="galleryGrid"></div>
+        <div class="pagination" id="pagination"></div>
       </div>
     </section>
 
@@ -553,6 +590,7 @@
           <h3 id="viewerTitle"></h3>
           <div class="viewer-meta" id="viewerMeta"></div>
           <div class="viewer-desc" id="viewerDesc"></div>
+          <div class="viewer-youtube" id="viewerYoutubeWrap"></div>
           <button class="btn viewer-close" id="viewerClose" type="button">닫기</button>
         </div>
       </div>
@@ -578,10 +616,7 @@
           <div class="admin-title">관리자 이미지 변환기</div>
           <div class="admin-sub">원본 사진 업로드 → 썸네일/확대본 생성 → 개별 또는 ZIP 다운로드</div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" type="button" id="logoutBtn">로그아웃</button>
-          <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
-        </div>
+
       </div>
 
       <div class="admin-panel">
@@ -607,7 +642,7 @@
                 <div class="field-row">
                   <div>
                     <label class="label" for="thumbWidth">썸네일 너비</label>
-                    <input class="field-sm" id="thumbWidth" type="number" min="200" max="2000" value="700">
+                    <input class="field-sm" id="thumbWidth" type="number" min="200" max="2000" value="900">
                   </div>
                   <div>
                     <label class="label" for="thumbQuality">썸네일 품질</label>
@@ -775,6 +810,11 @@
                   <textarea class="editor-area" id="artDescription" placeholder="작품 설명 입력"></textarea>
                 </div>
 
+                <div>
+                  <label class="label" for="artYoutube">유튜브 주소</label>
+                  <input class="field" id="artYoutube" type="url" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+
                 <div class="field-row">
                   <div>
                     <label class="label" for="artThumbInput">썸네일 이미지</label>
@@ -793,13 +833,19 @@
                   </label>
                 </div>
 
+                <div>
+                  <label class="label" for="artTargetWork">유튜브 연결할 기존 작품</label>
+                  <select class="field-sm" id="artTargetWork"></select>
+                </div>
+
                 <div class="hero-actions" style="margin-top:4px">
                   <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
                   <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
                   <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
+                  <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">여기는 관리자 전용 작품 등록 입력칸입니다. 메인 화면 작품 목록은 아직 자동 반영하지 않습니다.</div>
+                <div class="status" id="artDraftStatus">유튜브 주소를 넣고 기존 작품을 선택한 뒤 연결 버튼을 누르면 확대보기 팝업 안에만 유튜브 바로가기가 나타납니다.</div>
               </div>
             </div>
 
@@ -848,6 +894,10 @@
             <div class="preview-grid" id="previewGrid"></div>
             <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
           </div>
+          <div class="admin-bottom-actions">
+            <button class="btn" type="button" id="logoutBtn">로그아웃</button>
+            <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
+          </div>
         </div>
       </div>
     </div>
@@ -863,7 +913,8 @@
         medium: '전각',
         desc: '힘 있게 다듬은 획과 여백의 균형을 보여주는 전각 작업.',
         thumb: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop'
+        large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
       },
       {
         title: '묵향',
@@ -872,7 +923,8 @@
         medium: '서예',
         desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop'
+        large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
       },
       {
         title: '담연',
@@ -881,7 +933,8 @@
         medium: '전각',
         desc: '전통미와 현대적 정서를 함께 담아낸 인장 작업.',
         thumb: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1600&auto=format&fit=crop'
+        large: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
       },
       {
         title: '유려',
@@ -890,7 +943,8 @@
         medium: '서예',
         desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop'
+        large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
       },
       {
         title: '기록된 시간',
@@ -899,7 +953,8 @@
         medium: '전시 기록',
         desc: '전시 공간과 작품 설치 장면을 아카이브한 이미지.',
         thumb: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=1600&auto=format&fit=crop'
+        large: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
       },
       {
         title: '온기',
@@ -908,7 +963,8 @@
         medium: '기록 사진',
         desc: '작업의 온도와 여운을 담은 아카이브 성격의 작품 이미지.',
         thumb: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop'
+        large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
       }
     ];
 
@@ -961,6 +1017,8 @@
       adminOpen: false,
       loggedIn: false,
       currentCategory: '전체',
+      currentPage: 1,
+      worksPerPage: 8,
       isProcessing: false,
       cancelRequested: false
     };
@@ -969,11 +1027,18 @@
 
     function renderGallery(){
       const grid = qs('#galleryGrid');
+      const pagination = qs('#pagination');
       const visibleWorks = state.currentCategory === '전체'
         ? sampleWorks
         : sampleWorks.filter(work => work.category === state.currentCategory);
 
-      grid.innerHTML = visibleWorks.map((work) => {
+      const totalPages = Math.max(1, Math.ceil(visibleWorks.length / state.worksPerPage));
+      if(state.currentPage > totalPages) state.currentPage = totalPages;
+
+      const startIndex = (state.currentPage - 1) * state.worksPerPage;
+      const pageWorks = visibleWorks.slice(startIndex, startIndex + state.worksPerPage);
+
+      grid.innerHTML = pageWorks.map((work) => {
         const index = sampleWorks.indexOf(work);
         return `
         <article class="work" data-index="${index}">
@@ -988,12 +1053,33 @@
       }).join('');
 
       qsa('.work').forEach(card => card.addEventListener('click', () => openViewer(Number(card.dataset.index))));
+
+      if(!pagination) return;
+      if(totalPages <= 1){
+        pagination.innerHTML = '';
+        return;
+      }
+
+      pagination.innerHTML = Array.from({length: totalPages}, (_, i) => {
+        const page = i + 1;
+        return `<button class="page-btn ${page === state.currentPage ? 'active' : ''}" type="button" data-page="${page}">${page}</button>`;
+      }).join('');
+
+      qsa('#pagination .page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currentPage = Number(btn.dataset.page);
+          renderGallery();
+          const worksSection = qs('#works');
+          if(worksSection) worksSection.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
     }
 
     function bindCategoryFilters(){
       qsa('#filterBar .filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           state.currentCategory = btn.dataset.category;
+          state.currentPage = 1;
           qsa('#filterBar .filter-btn').forEach(el => el.classList.toggle('active', el === btn));
           renderGallery();
         });
@@ -1120,6 +1206,7 @@
       qs('#artYear') && (qs('#artYear').value = saved.year || '');
       qs('#artTitle') && (qs('#artTitle').value = saved.title || '');
       qs('#artDescription') && (qs('#artDescription').value = saved.description || '');
+      qs('#artYoutube') && (qs('#artYoutube').value = saved.youtube || '');
       qs('#artFeatured') && (qs('#artFeatured').checked = !!saved.featured);
       const status = qs('#artDraftStatus');
       if(status){
@@ -1134,6 +1221,7 @@
         year: qs('#artYear')?.value?.trim() || '',
         title: qs('#artTitle')?.value?.trim() || '',
         description: qs('#artDescription')?.value?.trim() || '',
+        youtube: qs('#artYoutube')?.value?.trim() || '',
         featured: !!qs('#artFeatured')?.checked
       };
       localStorage.setItem('wonjuArtworkDraft', JSON.stringify(data));
@@ -1150,6 +1238,7 @@
       qs('#artYear') && (qs('#artYear').value = '');
       qs('#artTitle') && (qs('#artTitle').value = '');
       qs('#artDescription') && (qs('#artDescription').value = '');
+      qs('#artYoutube') && (qs('#artYoutube').value = '');
       qs('#artFeatured') && (qs('#artFeatured').checked = false);
       qs('#artThumbInput') && (qs('#artThumbInput').value = '');
       qs('#artFullInput') && (qs('#artFullInput').value = '');
@@ -1196,12 +1285,88 @@
     }
 
 
+    function getSavedYoutubeMap(){
+      try{
+        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap') || '{}') || {};
+      }catch(e){
+        return {};
+      }
+    }
+
+    function buildArtTargetLabel(index){
+      const title = (qs('#artTitle')?.value || '').trim();
+      const category = (qs('#artCategory')?.value || '').trim();
+      const year = (qs('#artYear')?.value || '').trim();
+
+      if(title || category || year){
+        const parts = [title, category, year].filter(Boolean);
+        return parts.join(' · ') || '작품 선택';
+      }
+
+      const work = sampleWorks[index];
+      if(!work) return '작품 선택';
+      return [work.title, work.category, work.year].filter(Boolean).join(' · ');
+    }
+
+    function populateArtTargetWork(){
+      const select = qs('#artTargetWork');
+      if(!select) return;
+      const currentValue = select.value || '0';
+      select.innerHTML = sampleWorks.map((work, index) =>
+        `<option value="${index}">${escapeHtml(buildArtTargetLabel(index))}</option>`
+      ).join('');
+      if([...select.options].some(opt => opt.value === currentValue)){
+        select.value = currentValue;
+      }
+    }
+
+    function syncArtTargetLabel(){
+      populateArtTargetWork();
+    ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
+      qs(sel)?.addEventListener('input', syncArtTargetLabel);
+      qs(sel)?.addEventListener('change', syncArtTargetLabel);
+    });
+    }
+
+    function applyYoutubeToSelectedWork(){
+      const target = qs('#artTargetWork');
+      const youtube = (qs('#artYoutube')?.value || '').trim();
+      const status = qs('#artDraftStatus');
+      if(!target) return;
+      const idx = target.value;
+      const map = getSavedYoutubeMap();
+
+      if(youtube){
+        map[idx] = youtube;
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
+        if(status){
+          status.textContent = '선택한 작품 팝업에 유튜브 바로가기가 연결되었습니다.';
+          status.className = 'status ok';
+        }
+      } else {
+        delete map[idx];
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
+        if(status){
+          status.textContent = '선택한 작품 팝업의 유튜브 링크를 제거했습니다.';
+          status.className = 'status';
+        }
+      }
+    }
+
     function openViewer(index){
       const work = sampleWorks[index];
+      const youtubeMap = getSavedYoutubeMap();
       qs('#viewerImg').src = work.large;
       qs('#viewerTitle').textContent = work.title;
       qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
+      const wrap = qs('#viewerYoutubeWrap');
+      const youtube = (youtubeMap[index] || work.youtube || '').trim();
+      if(wrap){
+        wrap.innerHTML = youtube
+          ? `<a class="btn" href="${escapeHtml(youtube)}" target="_blank" rel="noopener noreferrer">유튜브 바로가기</a>`
+          : '';
+      }
       qs('#viewer').classList.add('open');
     }
     function closeViewer(){ qs('#viewer').classList.remove('open'); }
@@ -1694,7 +1859,9 @@
     qs('#artDraftSaveBtn')?.addEventListener('click', saveArtDraft);
     qs('#artDraftLoadBtn')?.addEventListener('click', loadArtDraft);
     qs('#artDraftResetBtn')?.addEventListener('click', resetArtDraft);
+    qs('#applyYoutubeBtn')?.addEventListener('click', applyYoutubeToSelectedWork);
     loadArtDraft();
+    populateArtTargetWork();
 
     qsa('[data-accordion]').forEach(btn => {
       btn.addEventListener('click', () => {
