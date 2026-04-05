@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>작품 포트폴리오</title>
+  <title>이원주 | 작품 포트폴리오</title>
   <meta name="description" content="이원주 작가의 작품 포트폴리오. 작품 보기와 관리자용 이미지 변환 기능을 하나의 페이지에서 제공합니다." />
   <meta name="theme-color" content="#f6f1ea" />
   <meta property="og:type" content="website" />
@@ -84,7 +84,11 @@
       aspect-ratio:4/5;
       background:
         linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)),
-        url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop') center/cover;
+        url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop') center/cover no-repeat;
+      background-position:center center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      overflow:hidden;
     }
     .hero-caption{padding:16px 18px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
 
@@ -119,6 +123,9 @@
       background:
         linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)),
         url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1200&auto=format&fit=crop') center top/cover no-repeat;
+      background-size:cover;
+      background-repeat:no-repeat;
+      overflow:hidden;
     }
     .artist-copy{
       display:grid;
@@ -250,7 +257,13 @@
     }
     .admin-overlay.open{display:block}
     .admin-shell{
-      max-width:1180px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:16px;
+      width:min(100%, 980px);
+      max-width:980px;
+      margin:0 auto;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
     }
     .admin-head{
       display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;
@@ -259,8 +272,13 @@
     .admin-title{font-size:20px;font-weight:800}
     .admin-sub{font-size:13px;color:var(--muted)}
     .admin-panel{
-      min-height:0;overflow:auto;background:rgba(255,253,249,.98);border:1px solid var(--line);border-radius:28px;
-      box-shadow:0 26px 60px rgba(0,0,0,.18);padding:20px;
+      min-height:0;
+      overflow:auto;
+      background:rgba(255,253,249,.98);
+      border:1px solid var(--line);
+      border-radius:28px;
+      box-shadow:0 26px 60px rgba(0,0,0,.18);
+      padding:18px;
     }
     .admin-grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}
     .stack{display:grid;gap:14px}
@@ -426,6 +444,11 @@
       }
       .accordion-panel{padding:0 18px 12px}
       .contact-item{padding:10px 13px}
+      .admin-overlay{padding:10px}
+      .admin-shell{width:100%;max-width:100%}
+      .admin-panel{padding:14px;border-radius:22px}
+      .admin-card{padding:14px;border-radius:18px}
+      .password-wrap{margin:4vh auto 0;padding:18px;border-radius:22px}
     }
   </style>
 </head>
@@ -1409,13 +1432,18 @@
     function setBackgroundImage(el, dataUrl){
       if(!el) return;
       if(dataUrl){
-        const base = getComputedStyle(el).backgroundImage;
+        el.style.backgroundPosition = el.id === 'artistPhoto' ? 'center top' : 'center center';
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundRepeat = 'no-repeat';
         el.style.backgroundImage = `linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)), url("${dataUrl}")`;
         if(el.id === 'artistPhoto'){
           el.style.backgroundImage = `linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)), url("${dataUrl}")`;
         }
       }else{
         el.style.backgroundImage = '';
+        el.style.backgroundPosition = '';
+        el.style.backgroundSize = '';
+        el.style.backgroundRepeat = '';
       }
     }
 
@@ -1429,9 +1457,6 @@
       const sharedImages = getSharedImageContent();
       const data = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
 
-      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
-      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
-      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
       if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
@@ -1589,6 +1614,60 @@
 
 
 
+
+    function dataUrlByteSize(dataUrl){
+      try{
+        const base64 = String(dataUrl || '').split(',')[1] || '';
+        return Math.ceil((base64.length * 3) / 4);
+      }catch(e){
+        return 0;
+      }
+    }
+
+    function compressImageFile(file, maxWidth, maxHeight, quality){
+      return new Promise((resolve, reject) => {
+        if(!file){
+          resolve(null);
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          const ratio = Math.min(maxWidth / img.naturalWidth, maxHeight / img.naturalHeight, 1);
+          const outWidth = Math.max(1, Math.round(img.naturalWidth * ratio));
+          const outHeight = Math.max(1, Math.round(img.naturalHeight * ratio));
+          const canvas = document.createElement('canvas');
+          canvas.width = outWidth;
+          canvas.height = outHeight;
+          const ctx = canvas.getContext('2d', {alpha:false});
+          ctx.fillStyle = '#f6f1ea';
+          ctx.fillRect(0, 0, outWidth, outHeight);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, outWidth, outHeight);
+          canvas.toBlob(async blob => {
+            URL.revokeObjectURL(url);
+            if(!blob){
+              reject(new Error('이미지 변환 실패'));
+              return;
+            }
+            const dataUrl = await blobToDataURL(blob);
+            resolve({
+              dataUrl,
+              width: outWidth,
+              height: outHeight,
+              bytes: blob.size
+            });
+          }, 'image/jpeg', quality);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('이미지를 읽을 수 없습니다.'));
+        };
+        img.src = url;
+      });
+    }
+
     function getImageSizeFromDataUrl(dataUrl){
       return new Promise((resolve) => {
         if(!dataUrl){
@@ -1641,44 +1720,68 @@
     }
 
         function bindAboutImageInputs(){
-      const readFile = async (file, key, targetSelector, statusText) => {
-        const size = await getImageSizeFromFile(file);
-        const reader = new FileReader();
-        reader.onload = async () => {
+      const saveCompressedImage = async (file, key, targetSelector, statusText, maxWidth, maxHeight) => {
+        const status = qs('#aboutContentStatus');
+        try{
+          if(status){
+            status.textContent = '이미지 최적화 중...';
+            status.className = 'status';
+          }
+
+          const optimized = await compressImageFile(file, maxWidth, maxHeight, 0.86);
+          if(!optimized?.dataUrl){
+            throw new Error('이미지 변환 실패');
+          }
+
+          const projectedBytes = dataUrlByteSize(optimized.dataUrl);
+          if(projectedBytes > 3.2 * 1024 * 1024){
+            throw new Error('이미지 용량이 너무 큽니다. JPG로 더 작게 저장해 주세요.');
+          }
+
           let saved = null;
           try{
             saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
           }catch(e){
             saved = null;
           }
+
           const sharedImages = getSharedImageContent();
           const merged = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
-          merged[key] = reader.result;
-          localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
-          writeSharedImageContent({
-            heroImage: key === 'heroImage' ? reader.result : (merged.heroImage || ''),
-            artistImage: key === 'artistImage' ? reader.result : (merged.artistImage || '')
-          });
-          setBackgroundImage(qs(targetSelector), reader.result);
+          merged[key] = optimized.dataUrl;
+
+          try{
+            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
+            writeSharedImageContent({
+              heroImage: key === 'heroImage' ? optimized.dataUrl : (merged.heroImage || ''),
+              artistImage: key === 'artistImage' ? optimized.dataUrl : (merged.artistImage || '')
+            });
+          }catch(storageErr){
+            throw new Error('브라우저 저장공간이 부족합니다. 더 작은 JPG 이미지를 사용해 주세요.');
+          }
+
+          setBackgroundImage(qs(targetSelector), optimized.dataUrl);
           await updateAboutImageSizeDisplay();
-          const status = qs('#aboutContentStatus');
+
           if(status){
-            const sizeText = size ? ` (${size.width} × ${size.height}px)` : '';
-            status.textContent = statusText + sizeText;
+            status.textContent = `${statusText} (${optimized.width} × ${optimized.height}px · ${formatMB(optimized.bytes)})`;
             status.className = 'status ok';
           }
-        };
-        reader.readAsDataURL(file);
+        }catch(err){
+          if(status){
+            status.textContent = err?.message || '이미지 저장 중 오류가 생겼습니다.';
+            status.className = 'status bad';
+          }
+        }
       };
 
       qs('#heroImageInput')?.addEventListener('change', e => {
         const file = e.target.files?.[0];
-        if(file) readFile(file, 'heroImage', '#heroArt', '대표 이미지가 저장되었습니다.');
+        if(file) saveCompressedImage(file, 'heroImage', '#heroArt', '대표 이미지가 저장되었습니다.', 1400, 1750);
       });
 
       qs('#artistImageInput')?.addEventListener('change', e => {
         const file = e.target.files?.[0];
-        if(file) readFile(file, 'artistImage', '#artistPhoto', '작가소개 이미지가 저장되었습니다.');
+        if(file) saveCompressedImage(file, 'artistImage', '#artistPhoto', '작가소개 이미지가 저장되었습니다.', 1200, 1500);
       });
     }
 
@@ -2306,6 +2409,7 @@
 
     loadEditableTextContent();
     loadAboutContent();
+    updateAboutImageSizeDisplay();
 
     qs('#saveAboutContentBtn')?.addEventListener('click', () => applyAboutContent(true));
     qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
