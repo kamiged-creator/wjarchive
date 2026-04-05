@@ -1,1 +1,2153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>이원주 | 작품 포트폴리오</title>
+  <meta name="description" content="이원주 작가의 작품 포트폴리오. 작품 보기와 관리자용 이미지 변환 기능을 하나의 페이지에서 제공합니다." />
+  <meta name="theme-color" content="#f6f1ea" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="이원주 | 작품 포트폴리오" />
+  <meta property="og:description" content="작품 보기와 관리자 이미지 변환 기능이 포함된 포트폴리오 사이트" />
+  <style>
+    :root{
+      --bg:#f6f1ea;
+      --paper:#fffdf9;
+      --text:#1f1a17;
+      --muted:#6e655d;
+      --line:rgba(31,26,23,.12);
+      --accent:#8b6847;
+      --accent-soft:#e7d6c4;
+      --shadow:0 20px 48px rgba(31,26,23,.08);
+      --radius:24px;
+      --max:1180px;
+      --danger:#b33d3d;
+      --ok:#2f7d4d;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(231,214,196,.7), transparent 26%),
+        linear-gradient(180deg, #fbf8f4 0%, var(--bg) 100%);
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+    button,input,textarea,select{font:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
+    .topbar{
+      position:sticky;top:0;z-index:20;
+      backdrop-filter:blur(14px);
+      background:rgba(251,248,244,.78);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      min-height:72px;display:grid;gap:12px;padding:20px 0 14px;
+    }
+    .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px}
+    .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
+    .brand-sub{font-size:12px;color:var(--muted)}
+    .nav{display:flex;gap:10px;flex-wrap:wrap}
+    .nav a{
+      padding:10px 14px;border-radius:999px;color:var(--muted);border:1px solid transparent;
+    }
+    .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
+
+    .hero{padding:60px 0 28px}
+    .hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:28px;align-items:center}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      border:1px solid var(--line);background:rgba(255,255,255,.58);font-size:13px;color:var(--muted);
+    }
+    h1{margin:18px 0 14px;font-size:clamp(34px,6vw,64px);line-height:1.08;letter-spacing:-.04em}
+    .lead{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:620px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      min-height:48px;padding:0 18px;border-radius:999px;font-weight:700;border:1px solid var(--line);
+      background:var(--paper);box-shadow:var(--shadow);cursor:pointer;color:var(--text);
+    }
+    .btn.primary{background:var(--text);color:#fff;border-color:transparent}
+    .btn.subtle{background:rgba(255,255,255,.55);box-shadow:none}
+    .btn.danger{background:#fff5f5;color:var(--danger);border-color:rgba(179,61,61,.18)}
+    .btn.apply-accent{background:linear-gradient(180deg,#8b6847,#735337);color:#fff;border-color:transparent}
+    .btn.applied{background:linear-gradient(180deg,#2f7d4d,#25633d);color:#fff;border-color:transparent;box-shadow:0 0 0 4px rgba(47,125,77,.12)}
+    .hero-card{background:var(--paper);border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow);overflow:hidden}
+    .hero-art{
+      aspect-ratio:4/5;
+      background:
+        linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)),
+        url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop') center/cover;
+    }
+    .hero-caption{padding:16px 18px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+    section{padding:36px 0}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
+    .section-title{font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:-.03em}
+    .section-copy{margin:0;color:var(--muted);max-width:700px}
+
+    .intro,.note,.contact{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+    .about-profile{
+      display:grid;
+      grid-template-columns:minmax(260px, 360px) 1fr;
+      gap:20px;
+      align-items:stretch;
+    }
+    .artist-photo-card{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+      min-height:100%;
+    }
+    .artist-photo{
+      width:100%;
+      height:100%;
+      min-height:520px;
+      background:
+        linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)),
+        url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1200&auto=format&fit=crop') center top/cover no-repeat;
+    }
+    .artist-copy{
+      display:grid;
+      gap:20px;
+    }
+
+    .card{background:rgba(255,253,249,.84);border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
+    .card p{margin:0;color:var(--muted)}
+    .note-quote{font-size:clamp(22px,4vw,34px);line-height:1.3;letter-spacing:-.03em;margin:0}
+    .small{font-size:14px;color:var(--muted)}
+
+    .filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+    .filter-btn{
+      padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.55);
+      color:var(--muted);font-weight:700;cursor:pointer;
+    }
+    .filter-btn.active{background:var(--text);color:#fff;border-color:transparent}
+    .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .work{
+      background:var(--paper);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:var(--shadow);
+      transition:transform .18s ease, box-shadow .18s ease;cursor:pointer;
+    }
+    .work:hover{transform:translateY(-4px);box-shadow:0 24px 54px rgba(31,26,23,.12)}
+    .work-img{aspect-ratio:4/5;background:#e9dfd3 center/cover no-repeat}
+    .work-body{padding:16px}
+    .work-title{margin:0 0 6px;font-size:18px}
+    .work-meta{font-size:13px;color:var(--muted);margin-bottom:10px}
+    .work-text{margin:0;color:var(--muted);font-size:14px}
+
+    .pagination{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:22px;
+    }
+    .page-btn{
+      min-width:44px;
+      height:44px;
+      padding:0 14px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.62);
+      color:var(--muted);
+      font-weight:800;
+      cursor:pointer;
+    }
+    .page-btn.active{
+      background:var(--text);
+      color:#fff;
+      border-color:transparent;
+    }
+
+
+    .accordion{display:grid;gap:14px}
+    .accordion-item{
+      background:rgba(255,253,249,.84);border:1px solid var(--line);border-radius:28px;
+      box-shadow:var(--shadow);overflow:hidden;
+    }
+    .accordion-btn{
+      width:100%;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+      padding:18px 20px 10px;border:none;background:transparent;color:var(--text);cursor:pointer;
+      font-size:24px;font-weight:800;letter-spacing:-.03em;text-align:left;
+    }
+    .accordion-btn span:last-child{
+      font-size:15px;color:var(--muted);transition:transform .2s ease;
+      line-height:1;margin-top:6px;flex:0 0 auto
+    }
+    .accordion-item.open .accordion-btn span:last-child{transform:rotate(45deg)}
+    .accordion-panel{display:none;padding:0 20px 14px}
+    .accordion-item.open .accordion-panel{display:block}
+
+    .contact-list{display:grid;gap:8px;margin-top:8px}
+    .contact-item{padding:10px 14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.55);line-height:1.12}
+    #contact .accordion-panel p{line-height:1.28}
+    .footer{padding:28px 0 60px;color:var(--muted);font-size:13px}
+    .footer-bar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    .footer-admin{opacity:.78}
+
+    .viewer{
+      position:fixed;inset:0;background:rgba(17,15,13,.82);display:none;align-items:center;justify-content:center;
+      padding:20px;z-index:70;
+    }
+    .viewer.open{display:flex}
+    .viewer-panel{
+      width:min(1020px,100%);background:#181412;border:1px solid rgba(255,255,255,.08);border-radius:28px;overflow:hidden;
+      box-shadow:0 30px 80px rgba(0,0,0,.45);
+    }
+    .viewer-grid{display:grid;grid-template-columns:1.15fr .85fr}
+    .viewer-image{background:#0e0c0b;min-height:340px;display:flex;align-items:center;justify-content:center}
+    .viewer-image img{max-height:min(78vh,860px);width:auto;object-fit:contain}
+    .viewer-body{padding:24px;color:#f5efe8}
+    .viewer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0 0 8px}
+    .viewer-body h3{margin:0;font-size:28px;line-height:1.2}
+    .viewer-meta{color:#d4c7ba;font-size:13px;margin-bottom:12px}
+    .viewer-desc{color:#eee4d8}
+    .viewer-youtube{
+      flex:0 0 auto;
+      margin-top:4px;
+      font-size:14px;
+      font-weight:700;
+      line-height:1.2;
+    }
+    .viewer-youtube a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:20px;
+      height:20px;
+      color:#ff0000;
+      text-decoration:none;
+      opacity:.88;
+      transition:color .18s ease, opacity .18s ease, transform .18s ease;
+    }
+    .viewer-youtube a svg{
+      display:block;
+      width:18px;
+      height:18px;
+    }
+    .viewer-youtube a:hover{
+      color:#ff2d2d;
+      opacity:1;
+      transform:translateY(-1px);
+    }
+    .viewer-close{margin-top:18px;background:#2a231f;color:#fff;border:none}
+
+    .admin-overlay{
+      position:fixed;inset:0;background:rgba(17,15,13,.72);backdrop-filter:blur(10px);display:none;z-index:90;padding:16px;
+    }
+    .admin-overlay.open{display:block}
+    .admin-shell{
+      max-width:1180px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:16px;
+    }
+    .admin-head{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;
+      background:rgba(255,253,249,.94);border:1px solid var(--line);
+    }
+    .admin-title{font-size:20px;font-weight:800}
+    .admin-sub{font-size:13px;color:var(--muted)}
+    .admin-panel{
+      min-height:0;overflow:auto;background:rgba(255,253,249,.98);border:1px solid var(--line);border-radius:28px;
+      box-shadow:0 26px 60px rgba(0,0,0,.18);padding:20px;
+    }
+    .admin-grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}
+    .stack{display:grid;gap:14px}
+    .admin-card{background:#fffdf9;border:1px solid var(--line);border-radius:22px;padding:16px}
+    .admin-card h3{margin:0 0 10px;font-size:17px}
+    .admin-card p{margin:0;color:var(--muted);font-size:14px}
+    .label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    .editor-area{
+      width:100%; min-height:130px; resize:vertical; border:1px solid var(--line); border-radius:16px;
+      background:#fff; padding:12px 14px; color:var(--text); line-height:1.6;
+    }
+    .mini-note{font-size:12px;color:var(--muted);margin-top:8px}
+
+    .field, .field-sm, textarea{
+      width:100%;border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px 14px;color:var(--text);
+    }
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .dropzone{
+      border:1.5px dashed rgba(139,104,71,.38);border-radius:18px;padding:18px;background:linear-gradient(180deg,#fff, #fbf7f1);
+      text-align:center;
+    }
+    .dropzone strong{display:block;font-size:16px;margin-bottom:6px}
+    .hint{font-size:12px;color:var(--muted)}
+    .status{font-size:13px;margin-top:8px;color:var(--muted)}
+    .status.ok{color:var(--ok)}
+    .status.bad{color:var(--danger)}
+    .progress-wrap{margin-top:10px}
+    .progress-bar{
+      width:100%;height:12px;border-radius:999px;overflow:hidden;
+      background:rgba(139,104,71,.12);border:1px solid var(--line)
+    }
+    .progress-fill{
+      width:0%;height:100%;
+      background:linear-gradient(90deg, rgba(139,104,71,.85), rgba(139,104,71,.55));
+      transition:width .18s ease;
+    }
+    .progress-meta{
+      margin-top:6px;font-size:12px;color:var(--muted);
+      display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap
+    }
+
+    .preview-toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .asset{
+      border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(31,26,23,.05)
+    }
+    .asset-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:start}
+    .asset-title{font-weight:800;font-size:14px;line-height:1.3;word-break:break-all}
+    .asset-meta{font-size:12px;color:var(--muted)}
+    .asset-preview{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
+    .thumb-box,.large-box{border:1px solid var(--line);border-radius:16px;padding:10px;background:#fcfaf6}
+    .thumb-box img,.large-box img{border-radius:12px;width:100%;height:auto;background:#eee2d4}
+    .thumb-tag,.large-tag{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px}
+    .asset-actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 14px}
+    .password-wrap{
+      max-width:420px;margin:10vh auto 0;background:#fffdf9;border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.18)
+    }
+    .password-wrap h2{margin:0 0 8px;font-size:28px;letter-spacing:-.03em}
+    .password-wrap p{margin:0 0 14px;color:var(--muted)}
+    .hidden{display:none !important}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+    .stat-box{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(180deg,#fff,#fbf7f1)}
+    .stat-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+    .stat-value{font-size:18px;font-weight:800;letter-spacing:-.02em;word-break:break-word}
+    .stat-note{margin-top:12px;font-size:12px;color:var(--muted)}
+
+    .admin-bottom-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+      padding-top:12px;
+      border-top:1px solid var(--line);
+    }
+
+
+    
+    .top-tools{display:grid;gap:12px;width:100%}
+    .top-nav-row{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
+    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:2px 6px 8px}
+    .top-left-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-left:2px}
+    .top-right-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:2px}
+    .news-mini{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:34px;padding:0 12px;border-radius:12px;
+      border:1px solid rgba(139,104,71,.18);
+      background:rgba(231,214,196,.42);
+      color:#6b5746;font-size:13px;font-weight:700;
+      box-shadow:none;
+    }
+    .news-mini:hover{
+      background:rgba(231,214,196,.62);
+      border-color:rgba(139,104,71,.28);
+      color:var(--text);
+    }
+    .accordion-item.news-accent{
+      background:linear-gradient(180deg, rgba(231,214,196,.34), rgba(255,253,249,.90));
+      border-color:rgba(139,104,71,.18);
+    }
+
+
+    .lang-select{
+      min-height:40px;
+      height:40px;
+      padding:0 12px;
+      min-width:118px;
+      max-width:140px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.72);
+      color:var(--text);
+      font-weight:700;
+      font-size:14px;
+      outline:none;
+      box-shadow:none;
+    }
+
+    @media (max-width: 1020px){
+      .hero-grid,.intro,.note,.contact,.admin-grid,.viewer-grid,.about-profile{grid-template-columns:1fr}
+      .gallery{grid-template-columns:repeat(2,1fr)}
+      .artist-photo{min-height:440px;background-position:center top}
+    }
+    @media (max-width: 680px){
+      .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 0 12px}
+      .wrap{padding:0 18px}
+      .hero{padding-top:34px}
+      .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
+      .asset-preview{grid-template-columns:1fr}
+      .btn{width:100%}
+      .hero-actions,.asset-actions{flex-direction:column}
+      .admin-head{align-items:flex-start;flex-direction:column}
+      .viewer-body h3{font-size:22px}
+      .viewer-header{gap:10px}
+      .viewer-youtube{font-size:13px;margin-top:3px}
+      .artist-photo{min-height:360px}
+      .top-tools{width:100%}
+      .top-nav-row,.top-sub-row{width:100%}
+      .top-sub-row{padding:2px 2px 6px}
+      .top-left-tools,.top-right-tools{display:flex;align-items:center}
+      .top-left-tools{justify-content:flex-start;padding-left:0}
+      .top-right-tools{justify-content:flex-end;padding-right:0}
+      .news-mini{
+        min-height:30px;
+        padding:0 10px;
+        border-radius:10px;
+        font-size:12px;
+      }
+      .lang-select{
+        min-height:34px;
+        height:34px;
+        min-width:92px;
+        max-width:110px;
+        padding:0 10px;
+        font-size:13px;
+      }
+      .accordion-btn{
+        padding:16px 18px 8px;
+        font-size:22px;
+      }
+      .accordion-panel{padding:0 18px 12px}
+      .contact-item{padding:10px 13px}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <div class="brand-title">이원주</div>
+        <div class="brand-sub">작품 포트폴리오</div>
+      </div>
+      <div class="top-tools">
+        <div class="top-nav-row">
+          <nav class="nav">
+            <a href="#about">작가 소개</a>
+            <a href="#works">작품</a>
+            <a href="#note">작가 노트</a>
+            <a href="#contact">문의</a>
+          </nav>
+        </div>
+        <div class="top-sub-row">
+          <div class="top-left-tools">
+            <select class="lang-select" aria-label="언어 선택">
+              <option value="/">Global</option>
+              <option value="/lang/ko.html" selected>한국어</option>
+              <option value="/lang/en.html">English</option>
+              <option value="/lang/ja.html">日本語</option>
+            </select>
+          </div>
+          <div class="top-right-tools">
+            <a class="news-mini" href="#news">소식</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">Selected Works · Artist Portfolio</span>
+          <h1>빛과 감정을 담는<br>이원주의 작품 세계</h1>
+          <p class="lead">
+            사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
+            작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.
+          </p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#works">작품 보기</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-art" id="heroArt" aria-label="대표 작품 이미지"></div>
+          <div class="hero-caption" id="heroCaption">대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">작가 소개</h2>
+            <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
+          </div>
+        </div>
+        <div class="about-profile">
+          <article class="artist-photo-card" aria-label="작가 소개 이미지">
+            <div class="artist-photo" id="artistPhoto"></div>
+          </article>
+          <div class="artist-copy">
+            <article class="card">
+              <p id="aboutParagraph1">
+                이원주는 사물과 공간, 인물의 잔상에서 출발해 ‘머무는 감정’을 시각적으로 구성하는 작업을 이어오고 있습니다.
+                정적인 장면 안에서 흐르는 미세한 움직임과 빛의 결을 포착하며, 익숙한 풍경을 낯선 감각으로 다시 보여주는 데 집중합니다.
+              </p>
+            </article>
+            <article class="card">
+              <p id="aboutParagraph2">
+                대표 작업은 사진 기반 연작, 오브제 기록, 공간 아카이브, 전시 설치 이미지 등으로 확장되며,
+                상업적 이미지보다 작품 자체의 온도와 밀도를 우선하는 방식으로 발표됩니다.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="works">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">작품</h2>
+            <p class="section-copy">카테고리별로 작품을 나눠 보이게 했습니다. 전체, 전각, 서예, 기타 중에서 골라 보세요.</p>
+          </div>
+        </div>
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-btn active" type="button" data-category="전체">전체</button>
+          <button class="filter-btn" type="button" data-category="전각">전각</button>
+          <button class="filter-btn" type="button" data-category="서예">서예</button>
+          <button class="filter-btn" type="button" data-category="기타">기타</button>
+        </div>
+        <div class="gallery" id="galleryGrid"></div>
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </section>
+
+    <section id="note">
+      <div class="wrap note">
+        <article class="card">
+          <p class="note-quote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
+        </article>
+        <article class="card">
+          <p>
+            작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
+            쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="news">
+      <div class="wrap">
+        <div class="accordion">
+          <article class="accordion-item news-accent" id="newsAccordion">
+            <button class="accordion-btn" type="button" data-accordion="newsAccordion">
+              <span>소식</span>
+              <span>＋</span>
+            </button>
+            <div class="accordion-panel">
+              <p style="margin:2px 0 10px;">최근 작업, 전시 준비, 업데이트 소식</p>
+              <div class="contact-list" id="newsDisplayList">
+                <div class="contact-item">2026.04 · 사이트 글로벌 도메인 연결 작업 진행</div>
+                <div class="contact-item">2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화</div>
+                <div class="contact-item">2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="wrap">
+        <div class="accordion">
+          <article class="accordion-item" id="contactAccordion">
+            <button class="accordion-btn" type="button" data-accordion="contactAccordion">
+              <span>문의</span>
+              <span>＋</span>
+            </button>
+            <div class="accordion-panel">
+              <p style="margin:2px 0 10px;">전시·소장·협업 문의</p>
+              <div class="contact-list" id="contactDisplayList">
+                <div class="contact-item">이메일 · leewonju.art@example.com</div>
+                <div class="contact-item">작품 문의 · 전시 / 소장 / 협업</div>
+                <div class="contact-item">문의 시간 · 평일 오전 10시 ~ 오후 6시</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="accordion-item" id="exhibitionAccordion">
+            <button class="accordion-btn" type="button" data-accordion="exhibitionAccordion">
+              <span>전시 이력</span>
+              <span>＋</span>
+            </button>
+            <div class="accordion-panel">
+              <div class="contact-list" id="exhibitionDisplayList">
+                <div class="contact-item">2026 · 이원주 개인전 예정</div>
+                <div class="contact-item">2025 · 서예·전각 그룹전 참여</div>
+                <div class="contact-item">2024 · 작업 아카이브 및 발표전</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="admin-link" style="padding:6px 0 22px;">
+      <div class="wrap" style="text-align:center;">
+        <button id="adminFooterBtn" type="button" style="min-height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.42);color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Admin</button>
+      </div>
+    </section>
+
+</main>
+
+  <footer class="footer">
+    <div class="wrap footer-bar">
+      <div>© <span id="year"></span> Lee Wonju. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <div class="viewer" id="viewer">
+    <div class="viewer-panel">
+      <div class="viewer-grid">
+        <div class="viewer-image"><img id="viewerImg" alt="확대 작품 이미지"></div>
+        <div class="viewer-body">
+          <div class="viewer-header">
+            <h3 id="viewerTitle"></h3>
+            <div class="viewer-youtube" id="viewerYoutubeWrap"></div>
+          </div>
+          <div class="viewer-meta" id="viewerMeta"></div>
+          <div class="viewer-desc" id="viewerDesc"></div>
+          <button class="btn viewer-close" id="viewerClose" type="button">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
+    <div id="passwordGate" class="password-wrap">
+      <h2>관리자 모드</h2>
+      <p>비밀번호를 입력하면 이미지 변환 도구가 열립니다.</p>
+      <label class="label" for="adminPassword">비밀번호</label>
+      <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+      <div class="hero-actions" style="margin-top:14px">
+        <button class="btn primary" type="button" id="loginBtn">들어가기</button>
+        <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
+      </div>
+      <div class="status" id="loginStatus">기본 비밀번호는 파일 전달 시 안내된 값으로 시작해, 코드에서 해시값을 바꿔 직접 변경해 사용할 수 있습니다.</div>
+    </div>
+
+    <div id="adminApp" class="admin-shell hidden">
+      <div class="admin-head">
+        <div>
+          <div class="admin-title">관리자 이미지 변환기</div>
+          <div class="admin-sub">원본 사진 업로드 → 썸네일/확대본 생성 → 개별 또는 ZIP 다운로드</div>
+        </div>
+
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-grid">
+          <div class="stack">
+            <div class="admin-card">
+              <h3>1. 사진 올리기</h3>
+              <div class="dropzone">
+                <strong>원본 사진 여러 장 업로드</strong>
+                <div class="hint">JPG, PNG, WebP 권장 · 사진은 브라우저 안에서만 변환됩니다.</div>
+                <input id="fileInput" type="file" accept="image/*" multiple style="margin-top:12px;width:100%">
+              </div>
+              <div class="status" id="fileStatus">아직 업로드된 파일이 없습니다.</div>
+            </div>
+
+            <div class="admin-card">
+              <h3>2. 출력 설정</h3>
+              <div class="stack">
+                <div>
+                  <label class="label" for="filePrefix">파일명 접두어</label>
+                  <input class="field" id="filePrefix" type="text" value="wonju-work" placeholder="예: wonju-work">
+                </div>
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="thumbWidth">썸네일 너비</label>
+                    <input class="field-sm" id="thumbWidth" type="number" min="200" max="2000" value="900">
+                  </div>
+                  <div>
+                    <label class="label" for="thumbQuality">썸네일 품질</label>
+                    <input class="field-sm" id="thumbQuality" type="number" min="0.4" max="1" step="0.01" value="0.78">
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="largeWidth">확대본 너비</label>
+                    <input class="field-sm" id="largeWidth" type="number" min="800" max="5000" value="2000">
+                  </div>
+                  <div>
+                    <label class="label" for="largeQuality">확대본 품질</label>
+                    <input class="field-sm" id="largeQuality" type="number" min="0.4" max="1" step="0.01" value="0.88">
+                  </div>
+                </div>
+                <div class="field-row-3">
+                  <div>
+                    <label class="label" for="outputType">출력 형식</label>
+                    <select class="field-sm" id="outputType">
+                      <option value="image/jpeg">JPG</option>
+                      <option value="image/webp">WebP</option>
+                      <option value="image/png">PNG</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="label" for="thumbFolder">썸네일 폴더명</label>
+                    <input class="field-sm" id="thumbFolder" type="text" value="images/thumbs">
+                  </div>
+                  <div>
+                    <label class="label" for="largeFolder">확대본 폴더명</label>
+                    <input class="field-sm" id="largeFolder" type="text" value="images/large">
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="batchSize">한 번에 처리할 장수</label>
+                    <input class="field-sm" id="batchSize" type="number" min="5" max="50" value="20">
+                  </div>
+                  <div>
+                    <label class="label" for="batchPause">배치 사이 쉬는 시간(ms)</label>
+                    <input class="field-sm" id="batchPause" type="number" min="0" max="3000" step="50" value="250">
+                  </div>
+                </div>
+                <div class="hero-actions" style="margin-top:6px">
+                  <button class="btn primary" type="button" id="processBtn">변환 시작</button>
+                  <button class="btn danger" type="button" id="cancelProcessBtn">중지</button>
+                </div>
+                <div class="status" id="processStatus">권장값: 86장 기준 20장씩 / 250ms 쉬기 / JPG 또는 WebP</div>
+                <div class="progress-wrap">
+                  <div class="progress-bar"><div class="progress-fill" id="processProgressFill"></div></div>
+                  <div class="progress-meta">
+                    <span id="processProgressText">0 / 0</span>
+                    <span id="processBatchText">대기 중</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <h3>3. 일괄 다운로드</h3>
+              <p>썸네일과 확대본을 각각 받거나, ZIP으로 한 번에 내려받을 수 있습니다.</p>
+              <div class="hero-actions" style="margin-top:14px">
+                <button class="btn" type="button" id="downloadThumbZipBtn">썸네일 ZIP</button>
+                <button class="btn" type="button" id="downloadLargeZipBtn">확대본 ZIP</button>
+                <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
+              </div>
+              <div class="status" id="zipStatus">아직 생성된 결과가 없습니다.</div>
+            </div>
+
+            <div class="admin-card">
+              <h3>4. 사이트 문구 편집</h3>
+              <p>문의 내용, 전시 이력, 소식란을 관리자에서 직접 바꾸고 바로 화면에 반영할 수 있습니다.</p>
+              <div class="stack" style="margin-top:14px">
+                <div>
+                  <label class="label" for="contactEditor">문의 내용</label>
+                  <textarea class="editor-area" id="contactEditor" placeholder="한 줄에 하나씩 입력&#10;예: 이메일 · yourname@example.com&#10;예: 인스타그램 · @wonju.archive"></textarea>
+                  <div class="mini-note">한 줄이 카드 한 줄로 들어갑니다.</div>
+                </div>
+                <div>
+                  <label class="label" for="exhibitionEditor">전시 이력</label>
+                  <textarea class="editor-area" id="exhibitionEditor" placeholder="한 줄에 하나씩 입력&#10;예: 2026 · 이원주 개인전 《빛의 결》"></textarea>
+                  <div class="mini-note">한 줄이 카드 한 줄로 들어갑니다.</div>
+                </div>
+                <div>
+                  <label class="label" for="newsEditor">소식란</label>
+                  <textarea class="editor-area" id="newsEditor" placeholder="한 줄에 하나씩 입력&#10;예: 2026.04 · 새 작품 업로드&#10;예: 2026.03 · 전시 준비 중"></textarea>
+                  <div class="mini-note">한 줄이 소식 카드 한 줄로 들어갑니다.</div>
+                </div>
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn primary" type="button" id="saveTextContentBtn">문구 저장</button>
+                  <button class="btn" type="button" id="applyTextContentBtn">화면 반영</button>
+                  <button class="btn subtle" type="button" id="resetTextContentBtn">기본값 복원</button>
+                </div>
+                <div class="status" id="textContentStatus">문의 / 전시 이력 / 소식란 문구를 수정할 수 있습니다.</div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <h3>5. 메인 / 작가소개 편집</h3>
+              <p>메인 대표 이미지와 작가소개 이미지, 작가소개 문구를 관리자에서 바꿀 수 있습니다.</p>
+              <div class="stack" style="margin-top:14px">
+                <div>
+                  <label class="label" for="heroCaptionEditor">대표 이미지 캡션</label>
+                  <input class="field" id="heroCaptionEditor" type="text" placeholder="대표 이미지 설명">
+                </div>
+                <div>
+                  <label class="label" for="aboutSectionCopyEditor">작가 소개 소제목</label>
+                  <input class="field" id="aboutSectionCopyEditor" type="text" placeholder="작가 소개 보조 문구">
+                </div>
+                <div>
+                  <label class="label" for="aboutParagraph1Editor">작가 소개 본문 1</label>
+                  <textarea class="editor-area" id="aboutParagraph1Editor" placeholder="작가 소개 첫 번째 문단"></textarea>
+                </div>
+                <div>
+                  <label class="label" for="aboutParagraph2Editor">작가 소개 본문 2</label>
+                  <textarea class="editor-area" id="aboutParagraph2Editor" placeholder="작가 소개 두 번째 문단"></textarea>
+                </div>
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="heroImageInput">대표 이미지 교체</label>
+                    <input class="field-sm" id="heroImageInput" type="file" accept="image/*">
+                  </div>
+                  <div>
+                    <label class="label" for="artistImageInput">작가소개 이미지 교체</label>
+                    <input class="field-sm" id="artistImageInput" type="file" accept="image/*">
+                  </div>
+                </div>
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn primary" type="button" id="saveAboutContentBtn">저장</button>
+                  <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
+                  <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
+                </div>
+                <div class="status" id="aboutContentStatus">메인 이미지와 작가소개 이미지, 문구를 수정할 수 있습니다.</div>
+              </div>
+            </div>
+
+            
+            <div class="admin-card">
+              <h3>6. 작품 등록 추가</h3>
+              <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.</p>
+              <div class="stack" style="margin-top:14px">
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="artCategory">카테고리</label>
+                    <select class="field-sm" id="artCategory">
+                      <option value="전각">전각</option>
+                      <option value="서예">서예</option>
+                      <option value="기타">기타</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="label" for="artYear">연도</label>
+                    <input class="field-sm" id="artYear" type="text" placeholder="예: 2026">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="label" for="artTitle">작품 제목</label>
+                  <input class="field" id="artTitle" type="text" placeholder="작품 제목 입력">
+                </div>
+
+                <div>
+                  <label class="label" for="artDescription">작품 설명</label>
+                  <textarea class="editor-area" id="artDescription" placeholder="작품 설명 입력"></textarea>
+                </div>
+
+                <div>
+                  <label class="label" for="artYoutube">유튜브 주소</label>
+                  <input class="field" id="artYoutube" type="url" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="artThumbInput">썸네일 이미지</label>
+                    <input class="field-sm" id="artThumbInput" type="file" accept="image/*">
+                  </div>
+                  <div>
+                    <label class="label" for="artFullInput">확대 이미지</label>
+                    <input class="field-sm" id="artFullInput" type="file" accept="image/*">
+                  </div>
+                </div>
+
+                <div class="field-row">
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
+                    <input id="artFeatured" type="checkbox">
+                    대표작으로 표시
+                  </label>
+                </div>
+
+                <div>
+                  <label class="label" for="artTargetWork">반영할 기존 작품</label>
+                  <select class="field-sm" id="artTargetWork"></select>
+                </div>
+
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
+                  <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
+                  <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
+                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
+                  <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
+                </div>
+
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 썸네일/확대 이미지를 넣고 작품 이미지 반영을 누르면 카드와 팝업 이미지가 바로 바뀝니다.</div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <h3>7. GitHub 업로드 용량 추정</h3>
+              <p>토큰 없이 현재 이 페이지에서 선택·생성한 파일 기준으로 GitHub Pages 1GB 한도 대비 여유를 계산합니다.</p>
+              <div class="stats-grid">
+                <div class="stat-box">
+                  <div class="stat-label">선택한 원본 합계</div>
+                  <div class="stat-value" id="statOriginal">0 MB</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">작품 개수</div>
+                  <div class="stat-value" id="statCount">0장</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">썸네일 예상 합계</div>
+                  <div class="stat-value" id="statThumb">0 MB</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">확대본 예상 합계</div>
+                  <div class="stat-value" id="statLarge">0 MB</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">업로드 결과물 총합</div>
+                  <div class="stat-value" id="statTotal">0 MB</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">1GB 기준 남은 여유</div>
+                  <div class="stat-value" id="statRemain">1024 MB</div>
+                </div>
+              </div>
+              <div class="status" id="capacityStatus">아직 계산할 결과가 없습니다.</div>
+              <div class="stat-note">실제 GitHub 저장소 전체 사용량이 아니라, 지금 이 페이지에서 만든 웹용 파일 기준 추정치입니다.</div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="preview-toolbar">
+              <div>
+                <h3 style="margin:0">결과 미리보기</h3>
+                <div class="small">생성 결과를 확인하고 파일별로 바로 내려받을 수 있습니다.</div>
+              </div>
+              <button class="btn subtle" type="button" id="clearResultsBtn">결과 지우기</button>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+            <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
+          </div>
+          <div class="admin-bottom-actions">
+            <button class="btn" type="button" id="logoutBtn">로그아웃</button>
+            <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const sampleWorks = [
+      {
+        title: '한결',
+        category: '전각',
+        year: '2026',
+        medium: '전각',
+        desc: '힘 있게 다듬은 획과 여백의 균형을 보여주는 전각 작업.',
+        thumb: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
+      },
+      {
+        title: '묵향',
+        category: '서예',
+        year: '2025',
+        medium: '서예',
+        desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
+        thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
+      },
+      {
+        title: '담연',
+        category: '전각',
+        year: '2025',
+        medium: '전각',
+        desc: '전통미와 현대적 정서를 함께 담아낸 인장 작업.',
+        thumb: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
+      },
+      {
+        title: '유려',
+        category: '서예',
+        year: '2024',
+        medium: '서예',
+        desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
+        thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
+      },
+      {
+        title: '기록된 시간',
+        category: '기타',
+        year: '2024',
+        medium: '전시 기록',
+        desc: '전시 공간과 작품 설치 장면을 아카이브한 이미지.',
+        thumb: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
+      },
+      {
+        title: '온기',
+        category: '기타',
+        year: '2023',
+        medium: '기록 사진',
+        desc: '작업의 온도와 여운을 담은 아카이브 성격의 작품 이미지.',
+        thumb: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop',
+        youtube: ''
+      }
+    ];
+
+    // 기본 비밀번호: wonju2026!
+    // 아래 해시를 원하는 비밀번호의 SHA-256 값으로 바꾸면 비밀번호 변경 가능
+    const ADMIN_HASH = 'fd02492a6b028e0a346966a0f5369c87fa8d477f203d787a0836db64e1b0ec10';
+
+
+    function formatMB(bytes){
+      return (bytes / (1024*1024)).toFixed(2) + ' MB';
+    }
+
+    function updateCapacityStats(){
+      const originalBytes = (state.files || []).reduce((sum, f) => sum + (f.size || 0), 0);
+      const thumbBytes = (state.results || []).reduce((sum, item) => sum + (item.thumb?.blob?.size || 0), 0);
+      const largeBytes = (state.results || []).reduce((sum, item) => sum + (item.large?.blob?.size || 0), 0);
+      const totalBytes = thumbBytes + largeBytes;
+      const maxBytes = 1024 * 1024 * 1024;
+      const remainBytes = Math.max(0, maxBytes - totalBytes);
+
+      if(qs('#statOriginal')) qs('#statOriginal').textContent = formatMB(originalBytes);
+      if(qs('#statCount')) qs('#statCount').textContent = `${(state.files || []).length}장`;
+      if(qs('#statThumb')) qs('#statThumb').textContent = formatMB(thumbBytes);
+      if(qs('#statLarge')) qs('#statLarge').textContent = formatMB(largeBytes);
+      if(qs('#statTotal')) qs('#statTotal').textContent = formatMB(totalBytes);
+      if(qs('#statRemain')) qs('#statRemain').textContent = formatMB(remainBytes);
+
+      const status = qs('#capacityStatus');
+      if(status){
+        if(!state.files.length && !state.results.length){
+          status.textContent = '아직 계산할 결과가 없습니다.';
+          status.className = 'status';
+        } else if(totalBytes > maxBytes * 0.8){
+          status.textContent = '용량이 많이 커졌습니다. 사진 수나 품질을 조금 낮추는 것을 권장합니다.';
+          status.className = 'status bad';
+        } else {
+          status.textContent = '현재 결과물 기준으로는 GitHub Pages 1GB 한도 안에서 무난한 편입니다.';
+          status.className = 'status ok';
+        }
+      }
+    }
+
+
+    const qs = sel => document.querySelector(sel);
+    const qsa = sel => [...document.querySelectorAll(sel)];
+
+    function getCategoryLabel(category){
+      return ({ '전체': window.I18N?.labels?.all || '전체', '전각': window.I18N?.labels?.seal || '전각', '서예': window.I18N?.labels?.calligraphy || '서예', '기타': window.I18N?.labels?.other || '기타' })[category] || category;
+    }
+
+    function bindLanguageSelect(){
+      const select = qs('.lang-select');
+      if(!select) return;
+      select.addEventListener('change', () => {
+        const next = select.value;
+        if(next) window.location.href = next;
+      });
+    }
+
+    const state = {
+      files: [],
+      results: [],
+      adminOpen: false,
+      loggedIn: false,
+      currentCategory: '전체',
+      currentPage: 1,
+      worksPerPage: 8,
+      isProcessing: false,
+      cancelRequested: false
+    };
+
+    qs('#year').textContent = new Date().getFullYear();
+
+    function readJSON(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(e){
+        return fallback;
+      }
+    }
+
+    function writeJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function getWorkOverrides(){
+      return readJSON('wonjuWorkOverrides', {});
+    }
+
+    function getExtraWorks(){
+      return readJSON('wonjuExtraWorks', []);
+    }
+
+    function writeExtraWorks(list){
+      writeJSON('wonjuExtraWorks', list);
+    }
+
+    function getWorks(){
+      const overrides = getWorkOverrides();
+      const baseWorks = sampleWorks.map((work, index) => ({
+        ...work,
+        ...(overrides[String(index)] || {}),
+        _sourceType: 'sample',
+        _sourceIndex: index
+      }));
+      const extraWorks = getExtraWorks().map((work, index) => ({
+        ...work,
+        _sourceType: 'extra',
+        _sourceIndex: index
+      }));
+      return [...extraWorks, ...baseWorks];
+    }
+
+    function getSelectedWorkInfo(){
+      const select = qs('#artTargetWork');
+      const value = select?.value || 'sample:0';
+      if(value === '__new__') return { type:'new', value };
+      const [type, rawIndex] = value.split(':');
+      const sourceIndex = Number(rawIndex);
+      const work = getWorks().find(item => item._sourceType === type && item._sourceIndex === sourceIndex);
+      return { type, sourceIndex, value, work };
+    }
+
+    function buildWorkLabel(work){
+      if(!work) return '작품 선택';
+      return [work.title, work.category, work.year].filter(Boolean).join(' · ');
+    }
+
+    function fillArtFormFromWork(work){
+      if(!work) return;
+      if(qs('#artCategory')) qs('#artCategory').value = work.category || '전각';
+      if(qs('#artYear')) qs('#artYear').value = work.year || '';
+      if(qs('#artTitle')) qs('#artTitle').value = work.title || '';
+      if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
+      if(qs('#artYoutube')) qs('#artYoutube').value = work.youtube || '';
+    }
+
+    function fileToDataURL(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function flashApplyButton(ok){
+      const btn = qs('#applyArtworkBtn');
+      if(!btn) return;
+      btn.classList.remove('applied');
+      btn.textContent = ok ? '반영 완료' : '작품 이미지 반영';
+      if(ok){
+        btn.classList.add('applied');
+        setTimeout(() => {
+          btn.classList.remove('applied');
+          btn.textContent = '작품 이미지 반영';
+        }, 1800);
+      }
+    }
+
+    async function applyArtworkToSelectedWork(){
+      const target = qs('#artTargetWork');
+      const thumbFile = qs('#artThumbInput')?.files?.[0];
+      const fullFile = qs('#artFullInput')?.files?.[0];
+      const status = qs('#artDraftStatus');
+
+      if(!target){
+        if(status){
+          status.textContent = '반영할 기존 작품 선택란을 찾지 못했습니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      if(!thumbFile && !fullFile){
+        if(status){
+          status.textContent = '썸네일 이미지 또는 확대 이미지 중 하나 이상 선택해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const info = getSelectedWorkInfo();
+      const title = (qs('#artTitle')?.value || '').trim();
+      const category = (qs('#artCategory')?.value || '').trim() || '전각';
+      const year = (qs('#artYear')?.value || '').trim();
+      const desc = (qs('#artDescription')?.value || '').trim();
+      const youtube = (qs('#artYoutube')?.value || '').trim();
+
+      try{
+        if(info.type === 'new'){
+          const thumbData = thumbFile ? await fileToDataURL(thumbFile) : '';
+          const fullData = fullFile ? await fileToDataURL(fullFile) : (thumbData || '');
+          const extraWorks = getExtraWorks();
+
+          extraWorks.unshift({
+            title: title || '새 작품',
+            category,
+            year: year || String(new Date().getFullYear()),
+            medium: category,
+            desc: desc || '작품 설명',
+            thumb: thumbData || fullData,
+            large: fullData || thumbData,
+            youtube
+          });
+
+          writeExtraWorks(extraWorks);
+          populateArtTargetWork('extra:0');
+          renderGallery();
+
+          if(status){
+            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다. 기존 작품은 그대로 아래에 유지됩니다.`;
+            status.className = 'status ok';
+          }
+        } else if(info.work){
+          if(info.type === 'sample'){
+            const overrides = getWorkOverrides();
+            const current = overrides[String(info.sourceIndex)] || info.work;
+            const thumbData = thumbFile ? await fileToDataURL(thumbFile) : (current.thumb || '');
+            const fullData = fullFile ? await fileToDataURL(fullFile) : (current.large || '');
+            overrides[String(info.sourceIndex)] = {
+              ...current,
+              title: title || current.title || '',
+              category: category || current.category || '',
+              year: year || current.year || '',
+              medium: category || current.medium || '',
+              desc: desc || current.desc || '',
+              youtube,
+              ...(thumbData ? { thumb: thumbData } : {}),
+              ...(fullData ? { large: fullData } : {})
+            };
+            writeJSON('wonjuWorkOverrides', overrides);
+          } else {
+            const extraWorks = getExtraWorks();
+            const current = extraWorks[info.sourceIndex] || info.work;
+            const thumbData = thumbFile ? await fileToDataURL(thumbFile) : (current.thumb || '');
+            const fullData = fullFile ? await fileToDataURL(fullFile) : (current.large || '');
+            extraWorks[info.sourceIndex] = {
+              ...current,
+              title: title || current.title || '',
+              category: category || current.category || '',
+              year: year || current.year || '',
+              medium: category || current.medium || '',
+              desc: desc || current.desc || '',
+              youtube,
+              ...(thumbData ? { thumb: thumbData } : {}),
+              ...(fullData ? { large: fullData } : {})
+            };
+            writeExtraWorks(extraWorks);
+          }
+
+          renderGallery();
+          populateArtTargetWork(info.value);
+
+          if(status){
+            status.textContent = `${title || buildWorkLabel(info.work)} 작품 반영 완료`;
+            status.className = 'status ok';
+          }
+        }
+
+        if(qs('#artFeatured')?.checked){
+          let saved = null;
+          try{
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+          }catch(e){
+            saved = null;
+          }
+          const currentAbout = {...defaultAboutContent, ...(saved || {})};
+          const works = getWorks();
+          const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
+          if(selected?.large || selected?.thumb){
+            currentAbout.heroImage = selected.large || selected.thumb;
+            currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
+            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
+            loadAboutContent();
+          }
+        }
+
+        if(qs('#artThumbInput')) qs('#artThumbInput').value = '';
+        if(qs('#artFullInput')) qs('#artFullInput').value = '';
+        flashApplyButton(true);
+      }catch(err){
+        if(status){
+          status.textContent = `이미지 반영 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
+          status.className = 'status bad';
+        }
+      }
+    }
+
+    function renderGallery(){
+      const grid = qs('#galleryGrid');
+      const pagination = qs('#pagination');
+      const works = getWorks();
+      const visibleWorks = state.currentCategory === '전체'
+        ? works
+        : works.filter(work => work.category === state.currentCategory);
+
+      const totalPages = Math.max(1, Math.ceil(visibleWorks.length / state.worksPerPage));
+      if(state.currentPage > totalPages) state.currentPage = totalPages;
+
+      const startIndex = (state.currentPage - 1) * state.worksPerPage;
+      const pageWorks = visibleWorks.slice(startIndex, startIndex + state.worksPerPage);
+
+      grid.innerHTML = pageWorks.map((work) => {
+        const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
+        return `
+        <article class="work" data-index="${index}">
+          <div class="work-img" style="background-image:url('${work.thumb}')"></div>
+          <div class="work-body">
+            <h3 class="work-title">${escapeHtml(work.title)}</h3>
+            <div class="work-meta">${escapeHtml(getCategoryLabel(work.category))} · ${escapeHtml(work.year)}</div>
+            <p class="work-text">${escapeHtml(work.desc)}</p>
+          </div>
+        </article>
+      `;
+      }).join('');
+
+      qsa('.work').forEach(card => card.addEventListener('click', () => openViewer(Number(card.dataset.index))));
+
+      if(!pagination) return;
+      if(totalPages <= 1){
+        pagination.innerHTML = '';
+        return;
+      }
+
+      pagination.innerHTML = Array.from({length: totalPages}, (_, i) => {
+        const page = i + 1;
+        return `<button class="page-btn ${page === state.currentPage ? 'active' : ''}" type="button" data-page="${page}">${page}</button>`;
+      }).join('');
+
+      qsa('#pagination .page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currentPage = Number(btn.dataset.page);
+          renderGallery();
+          const worksSection = qs('#works');
+          if(worksSection) worksSection.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
+    }
+
+    function bindCategoryFilters(){
+      qsa('#filterBar .filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.currentCategory = btn.dataset.category;
+          state.currentPage = 1;
+          qsa('#filterBar .filter-btn').forEach(el => el.classList.toggle('active', el === btn));
+          renderGallery();
+        });
+      });
+    }
+
+
+    const defaultAboutContent = {
+      heroCaption: '대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.',
+      aboutSectionCopy: '이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.',
+      paragraph1: `이원주는 사물과 공간, 인물의 잔상에서 출발해 ‘머무는 감정’을 시각적으로 구성하는 작업을 이어오고 있습니다.
+                정적인 장면 안에서 흐르는 미세한 움직임과 빛의 결을 포착하며, 익숙한 풍경을 낯선 감각으로 다시 보여주는 데 집중합니다.`,
+      paragraph2: `대표 작업은 사진 기반 연작, 오브제 기록, 공간 아카이브, 전시 설치 이미지 등으로 확장되며,
+                상업적 이미지보다 작품 자체의 온도와 밀도를 우선하는 방식으로 발표됩니다.`,
+      heroImage: '',
+      artistImage: ''
+    };
+
+    function setBackgroundImage(el, dataUrl){
+      if(!el) return;
+      if(dataUrl){
+        const base = getComputedStyle(el).backgroundImage;
+        el.style.backgroundImage = `linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)), url("${dataUrl}")`;
+        if(el.id === 'artistPhoto'){
+          el.style.backgroundImage = `linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)), url("${dataUrl}")`;
+        }
+      }else{
+        el.style.backgroundImage = '';
+      }
+    }
+
+    function loadAboutContent(){
+      let saved = null;
+      try{
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+      }catch(e){
+        saved = null;
+      }
+      const data = {...defaultAboutContent, ...(saved || {})};
+
+      if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption;
+      if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
+      if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
+      if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
+
+      if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = data.heroCaption;
+      if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy;
+      if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1;
+      if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2;
+
+      if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
+      if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
+    }
+
+    function applyAboutContent(save){
+      const status = qs('#aboutContentStatus');
+      let saved = null;
+      try{
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+      }catch(e){
+        saved = null;
+      }
+      const prev = {...defaultAboutContent, ...(saved || {})};
+      const data = {
+        heroCaption: qs('#heroCaptionEditor')?.value?.trim() || defaultAboutContent.heroCaption,
+        aboutSectionCopy: qs('#aboutSectionCopyEditor')?.value?.trim() || defaultAboutContent.aboutSectionCopy,
+        paragraph1: qs('#aboutParagraph1Editor')?.value?.trim() || defaultAboutContent.paragraph1,
+        paragraph2: qs('#aboutParagraph2Editor')?.value?.trim() || defaultAboutContent.paragraph2,
+        heroImage: prev.heroImage || '',
+        artistImage: prev.artistImage || ''
+      };
+
+      if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption;
+      if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
+      if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
+      if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
+
+      if(save){
+        localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
+        if(status){
+          status.textContent = '메인 / 작가소개 내용이 저장되었습니다.';
+          status.className = 'status ok';
+        }
+      }else if(status){
+        status.textContent = '메인 / 작가소개 내용이 화면에 반영되었습니다.';
+        status.className = 'status ok';
+      }
+    }
+
+    function resetAboutContent(){
+      localStorage.removeItem('wonjuSiteAboutContent');
+      if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = defaultAboutContent.heroCaption;
+      if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = defaultAboutContent.aboutSectionCopy;
+      if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = defaultAboutContent.paragraph1;
+      if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
+
+      if(qs('#heroCaption')) qs('#heroCaption').textContent = defaultAboutContent.heroCaption;
+      if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = defaultAboutContent.aboutSectionCopy;
+      if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = defaultAboutContent.paragraph1;
+      if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = defaultAboutContent.paragraph2;
+
+      const heroArt = qs('#heroArt');
+      const artistPhoto = qs('#artistPhoto');
+      if(heroArt) heroArt.style.backgroundImage = '';
+      if(artistPhoto) artistPhoto.style.backgroundImage = '';
+
+      const status = qs('#aboutContentStatus');
+      if(status){
+        status.textContent = '메인 / 작가소개 내용이 기본값으로 복원되었습니다.';
+        status.className = 'status';
+      }
+    }
+
+
+    function loadArtDraft(){
+      let saved = null;
+      try{
+        saved = JSON.parse(localStorage.getItem('wonjuArtworkDraft') || 'null');
+      }catch(e){
+        saved = null;
+      }
+      if(!saved) return;
+      qs('#artCategory') && (qs('#artCategory').value = saved.category || '전각');
+      qs('#artYear') && (qs('#artYear').value = saved.year || '');
+      qs('#artTitle') && (qs('#artTitle').value = saved.title || '');
+      qs('#artDescription') && (qs('#artDescription').value = saved.description || '');
+      qs('#artYoutube') && (qs('#artYoutube').value = saved.youtube || '');
+      qs('#artFeatured') && (qs('#artFeatured').checked = !!saved.featured);
+      const status = qs('#artDraftStatus');
+      if(status){
+        status.textContent = '저장된 작품 등록 입력값을 불러왔습니다.';
+        status.className = 'status ok';
+      }
+    }
+
+    function saveArtDraft(){
+      const data = {
+        category: qs('#artCategory')?.value || '전각',
+        year: qs('#artYear')?.value?.trim() || '',
+        title: qs('#artTitle')?.value?.trim() || '',
+        description: qs('#artDescription')?.value?.trim() || '',
+        youtube: qs('#artYoutube')?.value?.trim() || '',
+        featured: !!qs('#artFeatured')?.checked
+      };
+      localStorage.setItem('wonjuArtworkDraft', JSON.stringify(data));
+      const status = qs('#artDraftStatus');
+      if(status){
+        status.textContent = '작품 등록 입력값을 저장했습니다. 이미지 파일은 브라우저 보안상 입력칸에 유지되지 않습니다.';
+        status.className = 'status ok';
+      }
+    }
+
+    function resetArtDraft(){
+      localStorage.removeItem('wonjuArtworkDraft');
+      qs('#artCategory') && (qs('#artCategory').value = '전각');
+      qs('#artYear') && (qs('#artYear').value = '');
+      qs('#artTitle') && (qs('#artTitle').value = '');
+      qs('#artDescription') && (qs('#artDescription').value = '');
+      qs('#artYoutube') && (qs('#artYoutube').value = '');
+      qs('#artFeatured') && (qs('#artFeatured').checked = false);
+      qs('#artThumbInput') && (qs('#artThumbInput').value = '');
+      qs('#artFullInput') && (qs('#artFullInput').value = '');
+      const status = qs('#artDraftStatus');
+      if(status){
+        status.textContent = '작품 등록 입력칸을 초기화했습니다.';
+        status.className = 'status';
+      }
+    }
+
+
+        function bindAboutImageInputs(){
+      const readFile = (file, key, targetSelector, statusText) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          let saved = null;
+          try{
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+          }catch(e){
+            saved = null;
+          }
+          const merged = {...defaultAboutContent, ...(saved || {})};
+          merged[key] = reader.result;
+          localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
+          setBackgroundImage(qs(targetSelector), reader.result);
+          const status = qs('#aboutContentStatus');
+          if(status){
+            status.textContent = statusText;
+            status.className = 'status ok';
+          }
+        };
+        reader.readAsDataURL(file);
+      };
+
+      qs('#heroImageInput')?.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if(file) readFile(file, 'heroImage', '#heroArt', '대표 이미지가 저장되었습니다.');
+      });
+
+      qs('#artistImageInput')?.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if(file) readFile(file, 'artistImage', '#artistPhoto', '작가소개 이미지가 저장되었습니다.');
+      });
+    }
+
+
+    function getSavedYoutubeMap(){
+      try{
+        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap') || '{}') || {};
+      }catch(e){
+        return {};
+      }
+    }
+
+    function populateArtTargetWork(preferredValue){
+      const select = qs('#artTargetWork');
+      if(!select) return;
+      const currentValue = preferredValue || select.value || '__new__';
+      const works = getWorks();
+      const options = [`<option value="__new__">새 작품 추가</option>`].concat(
+        works.map(work => `<option value="${work._sourceType}:${work._sourceIndex}">${escapeHtml(buildWorkLabel(work))}</option>`)
+      );
+      select.innerHTML = options.join('');
+      if([...select.options].some(opt => opt.value === currentValue)){
+        select.value = currentValue;
+      } else {
+        select.value = '__new__';
+      }
+    }
+
+    function syncArtTargetLabel(){
+      populateArtTargetWork(qs('#artTargetWork')?.value || '__new__');
+    }
+
+    function handleArtTargetChange(){
+      const info = getSelectedWorkInfo();
+      if(info.type === 'new'){
+        return;
+      }
+      fillArtFormFromWork(info.work);
+    }
+
+    function applyYoutubeToSelectedWork(){
+      const info = getSelectedWorkInfo();
+      const youtube = (qs('#artYoutube')?.value || '').trim();
+      const status = qs('#artDraftStatus');
+
+      if(info.type === 'new'){
+        if(status){
+          status.textContent = '새 작품 추가는 작품 이미지 반영 버튼으로 함께 저장됩니다.';
+          status.className = 'status';
+        }
+        return;
+      }
+
+      if(info.type === 'sample'){
+        const map = getSavedYoutubeMap();
+        if(youtube) map[`${info.type}:${info.sourceIndex}`] = youtube;
+        else delete map[`${info.type}:${info.sourceIndex}`];
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
+      } else {
+        const extraWorks = getExtraWorks();
+        if(extraWorks[info.sourceIndex]){
+          extraWorks[info.sourceIndex].youtube = youtube;
+          writeExtraWorks(extraWorks);
+        }
+      }
+
+      if(status){
+        status.textContent = youtube ? '선택한 작품 팝업에 유튜브 링크가 연결되었습니다.' : '선택한 작품 팝업의 유튜브 링크를 제거했습니다.';
+        status.className = youtube ? 'status ok' : 'status';
+      }
+    }
+
+    function openViewer(index){
+      const work = getWorks()[index];
+      if(!work) return;
+      const youtubeMap = getSavedYoutubeMap();
+      qs('#viewerImg').src = work.large;
+      qs('#viewerTitle').textContent = work.title;
+      qs('#viewerMeta').textContent = `${getCategoryLabel(work.category)} · ${work.year}`;
+      qs('#viewerDesc').textContent = work.desc;
+      const wrap = qs('#viewerYoutubeWrap');
+      const youtubeKey = `${work._sourceType}:${work._sourceIndex}`;
+      const youtube = (youtubeMap[youtubeKey] || work.youtube || '').trim();
+      if(wrap){
+        wrap.innerHTML = youtube
+          ? `<a href="${escapeHtml(youtube)}" target="_blank" rel="noopener noreferrer" aria-label="유튜브 열기" title="유튜브 열기"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.4.6A3 3 0 0 0 .5 6.2 31.8 31.8 0 0 0 0 12a31.8 31.8 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.8 31.8 0 0 0 24 12a31.8 31.8 0 0 0-.5-5.8ZM9.6 15.7V8.3l6.5 3.7-6.5 3.7Z"/></svg></a>`
+          : '';
+      }
+      qs('#viewer').classList.add('open');
+    }
+    function closeViewer(){ qs('#viewer').classList.remove('open'); }
+    qs('#viewerClose').addEventListener('click', closeViewer);
+    qs('#viewer').addEventListener('click', e => { if(e.target.id === 'viewer') closeViewer(); });
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    function openAdmin(){
+      state.adminOpen = true;
+      qs('#adminOverlay').classList.add('open');
+      qs('#adminOverlay').setAttribute('aria-hidden', 'false');
+      if(state.loggedIn){
+        qs('#passwordGate').classList.add('hidden');
+        qs('#adminApp').classList.remove('hidden');
+      } else {
+        qs('#passwordGate').classList.remove('hidden');
+        qs('#adminApp').classList.add('hidden');
+        qs('#adminPassword').focus();
+      }
+    }
+    function closeAdmin(){
+      state.adminOpen = false;
+      qs('#adminOverlay').classList.remove('open');
+      qs('#adminOverlay').setAttribute('aria-hidden', 'true');
+    }
+    function logoutAdmin(){
+      state.loggedIn = false;
+      qs('#adminPassword').value = '';
+      qs('#loginStatus').textContent = '로그아웃되었습니다.';
+      qs('#passwordGate').classList.remove('hidden');
+      qs('#adminApp').classList.add('hidden');
+    }
+
+    qs('#adminFooterBtn')?.addEventListener('click', openAdmin);
+    qs('#closeOverlayFromGate').addEventListener('click', closeAdmin);
+    qs('#closeAdminBtn').addEventListener('click', closeAdmin);
+    qs('#logoutBtn').addEventListener('click', logoutAdmin);
+    qs('#adminOverlay').addEventListener('click', e => { if(e.target.id === 'adminOverlay') closeAdmin(); });
+
+    async function sha256(text){
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function handleLogin(){
+      const pw = qs('#adminPassword').value.trim();
+      const status = qs('#loginStatus');
+      if(!pw){
+        status.textContent = '비밀번호를 입력해 주세요.';
+        status.className = 'status bad';
+        return;
+      }
+      const digest = await sha256(pw);
+      if(digest === ADMIN_HASH){
+        state.loggedIn = true;
+        status.textContent = '비밀번호 확인 완료. 관리자 모드가 열렸습니다.';
+        status.className = 'status ok';
+        qs('#passwordGate').classList.add('hidden');
+        qs('#adminApp').classList.remove('hidden');
+      } else {
+        status.textContent = '비밀번호가 맞지 않습니다.';
+        status.className = 'status bad';
+      }
+    }
+    qs('#loginBtn').addEventListener('click', handleLogin);
+    qs('#adminPassword').addEventListener('keydown', e => { if(e.key === 'Enter') handleLogin(); });
+
+    qs('#fileInput').addEventListener('change', async (e) => {
+      state.files = [...(e.target.files || [])].filter(file => file.type.startsWith('image/'));
+      const fileStatus = qs('#fileStatus');
+      if(!state.files.length){
+        fileStatus.textContent = '아직 업로드된 파일이 없습니다.';
+        fileStatus.className = 'status';
+        updateCapacityStats();
+        return;
+      }
+      const totalMB = (state.files.reduce((sum,f)=> sum + f.size, 0) / (1024*1024)).toFixed(2);
+      fileStatus.textContent = `${state.files.length}장 선택됨 · 원본 합계 ${totalMB}MB`;
+      fileStatus.className = 'status ok';
+      updateCapacityStats();
+    });
+
+    function mimeToExt(mime){
+      if(mime === 'image/jpeg') return 'jpg';
+      if(mime === 'image/png') return 'png';
+      if(mime === 'image/webp') return 'webp';
+      return 'img';
+    }
+
+    function slugify(name){
+      return name
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[^a-z0-9가-힣]+/gi, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-{2,}/g, '-');
+    }
+
+    function loadImage(file){
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => resolve({img, url});
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    async function makeVariant(file, targetWidth, mime, quality){
+      const {img, url} = await loadImage(file);
+      const ratio = img.naturalWidth > targetWidth ? targetWidth / img.naturalWidth : 1;
+      const outWidth = Math.round(img.naturalWidth * ratio);
+      const outHeight = Math.round(img.naturalHeight * ratio);
+      const canvas = document.createElement('canvas');
+      canvas.width = outWidth;
+      canvas.height = outHeight;
+      const ctx = canvas.getContext('2d', {alpha: mime === 'image/png'});
+      if(mime !== 'image/png'){
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0,0,outWidth,outHeight);
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, outWidth, outHeight);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, mime, mime === 'image/png' ? undefined : Number(quality)));
+      URL.revokeObjectURL(url);
+      return { blob, width: outWidth, height: outHeight, dataUrl: await blobToDataURL(blob) };
+    }
+
+    function blobToDataURL(blob){
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function downloadBlob(blob, filename){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    }
+
+    function sleep(ms){
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function updateProcessProgress(done, total, batchLabel){
+      const fill = qs('#processProgressFill');
+      const text = qs('#processProgressText');
+      const batch = qs('#processBatchText');
+      const percent = total ? Math.min(100, (done / total) * 100) : 0;
+      if(fill) fill.style.width = percent + '%';
+      if(text) text.textContent = `${done} / ${total}`;
+      if(batch) batch.textContent = batchLabel || '대기 중';
+    }
+
+    function renderResults(){
+      const grid = qs('#previewGrid');
+      const empty = qs('#previewEmpty');
+      if(!state.results.length){
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        qs('#zipStatus').textContent = '아직 생성된 결과가 없습니다.';
+        return;
+      }
+      empty.classList.add('hidden');
+      grid.innerHTML = state.results.map((item, i) => `
+        <div class="asset">
+          <div class="asset-head">
+            <div>
+              <div class="asset-title">${escapeHtml(item.baseName)}</div>
+              <div class="asset-meta">원본 ${item.original.width}×${item.original.height}</div>
+            </div>
+            <div class="asset-meta">${(item.thumb.blob.size/1024).toFixed(0)}KB / ${(item.large.blob.size/1024).toFixed(0)}KB</div>
+          </div>
+          <div class="asset-preview">
+            <div class="thumb-box">
+              <div class="thumb-tag">썸네일</div>
+              <img src="${item.thumb.dataUrl}" alt="썸네일 미리보기">
+              <div class="asset-meta" style="margin-top:8px">${item.thumb.width}×${item.thumb.height} · ${escapeHtml(item.thumb.filename)}</div>
+            </div>
+            <div class="large-box">
+              <div class="large-tag">확대본</div>
+              <img src="${item.large.dataUrl}" alt="확대본 미리보기">
+              <div class="asset-meta" style="margin-top:8px">${item.large.width}×${item.large.height} · ${escapeHtml(item.large.filename)}</div>
+            </div>
+          </div>
+          <div class="asset-actions">
+            <button class="btn" type="button" data-download="thumb" data-index="${i}">썸네일 다운</button>
+            <button class="btn" type="button" data-download="large" data-index="${i}">확대본 다운</button>
+            <button class="btn subtle" type="button" data-download="both" data-index="${i}">둘 다 다운</button>
+          </div>
+        </div>
+      `).join('');
+
+      qsa('[data-download]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.index);
+          const item = state.results[idx];
+          if(btn.dataset.download === 'thumb' || btn.dataset.download === 'both') downloadBlob(item.thumb.blob, item.thumb.filename);
+          if(btn.dataset.download === 'large' || btn.dataset.download === 'both') downloadBlob(item.large.blob, item.large.filename);
+        });
+      });
+      qs('#zipStatus').textContent = `${state.results.length}장 결과 생성 완료`;
+    }
+
+    async function processFiles(){
+      if(state.isProcessing){
+        qs('#processStatus').textContent = '이미 변환 중입니다.';
+        qs('#processStatus').className = 'status bad';
+        return;
+      }
+      if(!state.files.length){
+        qs('#processStatus').textContent = '먼저 사진을 업로드해 주세요.';
+        qs('#processStatus').className = 'status bad';
+        return;
+      }
+
+      const thumbWidth = Math.max(200, Number(qs('#thumbWidth').value || 700));
+      const largeWidth = Math.max(800, Number(qs('#largeWidth').value || 2000));
+      const thumbQuality = Math.min(1, Math.max(0.4, Number(qs('#thumbQuality').value || 0.78)));
+      const largeQuality = Math.min(1, Math.max(0.4, Number(qs('#largeQuality').value || 0.88)));
+      const outputType = qs('#outputType').value;
+      const prefix = slugify(qs('#filePrefix').value || 'wonju-work') || 'wonju-work';
+      const ext = mimeToExt(outputType);
+      const processStatus = qs('#processStatus');
+      const total = state.files.length;
+      const batchSize = Math.max(5, Math.min(50, Number(qs('#batchSize').value || 20)));
+      const batchPause = Math.max(0, Math.min(3000, Number(qs('#batchPause').value || 250)));
+
+      state.results = [];
+      state.isProcessing = true;
+      state.cancelRequested = false;
+      renderResults();
+      updateProcessProgress(0, total, `배치 크기 ${batchSize}장`);
+
+      try{
+        processStatus.textContent = '안정화 모드로 이미지 변환 중...';
+        processStatus.className = 'status';
+
+        for(let start=0; start<total; start += batchSize){
+          if(state.cancelRequested){
+            processStatus.textContent = `사용자 중지 · ${state.results.length}장까지만 생성됨`;
+            processStatus.className = 'status bad';
+            break;
+          }
+
+          const end = Math.min(start + batchSize, total);
+          updateProcessProgress(start, total, `${start + 1}~${end}번째 처리 중`);
+
+          for(let i=start; i<end; i++){
+            if(state.cancelRequested) break;
+
+            const file = state.files[i];
+            processStatus.textContent = `${i+1}/${total} 변환 중... ${file.name}`;
+
+            const baseName = `${prefix}-${String(i+1).padStart(2,'0')}`;
+            const imgMeta = await loadImage(file);
+            const original = { width: imgMeta.img.naturalWidth, height: imgMeta.img.naturalHeight };
+            URL.revokeObjectURL(imgMeta.url);
+
+            const thumb = await makeVariant(file, thumbWidth, outputType, thumbQuality);
+            const large = await makeVariant(file, largeWidth, outputType, largeQuality);
+
+            state.results.push({
+              baseName,
+              original,
+              thumb: {...thumb, filename:`${baseName}-thumb.${ext}`},
+              large: {...large, filename:`${baseName}-large.${ext}`}
+            });
+
+            updateProcessProgress(i + 1, total, `${start + 1}~${end}번째 처리 중`);
+          }
+
+          renderResults();
+          updateCapacityStats();
+
+          if(end < total && !state.cancelRequested && batchPause > 0){
+            processStatus.textContent = `${end}/${total} 완료 · 잠시 쉬는 중...`;
+            await sleep(batchPause);
+          }
+        }
+
+        if(!state.cancelRequested){
+          processStatus.textContent = `변환 완료 · ${state.results.length}장 생성됨`;
+          processStatus.className = 'status ok';
+          updateProcessProgress(state.results.length, total, '완료');
+        }
+      } catch(err){
+        processStatus.textContent = `오류 발생 · ${err?.message || '변환 중 문제가 생겼습니다.'}`;
+        processStatus.className = 'status bad';
+      } finally {
+        state.isProcessing = false;
+        renderResults();
+        updateCapacityStats();
+      }
+    }
+    qs('#processBtn').addEventListener('click', processFiles);
+    qs('#cancelProcessBtn')?.addEventListener('click', () => {
+      if(!state.isProcessing){
+        qs('#processStatus').textContent = '지금은 중지할 작업이 없습니다.';
+        qs('#processStatus').className = 'status';
+        return;
+      }
+      state.cancelRequested = true;
+      qs('#processStatus').textContent = '중지 요청됨... 현재 작업까지만 마무리합니다.';
+      qs('#processStatus').className = 'status bad';
+    });
+
+    qs('#clearResultsBtn').addEventListener('click', () => {
+      state.results = [];
+      renderResults();
+      updateCapacityStats();
+      qs('#processStatus').textContent = '결과가 지워졌습니다.';
+      qs('#processStatus').className = 'status';
+    });
+
+    async function downloadZip(kind){
+      if(!state.results.length){
+        qs('#zipStatus').textContent = '먼저 이미지를 변환해 주세요.';
+        qs('#zipStatus').className = 'status bad';
+        return;
+      }
+      const zip = new JSZip();
+      const thumbFolder = (qs('#thumbFolder').value || 'images/thumbs').replace(/^\/+|\/+$/g,'');
+      const largeFolder = (qs('#largeFolder').value || 'images/large').replace(/^\/+|\/+$/g,'');
+
+      if(kind === 'thumb' || kind === 'all'){
+        const folder = zip.folder(thumbFolder);
+        state.results.forEach(item => folder.file(item.thumb.filename, item.thumb.blob));
+      }
+      if(kind === 'large' || kind === 'all'){
+        const folder = zip.folder(largeFolder);
+        state.results.forEach(item => folder.file(item.large.filename, item.large.blob));
+      }
+      if(kind === 'all'){
+        const rows = ['base_name,thumb_path,large_path'];
+        state.results.forEach(item => rows.push(`${item.baseName},${thumbFolder}/${item.thumb.filename},${largeFolder}/${item.large.filename}`));
+        zip.file('gallery-files.csv', rows.join('\n'));
+      }
+
+      qs('#zipStatus').textContent = 'ZIP 만드는 중...';
+      qs('#zipStatus').className = 'status';
+      const blob = await zip.generateAsync({type:'blob'});
+      const suffix = kind === 'thumb' ? 'thumbs' : kind === 'large' ? 'large' : 'all-assets';
+      downloadBlob(blob, `wonju-${suffix}.zip`);
+      qs('#zipStatus').textContent = 'ZIP 다운로드 완료';
+      qs('#zipStatus').className = 'status ok';
+    }
+
+    qs('#downloadThumbZipBtn').addEventListener('click', ()=>downloadZip('thumb'));
+    qs('#downloadLargeZipBtn').addEventListener('click', ()=>downloadZip('large'));
+    qs('#downloadAllZipBtn').addEventListener('click', ()=>downloadZip('all'));
+
+    window.addEventListener('keydown', e => {
+      if(e.key === 'Escape'){
+        closeViewer();
+        if(state.adminOpen) closeAdmin();
+      }
+    });
+
+
+    function escapeHtmlText(str){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    const defaultTextContent = {
+      contact: [
+        '이메일 · leewonju.art@example.com',
+        '작품 문의 · 전시 / 소장 / 협업',
+        '문의 시간 · 평일 오전 10시 ~ 오후 6시'
+      ],
+      exhibition: [
+        '2026 · 이원주 개인전 예정',
+        '2025 · 서예·전각 그룹전 참여',
+        '2024 · 작업 아카이브 및 발표전'
+      ],
+      news: [
+        '2026.04 · 사이트 글로벌 도메인 연결 작업 진행',
+        '2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화',
+        '2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비'
+      ]
+    };
+
+    function linesFromTextarea(value){
+      return String(value || '')
+        .split('\n')
+        .map(v => v.trim())
+        .filter(Boolean);
+    }
+
+    function renderListItems(targetId, lines){
+      const el = qs(targetId);
+      if(!el) return;
+      el.innerHTML = lines.map(line => `<div class="contact-item">${escapeHtmlText(line)}</div>`).join('');
+    }
+
+    function loadEditableTextContent(){
+      let saved = null;
+      try{
+        saved = JSON.parse(localStorage.getItem('wonjuSiteTextContent') || 'null');
+      }catch(e){
+        saved = null;
+      }
+      const contactLines = saved?.contact?.length ? saved.contact : defaultTextContent.contact;
+      const exhibitionLines = saved?.exhibition?.length ? saved.exhibition : defaultTextContent.exhibition;
+      const newsLines = saved?.news?.length ? saved.news : defaultTextContent.news;
+
+      if(qs('#contactEditor')) qs('#contactEditor').value = contactLines.join('\n');
+      if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = exhibitionLines.join('\n');
+      if(qs('#newsEditor')) qs('#newsEditor').value = newsLines.join('\n');
+
+      renderListItems('#contactDisplayList', contactLines);
+      renderListItems('#exhibitionDisplayList', exhibitionLines);
+      renderListItems('#newsDisplayList', newsLines);
+    }
+
+    function applyEditableTextContent(save){
+      const contactLines = linesFromTextarea(qs('#contactEditor')?.value);
+      const exhibitionLines = linesFromTextarea(qs('#exhibitionEditor')?.value);
+      const newsLines = linesFromTextarea(qs('#newsEditor')?.value);
+      const status = qs('#textContentStatus');
+
+      if(!contactLines.length || !exhibitionLines.length || !newsLines.length){
+        if(status){
+          status.textContent = '문의 내용, 전시 이력, 소식란에 각각 한 줄 이상 입력해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      renderListItems('#contactDisplayList', contactLines);
+      renderListItems('#exhibitionDisplayList', exhibitionLines);
+      renderListItems('#newsDisplayList', newsLines);
+
+      if(save){
+        localStorage.setItem('wonjuSiteTextContent', JSON.stringify({
+          contact: contactLines,
+          exhibition: exhibitionLines,
+          news: newsLines
+        }));
+        if(status){
+          status.textContent = '문구가 저장되었고 화면에도 반영되었습니다.';
+          status.className = 'status ok';
+        }
+      }else{
+        if(status){
+          status.textContent = '문구가 화면에 반영되었습니다. 저장하려면 문구 저장을 누르세요.';
+          status.className = 'status ok';
+        }
+      }
+    }
+
+    function resetEditableTextContent(){
+      localStorage.removeItem('wonjuSiteTextContent');
+      if(qs('#contactEditor')) qs('#contactEditor').value = defaultTextContent.contact.join('\n');
+      if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = defaultTextContent.exhibition.join('\n');
+      if(qs('#newsEditor')) qs('#newsEditor').value = defaultTextContent.news.join('\n');
+      renderListItems('#contactDisplayList', defaultTextContent.contact);
+      renderListItems('#exhibitionDisplayList', defaultTextContent.exhibition);
+      renderListItems('#newsDisplayList', defaultTextContent.news);
+      const status = qs('#textContentStatus');
+      if(status){
+        status.textContent = '기본 문구로 복원되었습니다.';
+        status.className = 'status';
+      }
+    }
+
+    qs('#saveTextContentBtn')?.addEventListener('click', () => applyEditableTextContent(true));
+    qs('#applyTextContentBtn')?.addEventListener('click', () => applyEditableTextContent(false));
+    qs('#resetTextContentBtn')?.addEventListener('click', resetEditableTextContent);
+
+    loadEditableTextContent();
+    loadAboutContent();
+
+    qs('#saveAboutContentBtn')?.addEventListener('click', () => applyAboutContent(true));
+    qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
+    qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
+    bindAboutImageInputs();
+    qs('#artDraftSaveBtn')?.addEventListener('click', saveArtDraft);
+    qs('#artDraftLoadBtn')?.addEventListener('click', loadArtDraft);
+    qs('#artDraftResetBtn')?.addEventListener('click', resetArtDraft);
+    qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
+    qs('#applyYoutubeBtn')?.addEventListener('click', applyYoutubeToSelectedWork);
+    qs('#artTargetWork')?.addEventListener('change', handleArtTargetChange);
+    ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
+      qs(sel)?.addEventListener('input', syncArtTargetLabel);
+      qs(sel)?.addEventListener('change', syncArtTargetLabel);
+    });
+    loadArtDraft();
+    populateArtTargetWork('__new__');
+
+    qsa('[data-accordion]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.accordion);
+        if(target) target.classList.toggle('open');
+      });
+    });
+
+    bindLanguageSelect();
+    bindCategoryFilters();
+    renderGallery();
+    updateCapacityStats();
+  </script>
+
+
+
+</body>
+</html>
