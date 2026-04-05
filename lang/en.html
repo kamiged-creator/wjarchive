@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lee Wonju | Art Portfolio</title>
-  <meta name="description" content="Lee Wonju artist portfolio. View artworks and manage images from a single page." />
+  <meta name="description" content="The art portfolio of Lee Wonju. View artworks and use admin image tools on a single page." />
   <meta name="theme-color" content="#f6f1ea" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Lee Wonju | Art Portfolio" />
-  <meta property="og:description" content="Portfolio site with artwork viewing and image management features" />
+  <meta property="og:description" content="A portfolio site with artwork viewing and admin image tools" />
   <style>
     :root{
       --bg:#f6f1ea;
@@ -87,6 +87,9 @@
         url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop') center/cover;
     }
     .hero-caption{padding:16px 18px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+    .hero-caption{display:none}
+    #aboutSectionCopy{display:none}
 
     section{padding:36px 0}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
@@ -442,9 +445,8 @@
         </div>
         <div class="top-sub-row">
           <div class="top-left-tools">
-            <select class="lang-select" aria-label="Language selection">
-              <option value="/">Global</option>
-              <option value="/lang/ko.html">한국어</option>
+            <select class="lang-select" id="languageSelect" aria-label="언어 선택">
+              <option value="/">한국어</option>
               <option value="/lang/en.html" selected>English</option>
               <option value="/lang/ja.html">日本語</option>
             </select>
@@ -461,19 +463,19 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <span class="eyebrow">Selected Works · Artist Portfolio</span>
-          <h1>Lee Wonju’s world of art<br>capturing light and emotion</h1>
-          <p class="lead">
-            Crossing photography and painterly sensibility, this portfolio records the time and warmth remaining in familiar scenes.
-            Artwork viewing and image management tools are included on a single page.
+          <span class="eyebrow" id="heroEyebrow">Selected Works · Artist Portfolio</span>
+          <h1 id="heroTitle">빛과 감정을 담는<br>이원주의 작품 세계</h1>
+          <p class="lead" id="heroLead">
+            사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
+            작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.
           </p>
           <div class="hero-actions">
-            <a class="btn primary" href="#works">View Works</a>
+            <a class="btn primary" href="#works">작품 보기</a>
           </div>
         </div>
         <div class="hero-card">
           <div class="hero-art" id="heroArt" aria-label="대표 작품 이미지"></div>
-          <div class="hero-caption" id="heroCaption">Featured image sample area — replace with an actual representative artwork.</div>
+          <div class="hero-caption" id="heroCaption">대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.</div>
         </div>
       </div>
     </section>
@@ -482,8 +484,8 @@
       <div class="wrap">
         <div class="section-head">
           <div>
-            <h2 class="section-title">About the Artist</h2>
-            <p class="section-copy" id="aboutSectionCopy">An introduction to Lee Wonju’s artistic direction and perspective.</p>
+            <h2 class="section-title" id="aboutSectionTitle">About</h2>
+            <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
           </div>
         </div>
         <div class="about-profile">
@@ -512,15 +514,15 @@
       <div class="wrap">
         <div class="section-head">
           <div>
-            <h2 class="section-title">Works</h2>
-            <p class="section-copy">Browse artworks by category. Choose from All, Seal Engraving, Calligraphy, and Others.</p>
+            <h2 class="section-title" id="worksSectionTitle">Works</h2>
+            <p class="section-copy" id="worksSectionCopy">Browse artworks by category. Choose from 전체, 전각, 서예, 기타.</p>
           </div>
         </div>
         <div class="filter-bar" id="filterBar">
-          <button class="filter-btn active" type="button" data-category="전체">All</button>
-          <button class="filter-btn" type="button" data-category="전각">Seal</button>
-          <button class="filter-btn" type="button" data-category="서예">Calligraphy</button>
-          <button class="filter-btn" type="button" data-category="기타">Other</button>
+          <button class="filter-btn active" type="button" data-category="전체">전체</button>
+          <button class="filter-btn" type="button" data-category="전각">전각</button>
+          <button class="filter-btn" type="button" data-category="서예">서예</button>
+          <button class="filter-btn" type="button" data-category="기타">기타</button>
         </div>
         <div class="gallery" id="galleryGrid"></div>
         <div class="pagination" id="pagination"></div>
@@ -530,11 +532,12 @@
     <section id="note">
       <div class="wrap note">
         <article class="card">
-          <p class="note-quote">“I wanted to capture what remains emotionally, not simply record what is seen.”</p>
+          <p class="note-quote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
         </article>
         <article class="card">
           <p>
-            The work often begins with a very quiet scene. By lingering on surfaces touched by light, the air left after people depart, and traces of time easily overlooked, new density is created within the frame.
+            작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
+            쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.
           </p>
         </article>
       </div>
@@ -551,9 +554,9 @@
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">Recent works, exhibition preparations, and updates</p>
               <div class="contact-list" id="newsDisplayList">
-                <div class="contact-item">2026.04 · Connecting the site to a global domain</div>
-                <div class="contact-item">2026.03 · Organizing the artwork archive and stabilizing admin features</div>
-                <div class="contact-item">2026.02 · Additional seal-engravings shoot and featured image replacement prep</div>
+                <div class="contact-item">2026.04 · 사이트 글로벌 도메인 연결 작업 진행</div>
+                <div class="contact-item">2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화</div>
+                <div class="contact-item">2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비</div>
               </div>
             </div>
           </article>
@@ -570,25 +573,25 @@
               <span>＋</span>
             </button>
             <div class="accordion-panel">
-              <p style="margin:2px 0 10px;">Inquiries for exhibitions, acquisition, and collaboration</p>
+              <p style="margin:2px 0 10px;">Exhibition, collection, and collaboration inquiries</p>
               <div class="contact-list" id="contactDisplayList">
                 <div class="contact-item">Email · leewonju.art@example.com</div>
-                <div class="contact-item">Artwork inquiries · Exhibition / Collection / Collaboration</div>
-                <div class="contact-item">Office hours · Weekdays 10:00 AM – 6:00 PM</div>
+                <div class="contact-item">Artwork Inquiry · Exhibition / Collection / Collaboration</div>
+                <div class="contact-item">Hours · Weekdays 10:00 AM – 6:00 PM</div>
               </div>
             </div>
           </article>
 
           <article class="accordion-item" id="exhibitionAccordion">
             <button class="accordion-btn" type="button" data-accordion="exhibitionAccordion">
-              <span>Exhibitions</span>
+              <span>Exhibition History</span>
               <span>＋</span>
             </button>
             <div class="accordion-panel">
               <div class="contact-list" id="exhibitionDisplayList">
-                <div class="contact-item">2026 · Scheduled solo exhibition by Lee Wonju</div>
-                <div class="contact-item">2025 · Participated in a calligraphy and seal-engraving group show</div>
-                <div class="contact-item">2024 · Artwork archive and presentation exhibition</div>
+                <div class="contact-item">2026 · Planned Solo Exhibition by Lee Wonju</div>
+                <div class="contact-item">2025 · Participated in a Calligraphy & Seal Engraving Group Exhibition</div>
+                <div class="contact-item">2024 · Work Archive and Presentation Exhibition</div>
               </div>
             </div>
           </article>
@@ -773,11 +776,23 @@
 
             <div class="admin-card">
               <h3>5. 메인 / 작가소개 편집</h3>
-              <p>메인 대표 이미지와 작가소개 이미지, 작가소개 문구를 관리자에서 바꿀 수 있습니다.</p>
+              <p>상단 큰 제목과 설명, 메인 대표 이미지와 작가소개 이미지, 작가소개 문구를 관리자에서 바꿀 수 있습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div>
                   <label class="label" for="heroCaptionEditor">대표 이미지 캡션</label>
                   <input class="field" id="heroCaptionEditor" type="text" placeholder="대표 이미지 설명">
+                </div>
+                <div>
+                  <label class="label" for="heroEyebrowEditor">상단 작은 제목</label>
+                  <input class="field" id="heroEyebrowEditor" type="text" placeholder="예: Selected Works · Artist Portfolio">
+                </div>
+                <div>
+                  <label class="label" for="heroTitleEditor">상단 큰 제목</label>
+                  <textarea class="editor-area" id="heroTitleEditor" placeholder="상단 메인 제목"></textarea>
+                </div>
+                <div>
+                  <label class="label" for="heroLeadEditor">상단 제목 아래 설명</label>
+                  <textarea class="editor-area" id="heroLeadEditor" placeholder="상단 설명 문구"></textarea>
                 </div>
                 <div>
                   <label class="label" for="aboutSectionCopyEditor">작가 소개 소제목</label>
@@ -806,7 +821,7 @@
                   <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
                   <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
                 </div>
-                <div class="status" id="aboutContentStatus">메인 이미지와 작가소개 이미지, 문구를 수정할 수 있습니다.</div>
+                <div class="status" id="aboutContentStatus">상단 제목/설명, 메인 이미지와 작가소개 이미지, 문구를 수정할 수 있습니다.</div>
               </div>
             </div>
 
@@ -874,6 +889,7 @@
                   <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
                   <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
                   <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
+                  <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
                 <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 썸네일/확대 이미지를 넣고 작품 이미지 반영을 누르면 카드와 팝업 이미지가 바로 바뀝니다.</div>
@@ -938,61 +954,61 @@
   <script>
     const sampleWorks = [
       {
-        title: 'Hangeol',
+        title: '한결',
         category: '전각',
         year: '2026',
         medium: '전각',
-        desc: 'A seal-engraving work showing powerful carved strokes and balanced empty space.',
+        desc: '힘 있게 다듬은 획과 여백의 균형을 보여주는 전각 작업.',
         thumb: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: 'Ink Fragrance',
+        title: '묵향',
         category: '서예',
         year: '2025',
         medium: '서예',
-        desc: 'A calligraphy work capturing the tonal depth of ink and the breath of brush movement.',
+        desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: 'Damyeon',
+        title: '담연',
         category: '전각',
         year: '2025',
         medium: '전각',
-        desc: 'A seal work carrying both traditional beauty and modern sentiment.',
+        desc: '전통미와 현대적 정서를 함께 담아낸 인장 작업.',
         thumb: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: 'Graceful Flow',
+        title: '유려',
         category: '서예',
         year: '2024',
         medium: '서예',
-        desc: 'A work alive with flowing lines and restrained empty space.',
+        desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: 'Recorded Time',
+        title: '기록된 시간',
         category: '기타',
         year: '2024',
-        medium: 'Exhibition Record',
-        desc: 'An archival image documenting the exhibition space and installation scenes.',
+        medium: '전시 기록',
+        desc: '전시 공간과 작품 설치 장면을 아카이브한 이미지.',
         thumb: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: 'Warmth',
+        title: '온기',
         category: '기타',
         year: '2023',
-        medium: 'Documentary Photo',
-        desc: 'An archival artwork image containing the warmth and afterglow of the work.',
+        medium: '기록 사진',
+        desc: '작업의 온도와 여운을 담은 아카이브 성격의 작품 이미지.',
         thumb: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -1042,19 +1058,6 @@
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
 
-    function getCategoryLabel(category){
-      return ({ '전체': window.I18N?.labels?.all || '전체', '전각': window.I18N?.labels?.seal || '전각', '서예': window.I18N?.labels?.calligraphy || '서예', '기타': window.I18N?.labels?.other || '기타' })[category] || category;
-    }
-
-    function bindLanguageSelect(){
-      const select = qs('.lang-select');
-      if(!select) return;
-      select.addEventListener('change', () => {
-        const next = select.value;
-        if(next) window.location.href = next;
-      });
-    }
-
     const state = {
       files: [],
       results: [],
@@ -1083,15 +1086,15 @@
     }
 
     function getWorkOverrides(){
-      return readJSON('wonjuWorkOverrides', {});
+      return readJSON('wonjuWorkOverrides_en', {});
     }
 
     function getExtraWorks(){
-      return readJSON('wonjuExtraWorks', []);
+      return readJSON('wonjuExtraWorks_en', []);
     }
 
     function writeExtraWorks(list){
-      writeJSON('wonjuExtraWorks', list);
+      writeJSON('wonjuExtraWorks_en', list);
     }
 
     function getWorks(){
@@ -1101,12 +1104,12 @@
         ...(overrides[String(index)] || {}),
         _sourceType: 'sample',
         _sourceIndex: index
-      }));
+      })).filter(work => !work._deleted);
       const extraWorks = getExtraWorks().map((work, index) => ({
         ...work,
         _sourceType: 'extra',
         _sourceIndex: index
-      }));
+      })).filter(work => !work._deleted);
       return [...extraWorks, ...baseWorks];
     }
 
@@ -1228,7 +1231,7 @@
               ...(thumbData ? { thumb: thumbData } : {}),
               ...(fullData ? { large: fullData } : {})
             };
-            writeJSON('wonjuWorkOverrides', overrides);
+            writeJSON('wonjuWorkOverrides_en', overrides);
           } else {
             const extraWorks = getExtraWorks();
             const current = extraWorks[info.sourceIndex] || info.work;
@@ -1260,7 +1263,7 @@
         if(qs('#artFeatured')?.checked){
           let saved = null;
           try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
           }catch(e){
             saved = null;
           }
@@ -1270,7 +1273,7 @@
           if(selected?.large || selected?.thumb){
             currentAbout.heroImage = selected.large || selected.thumb;
             currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
-            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
+            localStorage.setItem('wonjuSiteAboutContent_en', JSON.stringify(currentAbout));
             loadAboutContent();
           }
         }
@@ -1307,7 +1310,7 @@
           <div class="work-img" style="background-image:url('${work.thumb}')"></div>
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
-            <div class="work-meta">${escapeHtml(getCategoryLabel(work.category))} · ${escapeHtml(work.year)}</div>
+            <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
             <p class="work-text">${escapeHtml(work.desc)}</p>
           </div>
         </article>
@@ -1348,12 +1351,31 @@
       });
     }
 
+    function bindLanguageSwitcher(){
+      const select = qs('#languageSelect');
+      if(!select) return;
+      const path = window.location.pathname || '/';
+      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
+      const current = normalized === '' ? '/' : normalized;
+      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
+      if(match) select.value = match.value;
+      else select.value = '/';
+
+      select.addEventListener('change', () => {
+        const next = select.value;
+        if(next) window.location.href = next;
+      });
+    }
+
 
     const defaultAboutContent = {
-      heroCaption: 'Featured image sample area — replace with an actual representative artwork.',
+      heroEyebrow: 'Selected Works · Artist Portfolio',
+      heroTitle: 'Capturing Light and Emotion<br>Lee Wonju’s World of Art',
+      heroLead: `Moving between photography and painterly sensibility, this portfolio records the time and temperature that remain within familiar scenes. Artwork viewing and admin image tools are included on one page.`,
+      heroCaption: '대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.',
       aboutSectionCopy: 'An introduction to Lee Wonju’s artistic direction and perspective.',
-      paragraph1: `Lee Wonju continues to build visual compositions from the lingering traces of objects, spaces, and figures. The work focuses on capturing delicate movement and layers of light within still scenes, presenting familiar landscapes through a renewed sensory perspective.`,
-      paragraph2: `Representative works expand into photo-based series, object records, spatial archives, and exhibition installation images, prioritizing the work’s own temperature and density over commercial imagery.`,
+      paragraph1: `Lee Wonju continues to create visual compositions of “lingering emotions,” starting from traces of objects, spaces, and people. He focuses on capturing subtle movement and the texture of light within still scenes, presenting familiar landscapes through a fresh sensibility.`,
+      paragraph2: `His representative works expand into photo-based series, object documentation, spatial archives, and installation images, and are presented in a way that prioritizes the temperature and density of the work itself over commercial imagery.`,
       heroImage: '',
       artistImage: ''
     };
@@ -1374,17 +1396,26 @@
     function loadAboutContent(){
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
       }catch(e){
         saved = null;
       }
       const data = {...defaultAboutContent, ...(saved || {})};
 
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
 
+      if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow;
+      if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = data.heroTitle.replace(/<br\s*\/?>/gi, '\n');
+      if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = data.heroLead;
       if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = data.heroCaption;
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1;
@@ -1398,12 +1429,15 @@
       const status = qs('#aboutContentStatus');
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
       }catch(e){
         saved = null;
       }
       const prev = {...defaultAboutContent, ...(saved || {})};
       const data = {
+        heroEyebrow: qs('#heroEyebrowEditor')?.value?.trim() || defaultAboutContent.heroEyebrow,
+        heroTitle: (qs('#heroTitleEditor')?.value || '').trim().replace(/\n+/g, '<br>') || defaultAboutContent.heroTitle,
+        heroLead: qs('#heroLeadEditor')?.value?.trim() || defaultAboutContent.heroLead,
         heroCaption: qs('#heroCaptionEditor')?.value?.trim() || defaultAboutContent.heroCaption,
         aboutSectionCopy: qs('#aboutSectionCopyEditor')?.value?.trim() || defaultAboutContent.aboutSectionCopy,
         paragraph1: qs('#aboutParagraph1Editor')?.value?.trim() || defaultAboutContent.paragraph1,
@@ -1412,13 +1446,16 @@
         artistImage: prev.artistImage || ''
       };
 
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
 
       if(save){
-        localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
+        localStorage.setItem('wonjuSiteAboutContent_en', JSON.stringify(data));
         if(status){
           status.textContent = '메인 / 작가소개 내용이 저장되었습니다.';
           status.className = 'status ok';
@@ -1430,12 +1467,18 @@
     }
 
     function resetAboutContent(){
-      localStorage.removeItem('wonjuSiteAboutContent');
+      localStorage.removeItem('wonjuSiteAboutContent_en');
+      if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = defaultAboutContent.heroEyebrow;
+      if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = defaultAboutContent.heroTitle.replace(/<br\s*\/?>/gi, '\n');
+      if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = defaultAboutContent.heroLead;
       if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = defaultAboutContent.heroCaption;
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
 
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = defaultAboutContent.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = defaultAboutContent.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = defaultAboutContent.heroLead;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = defaultAboutContent.heroCaption;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = defaultAboutContent.paragraph1;
@@ -1457,7 +1500,7 @@
     function loadArtDraft(){
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuArtworkDraft') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuArtworkDraft_en') || 'null');
       }catch(e){
         saved = null;
       }
@@ -1484,7 +1527,7 @@
         youtube: qs('#artYoutube')?.value?.trim() || '',
         featured: !!qs('#artFeatured')?.checked
       };
-      localStorage.setItem('wonjuArtworkDraft', JSON.stringify(data));
+      localStorage.setItem('wonjuArtworkDraft_en', JSON.stringify(data));
       const status = qs('#artDraftStatus');
       if(status){
         status.textContent = '작품 등록 입력값을 저장했습니다. 이미지 파일은 브라우저 보안상 입력칸에 유지되지 않습니다.';
@@ -1493,7 +1536,7 @@
     }
 
     function resetArtDraft(){
-      localStorage.removeItem('wonjuArtworkDraft');
+      localStorage.removeItem('wonjuArtworkDraft_en');
       qs('#artCategory') && (qs('#artCategory').value = '전각');
       qs('#artYear') && (qs('#artYear').value = '');
       qs('#artTitle') && (qs('#artTitle').value = '');
@@ -1516,13 +1559,13 @@
         reader.onload = () => {
           let saved = null;
           try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
           }catch(e){
             saved = null;
           }
           const merged = {...defaultAboutContent, ...(saved || {})};
           merged[key] = reader.result;
-          localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
+          localStorage.setItem('wonjuSiteAboutContent_en', JSON.stringify(merged));
           setBackgroundImage(qs(targetSelector), reader.result);
           const status = qs('#aboutContentStatus');
           if(status){
@@ -1547,7 +1590,7 @@
 
     function getSavedYoutubeMap(){
       try{
-        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap') || '{}') || {};
+        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap_en') || '{}') || {};
       }catch(e){
         return {};
       }
@@ -1576,6 +1619,7 @@
     function handleArtTargetChange(){
       const info = getSelectedWorkInfo();
       if(info.type === 'new'){
+        resetArtDraft();
         return;
       }
       fillArtFormFromWork(info.work);
@@ -1598,7 +1642,7 @@
         const map = getSavedYoutubeMap();
         if(youtube) map[`${info.type}:${info.sourceIndex}`] = youtube;
         else delete map[`${info.type}:${info.sourceIndex}`];
-        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
+        localStorage.setItem('wonjuWorkYoutubeMap_en', JSON.stringify(map));
       } else {
         const extraWorks = getExtraWorks();
         if(extraWorks[info.sourceIndex]){
@@ -1613,13 +1657,67 @@
       }
     }
 
+
+    function deleteSelectedArtwork(){
+      const info = getSelectedWorkInfo();
+      const status = qs('#artDraftStatus');
+
+      if(info.type === 'new'){
+        if(status){
+          status.textContent = '새 작품 추가 선택 상태에서는 삭제할 작품이 없습니다.';
+          status.className = 'status';
+        }
+        return;
+      }
+
+      const label = buildWorkLabel(info.work);
+
+      if(info.type === 'sample'){
+        const overrides = getWorkOverrides();
+        const current = overrides[String(info.sourceIndex)] || {};
+        overrides[String(info.sourceIndex)] = {
+          ...current,
+          title: '',
+          year: '',
+          medium: '',
+          desc: '',
+          youtube: '',
+          thumb: '',
+          large: '',
+          _deleted: true
+        };
+        writeJSON('wonjuWorkOverrides_en', overrides);
+      } else {
+        const extraWorks = getExtraWorks();
+        if(info.sourceIndex >= 0 && info.sourceIndex < extraWorks.length){
+          extraWorks.splice(info.sourceIndex, 1);
+          writeExtraWorks(extraWorks);
+        }
+      }
+
+      try{
+        const youtubeMap = getSavedYoutubeMap();
+        delete youtubeMap[`${info.type}:${info.sourceIndex}`];
+        localStorage.setItem('wonjuWorkYoutubeMap_en', JSON.stringify(youtubeMap));
+      }catch(e){}
+
+      resetArtDraft();
+      populateArtTargetWork('__new__');
+      renderGallery();
+
+      if(status){
+        status.textContent = `${label || '선택 작품'} 삭제 완료`;
+        status.className = 'status ok';
+      }
+    }
+
     function openViewer(index){
       const work = getWorks()[index];
       if(!work) return;
       const youtubeMap = getSavedYoutubeMap();
       qs('#viewerImg').src = work.large;
       qs('#viewerTitle').textContent = work.title;
-      qs('#viewerMeta').textContent = `${getCategoryLabel(work.category)} · ${work.year}`;
+      qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
       const wrap = qs('#viewerYoutubeWrap');
       const youtubeKey = `${work._sourceType}:${work._sourceIndex}`;
@@ -2008,18 +2106,18 @@
     const defaultTextContent = {
       contact: [
         'Email · leewonju.art@example.com',
-        'Artwork inquiries · Exhibition / Collection / Collaboration',
-        'Office hours · Weekdays 10:00 AM – 6:00 PM'
+        'Artwork Inquiry · Exhibition / Collection / Collaboration',
+        'Hours · Weekdays 10:00 AM – 6:00 PM'
       ],
       exhibition: [
-        '2026 · Scheduled solo exhibition by Lee Wonju',
-        '2025 · Participated in a calligraphy and seal-engraving group show',
-        '2024 · Artwork archive and presentation exhibition'
+        '2026 · Planned Solo Exhibition by Lee Wonju',
+        '2025 · Participated in a Calligraphy & Seal Engraving Group Exhibition',
+        '2024 · Work Archive and Presentation Exhibition'
       ],
       news: [
-        '2026.04 · Connecting the site to a global domain',
-        '2026.03 · Organizing the artwork archive and stabilizing admin features',
-        '2026.02 · Additional seal-engravings shoot and featured image replacement prep'
+        '2026.04 · Global domain connection work in progress',
+        '2026.03 · Artwork archive organization and admin feature stabilization',
+        '2026.02 · Additional seal-engraving shoots and hero image replacement preparation'
       ]
     };
 
@@ -2039,7 +2137,7 @@
     function loadEditableTextContent(){
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuSiteTextContent') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuSiteTextContent_en') || 'null');
       }catch(e){
         saved = null;
       }
@@ -2075,7 +2173,7 @@
       renderListItems('#newsDisplayList', newsLines);
 
       if(save){
-        localStorage.setItem('wonjuSiteTextContent', JSON.stringify({
+        localStorage.setItem('wonjuSiteTextContent_en', JSON.stringify({
           contact: contactLines,
           exhibition: exhibitionLines,
           news: newsLines
@@ -2093,7 +2191,7 @@
     }
 
     function resetEditableTextContent(){
-      localStorage.removeItem('wonjuSiteTextContent');
+      localStorage.removeItem('wonjuSiteTextContent_en');
       if(qs('#contactEditor')) qs('#contactEditor').value = defaultTextContent.contact.join('\n');
       if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = defaultTextContent.exhibition.join('\n');
       if(qs('#newsEditor')) qs('#newsEditor').value = defaultTextContent.news.join('\n');
@@ -2123,6 +2221,7 @@
     qs('#artDraftResetBtn')?.addEventListener('click', resetArtDraft);
     qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
     qs('#applyYoutubeBtn')?.addEventListener('click', applyYoutubeToSelectedWork);
+    qs('#deleteArtworkBtn')?.addEventListener('click', deleteSelectedArtwork);
     qs('#artTargetWork')?.addEventListener('change', handleArtTargetChange);
     ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
       qs(sel)?.addEventListener('input', syncArtTargetLabel);
@@ -2138,7 +2237,7 @@
       });
     });
 
-    bindLanguageSelect();
+    bindLanguageSwitcher();
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
