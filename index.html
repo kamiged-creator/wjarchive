@@ -1085,6 +1085,17 @@
       localStorage.setItem(key, JSON.stringify(value));
     }
 
+    function getSharedImageContent(){
+      return readJSON('wonjuSharedImageContent', { heroImage:'', artistImage:'' });
+    }
+
+    function writeSharedImageContent(value){
+      writeJSON('wonjuSharedImageContent', {
+        heroImage: value?.heroImage || '',
+        artistImage: value?.artistImage || ''
+      });
+    }
+
     function getWorkOverrides(){
       return readJSON('wonjuWorkOverrides', {});
     }
@@ -1267,13 +1278,18 @@
           }catch(e){
             saved = null;
           }
-          const currentAbout = {...defaultAboutContent, ...(saved || {})};
+          const sharedImages = getSharedImageContent();
+          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
           const works = getWorks();
           const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
           if(selected?.large || selected?.thumb){
             currentAbout.heroImage = selected.large || selected.thumb;
             currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
             localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
+            writeSharedImageContent({
+              heroImage: currentAbout.heroImage,
+              artistImage: currentAbout.artistImage
+            });
             loadAboutContent();
           }
         }
@@ -1403,7 +1419,8 @@
       }catch(e){
         saved = null;
       }
-      const data = {...defaultAboutContent, ...(saved || {})};
+      const sharedImages = getSharedImageContent();
+      const data = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
@@ -1436,7 +1453,8 @@
       }catch(e){
         saved = null;
       }
-      const prev = {...defaultAboutContent, ...(saved || {})};
+      const sharedImages = getSharedImageContent();
+      const prev = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
       const data = {
         heroEyebrow: qs('#heroEyebrowEditor')?.value?.trim() || defaultAboutContent.heroEyebrow,
         heroTitle: (qs('#heroTitleEditor')?.value || '').trim().replace(/\n+/g, '<br>') || defaultAboutContent.heroTitle,
@@ -1459,6 +1477,10 @@
 
       if(save){
         localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
+        writeSharedImageContent({
+          heroImage: data.heroImage,
+          artistImage: data.artistImage
+        });
         if(status){
           status.textContent = '메인 / 작가소개 내용이 저장되었습니다.';
           status.className = 'status ok';
@@ -1471,6 +1493,7 @@
 
     function resetAboutContent(){
       localStorage.removeItem('wonjuSiteAboutContent');
+      localStorage.removeItem('wonjuSharedImageContent');
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = defaultAboutContent.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = defaultAboutContent.heroTitle.replace(/<br\s*\/?>/gi, '\n');
       if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = defaultAboutContent.heroLead;
@@ -1566,9 +1589,14 @@
           }catch(e){
             saved = null;
           }
-          const merged = {...defaultAboutContent, ...(saved || {})};
+          const sharedImages = getSharedImageContent();
+          const merged = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
           merged[key] = reader.result;
           localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
+          writeSharedImageContent({
+            heroImage: key === 'heroImage' ? reader.result : (merged.heroImage || ''),
+            artistImage: key === 'artistImage' ? reader.result : (merged.artistImage || '')
+          });
           setBackgroundImage(qs(targetSelector), reader.result);
           const status = qs('#aboutContentStatus');
           if(status){
