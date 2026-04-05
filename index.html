@@ -77,6 +77,8 @@
     .btn.primary{background:var(--text);color:#fff;border-color:transparent}
     .btn.subtle{background:rgba(255,255,255,.55);box-shadow:none}
     .btn.danger{background:#fff5f5;color:var(--danger);border-color:rgba(179,61,61,.18)}
+    .btn.apply-accent{background:linear-gradient(180deg,#8b6847,#735337);color:#fff;border-color:transparent}
+    .btn.applied{background:linear-gradient(180deg,#2f7d4d,#25633d);color:#fff;border-color:transparent;box-shadow:0 0 0 4px rgba(47,125,77,.12)}
     .hero-card{background:var(--paper);border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow);overflow:hidden}
     .hero-art{
       aspect-ratio:4/5;
@@ -85,6 +87,9 @@
         url('https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1400&auto=format&fit=crop') center/cover;
     }
     .hero-caption{padding:16px 18px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+
+    .hero-caption{display:none}
+    #aboutSectionCopy{display:none}
 
     section{padding:36px 0}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
@@ -206,11 +211,38 @@
     .viewer-image{background:#0e0c0b;min-height:340px;display:flex;align-items:center;justify-content:center}
     .viewer-image img{max-height:min(78vh,860px);width:auto;object-fit:contain}
     .viewer-body{padding:24px;color:#f5efe8}
-    .viewer-body h3{margin:0 0 8px;font-size:28px}
+    .viewer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0 0 8px}
+    .viewer-body h3{margin:0;font-size:28px;line-height:1.2}
     .viewer-meta{color:#d4c7ba;font-size:13px;margin-bottom:12px}
     .viewer-desc{color:#eee4d8}
-    .viewer-youtube{margin-top:14px}
-    .viewer-youtube .btn{width:auto;box-shadow:none;background:#fff;color:var(--text)}
+    .viewer-youtube{
+      flex:0 0 auto;
+      margin-top:4px;
+      font-size:14px;
+      font-weight:700;
+      line-height:1.2;
+    }
+    .viewer-youtube a{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:20px;
+      height:20px;
+      color:#ff0000;
+      text-decoration:none;
+      opacity:.88;
+      transition:color .18s ease, opacity .18s ease, transform .18s ease;
+    }
+    .viewer-youtube a svg{
+      display:block;
+      width:18px;
+      height:18px;
+    }
+    .viewer-youtube a:hover{
+      color:#ff2d2d;
+      opacity:1;
+      transform:translateY(-1px);
+    }
     .viewer-close{margin-top:18px;background:#2a231f;color:#fff;border:none}
 
     .admin-overlay{
@@ -363,6 +395,8 @@
       .hero-actions,.asset-actions{flex-direction:column}
       .admin-head{align-items:flex-start;flex-direction:column}
       .viewer-body h3{font-size:22px}
+      .viewer-header{gap:10px}
+      .viewer-youtube{font-size:13px;margin-top:3px}
       .artist-photo{min-height:360px}
       .top-tools{width:100%}
       .top-nav-row,.top-sub-row{width:100%}
@@ -411,13 +445,10 @@
         </div>
         <div class="top-sub-row">
           <div class="top-left-tools">
-            <select class="lang-select" aria-label="언어 선택">
-              <option value="global" selected>Global</option>
-              <option value="ko">한국어</option>
-              <option value="en">English</option>
-              <option value="ja">日本語</option>
-              <option value="vi">Tiếng Việt</option>
-              <option value="es">Español</option>
+            <select class="lang-select" id="languageSelect" aria-label="언어 선택">
+              <option value="/" selected>한국어</option>
+              <option value="/lang/en.html">English</option>
+              <option value="/lang/ja.html">日本語</option>
             </select>
           </div>
           <div class="top-right-tools">
@@ -432,9 +463,9 @@
     <section class="hero">
       <div class="wrap hero-grid">
         <div>
-          <span class="eyebrow">Selected Works · Artist Portfolio</span>
-          <h1>빛과 감정을 담는<br>이원주의 작품 세계</h1>
-          <p class="lead">
+          <span class="eyebrow" id="heroEyebrow">Selected Works · Artist Portfolio</span>
+          <h1 id="heroTitle">빛과 감정을 담는<br>이원주의 작품 세계</h1>
+          <p class="lead" id="heroLead">
             사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
             작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.
           </p>
@@ -453,7 +484,7 @@
       <div class="wrap">
         <div class="section-head">
           <div>
-            <h2 class="section-title">작가 소개</h2>
+            <h2 class="section-title" id="aboutSectionTitle">작가 소개</h2>
             <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
           </div>
         </div>
@@ -483,8 +514,8 @@
       <div class="wrap">
         <div class="section-head">
           <div>
-            <h2 class="section-title">작품</h2>
-            <p class="section-copy">카테고리별로 작품을 나눠 보이게 했습니다. 전체, 전각, 서예, 기타 중에서 골라 보세요.</p>
+            <h2 class="section-title" id="worksSectionTitle">작품</h2>
+            <p class="section-copy" id="worksSectionCopy">카테고리별로 작품을 나눠 보이게 했습니다. 전체, 전각, 서예, 기타 중에서 골라 보세요.</p>
           </div>
         </div>
         <div class="filter-bar" id="filterBar">
@@ -587,10 +618,12 @@
       <div class="viewer-grid">
         <div class="viewer-image"><img id="viewerImg" alt="확대 작품 이미지"></div>
         <div class="viewer-body">
-          <h3 id="viewerTitle"></h3>
+          <div class="viewer-header">
+            <h3 id="viewerTitle"></h3>
+            <div class="viewer-youtube" id="viewerYoutubeWrap"></div>
+          </div>
           <div class="viewer-meta" id="viewerMeta"></div>
           <div class="viewer-desc" id="viewerDesc"></div>
-          <div class="viewer-youtube" id="viewerYoutubeWrap"></div>
           <button class="btn viewer-close" id="viewerClose" type="button">닫기</button>
         </div>
       </div>
@@ -743,11 +776,23 @@
 
             <div class="admin-card">
               <h3>5. 메인 / 작가소개 편집</h3>
-              <p>메인 대표 이미지와 작가소개 이미지, 작가소개 문구를 관리자에서 바꿀 수 있습니다.</p>
+              <p>상단 큰 제목과 설명, 메인 대표 이미지와 작가소개 이미지, 작가소개 문구를 관리자에서 바꿀 수 있습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div>
                   <label class="label" for="heroCaptionEditor">대표 이미지 캡션</label>
                   <input class="field" id="heroCaptionEditor" type="text" placeholder="대표 이미지 설명">
+                </div>
+                <div>
+                  <label class="label" for="heroEyebrowEditor">상단 작은 제목</label>
+                  <input class="field" id="heroEyebrowEditor" type="text" placeholder="예: Selected Works · Artist Portfolio">
+                </div>
+                <div>
+                  <label class="label" for="heroTitleEditor">상단 큰 제목</label>
+                  <textarea class="editor-area" id="heroTitleEditor" placeholder="상단 메인 제목"></textarea>
+                </div>
+                <div>
+                  <label class="label" for="heroLeadEditor">상단 제목 아래 설명</label>
+                  <textarea class="editor-area" id="heroLeadEditor" placeholder="상단 설명 문구"></textarea>
                 </div>
                 <div>
                   <label class="label" for="aboutSectionCopyEditor">작가 소개 소제목</label>
@@ -776,7 +821,7 @@
                   <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
                   <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
                 </div>
-                <div class="status" id="aboutContentStatus">메인 이미지와 작가소개 이미지, 문구를 수정할 수 있습니다.</div>
+                <div class="status" id="aboutContentStatus">상단 제목/설명, 메인 이미지와 작가소개 이미지, 문구를 수정할 수 있습니다.</div>
               </div>
             </div>
 
@@ -834,7 +879,7 @@
                 </div>
 
                 <div>
-                  <label class="label" for="artTargetWork">유튜브 연결할 기존 작품</label>
+                  <label class="label" for="artTargetWork">반영할 기존 작품</label>
                   <select class="field-sm" id="artTargetWork"></select>
                 </div>
 
@@ -842,10 +887,12 @@
                   <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
                   <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
                   <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
+                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
                   <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
+                  <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">유튜브 주소를 넣고 기존 작품을 선택한 뒤 연결 버튼을 누르면 확대보기 팝업 안에만 유튜브 바로가기가 나타납니다.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 썸네일/확대 이미지를 넣고 작품 이미지 반영을 누르면 카드와 팝업 이미지가 바로 바뀝니다.</div>
               </div>
             </div>
 
@@ -1025,12 +1072,230 @@
 
     qs('#year').textContent = new Date().getFullYear();
 
+    function readJSON(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(e){
+        return fallback;
+      }
+    }
+
+    function writeJSON(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function getWorkOverrides(){
+      return readJSON('wonjuWorkOverrides', {});
+    }
+
+    function getExtraWorks(){
+      return readJSON('wonjuExtraWorks', []);
+    }
+
+    function writeExtraWorks(list){
+      writeJSON('wonjuExtraWorks', list);
+    }
+
+    function getWorks(){
+      const overrides = getWorkOverrides();
+      const baseWorks = sampleWorks.map((work, index) => ({
+        ...work,
+        ...(overrides[String(index)] || {}),
+        _sourceType: 'sample',
+        _sourceIndex: index
+      })).filter(work => !work._deleted);
+      const extraWorks = getExtraWorks().map((work, index) => ({
+        ...work,
+        _sourceType: 'extra',
+        _sourceIndex: index
+      })).filter(work => !work._deleted);
+      return [...extraWorks, ...baseWorks];
+    }
+
+    function getSelectedWorkInfo(){
+      const select = qs('#artTargetWork');
+      const value = select?.value || 'sample:0';
+      if(value === '__new__') return { type:'new', value };
+      const [type, rawIndex] = value.split(':');
+      const sourceIndex = Number(rawIndex);
+      const work = getWorks().find(item => item._sourceType === type && item._sourceIndex === sourceIndex);
+      return { type, sourceIndex, value, work };
+    }
+
+    function buildWorkLabel(work){
+      if(!work) return '작품 선택';
+      return [work.title, work.category, work.year].filter(Boolean).join(' · ');
+    }
+
+    function fillArtFormFromWork(work){
+      if(!work) return;
+      if(qs('#artCategory')) qs('#artCategory').value = work.category || '전각';
+      if(qs('#artYear')) qs('#artYear').value = work.year || '';
+      if(qs('#artTitle')) qs('#artTitle').value = work.title || '';
+      if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
+      if(qs('#artYoutube')) qs('#artYoutube').value = work.youtube || '';
+    }
+
+    function fileToDataURL(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function flashApplyButton(ok){
+      const btn = qs('#applyArtworkBtn');
+      if(!btn) return;
+      btn.classList.remove('applied');
+      btn.textContent = ok ? '반영 완료' : '작품 이미지 반영';
+      if(ok){
+        btn.classList.add('applied');
+        setTimeout(() => {
+          btn.classList.remove('applied');
+          btn.textContent = '작품 이미지 반영';
+        }, 1800);
+      }
+    }
+
+    async function applyArtworkToSelectedWork(){
+      const target = qs('#artTargetWork');
+      const thumbFile = qs('#artThumbInput')?.files?.[0];
+      const fullFile = qs('#artFullInput')?.files?.[0];
+      const status = qs('#artDraftStatus');
+
+      if(!target){
+        if(status){
+          status.textContent = '반영할 기존 작품 선택란을 찾지 못했습니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      if(!thumbFile && !fullFile){
+        if(status){
+          status.textContent = '썸네일 이미지 또는 확대 이미지 중 하나 이상 선택해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const info = getSelectedWorkInfo();
+      const title = (qs('#artTitle')?.value || '').trim();
+      const category = (qs('#artCategory')?.value || '').trim() || '전각';
+      const year = (qs('#artYear')?.value || '').trim();
+      const desc = (qs('#artDescription')?.value || '').trim();
+      const youtube = (qs('#artYoutube')?.value || '').trim();
+
+      try{
+        if(info.type === 'new'){
+          const thumbData = thumbFile ? await fileToDataURL(thumbFile) : '';
+          const fullData = fullFile ? await fileToDataURL(fullFile) : (thumbData || '');
+          const extraWorks = getExtraWorks();
+
+          extraWorks.unshift({
+            title: title || '새 작품',
+            category,
+            year: year || String(new Date().getFullYear()),
+            medium: category,
+            desc: desc || '작품 설명',
+            thumb: thumbData || fullData,
+            large: fullData || thumbData,
+            youtube
+          });
+
+          writeExtraWorks(extraWorks);
+          populateArtTargetWork('extra:0');
+          renderGallery();
+
+          if(status){
+            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다. 기존 작품은 그대로 아래에 유지됩니다.`;
+            status.className = 'status ok';
+          }
+        } else if(info.work){
+          if(info.type === 'sample'){
+            const overrides = getWorkOverrides();
+            const current = overrides[String(info.sourceIndex)] || info.work;
+            const thumbData = thumbFile ? await fileToDataURL(thumbFile) : (current.thumb || '');
+            const fullData = fullFile ? await fileToDataURL(fullFile) : (current.large || '');
+            overrides[String(info.sourceIndex)] = {
+              ...current,
+              title: title || current.title || '',
+              category: category || current.category || '',
+              year: year || current.year || '',
+              medium: category || current.medium || '',
+              desc: desc || current.desc || '',
+              youtube,
+              ...(thumbData ? { thumb: thumbData } : {}),
+              ...(fullData ? { large: fullData } : {})
+            };
+            writeJSON('wonjuWorkOverrides', overrides);
+          } else {
+            const extraWorks = getExtraWorks();
+            const current = extraWorks[info.sourceIndex] || info.work;
+            const thumbData = thumbFile ? await fileToDataURL(thumbFile) : (current.thumb || '');
+            const fullData = fullFile ? await fileToDataURL(fullFile) : (current.large || '');
+            extraWorks[info.sourceIndex] = {
+              ...current,
+              title: title || current.title || '',
+              category: category || current.category || '',
+              year: year || current.year || '',
+              medium: category || current.medium || '',
+              desc: desc || current.desc || '',
+              youtube,
+              ...(thumbData ? { thumb: thumbData } : {}),
+              ...(fullData ? { large: fullData } : {})
+            };
+            writeExtraWorks(extraWorks);
+          }
+
+          renderGallery();
+          populateArtTargetWork(info.value);
+
+          if(status){
+            status.textContent = `${title || buildWorkLabel(info.work)} 작품 반영 완료`;
+            status.className = 'status ok';
+          }
+        }
+
+        if(qs('#artFeatured')?.checked){
+          let saved = null;
+          try{
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+          }catch(e){
+            saved = null;
+          }
+          const currentAbout = {...defaultAboutContent, ...(saved || {})};
+          const works = getWorks();
+          const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
+          if(selected?.large || selected?.thumb){
+            currentAbout.heroImage = selected.large || selected.thumb;
+            currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
+            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
+            loadAboutContent();
+          }
+        }
+
+        if(qs('#artThumbInput')) qs('#artThumbInput').value = '';
+        if(qs('#artFullInput')) qs('#artFullInput').value = '';
+        flashApplyButton(true);
+      }catch(err){
+        if(status){
+          status.textContent = `이미지 반영 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
+          status.className = 'status bad';
+        }
+      }
+    }
+
     function renderGallery(){
       const grid = qs('#galleryGrid');
       const pagination = qs('#pagination');
+      const works = getWorks();
       const visibleWorks = state.currentCategory === '전체'
-        ? sampleWorks
-        : sampleWorks.filter(work => work.category === state.currentCategory);
+        ? works
+        : works.filter(work => work.category === state.currentCategory);
 
       const totalPages = Math.max(1, Math.ceil(visibleWorks.length / state.worksPerPage));
       if(state.currentPage > totalPages) state.currentPage = totalPages;
@@ -1039,7 +1304,7 @@
       const pageWorks = visibleWorks.slice(startIndex, startIndex + state.worksPerPage);
 
       grid.innerHTML = pageWorks.map((work) => {
-        const index = sampleWorks.indexOf(work);
+        const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
         return `
         <article class="work" data-index="${index}">
           <div class="work-img" style="background-image:url('${work.thumb}')"></div>
@@ -1086,8 +1351,28 @@
       });
     }
 
+    function bindLanguageSwitcher(){
+      const select = qs('#languageSelect');
+      if(!select) return;
+      const path = window.location.pathname || '/';
+      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
+      const current = normalized === '' ? '/' : normalized;
+      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
+      if(match) select.value = match.value;
+      else select.value = '/';
+
+      select.addEventListener('change', () => {
+        const next = select.value;
+        if(next) window.location.href = next;
+      });
+    }
+
 
     const defaultAboutContent = {
+      heroEyebrow: 'Selected Works · Artist Portfolio',
+      heroTitle: '빛과 감정을 담는<br>이원주의 작품 세계',
+      heroLead: `사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
+            작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.`,
       heroCaption: '대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.',
       aboutSectionCopy: '이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.',
       paragraph1: `이원주는 사물과 공간, 인물의 잔상에서 출발해 ‘머무는 감정’을 시각적으로 구성하는 작업을 이어오고 있습니다.
@@ -1120,11 +1405,20 @@
       }
       const data = {...defaultAboutContent, ...(saved || {})};
 
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
 
+      if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow;
+      if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = data.heroTitle.replace(/<br\s*\/?>/gi, '\n');
+      if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = data.heroLead;
       if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = data.heroCaption;
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1;
@@ -1144,6 +1438,9 @@
       }
       const prev = {...defaultAboutContent, ...(saved || {})};
       const data = {
+        heroEyebrow: qs('#heroEyebrowEditor')?.value?.trim() || defaultAboutContent.heroEyebrow,
+        heroTitle: (qs('#heroTitleEditor')?.value || '').trim().replace(/\n+/g, '<br>') || defaultAboutContent.heroTitle,
+        heroLead: qs('#heroLeadEditor')?.value?.trim() || defaultAboutContent.heroLead,
         heroCaption: qs('#heroCaptionEditor')?.value?.trim() || defaultAboutContent.heroCaption,
         aboutSectionCopy: qs('#aboutSectionCopyEditor')?.value?.trim() || defaultAboutContent.aboutSectionCopy,
         paragraph1: qs('#aboutParagraph1Editor')?.value?.trim() || defaultAboutContent.paragraph1,
@@ -1152,6 +1449,9 @@
         artistImage: prev.artistImage || ''
       };
 
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
@@ -1171,11 +1471,17 @@
 
     function resetAboutContent(){
       localStorage.removeItem('wonjuSiteAboutContent');
+      if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = defaultAboutContent.heroEyebrow;
+      if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = defaultAboutContent.heroTitle.replace(/<br\s*\/?>/gi, '\n');
+      if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = defaultAboutContent.heroLead;
       if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = defaultAboutContent.heroCaption;
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
 
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = defaultAboutContent.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = defaultAboutContent.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = defaultAboutContent.heroLead;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = defaultAboutContent.heroCaption;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = defaultAboutContent.paragraph1;
@@ -1293,78 +1599,135 @@
       }
     }
 
-    function buildArtTargetLabel(index){
-      const title = (qs('#artTitle')?.value || '').trim();
-      const category = (qs('#artCategory')?.value || '').trim();
-      const year = (qs('#artYear')?.value || '').trim();
-
-      if(title || category || year){
-        const parts = [title, category, year].filter(Boolean);
-        return parts.join(' · ') || '작품 선택';
-      }
-
-      const work = sampleWorks[index];
-      if(!work) return '작품 선택';
-      return [work.title, work.category, work.year].filter(Boolean).join(' · ');
-    }
-
-    function populateArtTargetWork(){
+    function populateArtTargetWork(preferredValue){
       const select = qs('#artTargetWork');
       if(!select) return;
-      const currentValue = select.value || '0';
-      select.innerHTML = sampleWorks.map((work, index) =>
-        `<option value="${index}">${escapeHtml(buildArtTargetLabel(index))}</option>`
-      ).join('');
+      const currentValue = preferredValue || select.value || '__new__';
+      const works = getWorks();
+      const options = [`<option value="__new__">새 작품 추가</option>`].concat(
+        works.map(work => `<option value="${work._sourceType}:${work._sourceIndex}">${escapeHtml(buildWorkLabel(work))}</option>`)
+      );
+      select.innerHTML = options.join('');
       if([...select.options].some(opt => opt.value === currentValue)){
         select.value = currentValue;
+      } else {
+        select.value = '__new__';
       }
     }
 
     function syncArtTargetLabel(){
-      populateArtTargetWork();
-    ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
-      qs(sel)?.addEventListener('input', syncArtTargetLabel);
-      qs(sel)?.addEventListener('change', syncArtTargetLabel);
-    });
+      populateArtTargetWork(qs('#artTargetWork')?.value || '__new__');
+    }
+
+    function handleArtTargetChange(){
+      const info = getSelectedWorkInfo();
+      if(info.type === 'new'){
+        resetArtDraft();
+        return;
+      }
+      fillArtFormFromWork(info.work);
     }
 
     function applyYoutubeToSelectedWork(){
-      const target = qs('#artTargetWork');
+      const info = getSelectedWorkInfo();
       const youtube = (qs('#artYoutube')?.value || '').trim();
       const status = qs('#artDraftStatus');
-      if(!target) return;
-      const idx = target.value;
-      const map = getSavedYoutubeMap();
 
-      if(youtube){
-        map[idx] = youtube;
-        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
+      if(info.type === 'new'){
         if(status){
-          status.textContent = '선택한 작품 팝업에 유튜브 바로가기가 연결되었습니다.';
-          status.className = 'status ok';
-        }
-      } else {
-        delete map[idx];
-        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
-        if(status){
-          status.textContent = '선택한 작품 팝업의 유튜브 링크를 제거했습니다.';
+          status.textContent = '새 작품 추가는 작품 이미지 반영 버튼으로 함께 저장됩니다.';
           status.className = 'status';
         }
+        return;
+      }
+
+      if(info.type === 'sample'){
+        const map = getSavedYoutubeMap();
+        if(youtube) map[`${info.type}:${info.sourceIndex}`] = youtube;
+        else delete map[`${info.type}:${info.sourceIndex}`];
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
+      } else {
+        const extraWorks = getExtraWorks();
+        if(extraWorks[info.sourceIndex]){
+          extraWorks[info.sourceIndex].youtube = youtube;
+          writeExtraWorks(extraWorks);
+        }
+      }
+
+      if(status){
+        status.textContent = youtube ? '선택한 작품 팝업에 유튜브 링크가 연결되었습니다.' : '선택한 작품 팝업의 유튜브 링크를 제거했습니다.';
+        status.className = youtube ? 'status ok' : 'status';
+      }
+    }
+
+
+    function deleteSelectedArtwork(){
+      const info = getSelectedWorkInfo();
+      const status = qs('#artDraftStatus');
+
+      if(info.type === 'new'){
+        if(status){
+          status.textContent = '새 작품 추가 선택 상태에서는 삭제할 작품이 없습니다.';
+          status.className = 'status';
+        }
+        return;
+      }
+
+      const label = buildWorkLabel(info.work);
+
+      if(info.type === 'sample'){
+        const overrides = getWorkOverrides();
+        const current = overrides[String(info.sourceIndex)] || {};
+        overrides[String(info.sourceIndex)] = {
+          ...current,
+          title: '',
+          year: '',
+          medium: '',
+          desc: '',
+          youtube: '',
+          thumb: '',
+          large: '',
+          _deleted: true
+        };
+        writeJSON('wonjuWorkOverrides', overrides);
+      } else {
+        const extraWorks = getExtraWorks();
+        if(info.sourceIndex >= 0 && info.sourceIndex < extraWorks.length){
+          extraWorks.splice(info.sourceIndex, 1);
+          writeExtraWorks(extraWorks);
+        }
+      }
+
+      try{
+        const youtubeMap = getSavedYoutubeMap();
+        delete youtubeMap[`${info.type}:${info.sourceIndex}`];
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(youtubeMap));
+      }catch(e){}
+
+      resetArtDraft();
+      populateArtTargetWork('__new__');
+      renderGallery();
+
+      if(status){
+        status.textContent = `${label || '선택 작품'} 삭제 완료`;
+        status.className = 'status ok';
       }
     }
 
     function openViewer(index){
-      const work = sampleWorks[index];
+      const work = getWorks()[index];
+      if(!work) return;
       const youtubeMap = getSavedYoutubeMap();
       qs('#viewerImg').src = work.large;
       qs('#viewerTitle').textContent = work.title;
       qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
       const wrap = qs('#viewerYoutubeWrap');
-      const youtube = (youtubeMap[index] || work.youtube || '').trim();
+      const youtubeKey = `${work._sourceType}:${work._sourceIndex}`;
+      const youtube = (youtubeMap[youtubeKey] || work.youtube || '').trim();
       if(wrap){
         wrap.innerHTML = youtube
-          ? `<a class="btn" href="${escapeHtml(youtube)}" target="_blank" rel="noopener noreferrer">유튜브 바로가기</a>`
+          ? `<a href="${escapeHtml(youtube)}" target="_blank" rel="noopener noreferrer" aria-label="유튜브 열기" title="유튜브 열기"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.4.6A3 3 0 0 0 .5 6.2 31.8 31.8 0 0 0 0 12a31.8 31.8 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.8 31.8 0 0 0 24 12a31.8 31.8 0 0 0-.5-5.8ZM9.6 15.7V8.3l6.5 3.7-6.5 3.7Z"/></svg></a>`
           : '';
       }
       qs('#viewer').classList.add('open');
@@ -1859,9 +2222,16 @@
     qs('#artDraftSaveBtn')?.addEventListener('click', saveArtDraft);
     qs('#artDraftLoadBtn')?.addEventListener('click', loadArtDraft);
     qs('#artDraftResetBtn')?.addEventListener('click', resetArtDraft);
+    qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
     qs('#applyYoutubeBtn')?.addEventListener('click', applyYoutubeToSelectedWork);
+    qs('#deleteArtworkBtn')?.addEventListener('click', deleteSelectedArtwork);
+    qs('#artTargetWork')?.addEventListener('change', handleArtTargetChange);
+    ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
+      qs(sel)?.addEventListener('input', syncArtTargetLabel);
+      qs(sel)?.addEventListener('change', syncArtTargetLabel);
+    });
     loadArtDraft();
-    populateArtTargetWork();
+    populateArtTargetWork('__new__');
 
     qsa('[data-accordion]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1870,6 +2240,7 @@
       });
     });
 
+    bindLanguageSwitcher();
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
