@@ -470,7 +470,7 @@
             작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.
           </p>
           <div class="hero-actions">
-            <a class="btn primary" href="#works">작품 보기</a>
+            <a class="btn primary" href="#works">View Works</a>
           </div>
         </div>
         <div class="hero-card">
@@ -532,12 +532,12 @@
     <section id="note">
       <div class="wrap note">
         <article class="card">
-          <p class="note-quote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
+          <p class="note-quote">“I did not want to record only what is visible; I wanted to capture the emotion that remains.”</p>
         </article>
         <article class="card">
           <p>
-            작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
-            쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.
+            The work often begins in very quiet scenes. By lingering on surfaces touched by light, the air left after people depart,
+            and traces of time that are easy to pass by, it builds a new density within the image.
           </p>
         </article>
       </div>
@@ -958,7 +958,7 @@
         category: '전각',
         year: '2026',
         medium: '전각',
-        desc: '힘 있게 다듬은 획과 여백의 균형을 보여주는 전각 작업.',
+        desc: 'A seal-engraving work that shows the balance of powerfully refined strokes and empty space.',
         thumb: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -968,7 +968,7 @@
         category: '서예',
         year: '2025',
         medium: '서예',
-        desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
+        desc: 'A calligraphic work capturing the rhythm of brush movement and the tonal depth of ink.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -978,7 +978,7 @@
         category: '전각',
         year: '2025',
         medium: '전각',
-        desc: '전통미와 현대적 정서를 함께 담아낸 인장 작업.',
+        desc: 'A seal work that brings together traditional beauty and contemporary emotion.',
         thumb: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -988,7 +988,7 @@
         category: '서예',
         year: '2024',
         medium: '서예',
-        desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
+        desc: 'A work alive with flowing lines and restrained negative space.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -998,7 +998,7 @@
         category: '기타',
         year: '2024',
         medium: '전시 기록',
-        desc: '전시 공간과 작품 설치 장면을 아카이브한 이미지.',
+        desc: 'An archival image documenting the exhibition space and installation scenes.',
         thumb: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -1008,7 +1008,7 @@
         category: '기타',
         year: '2023',
         medium: '기록 사진',
-        desc: '작업의 온도와 여운을 담은 아카이브 성격의 작품 이미지.',
+        desc: 'An archival artwork image holding the warmth and afterglow of the work.',
         thumb: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
@@ -1263,7 +1263,7 @@
         if(qs('#artFeatured')?.checked){
           let saved = null;
           try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en_v2') || 'null');
           }catch(e){
             saved = null;
           }
@@ -1388,7 +1388,7 @@
       heroEyebrow: 'Selected Works · Artist Portfolio',
       heroTitle: 'Capturing Light and Emotion<br>Lee Wonju’s World of Art',
       heroLead: `Moving between photography and painterly sensibility, this portfolio records the time and temperature that remain within familiar scenes. Artwork viewing and admin image tools are included on one page.`,
-      heroCaption: '대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.',
+      heroCaption: 'Hero image area — replace with an actual representative artwork image.',
       aboutSectionCopy: 'An introduction to Lee Wonju’s artistic direction and perspective.',
       paragraph1: `Lee Wonju continues to create visual compositions of “lingering emotions,” starting from traces of objects, spaces, and people. He focuses on capturing subtle movement and the texture of light within still scenes, presenting familiar landscapes through a fresh sensibility.`,
       paragraph2: `His representative works expand into photo-based series, object documentation, spatial archives, and installation images, and are presented in a way that prioritizes the temperature and density of the work itself over commercial imagery.`,
@@ -1412,7 +1412,7 @@
     function loadAboutContent(){
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en_v2') || 'null');
       }catch(e){
         saved = null;
       }
@@ -1446,7 +1446,7 @@
       const status = qs('#aboutContentStatus');
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en_v2') || 'null');
       }catch(e){
         saved = null;
       }
@@ -1473,7 +1473,7 @@
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
 
       if(save){
-        localStorage.setItem('wonjuSiteAboutContent_en', JSON.stringify(data));
+        localStorage.setItem('wonjuSiteAboutContent_en_v2', JSON.stringify(data));
         if(status){
           status.textContent = '메인 / 작가소개 내용이 저장되었습니다.';
           status.className = 'status ok';
@@ -1485,7 +1485,7 @@
     }
 
     function resetAboutContent(){
-      localStorage.removeItem('wonjuSiteAboutContent_en');
+      localStorage.removeItem('wonjuSiteAboutContent_en_v2');
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = defaultAboutContent.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = defaultAboutContent.heroTitle.replace(/<br\s*\/?>/gi, '\n');
       if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = defaultAboutContent.heroLead;
@@ -1521,7 +1521,7 @@
     function loadArtDraft(){
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuArtworkDraft_en') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuArtworkDraft_en_v2') || 'null');
       }catch(e){
         saved = null;
       }
@@ -1548,7 +1548,7 @@
         youtube: qs('#artYoutube')?.value?.trim() || '',
         featured: !!qs('#artFeatured')?.checked
       };
-      localStorage.setItem('wonjuArtworkDraft_en', JSON.stringify(data));
+      localStorage.setItem('wonjuArtworkDraft_en_v2', JSON.stringify(data));
       const status = qs('#artDraftStatus');
       if(status){
         status.textContent = '작품 등록 입력값을 저장했습니다. 이미지 파일은 브라우저 보안상 입력칸에 유지되지 않습니다.';
@@ -1557,7 +1557,7 @@
     }
 
     function resetArtDraft(){
-      localStorage.removeItem('wonjuArtworkDraft_en');
+      localStorage.removeItem('wonjuArtworkDraft_en_v2');
       qs('#artCategory') && (qs('#artCategory').value = '전각');
       qs('#artYear') && (qs('#artYear').value = '');
       qs('#artTitle') && (qs('#artTitle').value = '');
@@ -1611,7 +1611,7 @@
 
     function getSavedYoutubeMap(){
       try{
-        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap_en') || '{}') || {};
+        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap_en_v2') || '{}') || {};
       }catch(e){
         return {};
       }
@@ -1663,7 +1663,7 @@
         const map = getSavedYoutubeMap();
         if(youtube) map[`${info.type}:${info.sourceIndex}`] = youtube;
         else delete map[`${info.type}:${info.sourceIndex}`];
-        localStorage.setItem('wonjuWorkYoutubeMap_en', JSON.stringify(map));
+        localStorage.setItem('wonjuWorkYoutubeMap_en_v2', JSON.stringify(map));
       } else {
         const extraWorks = getExtraWorks();
         if(extraWorks[info.sourceIndex]){
@@ -1719,7 +1719,7 @@
       try{
         const youtubeMap = getSavedYoutubeMap();
         delete youtubeMap[`${info.type}:${info.sourceIndex}`];
-        localStorage.setItem('wonjuWorkYoutubeMap_en', JSON.stringify(youtubeMap));
+        localStorage.setItem('wonjuWorkYoutubeMap_en_v2', JSON.stringify(youtubeMap));
       }catch(e){}
 
       resetArtDraft();
@@ -2158,7 +2158,7 @@
     function loadEditableTextContent(){
       let saved = null;
       try{
-        saved = JSON.parse(localStorage.getItem('wonjuSiteTextContent_en') || 'null');
+        saved = JSON.parse(localStorage.getItem('wonjuSiteTextContent_en_v2') || 'null');
       }catch(e){
         saved = null;
       }
@@ -2194,7 +2194,7 @@
       renderListItems('#newsDisplayList', newsLines);
 
       if(save){
-        localStorage.setItem('wonjuSiteTextContent_en', JSON.stringify({
+        localStorage.setItem('wonjuSiteTextContent_en_v2', JSON.stringify({
           contact: contactLines,
           exhibition: exhibitionLines,
           news: newsLines
@@ -2212,7 +2212,7 @@
     }
 
     function resetEditableTextContent(){
-      localStorage.removeItem('wonjuSiteTextContent_en');
+      localStorage.removeItem('wonjuSiteTextContent_en_v2');
       if(qs('#contactEditor')) qs('#contactEditor').value = defaultTextContent.contact.join('\n');
       if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = defaultTextContent.exhibition.join('\n');
       if(qs('#newsEditor')) qs('#newsEditor').value = defaultTextContent.news.join('\n');
