@@ -273,6 +273,8 @@
       background:#fff; padding:12px 14px; color:var(--text); line-height:1.6;
     }
     .mini-note{font-size:12px;color:var(--muted);margin-top:8px}
+    .image-size-note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45}
+    .image-size-status{font-size:12px;color:var(--muted);margin-top:6px}
 
     .field, .field-sm, textarea{
       width:100%;border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px 14px;color:var(--text);
@@ -810,10 +812,14 @@
                   <div>
                     <label class="label" for="heroImageInput">대표 이미지 교체</label>
                     <input class="field-sm" id="heroImageInput" type="file" accept="image/*">
+                    <div class="image-size-note">권장 크기 1400 × 1750px (4:5)</div>
+                    <div class="image-size-status" id="heroImageSizeStatus">현재 이미지 크기 확인 전</div>
                   </div>
                   <div>
                     <label class="label" for="artistImageInput">작가소개 이미지 교체</label>
                     <input class="field-sm" id="artistImageInput" type="file" accept="image/*">
+                    <div class="image-size-note">권장 크기 1200 × 1500px 이상</div>
+                    <div class="image-size-status" id="artistImageSizeStatus">현재 이미지 크기 확인 전</div>
                   </div>
                 </div>
                 <div class="hero-actions" style="margin-top:4px">
@@ -1291,6 +1297,7 @@
               artistImage: currentAbout.artistImage
             });
             loadAboutContent();
+    updateAboutImageSizeDisplay();
           }
         }
 
@@ -1446,6 +1453,8 @@
     }
 
     function applyAboutContent(save){
+      updateAboutImageSizeDisplay();
+
       const status = qs('#aboutContentStatus');
       let saved = null;
       try{
@@ -1579,10 +1588,63 @@
     }
 
 
+
+    function getImageSizeFromDataUrl(dataUrl){
+      return new Promise((resolve) => {
+        if(!dataUrl){
+          resolve(null);
+          return;
+        }
+        const img = new Image();
+        img.onload = () => resolve({width: img.naturalWidth, height: img.naturalHeight});
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      });
+    }
+
+    function getImageSizeFromFile(file){
+      return new Promise((resolve) => {
+        if(!file){
+          resolve(null);
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          resolve({width: img.naturalWidth, height: img.naturalHeight});
+          URL.revokeObjectURL(url);
+        };
+        img.onerror = () => {
+          resolve(null);
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      });
+    }
+
+    async function updateAboutImageSizeDisplay(){
+      const sharedImages = getSharedImageContent();
+      const heroSize = await getImageSizeFromDataUrl(sharedImages.heroImage || '');
+      const artistSize = await getImageSizeFromDataUrl(sharedImages.artistImage || '');
+      const heroStatus = qs('#heroImageSizeStatus');
+      const artistStatus = qs('#artistImageSizeStatus');
+      if(heroStatus){
+        heroStatus.textContent = heroSize
+          ? `현재 저장 이미지: ${heroSize.width} × ${heroSize.height}px`
+          : '현재 저장 이미지 없음';
+      }
+      if(artistStatus){
+        artistStatus.textContent = artistSize
+          ? `현재 저장 이미지: ${artistSize.width} × ${artistSize.height}px`
+          : '현재 저장 이미지 없음';
+      }
+    }
+
         function bindAboutImageInputs(){
-      const readFile = (file, key, targetSelector, statusText) => {
+      const readFile = async (file, key, targetSelector, statusText) => {
+        const size = await getImageSizeFromFile(file);
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = async () => {
           let saved = null;
           try{
             saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
@@ -1598,9 +1660,11 @@
             artistImage: key === 'artistImage' ? reader.result : (merged.artistImage || '')
           });
           setBackgroundImage(qs(targetSelector), reader.result);
+          await updateAboutImageSizeDisplay();
           const status = qs('#aboutContentStatus');
           if(status){
-            status.textContent = statusText;
+            const sizeText = size ? ` (${size.width} × ${size.height}px)` : '';
+            status.textContent = statusText + sizeText;
             status.className = 'status ok';
           }
         };
