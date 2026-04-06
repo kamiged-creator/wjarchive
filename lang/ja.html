@@ -431,7 +431,7 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <div class="brand-title">이원주</div>
+        <div class="brand-title" id="adminTrigger">이원주</div>
         <div class="brand-sub">作品ポートフォリオ</div>
       </div>
       <div class="top-tools">
@@ -596,12 +596,6 @@
             </div>
           </article>
         </div>
-      </div>
-    </section>
-
-    <section aria-label="admin-link" style="padding:6px 0 22px;">
-      <div class="wrap" style="text-align:center;">
-        <button id="adminFooterBtn" type="button" style="min-height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.42);color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;">Admin</button>
       </div>
     </section>
 
@@ -1784,7 +1778,24 @@
       qs('#adminApp').classList.add('hidden');
     }
 
-    qs('#adminFooterBtn')?.addEventListener('click', openAdmin);
+    function bindHiddenAdminTrigger(){
+      const trigger = qs('#adminTrigger');
+      if(!trigger) return;
+      let tapCount = 0;
+      let lastTapAt = 0;
+      const resetGap = 1800;
+
+      trigger.style.cursor = 'pointer';
+      trigger.addEventListener('click', () => {
+        const now = Date.now();
+        tapCount = (now - lastTapAt <= resetGap) ? tapCount + 1 : 1;
+        lastTapAt = now;
+        if(tapCount >= 5){
+          tapCount = 0;
+          openAdmin();
+        }
+      });
+    }
     qs('#closeOverlayFromGate').addEventListener('click', closeAdmin);
     qs('#closeAdminBtn').addEventListener('click', closeAdmin);
     qs('#logoutBtn').addEventListener('click', logoutAdmin);
@@ -2258,6 +2269,7 @@
       });
     });
 
+    bindHiddenAdminTrigger();
     bindLanguageSwitcher();
     bindCategoryFilters();
     renderGallery();
