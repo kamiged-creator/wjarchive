@@ -431,7 +431,7 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <div class="brand-title" id="adminTapTarget">이원주</div>
+        <div class="brand-title" id="adminTrigger">이원주</div>
         <div class="brand-sub">Art Portfolio</div>
       </div>
       <div class="top-tools">
@@ -464,10 +464,10 @@
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow" id="heroEyebrow">Selected Works · Artist Portfolio</span>
-          <h1 id="heroTitle">Lee Wonju’s World of Art<br>Holding Light and Emotion</h1>
+          <h1 id="heroTitle">빛과 감정을 담는<br>이원주의 작품 세계</h1>
           <p class="lead" id="heroLead">
-            Moving between photography and painterly sensibility, the work records the time and warmth that remain within familiar scenes.
-            Artwork viewing and admin image tools are brought together on a single page.
+            사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
+            작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.
           </p>
           <div class="hero-actions">
             <a class="btn primary" href="#works">View Works</a>
@@ -475,7 +475,7 @@
         </div>
         <div class="hero-card">
           <div class="hero-art" id="heroArt" aria-label="대표 작품 이미지"></div>
-          <div class="hero-caption" id="heroCaption">Sample hero image area — replace it with an actual featured artwork image.</div>
+          <div class="hero-caption" id="heroCaption">대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.</div>
         </div>
       </div>
     </section>
@@ -485,7 +485,7 @@
         <div class="section-head">
           <div>
             <h2 class="section-title" id="aboutSectionTitle">About</h2>
-            <p class="section-copy" id="aboutSectionCopy">An introduction to Lee Wonju’s artistic direction and perspective.</p>
+            <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
           </div>
         </div>
         <div class="about-profile">
@@ -495,14 +495,14 @@
           <div class="artist-copy">
             <article class="card">
               <p id="aboutParagraph1">
-                Lee Wonju builds visual compositions from traces of objects, spaces, and human presence, continuing work that shapes emotions which linger.
-                The focus is on capturing subtle movement and the grain of light within still scenes, allowing familiar landscapes to be felt in unfamiliar ways.
+                이원주는 사물과 공간, 인물의 잔상에서 출발해 ‘머무는 감정’을 시각적으로 구성하는 작업을 이어오고 있습니다.
+                정적인 장면 안에서 흐르는 미세한 움직임과 빛의 결을 포착하며, 익숙한 풍경을 낯선 감각으로 다시 보여주는 데 집중합니다.
               </p>
             </article>
             <article class="card">
               <p id="aboutParagraph2">
-                Major works expand into photo-based series, object records, spatial archives, and installation images,
-                presented with priority on the work’s own temperature and density rather than commercial polish.
+                대표 작업은 사진 기반 연작, 오브제 기록, 공간 아카이브, 전시 설치 이미지 등으로 확장되며,
+                상업적 이미지보다 작품 자체의 온도와 밀도를 우선하는 방식으로 발표됩니다.
               </p>
             </article>
           </div>
@@ -556,9 +556,9 @@
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">Recent works, exhibition preparations, and updates</p>
               <div class="contact-list" id="newsDisplayList">
-                <div class="contact-item">2026.04 · Global domain connection work for the site is in progress</div>
-                <div class="contact-item">2026.03 · Artwork archive reorganized and admin features stabilized</div>
-                <div class="contact-item">2026.02 · Additional seal-engraving photography and featured image update in preparation</div>
+                <div class="contact-item">2026.04 · 사이트 글로벌 도메인 연결 작업 진행</div>
+                <div class="contact-item">2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화</div>
+                <div class="contact-item">2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비</div>
               </div>
             </div>
           </article>
@@ -628,15 +628,15 @@
 
   <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
     <div id="passwordGate" class="password-wrap">
-      <h2>Admin Mode</h2>
-      <p>Enter the password to open the admin tools.</p>
-      <label class="label" for="adminPassword">Password</label>
-      <input class="field" id="adminPassword" type="password" placeholder="Enter password" autocomplete="current-password">
+      <h2>관리자 모드</h2>
+      <p>비밀번호를 입력하면 이미지 변환 도구가 열립니다.</p>
+      <label class="label" for="adminPassword">비밀번호</label>
+      <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
       <div class="hero-actions" style="margin-top:14px">
-        <button class="btn primary" type="button" id="loginBtn">Enter</button>
-        <button class="btn" type="button" id="closeOverlayFromGate">Close</button>
+        <button class="btn primary" type="button" id="loginBtn">들어가기</button>
+        <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
       </div>
-      <div class="status" id="loginStatus">Use the default password you were given, or change the hash in the code to set a new password.</div>
+      <div class="status" id="loginStatus">기본 비밀번호는 파일 전달 시 안내된 값으로 시작해, 코드에서 해시값을 바꿔 직접 변경해 사용할 수 있습니다.</div>
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
@@ -738,7 +738,7 @@
                 <button class="btn" type="button" id="downloadThumbZipBtn">웹용 이미지 ZIP</button>
                                 <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
               </div>
-              <div class="status" id="zipStatus">No generated results yet.</div>
+              <div class="status" id="zipStatus">아직 생성된 결과가 없습니다.</div>
             </div>
 
             <div class="admin-card">
@@ -844,12 +844,12 @@
 
                 <div>
                   <label class="label" for="artTitle">작품 제목</label>
-                  <input class="field" id="artTitle" type="text" placeholder="Enter artwork title">
+                  <input class="field" id="artTitle" type="text" placeholder="작품 제목 입력">
                 </div>
 
                 <div>
                   <label class="label" for="artDescription">작품 설명</label>
-                  <textarea class="editor-area" id="artDescription" placeholder="Enter artwork description"></textarea>
+                  <textarea class="editor-area" id="artDescription" placeholder="작품 설명 입력"></textarea>
                 </div>
 
                 <div>
@@ -859,38 +859,38 @@
 
                 <div class="field-row">
                   <div>
-                    <label class="label" for="artThumbUrl">Artwork image share link</label>
+                    <label class="label" for="artThumbUrl">작품 이미지 공유링크</label>
                     <input class="field-sm" id="artThumbUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                   <div>
-                    <label class="label" for="artFullUrl">Use same link</label>
+                    <label class="label" for="artFullUrl">같은 링크 사용</label>
                     <input class="field-sm" id="artFullUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                 </div>
-                <div class="mini-note">If you enter one artwork image share link, the same image will be used for both the card and the popup.</div>
+                <div class="mini-note">작품 이미지 공유링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
                     <input id="artFeatured" type="checkbox">
-                    Set as featured work
+                    대표작으로 표시
                   </label>
                 </div>
 
                 <div>
-                  <label class="label" for="artTargetWork">Existing artwork to update</label>
+                  <label class="label" for="artTargetWork">반영할 기존 작품</label>
                   <select class="field-sm" id="artTargetWork"></select>
                 </div>
 
                 <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="artDraftSaveBtn">Save Draft</button>
-                  <button class="btn" type="button" id="artDraftLoadBtn">Load Draft</button>
-                  <button class="btn subtle" type="button" id="artDraftResetBtn">Reset</button>
-                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">Apply Artwork Image</button>
-                  <button class="btn" type="button" id="applyYoutubeBtn">Attach YouTube to Popup</button>
-                  <button class="btn danger" type="button" id="deleteArtworkBtn">Delete Selected Artwork</button>
+                  <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
+                  <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
+                  <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
+                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
+                  <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
+                  <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">Choose an existing artwork, enter the title, description, category, and Google Drive share link, then click Apply Artwork Image to update the card and popup right away.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
               </div>
             </div>
 
@@ -931,17 +931,17 @@
           <div class="admin-card">
             <div class="preview-toolbar">
               <div>
-                <h3 style="margin:0">Preview Results</h3>
-                <div class="small">Preview the result and download the single web image right away.</div>
+                <h3 style="margin:0">결과 미리보기</h3>
+                <div class="small">생성 결과를 확인하고 웹용 이미지 1개만 바로 내려받을 수 있습니다.</div>
               </div>
-              <button class="btn subtle" type="button" id="clearResultsBtn">Clear Results</button>
+              <button class="btn subtle" type="button" id="clearResultsBtn">결과 지우기</button>
             </div>
             <div class="preview-grid" id="previewGrid"></div>
-            <div class="small" id="previewEmpty">No generated results yet.</div>
+            <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
           </div>
           <div class="admin-bottom-actions">
-            <button class="btn" type="button" id="logoutBtn">Log out</button>
-            <button class="btn danger" type="button" id="closeAdminBtn">Close Admin</button>
+            <button class="btn" type="button" id="logoutBtn">로그아웃</button>
+            <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
           </div>
         </div>
       </div>
@@ -1197,7 +1197,7 @@
 
       if(!target){
         if(status){
-          status.textContent = 'Could not find the existing artwork selector.';
+          status.textContent = '반영할 기존 작품 선택란을 찾지 못했습니다.';
           status.className = 'status bad';
         }
         return;
@@ -1392,20 +1392,20 @@
       const select = qs('#languageSelect');
       if(!select) return;
 
-      const path = String(window.location.pathname || '/').toLowerCase();
+      const path = (window.location.pathname || '').toLowerCase();
 
-      if(path.includes('/lang/ja')){
-        select.value = '/lang/ja.html';
-      } else if(path.includes('/lang/en')){
+      if (path.includes('/lang/en.html')) {
         select.value = '/lang/en.html';
+      } else if (path.includes('/lang/ja.html')) {
+        select.value = '/lang/ja.html';
       } else {
         select.value = '/';
       }
 
-      select.addEventListener('change', () => {
+      select.onchange = () => {
         const next = select.value;
-        if(next) window.location.href = next;
-      });
+        if (next) window.location.href = next;
+      };
     }
 
 
@@ -1863,7 +1863,7 @@
       const digest = await sha256(pw);
       if(digest === ADMIN_HASH){
         state.loggedIn = true;
-        status.textContent = '비밀번호 확인 완료. Admin Mode가 열렸습니다.';
+        status.textContent = '비밀번호 확인 완료. 관리자 모드가 열렸습니다.';
         status.className = 'status ok';
         qs('#passwordGate').classList.add('hidden');
         qs('#adminApp').classList.remove('hidden');
@@ -1976,7 +1976,7 @@
       if(!state.results.length){
         grid.innerHTML = '';
         empty.classList.remove('hidden');
-        qs('#zipStatus').textContent = 'No generated results yet.';
+        qs('#zipStatus').textContent = '아직 생성된 결과가 없습니다.';
         return;
       }
       empty.classList.add('hidden');
