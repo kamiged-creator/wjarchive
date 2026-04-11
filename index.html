@@ -959,9 +959,9 @@
       },
       {
         title: '묵향',
-        category: '서예',
+        category: '필선',
         year: '2025',
-        medium: '서예',
+        medium: '필선',
         desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
@@ -979,9 +979,9 @@
       },
       {
         title: '유려',
-        category: '서예',
+        category: '필선',
         year: '2024',
-        medium: '서예',
+        medium: '필선',
         desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
@@ -1398,12 +1398,16 @@
     function bindLanguageSwitcher(){
       const select = qs('#languageSelect');
       if(!select) return;
-      const path = window.location.pathname || '/';
-      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
-      const current = normalized === '' ? '/' : normalized;
-      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
-      if(match) select.value = match.value;
-      else select.value = '/';
+
+      const path = String(window.location.pathname || '/').toLowerCase();
+
+      if(path.includes('/lang/ja')){
+        select.value = '/lang/ja.html';
+      } else if(path.includes('/lang/en')){
+        select.value = '/lang/en.html';
+      } else {
+        select.value = '/';
+      }
 
       select.addEventListener('change', () => {
         const next = select.value;
