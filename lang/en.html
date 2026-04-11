@@ -643,7 +643,7 @@
       <div class="admin-head">
         <div>
           <div class="admin-title">관리자 이미지 변환기</div>
-          <div class="admin-sub">원본 사진 업로드 → 웹용 이미지 1개 생성 → 개별 또는 ZIP 다운로드</div>
+          <div class="admin-sub">원본 사진 업로드 → 썸네일/확대본 생성 → 개별 또는 ZIP 다운로드</div>
         </div>
 
       </div>
@@ -670,22 +670,22 @@
                 </div>
                 <div class="field-row">
                   <div>
-                    <label class="label" for="thumbWidth">작품 이미지 너비</label>
-                    <input class="field-sm" id="thumbWidth" type="number" min="600" max="3000" value="1600">
+                    <label class="label" for="thumbWidth">썸네일 너비</label>
+                    <input class="field-sm" id="thumbWidth" type="number" min="200" max="2000" value="900">
                   </div>
                   <div>
-                    <label class="label" for="thumbQuality">작품 이미지 품질</label>
-                    <input class="field-sm" id="thumbQuality" type="number" min="0.4" max="1" step="0.01" value="0.85">
+                    <label class="label" for="thumbQuality">썸네일 품질</label>
+                    <input class="field-sm" id="thumbQuality" type="number" min="0.4" max="1" step="0.01" value="0.78">
                   </div>
                 </div>
                 <div class="field-row">
                   <div>
-                    <label class="label" for="largeWidth">보조 표시</label>
-                    <input class="field-sm" id="largeWidth" type="text" value="single-image-mode" disabled>
+                    <label class="label" for="largeWidth">확대본 너비</label>
+                    <input class="field-sm" id="largeWidth" type="number" min="800" max="5000" value="2000">
                   </div>
                   <div>
-                    <label class="label" for="largeQuality">보조 표시</label>
-                    <input class="field-sm" id="largeQuality" type="text" value="same-as-artwork" disabled>
+                    <label class="label" for="largeQuality">확대본 품질</label>
+                    <input class="field-sm" id="largeQuality" type="number" min="0.4" max="1" step="0.01" value="0.88">
                   </div>
                 </div>
                 <div class="field-row-3">
@@ -698,12 +698,12 @@
                     </select>
                   </div>
                   <div>
-                    <label class="label" for="thumbFolder">웹용 이미지 폴더명</label>
-                    <input class="field-sm" id="thumbFolder" type="text" value="images/works">
+                    <label class="label" for="thumbFolder">썸네일 폴더명</label>
+                    <input class="field-sm" id="thumbFolder" type="text" value="images/thumbs">
                   </div>
                   <div>
-                    <label class="label" for="largeFolder">보조 표시</label>
-                    <input class="field-sm" id="largeFolder" type="text" value="single-image-mode" disabled>
+                    <label class="label" for="largeFolder">확대본 폴더명</label>
+                    <input class="field-sm" id="largeFolder" type="text" value="images/large">
                   </div>
                 </div>
                 <div class="field-row">
@@ -720,7 +720,7 @@
                   <button class="btn primary" type="button" id="processBtn">변환 시작</button>
                   <button class="btn danger" type="button" id="cancelProcessBtn">중지</button>
                 </div>
-                <div class="status" id="processStatus">권장값: 너비 1600 / 품질 0.85 / JPG 또는 WebP</div>
+                <div class="status" id="processStatus">권장값: 86장 기준 20장씩 / 250ms 쉬기 / JPG 또는 WebP</div>
                 <div class="progress-wrap">
                   <div class="progress-bar"><div class="progress-fill" id="processProgressFill"></div></div>
                   <div class="progress-meta">
@@ -733,10 +733,11 @@
 
             <div class="admin-card">
               <h3>3. 일괄 다운로드</h3>
-              <p>웹용으로 줄인 이미지 한 종류만 내려받거나, ZIP으로 한 번에 받을 수 있습니다.</p>
+              <p>썸네일과 확대본을 각각 받거나, ZIP으로 한 번에 내려받을 수 있습니다.</p>
               <div class="hero-actions" style="margin-top:14px">
-                <button class="btn" type="button" id="downloadThumbZipBtn">웹용 이미지 ZIP</button>
-                                <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
+                <button class="btn" type="button" id="downloadThumbZipBtn">썸네일 ZIP</button>
+                <button class="btn" type="button" id="downloadLargeZipBtn">확대본 ZIP</button>
+                <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
               </div>
               <div class="status" id="zipStatus">아직 생성된 결과가 없습니다.</div>
             </div>
@@ -859,15 +860,14 @@
 
                 <div class="field-row">
                   <div>
-                    <label class="label" for="artThumbUrl">작품 이미지 공유링크</label>
-                    <input class="field-sm" id="artThumbUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
+                    <label class="label" for="artThumbInput">썸네일 이미지</label>
+                    <input class="field-sm" id="artThumbInput" type="file" accept="image/*">
                   </div>
                   <div>
-                    <label class="label" for="artFullUrl">같은 링크 사용</label>
-                    <input class="field-sm" id="artFullUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
+                    <label class="label" for="artFullInput">확대 이미지</label>
+                    <input class="field-sm" id="artFullInput" type="file" accept="image/*">
                   </div>
                 </div>
-                <div class="mini-note">작품 이미지 공유링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
@@ -890,7 +890,7 @@
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 썸네일/확대 이미지를 넣고 작품 이미지 반영을 누르면 카드와 팝업 이미지가 바로 바뀝니다.</div>
               </div>
             </div>
 
@@ -932,7 +932,7 @@
             <div class="preview-toolbar">
               <div>
                 <h3 style="margin:0">결과 미리보기</h3>
-                <div class="small">생성 결과를 확인하고 웹용 이미지 1개만 바로 내려받을 수 있습니다.</div>
+                <div class="small">생성 결과를 확인하고 파일별로 바로 내려받을 수 있습니다.</div>
               </div>
               <button class="btn subtle" type="button" id="clearResultsBtn">결과 지우기</button>
             </div>
@@ -1056,12 +1056,6 @@
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
 
-    function truncateCardText(text, maxLength = 34){
-      const value = String(text || '').trim();
-      if(value.length <= maxLength) return value;
-      return value.slice(0, maxLength).trimEnd() + '...';
-    }
-
     const state = {
       files: [],
       results: [],
@@ -1139,8 +1133,6 @@
       if(qs('#artTitle')) qs('#artTitle').value = work.title || '';
       if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
       if(qs('#artYoutube')) qs('#artYoutube').value = work.youtube || '';
-      if(qs('#artThumbUrl')) qs('#artThumbUrl').value = work.thumb || '';
-      if(qs('#artFullUrl')) qs('#artFullUrl').value = work.large || '';
     }
 
     function fileToDataURL(file){
@@ -1150,31 +1142,6 @@
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-    }
-
-    function extractGoogleDriveFileId(url){
-      const value = String(url || '').trim();
-      if(!value) return '';
-      const patterns = [
-        /\/file\/d\/([a-zA-Z0-9_-]+)/,
-        /[?&]id=([a-zA-Z0-9_-]+)/,
-        /\/uc\?.*?[?&]id=([a-zA-Z0-9_-]+)/,
-        /\/thumbnail\?id=([a-zA-Z0-9_-]+)/
-      ];
-      for(const pattern of patterns){
-        const match = value.match(pattern);
-        if(match && match[1]) return match[1];
-      }
-      return '';
-    }
-
-    function normalizeArtworkImageUrl(url){
-      const value = String(url || '').trim();
-      if(!value) return '';
-      if(value.startsWith('data:image/')) return value;
-      const driveId = extractGoogleDriveFileId(value);
-      if(driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w2000`;
-      return value;
     }
 
     function flashApplyButton(ok){
@@ -1193,11 +1160,21 @@
 
     async function applyArtworkToSelectedWork(){
       const target = qs('#artTargetWork');
+      const thumbFile = qs('#artThumbInput')?.files?.[0];
+      const fullFile = qs('#artFullInput')?.files?.[0];
       const status = qs('#artDraftStatus');
 
       if(!target){
         if(status){
           status.textContent = '반영할 기존 작품 선택란을 찾지 못했습니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      if(!thumbFile && !fullFile){
+        if(status){
+          status.textContent = '썸네일 이미지 또는 확대 이미지 중 하나 이상 선택해 주세요.';
           status.className = 'status bad';
         }
         return;
@@ -1209,20 +1186,11 @@
       const year = (qs('#artYear')?.value || '').trim();
       const desc = (qs('#artDescription')?.value || '').trim();
       const youtube = (qs('#artYoutube')?.value || '').trim();
-      const singleUrl = normalizeArtworkImageUrl(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '');
-      const thumbUrl = singleUrl;
-      const fullUrl = singleUrl;
-
-      if(!title && !desc && !year && !thumbUrl && !fullUrl && !youtube){
-        if(status){
-          status.textContent = '제목, 내용, 연도, 이미지 링크 중 하나 이상 입력해 주세요.';
-          status.className = 'status bad';
-        }
-        return;
-      }
 
       try{
         if(info.type === 'new'){
+          const thumbData = thumbFile ? await fileToDataURL(thumbFile) : '';
+          const fullData = fullFile ? await fileToDataURL(fullFile) : (thumbData || '');
           const extraWorks = getExtraWorks();
 
           extraWorks.unshift({
@@ -1231,8 +1199,8 @@
             year: year || String(new Date().getFullYear()),
             medium: category,
             desc: desc || '작품 설명',
-            thumb: thumbUrl || fullUrl || '',
-            large: fullUrl || thumbUrl || '',
+            thumb: thumbData || fullData,
+            large: fullData || thumbData,
             youtube
           });
 
@@ -1248,6 +1216,8 @@
           if(info.type === 'sample'){
             const overrides = getWorkOverrides();
             const current = overrides[String(info.sourceIndex)] || info.work;
+            const thumbData = thumbFile ? await fileToDataURL(thumbFile) : (current.thumb || '');
+            const fullData = fullFile ? await fileToDataURL(fullFile) : (current.large || '');
             overrides[String(info.sourceIndex)] = {
               ...current,
               title: title || current.title || '',
@@ -1256,13 +1226,15 @@
               medium: category || current.medium || '',
               desc: desc || current.desc || '',
               youtube,
-              ...(thumbUrl ? { thumb: thumbUrl } : {}),
-              ...(fullUrl ? { large: fullUrl } : {})
+              ...(thumbData ? { thumb: thumbData } : {}),
+              ...(fullData ? { large: fullData } : {})
             };
             writeJSON('wonjuWorkOverrides', overrides);
           } else {
             const extraWorks = getExtraWorks();
             const current = extraWorks[info.sourceIndex] || info.work;
+            const thumbData = thumbFile ? await fileToDataURL(thumbFile) : (current.thumb || '');
+            const fullData = fullFile ? await fileToDataURL(fullFile) : (current.large || '');
             extraWorks[info.sourceIndex] = {
               ...current,
               title: title || current.title || '',
@@ -1271,8 +1243,8 @@
               medium: category || current.medium || '',
               desc: desc || current.desc || '',
               youtube,
-              ...(thumbUrl ? { thumb: thumbUrl } : {}),
-              ...(fullUrl ? { large: fullUrl } : {})
+              ...(thumbData ? { thumb: thumbData } : {}),
+              ...(fullData ? { large: fullData } : {})
             };
             writeExtraWorks(extraWorks);
           }
@@ -1289,38 +1261,29 @@
         if(qs('#artFeatured')?.checked){
           let saved = null;
           try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_en_v2') || 'null');
           }catch(e){
             saved = null;
           }
-          const sharedImages = getSharedImageContent ? getSharedImageContent() : (readSharedImages ? readSharedImages() : {});
-          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
+          const currentAbout = {...defaultAboutContent, ...(saved || {})};
+          const sharedImages = readSharedImages();
           const works = getWorks();
           const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
           if(selected?.large || selected?.thumb){
-            currentAbout.heroImage = selected.large || selected.thumb;
-            currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
-            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
-            if(typeof writeSharedImageContent === 'function'){
-              writeSharedImageContent({
-                heroImage: currentAbout.heroImage,
-                artistImage: currentAbout.artistImage
-              });
-            } else if(typeof writeSharedImages === 'function'){
-              writeSharedImages({
-                ...(sharedImages || {}),
-                heroImage: currentAbout.heroImage
-              });
-            }
+            writeSharedImages({
+              ...sharedImages,
+              heroImage: selected.large || selected.thumb
+            });
             loadAboutContent();
-            if(typeof updateAboutImageSizeDisplay === 'function') updateAboutImageSizeDisplay();
           }
         }
 
+        if(qs('#artThumbInput')) qs('#artThumbInput').value = '';
+        if(qs('#artFullInput')) qs('#artFullInput').value = '';
         flashApplyButton(true);
       }catch(err){
         if(status){
-          status.textContent = `작품 반영 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
+          status.textContent = `이미지 반영 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
           status.className = 'status bad';
         }
       }
@@ -1348,7 +1311,7 @@
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
             <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
-            <p class="work-text">${escapeHtml(truncateCardText(work.desc))}</p>
+            <p class="work-text">${escapeHtml(work.desc)}</p>
           </div>
         </article>
       `;
@@ -1391,21 +1354,17 @@
     function bindLanguageSwitcher(){
       const select = qs('#languageSelect');
       if(!select) return;
+      const path = window.location.pathname || '/';
+      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
+      const current = normalized === '' ? '/' : normalized;
+      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
+      if(match) select.value = match.value;
+      else select.value = '/';
 
-      const path = (window.location.pathname || '').toLowerCase();
-
-      if (path.includes('/lang/en.html')) {
-        select.value = '/lang/en.html';
-      } else if (path.includes('/lang/ja.html')) {
-        select.value = '/lang/ja.html';
-      } else {
-        select.value = '/';
-      }
-
-      select.onchange = () => {
+      select.addEventListener('change', () => {
         const next = select.value;
-        if (next) window.location.href = next;
-      };
+        if(next) window.location.href = next;
+      });
     }
 
 
@@ -1987,18 +1946,24 @@
               <div class="asset-title">${escapeHtml(item.baseName)}</div>
               <div class="asset-meta">원본 ${item.original.width}×${item.original.height}</div>
             </div>
-            <div class="asset-meta">${(item.thumb.blob.size/1024).toFixed(0)}KB</div>
+            <div class="asset-meta">${(item.thumb.blob.size/1024).toFixed(0)}KB / ${(item.large.blob.size/1024).toFixed(0)}KB</div>
           </div>
           <div class="asset-preview">
             <div class="thumb-box">
-              <div class="thumb-tag">작품 이미지</div>
-              <img src="${item.thumb.dataUrl}" alt="작품 이미지 미리보기">
+              <div class="thumb-tag">썸네일</div>
+              <img src="${item.thumb.dataUrl}" alt="썸네일 미리보기">
               <div class="asset-meta" style="margin-top:8px">${item.thumb.width}×${item.thumb.height} · ${escapeHtml(item.thumb.filename)}</div>
-              <div class="asset-meta" style="margin-top:6px">같은 이미지를 팝업에도 함께 사용</div>
+            </div>
+            <div class="large-box">
+              <div class="large-tag">확대본</div>
+              <img src="${item.large.dataUrl}" alt="확대본 미리보기">
+              <div class="asset-meta" style="margin-top:8px">${item.large.width}×${item.large.height} · ${escapeHtml(item.large.filename)}</div>
             </div>
           </div>
           <div class="asset-actions">
-            <button class="btn primary" type="button" data-download="thumb" data-index="${i}">이미지 다운</button>
+            <button class="btn" type="button" data-download="thumb" data-index="${i}">썸네일 다운</button>
+            <button class="btn" type="button" data-download="large" data-index="${i}">확대본 다운</button>
+            <button class="btn subtle" type="button" data-download="both" data-index="${i}">둘 다 다운</button>
           </div>
         </div>
       `).join('');
@@ -2029,7 +1994,7 @@
       const thumbWidth = Math.max(200, Number(qs('#thumbWidth').value || 700));
       const largeWidth = Math.max(800, Number(qs('#largeWidth').value || 2000));
       const thumbQuality = Math.min(1, Math.max(0.4, Number(qs('#thumbQuality').value || 0.78)));
-      const largeQuality = thumbQuality;
+      const largeQuality = Math.min(1, Math.max(0.4, Number(qs('#largeQuality').value || 0.88)));
       const outputType = qs('#outputType').value;
       const prefix = slugify(qs('#filePrefix').value || 'wonju-work') || 'wonju-work';
       const ext = mimeToExt(outputType);
