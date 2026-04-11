@@ -515,14 +515,16 @@
         <div class="section-head">
           <div>
             <h2 class="section-title" id="worksSectionTitle">Works</h2>
-            <p class="section-copy" id="worksSectionCopy">Browse artworks by category. Choose from 전체, 전각, 서예, 기타.</p>
+            <p class="section-copy" id="worksSectionCopy">Browse artworks by category. Choose from All, Brush Line, Seal Engraving, Hapjuk, Ink Tone, Others.</p>
           </div>
         </div>
         <div class="filter-bar" id="filterBar">
-          <button class="filter-btn active" type="button" data-category="전체">전체</button>
-          <button class="filter-btn" type="button" data-category="전각">전각</button>
-          <button class="filter-btn" type="button" data-category="서예">서예</button>
-          <button class="filter-btn" type="button" data-category="기타">기타</button>
+          <button class="filter-btn active" type="button" data-category="전체">All</button>
+          <button class="filter-btn" type="button" data-category="필선">Brush Line</button>
+          <button class="filter-btn" type="button" data-category="전각">Seal Engraving</button>
+          <button class="filter-btn" type="button" data-category="합죽">Hapjuk</button>
+          <button class="filter-btn" type="button" data-category="묵색">Ink Tone</button>
+          <button class="filter-btn" type="button" data-category="기타">Others</button>
         </div>
         <div class="gallery" id="galleryGrid"></div>
         <div class="pagination" id="pagination"></div>
@@ -828,9 +830,11 @@
                   <div>
                     <label class="label" for="artCategory">카테고리</label>
                     <select class="field-sm" id="artCategory">
-                      <option value="전각">전각</option>
-                      <option value="서예">서예</option>
-                      <option value="기타">기타</option>
+                      <option value="필선">Brush Line</option>
+                      <option value="전각">Seal Engraving</option>
+                      <option value="합죽">Hapjuk</option>
+                      <option value="묵색">Ink Tone</option>
+                      <option value="기타">Others</option>
                     </select>
                   </div>
                   <div>
@@ -959,9 +963,9 @@
       },
       {
         title: '묵향',
-        category: '서예',
+        category: '필선',
         year: '2025',
-        medium: '서예',
+        medium: '필선',
         desc: 'A calligraphic work capturing the rhythm of brush movement and the tonal depth of ink.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
@@ -979,9 +983,9 @@
       },
       {
         title: '유려',
-        category: '서예',
+        category: '필선',
         year: '2024',
-        medium: '서예',
+        medium: '필선',
         desc: 'A work alive with flowing lines and restrained negative space.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
@@ -1124,7 +1128,7 @@
 
     function fillArtFormFromWork(work){
       if(!work) return;
-      if(qs('#artCategory')) qs('#artCategory').value = work.category || '전각';
+      if(qs('#artCategory')) qs('#artCategory').value = work.category || '필선';
       if(qs('#artYear')) qs('#artYear').value = work.year || '';
       if(qs('#artTitle')) qs('#artTitle').value = work.title || '';
       if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
@@ -1178,7 +1182,7 @@
 
       const info = getSelectedWorkInfo();
       const title = (qs('#artTitle')?.value || '').trim();
-      const category = (qs('#artCategory')?.value || '').trim() || '전각';
+      const category = (qs('#artCategory')?.value || '').trim() || '필선';
       const year = (qs('#artYear')?.value || '').trim();
       const desc = (qs('#artDescription')?.value || '').trim();
       const youtube = (qs('#artYoutube')?.value || '').trim();
@@ -1535,7 +1539,7 @@
 
     function saveArtDraft(){
       const data = {
-        category: qs('#artCategory')?.value || '전각',
+        category: qs('#artCategory')?.value || '필선',
         year: qs('#artYear')?.value?.trim() || '',
         title: qs('#artTitle')?.value?.trim() || '',
         description: qs('#artDescription')?.value?.trim() || '',
@@ -1552,7 +1556,7 @@
 
     function resetArtDraft(){
       localStorage.removeItem('wonjuArtworkDraft_en_v2');
-      qs('#artCategory') && (qs('#artCategory').value = '전각');
+      qs('#artCategory') && (qs('#artCategory').value = '필선');
       qs('#artYear') && (qs('#artYear').value = '');
       qs('#artTitle') && (qs('#artTitle').value = '');
       qs('#artDescription') && (qs('#artDescription').value = '');
