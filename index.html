@@ -313,7 +313,7 @@
     .asset-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:start}
     .asset-title{font-weight:800;font-size:14px;line-height:1.3;word-break:break-all}
     .asset-meta{font-size:12px;color:var(--muted)}
-    .asset-preview{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
+    .asset-preview{display:grid;grid-template-columns:1fr;gap:12px;padding:14px}
     .thumb-box,.large-box{border:1px solid var(--line);border-radius:16px;padding:10px;background:#fcfaf6}
     .thumb-box img,.large-box img{border-radius:12px;width:100%;height:auto;background:#eee2d4}
     .thumb-tag,.large-tag{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px}
@@ -2021,13 +2021,9 @@
           <div class="asset-preview">
             <div class="thumb-box">
               <div class="thumb-tag">작품 이미지</div>
-              <img src="${item.thumb.dataUrl}" alt="썸네일 미리보기">
+              <img src="${item.thumb.dataUrl}" alt="작품 이미지 미리보기">
               <div class="asset-meta" style="margin-top:8px">${item.thumb.width}×${item.thumb.height} · ${escapeHtml(item.thumb.filename)}</div>
-            </div>
-            <div class="large-box">
-              <div class="large-tag">미리보기 복제</div>
-              <img src="${item.large.dataUrl}" alt="확대본 미리보기">
-              <div class="asset-meta" style="margin-top:8px">같은 이미지를 팝업에도 함께 사용</div>
+              <div class="asset-meta" style="margin-top:6px">같은 이미지를 팝업에도 함께 사용</div>
             </div>
           </div>
           <div class="asset-actions">
