@@ -1084,15 +1084,15 @@
     }
 
     function getWorkOverrides(){
-      return readJSON('wonjuWorkOverrides_en', {});
+      return readJSON('wonjuWorkOverrides', {});
     }
 
     function getExtraWorks(){
-      return readJSON('wonjuExtraWorks_en', []);
+      return readJSON('wonjuExtraWorks', []);
     }
 
     function writeExtraWorks(list){
-      writeJSON('wonjuExtraWorks_en', list);
+      writeJSON('wonjuExtraWorks', list);
     }
 
     function getWorks(){
@@ -1229,7 +1229,7 @@
               ...(thumbData ? { thumb: thumbData } : {}),
               ...(fullData ? { large: fullData } : {})
             };
-            writeJSON('wonjuWorkOverrides_en', overrides);
+            writeJSON('wonjuWorkOverrides', overrides);
           } else {
             const extraWorks = getExtraWorks();
             const current = extraWorks[info.sourceIndex] || info.work;
@@ -1609,7 +1609,7 @@
 
     function getSavedYoutubeMap(){
       try{
-        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap_en_v2') || '{}') || {};
+        return JSON.parse(localStorage.getItem('wonjuWorkYoutubeMap') || '{}') || {};
       }catch(e){
         return {};
       }
@@ -1661,7 +1661,7 @@
         const map = getSavedYoutubeMap();
         if(youtube) map[`${info.type}:${info.sourceIndex}`] = youtube;
         else delete map[`${info.type}:${info.sourceIndex}`];
-        localStorage.setItem('wonjuWorkYoutubeMap_en_v2', JSON.stringify(map));
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(map));
       } else {
         const extraWorks = getExtraWorks();
         if(extraWorks[info.sourceIndex]){
@@ -1705,7 +1705,7 @@
           large: '',
           _deleted: true
         };
-        writeJSON('wonjuWorkOverrides_en', overrides);
+        writeJSON('wonjuWorkOverrides', overrides);
       } else {
         const extraWorks = getExtraWorks();
         if(info.sourceIndex >= 0 && info.sourceIndex < extraWorks.length){
@@ -1717,7 +1717,7 @@
       try{
         const youtubeMap = getSavedYoutubeMap();
         delete youtubeMap[`${info.type}:${info.sourceIndex}`];
-        localStorage.setItem('wonjuWorkYoutubeMap_en_v2', JSON.stringify(youtubeMap));
+        localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(youtubeMap));
       }catch(e){}
 
       resetArtDraft();
