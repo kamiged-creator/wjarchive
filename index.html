@@ -959,9 +959,9 @@
       },
       {
         title: '묵향',
-        category: '필선',
+        category: '서예',
         year: '2025',
-        medium: '필선',
+        medium: '서예',
         desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
@@ -979,9 +979,9 @@
       },
       {
         title: '유려',
-        category: '필선',
+        category: '서예',
         year: '2024',
-        medium: '필선',
+        medium: '서예',
         desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
@@ -1399,20 +1399,20 @@
       const select = qs('#languageSelect');
       if(!select) return;
 
-      const path = String(window.location.pathname || '/').toLowerCase();
+      const path = (window.location.pathname || '').toLowerCase();
 
-      if(path.includes('/lang/ja')){
-        select.value = '/lang/ja.html';
-      } else if(path.includes('/lang/en')){
+      if (path.includes('/lang/en.html')) {
         select.value = '/lang/en.html';
+      } else if (path.includes('/lang/ja.html')) {
+        select.value = '/lang/ja.html';
       } else {
         select.value = '/';
       }
 
-      select.addEventListener('change', () => {
+      select.onchange = () => {
         const next = select.value;
-        if(next) window.location.href = next;
-      });
+        if (next) window.location.href = next;
+      };
     }
 
 
@@ -2364,7 +2364,7 @@
 
 
     function bindHiddenAdminTrigger(){
-      const target = qs('#adminTapTarget') || qs('#adminTrigger');
+      const target = qs('#adminTapTarget');
       if(!target) return;
       let tapCount = 0;
       let tapTimer = null;
