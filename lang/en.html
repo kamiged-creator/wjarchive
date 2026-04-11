@@ -464,10 +464,10 @@
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow" id="heroEyebrow">Selected Works · Artist Portfolio</span>
-          <h1 id="heroTitle">빛과 감정을 담는<br>이원주의 작품 세계</h1>
+          <h1 id="heroTitle">Lee Wonju’s World of Art<br>Holding Light and Emotion</h1>
           <p class="lead" id="heroLead">
-            사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
-            작품 보기와 관리자용 이미지 변환 기능이 한 페이지 안에 함께 들어 있습니다.
+            Moving between photography and painterly sensibility, the work records the time and warmth that remain within familiar scenes.
+            Artwork viewing and admin image tools are brought together on a single page.
           </p>
           <div class="hero-actions">
             <a class="btn primary" href="#works">View Works</a>
@@ -475,7 +475,7 @@
         </div>
         <div class="hero-card">
           <div class="hero-art" id="heroArt" aria-label="대표 작품 이미지"></div>
-          <div class="hero-caption" id="heroCaption">대표 이미지 예시 영역 — 실제 대표 작품 사진으로 바꿔 쓰면 됩니다.</div>
+          <div class="hero-caption" id="heroCaption">Sample hero image area — replace it with an actual featured artwork image.</div>
         </div>
       </div>
     </section>
@@ -485,7 +485,7 @@
         <div class="section-head">
           <div>
             <h2 class="section-title" id="aboutSectionTitle">About</h2>
-            <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
+            <p class="section-copy" id="aboutSectionCopy">An introduction to Lee Wonju’s artistic direction and perspective.</p>
           </div>
         </div>
         <div class="about-profile">
@@ -495,14 +495,14 @@
           <div class="artist-copy">
             <article class="card">
               <p id="aboutParagraph1">
-                이원주는 사물과 공간, 인물의 잔상에서 출발해 ‘머무는 감정’을 시각적으로 구성하는 작업을 이어오고 있습니다.
-                정적인 장면 안에서 흐르는 미세한 움직임과 빛의 결을 포착하며, 익숙한 풍경을 낯선 감각으로 다시 보여주는 데 집중합니다.
+                Lee Wonju builds visual compositions from traces of objects, spaces, and human presence, continuing work that shapes emotions which linger.
+                The focus is on capturing subtle movement and the grain of light within still scenes, allowing familiar landscapes to be felt in unfamiliar ways.
               </p>
             </article>
             <article class="card">
               <p id="aboutParagraph2">
-                대표 작업은 사진 기반 연작, 오브제 기록, 공간 아카이브, 전시 설치 이미지 등으로 확장되며,
-                상업적 이미지보다 작품 자체의 온도와 밀도를 우선하는 방식으로 발표됩니다.
+                Major works expand into photo-based series, object records, spatial archives, and installation images,
+                presented with priority on the work’s own temperature and density rather than commercial polish.
               </p>
             </article>
           </div>
@@ -556,9 +556,9 @@
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">Recent works, exhibition preparations, and updates</p>
               <div class="contact-list" id="newsDisplayList">
-                <div class="contact-item">2026.04 · 사이트 글로벌 도메인 연결 작업 진행</div>
-                <div class="contact-item">2026.03 · 작품 아카이브 정리 및 관리자 기능 안정화</div>
-                <div class="contact-item">2026.02 · 전각 작품 추가 촬영 및 대표 이미지 교체 준비</div>
+                <div class="contact-item">2026.04 · Global domain connection work for the site is in progress</div>
+                <div class="contact-item">2026.03 · Artwork archive reorganized and admin features stabilized</div>
+                <div class="contact-item">2026.02 · Additional seal-engraving photography and featured image update in preparation</div>
               </div>
             </div>
           </article>
@@ -630,13 +630,13 @@
     <div id="passwordGate" class="password-wrap">
       <h2>Admin Mode</h2>
       <p>Enter the password to open the admin tools.</p>
-      <label class="label" for="adminPassword">비밀번호</label>
+      <label class="label" for="adminPassword">Password</label>
       <input class="field" id="adminPassword" type="password" placeholder="Enter password" autocomplete="current-password">
       <div class="hero-actions" style="margin-top:14px">
         <button class="btn primary" type="button" id="loginBtn">Enter</button>
         <button class="btn" type="button" id="closeOverlayFromGate">Close</button>
       </div>
-      <div class="status" id="loginStatus">기본 비밀번호는 파일 전달 시 안내된 값으로 시작해, 코드에서 해시값을 바꿔 직접 변경해 사용할 수 있습니다.</div>
+      <div class="status" id="loginStatus">Use the default password you were given, or change the hash in the code to set a new password.</div>
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
@@ -867,7 +867,7 @@
                     <input class="field-sm" id="artFullUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                 </div>
-                <div class="mini-note">Artwork image share link 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
+                <div class="mini-note">If you enter one artwork image share link, the same image will be used for both the card and the popup.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
@@ -890,7 +890,7 @@
                   <button class="btn danger" type="button" id="deleteArtworkBtn">Delete Selected Artwork</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">Existing artwork to update을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">Choose an existing artwork, enter the title, description, category, and Google Drive share link, then click Apply Artwork Image to update the card and popup right away.</div>
               </div>
             </div>
 
@@ -1197,7 +1197,7 @@
 
       if(!target){
         if(status){
-          status.textContent = 'Existing artwork to update 선택란을 찾지 못했습니다.';
+          status.textContent = 'Could not find the existing artwork selector.';
           status.className = 'status bad';
         }
         return;
@@ -1391,12 +1391,16 @@
     function bindLanguageSwitcher(){
       const select = qs('#languageSelect');
       if(!select) return;
-      const path = window.location.pathname || '/';
-      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
-      const current = normalized === '' ? '/' : normalized;
-      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
-      if(match) select.value = match.value;
-      else select.value = '/';
+
+      const path = String(window.location.pathname || '/').toLowerCase();
+
+      if(path.includes('/lang/ja')){
+        select.value = '/lang/ja.html';
+      } else if(path.includes('/lang/en')){
+        select.value = '/lang/en.html';
+      } else {
+        select.value = '/';
+      }
 
       select.addEventListener('change', () => {
         const next = select.value;
