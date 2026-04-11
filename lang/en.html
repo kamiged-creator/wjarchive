@@ -431,7 +431,7 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <div class="brand-title" id="adminTrigger">이원주</div>
+        <div class="brand-title" id="adminTapTarget">이원주</div>
         <div class="brand-sub">Art Portfolio</div>
       </div>
       <div class="top-tools">
@@ -628,13 +628,13 @@
 
   <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
     <div id="passwordGate" class="password-wrap">
-      <h2>관리자 모드</h2>
-      <p>비밀번호를 입력하면 이미지 변환 도구가 열립니다.</p>
+      <h2>Admin Mode</h2>
+      <p>Enter the password to open the admin tools.</p>
       <label class="label" for="adminPassword">비밀번호</label>
-      <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+      <input class="field" id="adminPassword" type="password" placeholder="Enter password" autocomplete="current-password">
       <div class="hero-actions" style="margin-top:14px">
-        <button class="btn primary" type="button" id="loginBtn">들어가기</button>
-        <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
+        <button class="btn primary" type="button" id="loginBtn">Enter</button>
+        <button class="btn" type="button" id="closeOverlayFromGate">Close</button>
       </div>
       <div class="status" id="loginStatus">기본 비밀번호는 파일 전달 시 안내된 값으로 시작해, 코드에서 해시값을 바꿔 직접 변경해 사용할 수 있습니다.</div>
     </div>
@@ -738,7 +738,7 @@
                 <button class="btn" type="button" id="downloadThumbZipBtn">웹용 이미지 ZIP</button>
                                 <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
               </div>
-              <div class="status" id="zipStatus">아직 생성된 결과가 없습니다.</div>
+              <div class="status" id="zipStatus">No generated results yet.</div>
             </div>
 
             <div class="admin-card">
@@ -844,12 +844,12 @@
 
                 <div>
                   <label class="label" for="artTitle">작품 제목</label>
-                  <input class="field" id="artTitle" type="text" placeholder="작품 제목 입력">
+                  <input class="field" id="artTitle" type="text" placeholder="Enter artwork title">
                 </div>
 
                 <div>
                   <label class="label" for="artDescription">작품 설명</label>
-                  <textarea class="editor-area" id="artDescription" placeholder="작품 설명 입력"></textarea>
+                  <textarea class="editor-area" id="artDescription" placeholder="Enter artwork description"></textarea>
                 </div>
 
                 <div>
@@ -859,38 +859,38 @@
 
                 <div class="field-row">
                   <div>
-                    <label class="label" for="artThumbUrl">작품 이미지 공유링크</label>
+                    <label class="label" for="artThumbUrl">Artwork image share link</label>
                     <input class="field-sm" id="artThumbUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                   <div>
-                    <label class="label" for="artFullUrl">같은 링크 사용</label>
+                    <label class="label" for="artFullUrl">Use same link</label>
                     <input class="field-sm" id="artFullUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                 </div>
-                <div class="mini-note">작품 이미지 공유링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
+                <div class="mini-note">Artwork image share link 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
                     <input id="artFeatured" type="checkbox">
-                    대표작으로 표시
+                    Set as featured work
                   </label>
                 </div>
 
                 <div>
-                  <label class="label" for="artTargetWork">반영할 기존 작품</label>
+                  <label class="label" for="artTargetWork">Existing artwork to update</label>
                   <select class="field-sm" id="artTargetWork"></select>
                 </div>
 
                 <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
-                  <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
-                  <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
-                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
-                  <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
-                  <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
+                  <button class="btn primary" type="button" id="artDraftSaveBtn">Save Draft</button>
+                  <button class="btn" type="button" id="artDraftLoadBtn">Load Draft</button>
+                  <button class="btn subtle" type="button" id="artDraftResetBtn">Reset</button>
+                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">Apply Artwork Image</button>
+                  <button class="btn" type="button" id="applyYoutubeBtn">Attach YouTube to Popup</button>
+                  <button class="btn danger" type="button" id="deleteArtworkBtn">Delete Selected Artwork</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">Existing artwork to update을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
               </div>
             </div>
 
@@ -931,17 +931,17 @@
           <div class="admin-card">
             <div class="preview-toolbar">
               <div>
-                <h3 style="margin:0">결과 미리보기</h3>
-                <div class="small">생성 결과를 확인하고 웹용 이미지 1개만 바로 내려받을 수 있습니다.</div>
+                <h3 style="margin:0">Preview Results</h3>
+                <div class="small">Preview the result and download the single web image right away.</div>
               </div>
-              <button class="btn subtle" type="button" id="clearResultsBtn">결과 지우기</button>
+              <button class="btn subtle" type="button" id="clearResultsBtn">Clear Results</button>
             </div>
             <div class="preview-grid" id="previewGrid"></div>
-            <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
+            <div class="small" id="previewEmpty">No generated results yet.</div>
           </div>
           <div class="admin-bottom-actions">
-            <button class="btn" type="button" id="logoutBtn">로그아웃</button>
-            <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
+            <button class="btn" type="button" id="logoutBtn">Log out</button>
+            <button class="btn danger" type="button" id="closeAdminBtn">Close Admin</button>
           </div>
         </div>
       </div>
@@ -1197,7 +1197,7 @@
 
       if(!target){
         if(status){
-          status.textContent = '반영할 기존 작품 선택란을 찾지 못했습니다.';
+          status.textContent = 'Existing artwork to update 선택란을 찾지 못했습니다.';
           status.className = 'status bad';
         }
         return;
@@ -1859,7 +1859,7 @@
       const digest = await sha256(pw);
       if(digest === ADMIN_HASH){
         state.loggedIn = true;
-        status.textContent = '비밀번호 확인 완료. 관리자 모드가 열렸습니다.';
+        status.textContent = '비밀번호 확인 완료. Admin Mode가 열렸습니다.';
         status.className = 'status ok';
         qs('#passwordGate').classList.add('hidden');
         qs('#adminApp').classList.remove('hidden');
@@ -1972,7 +1972,7 @@
       if(!state.results.length){
         grid.innerHTML = '';
         empty.classList.remove('hidden');
-        qs('#zipStatus').textContent = '아직 생성된 결과가 없습니다.';
+        qs('#zipStatus').textContent = 'No generated results yet.';
         return;
       }
       empty.classList.add('hidden');

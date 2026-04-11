@@ -431,7 +431,7 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <div class="brand-title" id="adminTrigger">이원주</div>
+        <div class="brand-title" id="adminTapTarget">이원주</div>
         <div class="brand-sub">作品ポートフォリオ</div>
       </div>
       <div class="top-tools">
@@ -628,13 +628,13 @@
 
   <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
     <div id="passwordGate" class="password-wrap">
-      <h2>관리자 모드</h2>
-      <p>비밀번호를 입력하면 이미지 변환 도구가 열립니다.</p>
+      <h2>管理者モード</h2>
+      <p>パスワードを入力すると管理者ツールが開きます。</p>
       <label class="label" for="adminPassword">비밀번호</label>
-      <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+      <input class="field" id="adminPassword" type="password" placeholder="パスワードを入力" autocomplete="current-password">
       <div class="hero-actions" style="margin-top:14px">
-        <button class="btn primary" type="button" id="loginBtn">들어가기</button>
-        <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
+        <button class="btn primary" type="button" id="loginBtn">入る</button>
+        <button class="btn" type="button" id="closeOverlayFromGate">閉じる</button>
       </div>
       <div class="status" id="loginStatus">기본 비밀번호는 파일 전달 시 안내된 값으로 시작해, 코드에서 해시값을 바꿔 직접 변경해 사용할 수 있습니다.</div>
     </div>
@@ -738,7 +738,7 @@
                 <button class="btn" type="button" id="downloadThumbZipBtn">웹용 이미지 ZIP</button>
                                 <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
               </div>
-              <div class="status" id="zipStatus">아직 생성된 결과가 없습니다.</div>
+              <div class="status" id="zipStatus">まだ生成された結果はありません。</div>
             </div>
 
             <div class="admin-card">
@@ -844,12 +844,12 @@
 
                 <div>
                   <label class="label" for="artTitle">작품 제목</label>
-                  <input class="field" id="artTitle" type="text" placeholder="작품 제목 입력">
+                  <input class="field" id="artTitle" type="text" placeholder="作品タイトルを入力">
                 </div>
 
                 <div>
                   <label class="label" for="artDescription">작품 설명</label>
-                  <textarea class="editor-area" id="artDescription" placeholder="작품 설명 입력"></textarea>
+                  <textarea class="editor-area" id="artDescription" placeholder="作品説明を入力"></textarea>
                 </div>
 
                 <div>
@@ -859,38 +859,38 @@
 
                 <div class="field-row">
                   <div>
-                    <label class="label" for="artThumbUrl">작품 이미지 공유링크</label>
+                    <label class="label" for="artThumbUrl">作品画像の共有リンク</label>
                     <input class="field-sm" id="artThumbUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                   <div>
-                    <label class="label" for="artFullUrl">같은 링크 사용</label>
+                    <label class="label" for="artFullUrl">同じリンクを使用</label>
                     <input class="field-sm" id="artFullUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                 </div>
-                <div class="mini-note">작품 이미지 공유링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
+                <div class="mini-note">作品画像の共有リンク 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
                     <input id="artFeatured" type="checkbox">
-                    대표작으로 표시
+                    代表作として設定
                   </label>
                 </div>
 
                 <div>
-                  <label class="label" for="artTargetWork">반영할 기존 작품</label>
+                  <label class="label" for="artTargetWork">反映する既存作品</label>
                   <select class="field-sm" id="artTargetWork"></select>
                 </div>
 
                 <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
-                  <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
-                  <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
-                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
-                  <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
-                  <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
+                  <button class="btn primary" type="button" id="artDraftSaveBtn">入力を保存</button>
+                  <button class="btn" type="button" id="artDraftLoadBtn">読み込み</button>
+                  <button class="btn subtle" type="button" id="artDraftResetBtn">初期化</button>
+                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">作品画像を反映</button>
+                  <button class="btn" type="button" id="applyYoutubeBtn">ポップアップにYouTubeを追加</button>
+                  <button class="btn danger" type="button" id="deleteArtworkBtn">選択作品を削除</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">反映する既存作品을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
               </div>
             </div>
 
@@ -931,17 +931,17 @@
           <div class="admin-card">
             <div class="preview-toolbar">
               <div>
-                <h3 style="margin:0">결과 미리보기</h3>
-                <div class="small">생성 결과를 확인하고 웹용 이미지 1개만 바로 내려받을 수 있습니다.</div>
+                <h3 style="margin:0">結果プレビュー</h3>
+                <div class="small">生成結果を確認し、Web用画像をすぐにダウンロードできます。</div>
               </div>
-              <button class="btn subtle" type="button" id="clearResultsBtn">결과 지우기</button>
+              <button class="btn subtle" type="button" id="clearResultsBtn">結果をクリア</button>
             </div>
             <div class="preview-grid" id="previewGrid"></div>
-            <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
+            <div class="small" id="previewEmpty">まだ生成された結果はありません。</div>
           </div>
           <div class="admin-bottom-actions">
-            <button class="btn" type="button" id="logoutBtn">로그아웃</button>
-            <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
+            <button class="btn" type="button" id="logoutBtn">ログアウト</button>
+            <button class="btn danger" type="button" id="closeAdminBtn">管理者を閉じる</button>
           </div>
         </div>
       </div>
@@ -1197,7 +1197,7 @@
 
       if(!target){
         if(status){
-          status.textContent = '반영할 기존 작품 선택란을 찾지 못했습니다.';
+          status.textContent = '反映する既存作品 선택란을 찾지 못했습니다.';
           status.className = 'status bad';
         }
         return;
@@ -1859,7 +1859,7 @@
       const digest = await sha256(pw);
       if(digest === ADMIN_HASH){
         state.loggedIn = true;
-        status.textContent = '비밀번호 확인 완료. 관리자 모드가 열렸습니다.';
+        status.textContent = '비밀번호 확인 완료. 管理者モード가 열렸습니다.';
         status.className = 'status ok';
         qs('#passwordGate').classList.add('hidden');
         qs('#adminApp').classList.remove('hidden');
@@ -1972,7 +1972,7 @@
       if(!state.results.length){
         grid.innerHTML = '';
         empty.classList.remove('hidden');
-        qs('#zipStatus').textContent = '아직 생성된 결과가 없습니다.';
+        qs('#zipStatus').textContent = 'まだ生成された結果はありません。';
         return;
       }
       empty.classList.add('hidden');
