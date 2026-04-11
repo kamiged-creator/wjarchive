@@ -2360,7 +2360,7 @@
 
 
     function bindHiddenAdminTrigger(){
-      const target = qs('#adminTapTarget');
+      const target = qs('#adminTapTarget') || qs('#adminTrigger');
       if(!target) return;
       let tapCount = 0;
       let tapTimer = null;
