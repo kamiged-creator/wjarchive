@@ -863,7 +863,7 @@
                     <input class="field-sm" id="artFullUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
                   </div>
                 </div>
-                <div class="mini-note">작품 이미지 공유링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
+                <div class="mini-note">작품 이미지 공유링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다. 구글드라이브는 공개 보기 링크여야 합니다.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
@@ -886,7 +886,7 @@
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다. 드라이브 링크는 파일 보기 공개 상태여야 합니다.</div>
               </div>
             </div>
 
@@ -928,7 +928,7 @@
             <div class="preview-toolbar">
               <div>
                 <h3 style="margin:0">결과 미리보기</h3>
-                <div class="small">생성 생성 결과를 확인하고 웹용 이미지 1개만 바로 내려받을 수 있습니다.</div>
+                <div class="small">생성 결과를 확인하고 웹용 이미지 1개만 바로 내려받을 수 있습니다.</div>
               </div>
               <button class="btn subtle" type="button" id="clearResultsBtn">결과 지우기</button>
             </div>
@@ -1052,6 +1052,12 @@
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
 
+    function truncateCardText(text, maxLength = 34){
+      const value = String(text || '').trim();
+      if(value.length <= maxLength) return value;
+      return value.slice(0, maxLength).trimEnd() + '...';
+    }
+
     const state = {
       files: [],
       results: [],
@@ -1173,8 +1179,12 @@
       const value = String(url || '').trim();
       if(!value) return '';
       if(value.startsWith('data:image/')) return value;
+
       const driveId = extractGoogleDriveFileId(value);
-      if(driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w2000`;
+      if(driveId){
+        return `https://drive.google.com/uc?export=view&id=${driveId}`;
+      }
+
       return value;
     }
 
@@ -1225,6 +1235,7 @@
       try{
         if(info.type === 'new'){
           const extraWorks = getExtraWorks();
+
           extraWorks.unshift({
             title: title || '새 작품',
             category,
@@ -1293,7 +1304,7 @@
           }catch(e){
             saved = null;
           }
-          const sharedImages = getSharedImageContent();
+          const sharedImages = getSharedImageContent ? getSharedImageContent() : (readSharedImages ? readSharedImages() : {});
           const currentAbout = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
           const works = getWorks();
           const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
@@ -1301,12 +1312,19 @@
             currentAbout.heroImage = selected.large || selected.thumb;
             currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
             localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
-            writeSharedImageContent({
-              heroImage: currentAbout.heroImage,
-              artistImage: currentAbout.artistImage
-            });
+            if(typeof writeSharedImageContent === 'function'){
+              writeSharedImageContent({
+                heroImage: currentAbout.heroImage,
+                artistImage: currentAbout.artistImage
+              });
+            } else if(typeof writeSharedImages === 'function'){
+              writeSharedImages({
+                ...(sharedImages || {}),
+                heroImage: currentAbout.heroImage
+              });
+            }
             loadAboutContent();
-            updateAboutImageSizeDisplay();
+            if(typeof updateAboutImageSizeDisplay === 'function') updateAboutImageSizeDisplay();
           }
         }
 
@@ -1341,7 +1359,7 @@
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
             <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
-            <p class="work-text">${escapeHtml(work.desc)}</p>
+            <p class="work-text">${escapeHtml(truncateCardText(work.desc))}</p>
           </div>
         </article>
       `;
@@ -1547,7 +1565,7 @@
         saved = null;
       }
       if(!saved) return;
-      qs('#artCategory') && (qs('#artCategory').value = saved.category || '전각');
+      qs('#artCategory') && (qs('#artCategory').value = saved.category || '필선');
       qs('#artYear') && (qs('#artYear').value = saved.year || '');
       qs('#artTitle') && (qs('#artTitle').value = saved.title || '');
       qs('#artDescription') && (qs('#artDescription').value = saved.description || '');
@@ -1597,7 +1615,6 @@
         status.className = 'status';
       }
     }
-
 
 
     function getImageSizeFromDataUrl(dataUrl){
