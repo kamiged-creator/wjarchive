@@ -42,12 +42,18 @@
     button,input,textarea,select{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
+
     .topbar{
       position:sticky;top:0;z-index:20;
       backdrop-filter:blur(14px);
       background:rgba(251,248,244,.78);
       border-bottom:1px solid var(--line);
+      transition:transform .24s ease;
     }
+    body.pc-hide-header .topbar.topbar-hidden{
+      transform:translateY(calc(-100% - 6px));
+    }
+
     .topbar-inner{
       min-height:72px;display:grid;gap:12px;padding:20px 0 14px;
     }
@@ -1340,6 +1346,53 @@
       });
     }
 
+
+
+    function bindDesktopAutoHideTopbar(){
+      const topbar = qs('.topbar');
+      if(!topbar) return;
+
+      const media = window.matchMedia('(min-width: 1021px)');
+      let lastY = window.scrollY || 0;
+
+      function applyMode(){
+        document.body.classList.toggle('pc-hide-header', media.matches);
+        if(!media.matches){
+          topbar.classList.remove('topbar-hidden');
+        } else if((window.scrollY || 0) <= 8){
+          topbar.classList.remove('topbar-hidden');
+        }
+      }
+
+      function onScroll(){
+        if(!media.matches) return;
+        const y = window.scrollY || 0;
+
+        if(y <= 8){
+          topbar.classList.remove('topbar-hidden');
+          lastY = y;
+          return;
+        }
+
+        if(y > lastY + 8){
+          topbar.classList.add('topbar-hidden');
+        } else if(y < lastY - 8){
+          topbar.classList.remove('topbar-hidden');
+        }
+
+        lastY = y;
+      }
+
+      applyMode();
+      window.addEventListener('scroll', onScroll, { passive:true });
+      if(typeof media.addEventListener === 'function'){
+        media.addEventListener('change', applyMode);
+      } else if(typeof media.addListener === 'function'){
+        media.addListener(applyMode);
+      }
+      window.addEventListener('resize', applyMode);
+    }
+
     function bindCategoryFilters(){
       qsa('#filterBar .filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2275,6 +2328,7 @@
 
     bindHiddenAdminTrigger();
     bindLanguageSwitcher();
+    bindDesktopAutoHideTopbar();
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
