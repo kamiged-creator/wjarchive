@@ -446,13 +446,6 @@
           </nav>
         </div>
         <div class="top-sub-row">
-          <div class="top-left-tools">
-            <select class="lang-select" id="languageSelect" aria-label="언어 선택">
-              <option value="/" selected>한국어</option>
-              <option value="/lang/en.html">English</option>
-              <option value="/lang/ja.html">日本語</option>
-            </select>
-          </div>
           <div class="top-right-tools">
             <a class="news-mini" href="#news">소식</a>
           </div>
@@ -807,17 +800,6 @@
                     <div class="image-size-status" id="artistImageSizeStatus">현재 이미지 크기 확인 전</div>
                   </div>
                 </div>
-                <div class="field-row">
-                  <div>
-                    <label class="label" for="heroImageUrl">대표 이미지 공유링크</label>
-                    <input class="field-sm" id="heroImageUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
-                  </div>
-                  <div>
-                    <label class="label" for="artistImageUrl">작가소개 이미지 공유링크</label>
-                    <input class="field-sm" id="artistImageUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
-                  </div>
-                </div>
-                <div class="mini-note">구글드라이브 뷰어 링크를 넣어도 자동으로 표시용 주소로 바꿔 저장합니다. 파일 공유는 "링크가 있는 모든 사용자"로 열어두어야 합니다.</div>
                 <div class="hero-actions" style="margin-top:4px">
                   <button class="btn primary" type="button" id="saveAboutContentBtn">저장</button>
                   <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
@@ -1091,17 +1073,13 @@
     }
 
     function getSharedImageContent(){
-      const saved = readJSON('wonjuSharedImageContent', { heroImage:'', artistImage:'' });
-      return {
-        heroImage: normalizeArtworkImageUrl(saved?.heroImage || ''),
-        artistImage: normalizeArtworkImageUrl(saved?.artistImage || '')
-      };
+      return readJSON('wonjuSharedImageContent', { heroImage:'', artistImage:'' });
     }
 
     function writeSharedImageContent(value){
       writeJSON('wonjuSharedImageContent', {
-        heroImage: normalizeArtworkImageUrl(value?.heroImage || ''),
-        artistImage: normalizeArtworkImageUrl(value?.artistImage || '')
+        heroImage: value?.heroImage || '',
+        artistImage: value?.artistImage || ''
       });
     }
 
@@ -1119,18 +1097,13 @@
 
     function getWorks(){
       const overrides = getWorkOverrides();
-      const normalizeWork = (work) => ({
-        ...work,
-        thumb: normalizeArtworkImageUrl(work?.thumb || ''),
-        large: normalizeArtworkImageUrl(work?.large || work?.thumb || '')
-      });
-      const baseWorks = sampleWorks.map((work, index) => normalizeWork({
+      const baseWorks = sampleWorks.map((work, index) => ({
         ...work,
         ...(overrides[String(index)] || {}),
         _sourceType: 'sample',
         _sourceIndex: index
       })).filter(work => !work._deleted);
-      const extraWorks = getExtraWorks().map((work, index) => normalizeWork({
+      const extraWorks = getExtraWorks().map((work, index) => ({
         ...work,
         _sourceType: 'extra',
         _sourceIndex: index
@@ -1401,22 +1374,6 @@
       });
     }
 
-    function bindLanguageSwitcher(){
-      const select = qs('#languageSelect');
-      if(!select) return;
-      const path = window.location.pathname || '/';
-      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
-      const current = normalized === '' ? '/' : normalized;
-      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
-      if(match) select.value = match.value;
-      else select.value = '/';
-
-      select.addEventListener('change', () => {
-        const next = select.value;
-        if(next) window.location.href = next;
-      });
-    }
-
 
     const defaultAboutContent = {
       heroEyebrow: 'Selected Works · Artist Portfolio',
@@ -1454,13 +1411,7 @@
         saved = null;
       }
       const sharedImages = getSharedImageContent();
-      const data = {
-        ...defaultAboutContent,
-        ...(saved || {}),
-        ...sharedImages,
-        heroImage: normalizeArtworkImageUrl(((saved || {}).heroImage) || sharedImages.heroImage || ''),
-        artistImage: normalizeArtworkImageUrl(((saved || {}).artistImage) || sharedImages.artistImage || '')
-      };
+      const data = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
@@ -1480,8 +1431,6 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2;
-      if(qs('#heroImageUrl')) qs('#heroImageUrl').value = data.heroImage || '';
-      if(qs('#artistImageUrl')) qs('#artistImageUrl').value = data.artistImage || '';
 
       if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
@@ -1499,8 +1448,6 @@
       }
       const sharedImages = getSharedImageContent();
       const prev = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
-      const heroImageUrl = normalizeArtworkImageUrl(qs('#heroImageUrl')?.value || prev.heroImage || '');
-      const artistImageUrl = normalizeArtworkImageUrl(qs('#artistImageUrl')?.value || prev.artistImage || '');
       const data = {
         heroEyebrow: qs('#heroEyebrowEditor')?.value?.trim() || defaultAboutContent.heroEyebrow,
         heroTitle: (qs('#heroTitleEditor')?.value || '').trim().replace(/\n+/g, '<br>') || defaultAboutContent.heroTitle,
@@ -1509,8 +1456,8 @@
         aboutSectionCopy: qs('#aboutSectionCopyEditor')?.value?.trim() || defaultAboutContent.aboutSectionCopy,
         paragraph1: qs('#aboutParagraph1Editor')?.value?.trim() || defaultAboutContent.paragraph1,
         paragraph2: qs('#aboutParagraph2Editor')?.value?.trim() || defaultAboutContent.paragraph2,
-        heroImage: heroImageUrl || '',
-        artistImage: artistImageUrl || ''
+        heroImage: prev.heroImage || '',
+        artistImage: prev.artistImage || ''
       };
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
@@ -1520,8 +1467,6 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
-      setBackgroundImage(qs('#heroArt'), data.heroImage || '');
-      setBackgroundImage(qs('#artistPhoto'), data.artistImage || '');
 
       if(save){
         localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
@@ -1549,8 +1494,6 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
-      if(qs('#heroImageUrl')) qs('#heroImageUrl').value = '';
-      if(qs('#artistImageUrl')) qs('#artistImageUrl').value = '';
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = defaultAboutContent.heroEyebrow;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = defaultAboutContent.heroTitle;
@@ -1725,37 +1668,6 @@
         const file = e.target.files?.[0];
         if(file) readFile(file, 'artistImage', '#artistPhoto', '작가소개 이미지가 저장되었습니다.');
       });
-
-      const applyUrl = async (inputSelector, key, targetSelector, statusText) => {
-        const input = qs(inputSelector);
-        if(!input) return;
-        const normalized = normalizeArtworkImageUrl(input.value || '');
-        if(!normalized) return;
-        input.value = normalized;
-        let saved = null;
-        try{
-          saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
-        }catch(e){
-          saved = null;
-        }
-        const sharedImages = getSharedImageContent();
-        const merged = {...defaultAboutContent, ...(saved || {}), ...sharedImages, [key]: normalized};
-        localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
-        writeSharedImageContent({
-          heroImage: key === 'heroImage' ? normalized : (merged.heroImage || ''),
-          artistImage: key === 'artistImage' ? normalized : (merged.artistImage || '')
-        });
-        setBackgroundImage(qs(targetSelector), normalized);
-        await updateAboutImageSizeDisplay();
-        const status = qs('#aboutContentStatus');
-        if(status){
-          status.textContent = statusText;
-          status.className = 'status ok';
-        }
-      };
-
-      qs('#heroImageUrl')?.addEventListener('change', () => applyUrl('#heroImageUrl', 'heroImage', '#heroArt', '대표 이미지 링크가 저장되었습니다.'));
-      qs('#artistImageUrl')?.addEventListener('change', () => applyUrl('#artistImageUrl', 'artistImage', '#artistPhoto', '작가소개 이미지 링크가 저장되었습니다.'));
     }
 
 
@@ -2439,7 +2351,6 @@
       });
     }
 
-    bindLanguageSwitcher();
     bindHiddenAdminTrigger();
     bindCategoryFilters();
     renderGallery();
