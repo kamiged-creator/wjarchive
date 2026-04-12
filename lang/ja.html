@@ -831,7 +831,7 @@
             
             <div class="admin-card">
               <h3>6. 작품 등록 추가</h3>
-              <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.</p>
+              <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.<br><span class="mini-note">새로 등록하는 작품 제목과 설명은 일본어 페이지에서도 한국어 그대로 유지됩니다. 필요하면 브라우저 번역을 함께 사용하면 됩니다.</span></p>
               <div class="stack" style="margin-top:14px">
                 <div class="field-row">
                   <div>
@@ -897,7 +897,7 @@
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다. 새로 입력한 제목과 설명은 일본어 페이지에서도 한국어 그대로 표시됩니다.</div>
               </div>
             </div>
 
@@ -1183,7 +1183,9 @@
       const year = (qs('#artYear')?.value || '').trim();
       const desc = (qs('#artDescription')?.value || '').trim();
       const youtube = (qs('#artYoutube')?.value || '').trim();
-      const singleUrl = normalizeArtworkImageUrl(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '');
+      const singleUrl = typeof normalizeArtworkImageUrl === 'function'
+        ? normalizeArtworkImageUrl(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '')
+        : String(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '').trim();
       const thumbUrl = singleUrl;
       const fullUrl = singleUrl;
 
@@ -1208,7 +1210,6 @@
             large: fullUrl || thumbUrl || '',
             youtube
           });
-
           writeExtraWorks(extraWorks);
           populateArtTargetWork('extra:0');
           renderGallery();
@@ -1217,7 +1218,7 @@
             status.textContent = `${title || '새 작품'} 작품이 추가되었습니다. 기존 작품은 그대로 아래에 유지됩니다.`;
             status.className = 'status ok';
           }
-        } else if(info.work){
+        } else if(info.work) {
           if(info.type === 'sample'){
             const overrides = getWorkOverrides();
             const current = overrides[String(info.sourceIndex)] || info.work;
@@ -1261,31 +1262,44 @@
 
         if(qs('#artFeatured')?.checked){
           let saved = null;
-          try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent''' + ("" if lang=="ko" else f"_{lang}_v2") + '''') || 'null');
-          }catch(e){
+          try {
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent_ja_v2') || 'null');
+          } catch(e) {
             saved = null;
           }
-          const sharedImages = typeof readSharedImages === 'function' ? readSharedImages() : (typeof getSharedImageContent === 'function' ? getSharedImageContent() : {});
+
+          const sharedImages =
+            typeof readSharedImages === 'function'
+              ? (readSharedImages() || {})
+              : (typeof getSharedImageContent === 'function' ? (getSharedImageContent() || {}) : {});
+
           const currentAbout = {...defaultAboutContent, ...(saved || {}), ...(sharedImages || {})};
           const works = getWorks();
-          const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
+          const selected = info.type === 'new'
+            ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0)
+            : getSelectedWorkInfo().work;
+
           if(selected?.large || selected?.thumb){
             currentAbout.heroImage = selected.large || selected.thumb;
             currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
-            localStorage.setItem('wonjuSiteAboutContent''' + ("" if lang=="ko" else f"_{lang}_v2") + '''', JSON.stringify(currentAbout));
+            localStorage.setItem('wonjuSiteAboutContent_ja_v2', JSON.stringify(currentAbout));
+
             if(typeof writeSharedImages === 'function'){
-              writeSharedImages({ ...(sharedImages || {}), heroImage: currentAbout.heroImage });
+              writeSharedImages({...(sharedImages || {}), heroImage: currentAbout.heroImage});
             } else if(typeof writeSharedImageContent === 'function'){
-              writeSharedImageContent({ heroImage: currentAbout.heroImage, artistImage: currentAbout.artistImage || '' });
+              writeSharedImageContent({
+                heroImage: currentAbout.heroImage,
+                artistImage: currentAbout.artistImage || ''
+              });
             }
+
             loadAboutContent();
             if(typeof updateAboutImageSizeDisplay === 'function') updateAboutImageSizeDisplay();
           }
         }
 
         flashApplyButton(true);
-      }catch(err){
+      } catch(err) {
         if(status){
           status.textContent = `작품 반영 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
           status.className = 'status bad';
