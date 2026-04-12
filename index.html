@@ -42,27 +42,21 @@
     button,input,textarea,select{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
-
     .topbar{
       position:sticky;top:0;z-index:20;
       backdrop-filter:blur(14px);
       background:rgba(251,248,244,.78);
       border-bottom:1px solid var(--line);
-      transition:transform .24s ease;
     }
-    body.pc-hide-header .topbar.topbar-hidden{
-      transform:translateY(calc(-100% - 6px));
-    }
-
     .topbar-inner{
-      min-height:56px;display:grid;gap:8px;padding:12px 0 8px;
+      min-height:72px;display:grid;gap:12px;padding:20px 0 14px;
     }
-    .brand{display:flex;flex-direction:column;gap:2px;padding-top:0}
-    .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em;line-height:1.15}
-    .brand-sub{font-size:11px;color:var(--muted);line-height:1.2}
+    .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px}
+    .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
+    .brand-sub{font-size:12px;color:var(--muted)}
     .nav{display:flex;gap:10px;flex-wrap:wrap}
     .nav a{
-      padding:8px 12px;border-radius:999px;color:var(--muted);border:1px solid transparent;
+      padding:10px 14px;border-radius:999px;color:var(--muted);border:1px solid transparent;
     }
     .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
 
@@ -98,7 +92,6 @@
     #aboutSectionCopy{display:none}
 
     section{padding:36px 0}
-    section[id]{scroll-margin-top:140px;}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
     .section-title{font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:-.03em}
     .section-copy{margin:0;color:var(--muted);max-width:700px}
@@ -349,14 +342,14 @@
 
 
     
-    .top-tools{display:grid;gap:6px;width:100%}
+    .top-tools{display:grid;gap:12px;width:100%}
     .top-nav-row{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
-    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 4px 2px}
+    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:2px 6px 8px}
     .top-left-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-left:2px}
     .top-right-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:2px}
     .news-mini{
       display:inline-flex;align-items:center;justify-content:center;
-      min-height:32px;padding:0 11px;border-radius:12px;
+      min-height:34px;padding:0 12px;border-radius:12px;
       border:1px solid rgba(139,104,71,.18);
       background:rgba(231,214,196,.42);
       color:#6b5746;font-size:13px;font-weight:700;
@@ -374,8 +367,8 @@
 
 
     .lang-select{
-      min-height:36px;
-      height:36px;
+      min-height:40px;
+      height:40px;
       padding:0 12px;
       min-width:118px;
       max-width:140px;
@@ -396,7 +389,6 @@
     }
     @media (max-width: 680px){
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 0 12px}
-      section[id]{scroll-margin-top:180px;}
       .wrap{padding:0 18px}
       .hero{padding-top:34px}
       .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
@@ -952,25 +944,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js">
-    function initSite(){
-      try{ bindDesktopAutoHideTopbar(); }catch(e){}
-      try{ bindLanguageSwitcher(); }catch(e){}
-      try{ bindCategoryFilters(); }catch(e){}
-      try{ bindAccordions(); }catch(e){}
-      try{ if(typeof populateArtTargetWork === 'function') populateArtTargetWork('__new__'); }catch(e){}
-      try{ renderGallery(); }catch(e){}
-      try{
-        const adminTapTarget = qs('#adminTapTarget');
-        if(adminTapTarget && typeof openAdminOverlay === 'function'){
-          adminTapTarget.addEventListener('click', openAdminOverlay);
-        }
-      }catch(e){}
-    }
-
-    document.addEventListener('DOMContentLoaded', initSite);
-
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
     const sampleWorks = [
       {
@@ -985,9 +959,9 @@
       },
       {
         title: '묵향',
-        category: '필선',
+        category: '서예',
         year: '2025',
-        medium: '필선',
+        medium: '서예',
         desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
@@ -1005,9 +979,9 @@
       },
       {
         title: '유려',
-        category: '필선',
+        category: '서예',
         year: '2024',
-        medium: '필선',
+        medium: '서예',
         desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
@@ -1161,7 +1135,7 @@
 
     function fillArtFormFromWork(work){
       if(!work) return;
-      if(qs('#artCategory')) qs('#artCategory').value = work.category || '필선';
+      if(qs('#artCategory')) qs('#artCategory').value = work.category || '전각';
       if(qs('#artYear')) qs('#artYear').value = work.year || '';
       if(qs('#artTitle')) qs('#artTitle').value = work.title || '';
       if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
@@ -1200,11 +1174,9 @@
       if(!value) return '';
       if(value.startsWith('data:image/')) return value;
       const driveId = extractGoogleDriveFileId(value);
-      if(driveId) return `https://drive.google.com/uc?export=view&id=${driveId}`;
+      if(driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w2000`;
       return value;
     }
-
-    function flashApplyButton
 
     function flashApplyButton(ok){
       const btn = qs('#applyArtworkBtn');
@@ -1238,13 +1210,11 @@
       const year = (qs('#artYear')?.value || '').trim();
       const desc = (qs('#artDescription')?.value || '').trim();
       const youtube = (qs('#artYoutube')?.value || '').trim();
-      const singleUrl = typeof normalizeArtworkImageUrl === 'function'
-        ? normalizeArtworkImageUrl(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '')
-        : String(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '').trim();
+      const singleUrl = normalizeArtworkImageUrl(qs('#artThumbUrl')?.value || qs('#artFullUrl')?.value || '');
       const thumbUrl = singleUrl;
       const fullUrl = singleUrl;
 
-      if(!title && !desc && !year && !thumbUrl && !youtube){
+      if(!title && !desc && !year && !thumbUrl && !fullUrl && !youtube){
         if(status){
           status.textContent = '제목, 내용, 연도, 이미지 링크 중 하나 이상 입력해 주세요.';
           status.className = 'status bad';
@@ -1252,7 +1222,7 @@
         return;
       }
 
-      try {
+      try{
         if(info.type === 'new'){
           const extraWorks = getExtraWorks();
           extraWorks.unshift({
@@ -1260,19 +1230,21 @@
             category,
             year: year || String(new Date().getFullYear()),
             medium: category,
-            desc: desc || '',
-            thumb: thumbUrl || '',
-            large: fullUrl || '',
+            desc: desc || '작품 설명',
+            thumb: thumbUrl || fullUrl || '',
+            large: fullUrl || thumbUrl || '',
             youtube
           });
+
           writeExtraWorks(extraWorks);
+          populateArtTargetWork('extra:0');
           renderGallery();
-          if(typeof populateArtTargetWork === 'function') populateArtTargetWork('extra:0');
+
           if(status){
-            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다.`;
+            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다. 기존 작품은 그대로 아래에 유지됩니다.`;
             status.className = 'status ok';
           }
-        } else if(info.work) {
+        } else if(info.work){
           if(info.type === 'sample'){
             const overrides = getWorkOverrides();
             const current = overrides[String(info.sourceIndex)] || info.work;
@@ -1306,7 +1278,8 @@
           }
 
           renderGallery();
-          if(typeof populateArtTargetWork === 'function') populateArtTargetWork(info.value);
+          populateArtTargetWork(info.value);
+
           if(status){
             status.textContent = `${title || buildWorkLabel(info.work)} 작품 반영 완료`;
             status.className = 'status ok';
@@ -1315,52 +1288,36 @@
 
         if(qs('#artFeatured')?.checked){
           let saved = null;
-          try {
+          try{
             saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
-          } catch(e) {
+          }catch(e){
             saved = null;
           }
-
-          const sharedImages =
-            typeof readSharedImages === 'function'
-              ? (readSharedImages() || {})
-              : (typeof getSharedImageContent === 'function' ? (getSharedImageContent() || {}) : {});
-
-          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...(sharedImages || {})};
+          const sharedImages = getSharedImageContent();
+          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
           const works = getWorks();
-          const selected = info.type === 'new'
-            ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0)
-            : getSelectedWorkInfo().work;
-
+          const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
           if(selected?.large || selected?.thumb){
             currentAbout.heroImage = selected.large || selected.thumb;
             currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
             localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
-
-            if(typeof writeSharedImages === 'function'){
-              writeSharedImages({...(sharedImages || {}), heroImage: currentAbout.heroImage});
-            } else if(typeof writeSharedImageContent === 'function'){
-              writeSharedImageContent({
-                heroImage: currentAbout.heroImage,
-                artistImage: currentAbout.artistImage || ''
-              });
-            }
-
-            if(typeof loadAboutContent === 'function') loadAboutContent();
-            if(typeof updateAboutImageSizeDisplay === 'function') updateAboutImageSizeDisplay();
+            writeSharedImageContent({
+              heroImage: currentAbout.heroImage,
+              artistImage: currentAbout.artistImage
+            });
+            loadAboutContent();
+            updateAboutImageSizeDisplay();
           }
         }
 
         flashApplyButton(true);
-      } catch(err) {
+      }catch(err){
         if(status){
           status.textContent = `작품 반영 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
           status.className = 'status bad';
         }
       }
     }
-
-    function renderGallery(){
 
     function renderGallery(){
       const grid = qs('#galleryGrid');
@@ -1413,64 +1370,7 @@
       });
     }
 
-
-
-    function bindDesktopAutoHideTopbar(){
-      const topbar = qs('.topbar');
-      if(!topbar) return;
-
-      const media = window.matchMedia('(min-width: 1021px)');
-      let lastY = window.scrollY || 0;
-
-      function applyMode(){
-        document.body.classList.toggle('pc-hide-header', media.matches);
-        if(!media.matches){
-          topbar.classList.remove('topbar-hidden');
-        } else if((window.scrollY || 0) <= 8){
-          topbar.classList.remove('topbar-hidden');
-        }
-      }
-
-      function onScroll(){
-        if(!media.matches) return;
-        const y = window.scrollY || 0;
-
-        if(y <= 8){
-          topbar.classList.remove('topbar-hidden');
-          lastY = y;
-          return;
-        }
-
-        if(y > lastY + 8){
-          topbar.classList.add('topbar-hidden');
-        } else if(y < lastY - 8){
-          topbar.classList.remove('topbar-hidden');
-        }
-
-        lastY = y;
-      }
-
-      applyMode();
-      window.addEventListener('scroll', onScroll, { passive:true });
-      if(typeof media.addEventListener === 'function'){
-        media.addEventListener('change', applyMode);
-      } else if(typeof media.addListener === 'function'){
-        media.addListener(applyMode);
-      }
-      window.addEventListener('resize', applyMode);
-    }
-
-    function bindAccordions(){
-      qsa('[data-accordion]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const id = btn.getAttribute('data-accordion');
-          const item = id ? qs('#' + id) : btn.closest('.accordion-item');
-          if(item) item.classList.toggle('open');
-        });
-      });
-    }
-
-function bindCategoryFilters(){
+    function bindCategoryFilters(){
       qsa('#filterBar .filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           state.currentCategory = btn.dataset.category;
@@ -1484,22 +1384,17 @@ function bindCategoryFilters(){
     function bindLanguageSwitcher(){
       const select = qs('#languageSelect');
       if(!select) return;
+      const path = window.location.pathname || '/';
+      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
+      const current = normalized === '' ? '/' : normalized;
+      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
+      if(match) select.value = match.value;
+      else select.value = '/';
 
-      const path = String(window.location.pathname || '/').toLowerCase();
-
-      if(path.includes('/lang/en.html')){
-        select.value = '/lang/en.html';
-      } else if(path.includes('/lang/ja.html')){
-        select.value = '/lang/ja.html';
-      } else {
-        select.value = '/';
-      }
-
-      select.onchange = () => {
+      select.addEventListener('change', () => {
         const next = select.value;
         if(next) window.location.href = next;
-      };
-    });
+      });
     }
 
 
@@ -2481,7 +2376,6 @@ function bindCategoryFilters(){
 
     bindLanguageSwitcher();
     bindHiddenAdminTrigger();
-    bindDesktopAutoHideTopbar();
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
