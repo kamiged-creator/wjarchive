@@ -55,14 +55,14 @@
     }
 
     .topbar-inner{
-      min-height:72px;display:grid;gap:12px;padding:20px 0 14px;
+      min-height:56px;display:grid;gap:8px;padding:12px 0 8px;
     }
-    .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px}
-    .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
-    .brand-sub{font-size:12px;color:var(--muted)}
+    .brand{display:flex;flex-direction:column;gap:2px;padding-top:0}
+    .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em;line-height:1.15}
+    .brand-sub{font-size:11px;color:var(--muted);line-height:1.2}
     .nav{display:flex;gap:10px;flex-wrap:wrap}
     .nav a{
-      padding:10px 14px;border-radius:999px;color:var(--muted);border:1px solid transparent;
+      padding:8px 12px;border-radius:999px;color:var(--muted);border:1px solid transparent;
     }
     .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
 
@@ -98,6 +98,7 @@
     #aboutSectionCopy{display:none}
 
     section{padding:36px 0}
+    section[id]{scroll-margin-top:140px;}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
     .section-title{font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:-.03em}
     .section-copy{margin:0;color:var(--muted);max-width:700px}
@@ -348,14 +349,14 @@
 
 
     
-    .top-tools{display:grid;gap:12px;width:100%}
+    .top-tools{display:grid;gap:6px;width:100%}
     .top-nav-row{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
-    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:2px 6px 8px}
+    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 4px 2px}
     .top-left-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-left:2px}
     .top-right-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:2px}
     .news-mini{
       display:inline-flex;align-items:center;justify-content:center;
-      min-height:34px;padding:0 12px;border-radius:12px;
+      min-height:32px;padding:0 11px;border-radius:12px;
       border:1px solid rgba(139,104,71,.18);
       background:rgba(231,214,196,.42);
       color:#6b5746;font-size:13px;font-weight:700;
@@ -373,8 +374,8 @@
 
 
     .lang-select{
-      min-height:40px;
-      height:40px;
+      min-height:36px;
+      height:36px;
       padding:0 12px;
       min-width:118px;
       max-width:140px;
@@ -395,6 +396,7 @@
     }
     @media (max-width: 680px){
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 0 12px}
+      section[id]{scroll-margin-top:180px;}
       .wrap{padding:0 18px}
       .hero{padding-top:34px}
       .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
@@ -965,9 +967,9 @@
       },
       {
         title: '묵향',
-        category: '서예',
+        category: '필선',
         year: '2025',
-        medium: '서예',
+        medium: '필선',
         desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
         thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
@@ -985,9 +987,9 @@
       },
       {
         title: '유려',
-        category: '서예',
+        category: '필선',
         year: '2024',
-        medium: '서예',
+        medium: '필선',
         desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
         thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
@@ -1141,7 +1143,7 @@
 
     function fillArtFormFromWork(work){
       if(!work) return;
-      if(qs('#artCategory')) qs('#artCategory').value = work.category || '전각';
+      if(qs('#artCategory')) qs('#artCategory').value = work.category || '필선';
       if(qs('#artYear')) qs('#artYear').value = work.year || '';
       if(qs('#artTitle')) qs('#artTitle').value = work.title || '';
       if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
@@ -1180,7 +1182,7 @@
       if(!value) return '';
       if(value.startsWith('data:image/')) return value;
       const driveId = extractGoogleDriveFileId(value);
-      if(driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w2000`;
+      if(driveId) return `https://drive.google.com/uc?export=view&id=${driveId}`;
       return value;
     }
 
@@ -1295,24 +1297,25 @@
         if(qs('#artFeatured')?.checked){
           let saved = null;
           try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent''' + ("" if lang=="ko" else f"_{lang}_v2") + '''') || 'null');
           }catch(e){
             saved = null;
           }
-          const sharedImages = getSharedImageContent();
-          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
+          const sharedImages = typeof readSharedImages === 'function' ? readSharedImages() : (typeof getSharedImageContent === 'function' ? getSharedImageContent() : {});
+          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...(sharedImages || {})};
           const works = getWorks();
           const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
           if(selected?.large || selected?.thumb){
             currentAbout.heroImage = selected.large || selected.thumb;
             currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
-            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
-            writeSharedImageContent({
-              heroImage: currentAbout.heroImage,
-              artistImage: currentAbout.artistImage
-            });
+            localStorage.setItem('wonjuSiteAboutContent''' + ("" if lang=="ko" else f"_{lang}_v2") + '''', JSON.stringify(currentAbout));
+            if(typeof writeSharedImages === 'function'){
+              writeSharedImages({ ...(sharedImages || {}), heroImage: currentAbout.heroImage });
+            } else if(typeof writeSharedImageContent === 'function'){
+              writeSharedImageContent({ heroImage: currentAbout.heroImage, artistImage: currentAbout.artistImage || '' });
+            }
             loadAboutContent();
-            updateAboutImageSizeDisplay();
+            if(typeof updateAboutImageSizeDisplay === 'function') updateAboutImageSizeDisplay();
           }
         }
 
@@ -1437,17 +1440,22 @@
     function bindLanguageSwitcher(){
       const select = qs('#languageSelect');
       if(!select) return;
-      const path = window.location.pathname || '/';
-      const normalized = path.endsWith('/index.html') ? path.replace(/index\.html$/, '') : path;
-      const current = normalized === '' ? '/' : normalized;
-      const match = [...select.options].find(opt => opt.value === current || (opt.value !== '/' && current.endsWith(opt.value)));
-      if(match) select.value = match.value;
-      else select.value = '/';
 
-      select.addEventListener('change', () => {
+      const path = String(window.location.pathname || '/').toLowerCase();
+
+      if(path.includes('/lang/en.html')){
+        select.value = '/lang/en.html';
+      } else if(path.includes('/lang/ja.html')){
+        select.value = '/lang/ja.html';
+      } else {
+        select.value = '/';
+      }
+
+      select.onchange = () => {
         const next = select.value;
         if(next) window.location.href = next;
-      });
+      };
+    });
     }
 
 
