@@ -831,7 +831,7 @@
             
             <div class="admin-card">
               <h3>6. 작품 등록 추가</h3>
-              <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.<br><span class="mini-note">새로 등록하는 작품 제목과 설명은 일본어 페이지에서도 한국어 그대로 유지됩니다. 필요하면 브라우저 번역을 함께 사용하면 됩니다.</span></p>
+              <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div class="field-row">
                   <div>
@@ -897,7 +897,7 @@
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다. 새로 입력한 제목과 설명은 일본어 페이지에서도 한국어 그대로 표시됩니다.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 구글드라이브 공유링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
               </div>
             </div>
 
@@ -955,7 +955,25 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js">
+    function initSite(){
+      try{ bindDesktopAutoHideTopbar(); }catch(e){}
+      try{ bindLanguageSwitcher(); }catch(e){}
+      try{ bindCategoryFilters(); }catch(e){}
+      try{ bindAccordions(); }catch(e){}
+      try{ if(typeof populateArtTargetWork === 'function') populateArtTargetWork('__new__'); }catch(e){}
+      try{ renderGallery(); }catch(e){}
+      try{
+        const adminTapTarget = qs('#adminTapTarget');
+        if(adminTapTarget && typeof openAdminOverlay === 'function'){
+          adminTapTarget.addEventListener('click', openAdminOverlay);
+        }
+      }catch(e){}
+    }
+
+    document.addEventListener('DOMContentLoaded', initSite);
+
+  </script>
   <script>
     const sampleWorks = [
       {
@@ -1189,7 +1207,7 @@
       const thumbUrl = singleUrl;
       const fullUrl = singleUrl;
 
-      if(!title && !desc && !year && !thumbUrl && !fullUrl && !youtube){
+      if(!title && !desc && !year && !thumbUrl && !youtube){
         if(status){
           status.textContent = '제목, 내용, 연도, 이미지 링크 중 하나 이상 입력해 주세요.';
           status.className = 'status bad';
@@ -1197,7 +1215,7 @@
         return;
       }
 
-      try{
+      try {
         if(info.type === 'new'){
           const extraWorks = getExtraWorks();
           extraWorks.unshift({
@@ -1205,17 +1223,16 @@
             category,
             year: year || String(new Date().getFullYear()),
             medium: category,
-            desc: desc || '작품 설명',
-            thumb: thumbUrl || fullUrl || '',
-            large: fullUrl || thumbUrl || '',
+            desc: desc || '',
+            thumb: thumbUrl || '',
+            large: fullUrl || '',
             youtube
           });
           writeExtraWorks(extraWorks);
-          populateArtTargetWork('extra:0');
           renderGallery();
-
+          if(typeof populateArtTargetWork === 'function') populateArtTargetWork('extra:0');
           if(status){
-            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다. 기존 작품은 그대로 아래에 유지됩니다.`;
+            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다.`;
             status.className = 'status ok';
           }
         } else if(info.work) {
@@ -1252,8 +1269,7 @@
           }
 
           renderGallery();
-          populateArtTargetWork(info.value);
-
+          if(typeof populateArtTargetWork === 'function') populateArtTargetWork(info.value);
           if(status){
             status.textContent = `${title || buildWorkLabel(info.work)} 작품 반영 완료`;
             status.className = 'status ok';
@@ -1293,7 +1309,7 @@
               });
             }
 
-            loadAboutContent();
+            if(typeof loadAboutContent === 'function') loadAboutContent();
             if(typeof updateAboutImageSizeDisplay === 'function') updateAboutImageSizeDisplay();
           }
         }
@@ -1306,6 +1322,8 @@
         }
       }
     }
+
+    function renderGallery(){
 
     function renderGallery(){
       const grid = qs('#galleryGrid');
@@ -1405,7 +1423,17 @@
       window.addEventListener('resize', applyMode);
     }
 
-    function bindCategoryFilters(){
+    function bindAccordions(){
+      qsa('[data-accordion]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.getAttribute('data-accordion');
+          const item = id ? qs('#' + id) : btn.closest('.accordion-item');
+          if(item) item.classList.toggle('open');
+        });
+      });
+    }
+
+function bindCategoryFilters(){
       qsa('#filterBar .filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           state.currentCategory = btn.dataset.category;
@@ -1434,9 +1462,9 @@
         const next = select.value;
         if(next) window.location.href = next;
       };
-    });
     }
 
+    const SHARED_IMAGE_KEY
 
     const SHARED_IMAGE_KEY = 'wonjuSharedImageContent';
 
@@ -1853,7 +1881,7 @@
     }
 
     function bindHiddenAdminTrigger(){
-      const trigger = qs('#adminTrigger');
+      const trigger = qs('#adminTapTarget');
       if(!trigger) return;
       let tapCount = 0;
       let lastTapAt = 0;
