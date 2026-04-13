@@ -54,9 +54,10 @@
     .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px}
     .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
     .brand-sub{font-size:12px;color:var(--muted)}
-    .nav{display:flex;gap:10px;flex-wrap:wrap}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
     .nav a{
       padding:10px 14px;border-radius:999px;color:var(--muted);border:1px solid transparent;
+      position:relative; top:-3px;
     }
     .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
 
@@ -344,12 +345,13 @@
     
     .top-tools{display:grid;gap:12px;width:100%}
     .top-nav-row{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
-    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:2px 6px 8px}
+    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:0 6px 6px;margin-top:-8px}
     .top-left-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-left:2px}
     .top-right-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:2px}
     .news-mini{
       display:inline-flex;align-items:center;justify-content:center;
       min-height:34px;padding:0 12px;border-radius:12px;
+      position:relative; top:-4px;
       border:1px solid rgba(139,104,71,.18);
       background:rgba(231,214,196,.42);
       color:#6b5746;font-size:13px;font-weight:700;
@@ -405,7 +407,7 @@
       .artist-photo{min-height:360px}
       .top-tools{width:100%}
       .top-nav-row,.top-sub-row{width:100%}
-      .top-sub-row{padding:2px 2px 6px}
+      .top-sub-row{padding:0 2px 4px;margin-top:-10px}
       .top-left-tools,.top-right-tools{display:flex;align-items:center}
       .top-left-tools{justify-content:flex-start;padding-left:0}
       .top-right-tools{justify-content:flex-end;padding-right:0}
@@ -414,6 +416,7 @@
         padding:0 10px;
         border-radius:10px;
         font-size:12px;
+        top:-5px;
       }
       .lang-select{
         min-height:34px;
