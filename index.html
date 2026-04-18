@@ -1,8 +1,9 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" translate="no" class="notranslate">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="google" content="notranslate" />
   <title>이원주 | 작품 포트폴리오</title>
   <meta name="description" content="이원주 작가의 작품 포트폴리오. 작품 보기와 관리자용 이미지 변환 기능을 하나의 페이지에서 제공합니다." />
   <meta name="theme-color" content="#f6f1ea" />
@@ -38,20 +39,30 @@
       text-rendering:optimizeLegibility;
     }
     img{max-width:100%;display:block}
+    main{margin:0;padding:0}
     a{text-decoration:none;color:inherit}
     button,input,textarea,select{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
     .topbar{
       position:sticky;top:0;z-index:20;
-      backdrop-filter:blur(14px);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
       background:rgba(251,248,244,.78);
-      border-bottom:1px solid var(--line);
+      border-bottom:none;
+      box-shadow:none;
+      margin:0;
+      transition:transform .28s ease, opacity .28s ease;
+      will-change:transform;
+    }
+    .topbar.is-hidden{
+      transform:translateY(calc(-100% - 8px));
+      opacity:.98;
     }
     .topbar-inner{
-      min-height:72px;display:grid;gap:12px;padding:20px 0 14px;
+      min-height:72px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 0 14px;
     }
-    .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px}
+    .brand{display:flex;flex-direction:column;gap:4px;padding-top:2px;flex:0 0 auto}
     .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
     .brand-sub{font-size:12px;color:var(--muted)}
     .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
@@ -61,7 +72,7 @@
     }
     .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
 
-    .hero{padding:60px 0 28px}
+    .hero{padding:18px 0 28px; margin-top:0;}
     .hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:28px;align-items:center}
     .eyebrow{
       display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
@@ -80,7 +91,7 @@
     .btn.danger{background:#fff5f5;color:var(--danger);border-color:rgba(179,61,61,.18)}
     .btn.apply-accent{background:linear-gradient(180deg,#8b6847,#735337);color:#fff;border-color:transparent}
     .btn.applied{background:linear-gradient(180deg,#2f7d4d,#25633d);color:#fff;border-color:transparent;box-shadow:0 0 0 4px rgba(47,125,77,.12)}
-    .hero-card{background:var(--paper);border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow);overflow:hidden}
+    .hero-card{background:var(--paper);border:1px solid var(--line);border-radius:32px;box-shadow:var(--shadow);overflow:hidden;margin-top:0}
     .hero-art{
       aspect-ratio:4/5;
       background:
@@ -92,7 +103,7 @@
     .hero-caption{display:none}
     #aboutSectionCopy{display:none}
 
-    section{padding:36px 0;scroll-margin-top:170px}
+    section{padding:36px 0;scroll-margin-top:170px;margin-top:0}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
     .section-title{font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:-.03em}
     .section-copy{margin:0;color:var(--muted);max-width:700px}
@@ -343,15 +354,15 @@
 
 
     
-    .top-tools{display:grid;gap:12px;width:100%}
-    .top-nav-row{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap}
-    .top-sub-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:0 6px 6px;margin-top:-8px}
+    .top-tools{display:grid;gap:8px;flex:1 1 auto;min-width:0}
+    .top-nav-row{display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;flex-wrap:nowrap}
+    .top-sub-row{display:none}
     .top-left-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-left:2px}
-    .top-right-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:2px}
+    .top-right-tools{display:none}
     .news-mini{
       display:inline-flex;align-items:center;justify-content:center;
       min-height:34px;padding:0 12px;border-radius:12px;
-      position:relative; top:-4px;
+      position:relative; top:6px;
       border:1px solid rgba(139,104,71,.18);
       background:rgba(231,214,196,.42);
       color:#6b5746;font-size:13px;font-weight:700;
@@ -370,21 +381,6 @@
 
 
     #news,#contact,#exhibitionAccordion,#contactAccordion{scroll-margin-top:230px}
-    .lang-select{
-      min-height:40px;
-      height:40px;
-      padding:0 12px;
-      min-width:118px;
-      max-width:140px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.72);
-      color:var(--text);
-      font-weight:700;
-      font-size:14px;
-      outline:none;
-      box-shadow:none;
-    }
 
     @media (max-width: 1020px){
       .hero-grid,.intro,.note,.contact,.admin-grid,.viewer-grid,.about-profile{grid-template-columns:1fr}
@@ -395,7 +391,7 @@
       section{scroll-margin-top:190px}
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 0 12px}
       .wrap{padding:0 18px}
-      .hero{padding-top:34px}
+      .hero{padding-top:14px}
       .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
       .asset-preview{grid-template-columns:1fr}
       .btn{width:100%}
@@ -405,9 +401,11 @@
       .viewer-header{gap:10px}
       .viewer-youtube{font-size:13px;margin-top:3px}
       .artist-photo{min-height:360px}
+      .brand{width:100%}
+      .brand-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
       .top-tools{width:100%}
-      .top-nav-row,.top-sub-row{width:100%}
-      .top-sub-row{padding:0 2px 4px;margin-top:-10px}
+      .top-nav-row{width:100%;flex-wrap:wrap;gap:8px}
+      .nav{width:100%;justify-content:space-between}
       .top-left-tools,.top-right-tools{display:flex;align-items:center}
       .top-left-tools{justify-content:flex-start;padding-left:0}
       .top-right-tools{justify-content:flex-end;padding-right:0}
@@ -416,15 +414,7 @@
         padding:0 10px;
         border-radius:10px;
         font-size:12px;
-        top:-5px;
-      }
-      .lang-select{
-        min-height:34px;
-        height:34px;
-        min-width:92px;
-        max-width:110px;
-        padding:0 10px;
-        font-size:13px;
+        top:6px;
       }
       .accordion-btn{
         padding:16px 18px 8px;
@@ -439,7 +429,10 @@
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
-        <div class="brand-title" id="adminTapTarget" role="button" aria-label="작가명">이원주</div>
+        <div class="brand-top">
+          <div class="brand-title" id="adminTapTarget" role="button" aria-label="작가명">이원주</div>
+          <a class="news-mini" href="#news">소식</a>
+        </div>
         <div class="brand-sub">작품 포트폴리오</div>
       </div>
       <div class="top-tools">
@@ -450,11 +443,6 @@
             <a href="#note">작가 노트</a>
             <a href="#contact">문의</a>
           </nav>
-        </div>
-        <div class="top-sub-row">
-          <div class="top-right-tools">
-            <a class="news-mini" href="#news">소식</a>
-          </div>
         </div>
       </div>
     </div>
@@ -2329,6 +2317,37 @@
 
 
 
+    function bindAutoHideTopbar(){
+      const topbar = qs('.topbar');
+      if(!topbar) return;
+
+      let lastY = window.scrollY || 0;
+      let ticking = false;
+
+      const updateTopbar = () => {
+        const currentY = window.scrollY || 0;
+        const delta = currentY - lastY;
+
+        if(currentY <= 8){
+          topbar.classList.remove('is-hidden');
+        }else if(delta > 8){
+          topbar.classList.add('is-hidden');
+        }else if(delta < -8){
+          topbar.classList.remove('is-hidden');
+        }
+
+        lastY = currentY;
+        ticking = false;
+      };
+
+      window.addEventListener('scroll', () => {
+        if(!ticking){
+          window.requestAnimationFrame(updateTopbar);
+          ticking = true;
+        }
+      }, {passive:true});
+    }
+
     function bindHiddenAdminTrigger(){
       const target = qs('#adminTapTarget');
       if(!target) return;
@@ -2358,6 +2377,7 @@
     }
 
     bindHiddenAdminTrigger();
+    bindAutoHideTopbar();
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
