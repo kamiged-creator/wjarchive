@@ -342,6 +342,18 @@
     .stat-value{font-size:18px;font-weight:800;letter-spacing:-.02em;word-break:break-word}
     .stat-note{margin-top:12px;font-size:12px;color:var(--muted)}
 
+
+    .artwork-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    .artwork-actions .btn{
+      width:100%;
+      min-height:56px;
+      font-size:16px;
+    }
+
     .admin-bottom-actions{
       display:flex;
       justify-content:flex-end;
@@ -423,6 +435,226 @@
       .accordion-panel{padding:0 18px 12px}
       .contact-item{padding:10px 13px}
     }
+  
+    /* iPhone-like admin UI overrides */
+    .admin-overlay{
+      background:rgba(22,22,24,.28);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+    .admin-shell{
+      max-width:980px;
+      gap:14px;
+    }
+    .admin-head{
+      background:rgba(255,255,255,.84);
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:22px;
+      box-shadow:0 8px 24px rgba(0,0,0,.06);
+      padding:14px 16px;
+    }
+    .admin-title{
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:-0.02em;
+    }
+    .admin-sub{
+      font-size:12px;
+      color:#8e8e93;
+    }
+    .admin-panel{
+      background:rgba(245,245,247,.92);
+      border:1px solid rgba(0,0,0,.04);
+      border-radius:26px;
+      box-shadow:0 14px 40px rgba(0,0,0,.08);
+      padding:16px;
+    }
+    .admin-grid{
+      grid-template-columns:330px minmax(0,1fr);
+      gap:16px;
+    }
+    .admin-card{
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:20px;
+      box-shadow:none;
+      padding:16px;
+    }
+    .admin-card h3{
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:-0.02em;
+      margin:0 0 8px;
+    }
+    .admin-card p,
+    .small,
+    .hint,
+    .mini-note,
+    .image-size-note,
+    .image-size-status,
+    .status,
+    .stat-note{
+      color:#8e8e93;
+    }
+    .label{
+      font-size:12px;
+      font-weight:600;
+      color:#6d6d72;
+      margin-bottom:6px;
+    }
+    .field, .field-sm, textarea, .editor-area, select{
+      min-height:44px;
+      border-radius:14px;
+      border:1px solid rgba(60,60,67,.12);
+      background:#fbfbfd;
+      padding:12px 14px;
+      font-size:14px;
+      box-shadow:none;
+    }
+    .editor-area{
+      min-height:104px;
+    }
+    .dropzone{
+      border:1px dashed rgba(60,60,67,.18);
+      border-radius:18px;
+      background:#fbfbfd;
+      padding:16px;
+    }
+    .dropzone strong{
+      font-size:15px;
+      font-weight:700;
+      letter-spacing:-0.02em;
+    }
+    .hero-actions{
+      gap:10px;
+      margin-top:16px;
+    }
+    .btn{
+      min-height:44px;
+      padding:0 16px;
+      border-radius:14px;
+      font-size:14px;
+      font-weight:600;
+      letter-spacing:-0.01em;
+      border:1px solid rgba(60,60,67,.12);
+      background:#f2f2f7;
+      color:#1c1c1e;
+      box-shadow:none;
+    }
+    .btn.primary{
+      background:#1c1c1e;
+      color:#fff;
+      border-color:transparent;
+    }
+    .btn.apply-accent{
+      background:#8b6847;
+      color:#fff;
+      border-color:transparent;
+    }
+    .btn.subtle{
+      background:#f2f2f7;
+      color:#3a3a3c;
+    }
+    .btn.danger{
+      background:#fff1f1;
+      color:#c23a3a;
+      border-color:rgba(194,58,58,.12);
+    }
+    .btn.applied{
+      background:#34c759;
+      color:#fff;
+      border-color:transparent;
+      box-shadow:none;
+    }
+    .preview-toolbar{
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .asset{
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:18px;
+      box-shadow:none;
+      background:#fff;
+    }
+    .asset-head{
+      border-bottom:1px solid rgba(0,0,0,.05);
+    }
+    .thumb-box,.large-box{
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:14px;
+      background:#fbfbfd;
+    }
+    .stats-grid{
+      gap:10px;
+    }
+    .stat-box{
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:16px;
+      background:#fbfbfd;
+      padding:12px;
+    }
+    .stat-label{
+      font-size:12px;
+      color:#8e8e93;
+    }
+    .stat-value{
+      font-size:17px;
+      font-weight:700;
+      color:#1c1c1e;
+    }
+    .progress-bar{
+      height:10px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.05);
+      background:#ececf1;
+    }
+    .progress-fill{
+      background:linear-gradient(90deg,#8b6847,#b28a66);
+    }
+    .password-wrap{
+      max-width:420px;
+      background:rgba(255,255,255,.94);
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:24px;
+      box-shadow:0 14px 40px rgba(0,0,0,.08);
+      padding:22px;
+    }
+    .password-wrap h2{
+      font-size:26px;
+      font-weight:700;
+      letter-spacing:-0.03em;
+    }
+    .admin-bottom-actions{
+      gap:10px;
+      border-top:1px solid rgba(0,0,0,.05);
+      margin-top:16px;
+      padding-top:12px;
+    }
+    .artwork-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .artwork-actions .btn{
+      width:100%;
+      min-height:44px;
+      font-size:14px;
+      font-weight:600;
+      border-radius:14px;
+      box-shadow:none;
+    }
+    @media (max-width: 1020px){
+      .admin-grid{grid-template-columns:1fr}
+    }
+    @media (max-width: 680px){
+      .admin-panel{padding:14px}
+      .admin-card{padding:14px}
+      .hero-actions,.asset-actions,.admin-bottom-actions{flex-direction:column}
+      .btn{width:100%}
+      .admin-head{padding:14px}
+      .password-wrap{margin:8vh auto 0}
+    }
+
   </style>
 </head>
 <body>
@@ -629,19 +861,13 @@
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
-      <div class="admin-head">
-        <div>
-          <div class="admin-title">관리자 이미지 변환기</div>
-          <div class="admin-sub">원본 사진 업로드 → 웹용 이미지 1개 생성 → 개별 또는 ZIP 다운로드</div>
-        </div>
-
-      </div>
 
       <div class="admin-panel">
         <div class="admin-grid">
           <div class="stack">
             <div class="admin-card">
               <h3>1. 사진 올리기</h3>
+              <p style="margin:0 0 12px;color:#8e8e93;font-size:13px;line-height:1.55">원본 사진 업로드 → 웹용 이미지 1개 생성 → 개별 또는 ZIP 다운로드</p>
               <div class="dropzone">
                 <strong>원본 사진 여러 장 업로드</strong>
                 <div class="hint">JPG, PNG, WebP 권장 · 사진은 브라우저 안에서만 변환됩니다.</div>
@@ -845,7 +1071,7 @@
                   <label class="label" for="artThumbUrl">작품 이미지 링크</label>
                   <input class="field" id="artThumbUrl" type="url" placeholder="https://ik.imagekit.io/... 또는 https://drive.google.com/file/d/.../view">
                 </div>
-                <div class="mini-note">작품 이미지 링크 1개만 넣으면 카드와 팝업에 같은 이미지로 함께 반영합니다.</div>
+                <div class="mini-note" style="font-size:13px;line-height:1.6">※ 이미지 링크와 유튜브 주소를 넣고 버튼 한 번만 누르면 함께 반영됩니다.</div>
 
                 <div class="field-row">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:700;color:var(--muted)">
@@ -859,16 +1085,13 @@
                   <select class="field-sm" id="artTargetWork"></select>
                 </div>
 
-                <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="artDraftSaveBtn">입력 저장</button>
-                  <button class="btn" type="button" id="artDraftLoadBtn">불러오기</button>
-                  <button class="btn subtle" type="button" id="artDraftResetBtn">초기화</button>
-                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품 이미지 반영</button>
-                  <button class="btn" type="button" id="applyYoutubeBtn">팝업 유튜브 연결</button>
+                <div class="hero-actions artwork-actions" style="margin-top:10px">
+                  <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품/유튜브 반영</button>
+                  <button class="btn" type="button" id="exportHtmlBtnInline">업로드용 HTML 저장</button>
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리와 작품 이미지 링크를 넣고 작품 이미지 반영을 누르면 카드와 팝업에 바로 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리, 작품 이미지 링크, 유튜브 주소를 넣고 작품/유튜브 반영을 누르면 함께 반영됩니다.</div>
               </div>
             </div>
 
@@ -918,7 +1141,6 @@
             <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
           </div>
           <div class="admin-bottom-actions">
-            <button class="btn primary" type="button" id="exportHtmlBtn">업로드용 HTML 저장</button>
             <button class="btn" type="button" id="logoutBtn">로그아웃</button>
             <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
           </div>
@@ -1229,12 +1451,12 @@
       const btn = qs('#applyArtworkBtn');
       if(!btn) return;
       btn.classList.remove('applied');
-      btn.textContent = ok ? '반영 완료' : '작품 이미지 반영';
+      btn.textContent = ok ? '반영 완료' : '작품/유튜브 반영';
       if(ok){
         btn.classList.add('applied');
         setTimeout(() => {
           btn.classList.remove('applied');
-          btn.textContent = '작품 이미지 반영';
+          btn.textContent = '작품/유튜브 반영';
         }, 1800);
       }
     }
@@ -2408,11 +2630,7 @@
     qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
     qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
     bindAboutImageInputs();
-    qs('#artDraftSaveBtn')?.addEventListener('click', saveArtDraft);
-    qs('#artDraftLoadBtn')?.addEventListener('click', loadArtDraft);
-    qs('#artDraftResetBtn')?.addEventListener('click', resetArtDraft);
     qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
-    qs('#applyYoutubeBtn')?.addEventListener('click', applyYoutubeToSelectedWork);
     qs('#deleteArtworkBtn')?.addEventListener('click', deleteSelectedArtwork);
     qs('#artTargetWork')?.addEventListener('change', handleArtTargetChange);
     ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
@@ -2424,6 +2642,7 @@
     populateArtTargetWork('__new__');
 
     qs('#exportHtmlBtn')?.addEventListener('click', exportCurrentHtml);
+    qs('#exportHtmlBtnInline')?.addEventListener('click', exportCurrentHtml);
 
     qsa('[data-accordion]').forEach(btn => {
       btn.addEventListener('click', () => {
