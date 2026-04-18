@@ -414,7 +414,13 @@
       .viewer-youtube{font-size:13px;margin-top:3px}
       .artist-photo{min-height:360px}
       .brand{width:100%}
-      .brand-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;width:100%}
+      .brand-top{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        width:100%;
+      }
       .top-tools{width:100%}
       .top-nav-row{width:100%;flex-wrap:wrap;gap:8px}
       .nav{width:100%;justify-content:space-between}
@@ -422,12 +428,14 @@
       .top-left-tools{justify-content:flex-start;padding-left:0}
       .top-right-tools{justify-content:flex-end;padding-right:0}
       .news-mini{
-        min-height:30px;
-        padding:0 10px;
+        min-height:32px;
+        padding:0 12px;
         border-radius:10px;
         font-size:12px;
-        top:6px;
+        top:4px;
       }
+      .news-mobile{display:inline-flex !important}
+      .news-desktop-link{display:none !important}
       .accordion-btn{
         padding:16px 18px 8px;
         font-size:22px;
@@ -655,6 +663,23 @@
       .password-wrap{margin:8vh auto 0}
     }
 
+
+    .news-mobile{display:none}
+    .news-desktop-link{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      color:var(--muted);
+      border:1px solid transparent;
+    }
+    .news-desktop-link:hover{
+      background:rgba(255,255,255,.55);
+      border-color:var(--line);
+      color:var(--text);
+    }
+
   </style>
 </head>
 <body>
@@ -663,7 +688,7 @@
       <div class="brand">
         <div class="brand-top">
           <div class="brand-title" id="adminTapTarget" role="button" aria-label="작가명">이원주</div>
-          <a class="news-mini" href="#news">소식</a>
+          <a class="news-mini news-mobile" href="#news">소식</a>
         </div>
         <div class="brand-sub">작품 포트폴리오</div>
       </div>
@@ -674,6 +699,7 @@
             <a href="#works">작품</a>
             <a href="#note">작가 노트</a>
             <a href="#contact">문의</a>
+            <a class="news-desktop-link" href="#news">소식</a>
           </nav>
         </div>
       </div>
