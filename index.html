@@ -804,8 +804,33 @@
             </div>
 
             
+            
             <div class="admin-card">
-              <h3>6. 작품 등록 추가</h3>
+              <h3>6. ImageKit 연결</h3>
+              <p>ImageKit 기본 주소를 한 번 저장해두면 파일명만 넣어도 전체 링크를 자동으로 만들어 작품에 반영할 수 있습니다.</p>
+              <div class="stack" style="margin-top:14px">
+                <div>
+                  <label class="label" for="imagekitBaseUrl">ImageKit 기본 주소</label>
+                  <input class="field" id="imagekitBaseUrl" type="url" placeholder="https://ik.imagekit.io/wonjuart" value="https://ik.imagekit.io/wonjuart">
+                </div>
+                <div>
+                  <label class="label" for="imagekitFolderPath">기본 폴더 경로 (선택)</label>
+                  <input class="field" id="imagekitFolderPath" type="text" placeholder="예: works 또는 archive/2026">
+                </div>
+                <div>
+                  <label class="label" for="imagekitFileName">파일명만 입력</label>
+                  <input class="field" id="imagekitFileName" type="text" placeholder="예: wonju-work-01.jpg">
+                </div>
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn primary" type="button" id="saveImagekitConfigBtn">ImageKit 설정 저장</button>
+                  <button class="btn" type="button" id="applyImagekitLinkBtn">파일명으로 링크 넣기</button>
+                </div>
+                <div class="status" id="imagekitStatus">ImageKit 주소를 저장한 뒤 파일명만 입력하면 작품 이미지 공유링크 칸에 자동으로 들어갑니다.</div>
+              </div>
+            </div>
+
+<div class="admin-card">
+              <h3>7. 작품 등록 추가</h3>
               <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div class="field-row">
@@ -843,7 +868,7 @@
                 <div class="field-row">
                   <div>
                     <label class="label" for="artThumbUrl">작품 이미지 공유링크</label>
-                    <input class="field-sm" id="artThumbUrl" type="url" placeholder="https://drive.google.com/file/d/.../view">
+                    <input class="field-sm" id="artThumbUrl" type="url" placeholder="ImageKit 전체 주소 또는 파일명 (예: wonju-work-01.jpg)">
                   </div>
                   <div>
                     <label class="label" for="artFullUrl">같은 링크 사용</label>
@@ -878,7 +903,7 @@
             </div>
 
             <div class="admin-card">
-              <h3>7. GitHub 업로드 용량 추정</h3>
+              <h3>8. GitHub 업로드 용량 추정</h3>
               <p>토큰 없이 현재 이 페이지에서 선택·생성한 파일 기준으로 GitHub Pages 1GB 한도 대비 여유를 계산합니다.</p>
               <div class="stats-grid">
                 <div class="stat-box">
@@ -923,6 +948,7 @@
             <div class="small" id="previewEmpty">아직 생성된 결과가 없습니다.</div>
           </div>
           <div class="admin-bottom-actions">
+            <button class="btn primary" type="button" id="exportHtmlBtn">업로드용 HTML 저장</button>
             <button class="btn" type="button" id="logoutBtn">로그아웃</button>
             <button class="btn danger" type="button" id="closeAdminBtn">관리자 닫기</button>
           </div>
@@ -1077,6 +1103,71 @@
       });
     }
 
+
+    function getImagekitConfig(){
+      return readJSON('wonjuImagekitConfig', {
+        baseUrl: 'https://ik.imagekit.io/wonjuart',
+        folderPath: ''
+      });
+    }
+
+    function writeImagekitConfig(value){
+      writeJSON('wonjuImagekitConfig', {
+        baseUrl: String(value?.baseUrl || '').trim(),
+        folderPath: String(value?.folderPath || '').trim().replace(/^\/+|\/+$/g, '')
+      });
+    }
+
+    function buildImagekitUrl(rawValue){
+      const value = String(rawValue || '').trim();
+      if(!value) return '';
+      if(/^https?:\/\//i.test(value) || value.startsWith('data:image/')) return value;
+
+      const config = getImagekitConfig();
+      const baseUrl = String(config.baseUrl || '').trim().replace(/\/+$/g, '');
+      const folderPath = String(config.folderPath || '').trim().replace(/^\/+|\/+$/g, '');
+      const filePath = value.replace(/^\/+/, '');
+
+      if(!baseUrl) return value;
+      return folderPath ? `${baseUrl}/${folderPath}/${filePath}` : `${baseUrl}/${filePath}`;
+    }
+
+    function loadImagekitConfig(){
+      const config = getImagekitConfig();
+      if(qs('#imagekitBaseUrl')) qs('#imagekitBaseUrl').value = config.baseUrl || '';
+      if(qs('#imagekitFolderPath')) qs('#imagekitFolderPath').value = config.folderPath || '';
+    }
+
+    function saveImagekitConfig(){
+      const baseUrl = qs('#imagekitBaseUrl')?.value?.trim() || '';
+      const folderPath = qs('#imagekitFolderPath')?.value?.trim() || '';
+      writeImagekitConfig({ baseUrl, folderPath });
+      const status = qs('#imagekitStatus');
+      if(status){
+        status.textContent = 'ImageKit 설정을 저장했습니다.';
+        status.className = 'status ok';
+      }
+    }
+
+    function applyImagekitLinkFromFilename(){
+      const fileName = qs('#imagekitFileName')?.value?.trim() || '';
+      const status = qs('#imagekitStatus');
+      if(!fileName){
+        if(status){
+          status.textContent = '파일명을 입력해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const finalUrl = buildImagekitUrl(fileName);
+      if(qs('#artThumbUrl')) qs('#artThumbUrl').value = finalUrl;
+      if(status){
+        status.textContent = `작품 이미지 공유링크에 넣었습니다. ${finalUrl}`;
+        status.className = 'status ok';
+      }
+    }
+
     function getWorkOverrides(){
       return readJSON('wonjuWorkOverrides', {});
     }
@@ -1162,7 +1253,7 @@
       if(value.startsWith('data:image/')) return value;
       const driveId = extractGoogleDriveFileId(value);
       if(driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w2000`;
-      return value;
+      return buildImagekitUrl(value);
     }
 
     function flashApplyButton(ok){
@@ -2167,6 +2258,73 @@
     });
 
 
+
+    function serializeCurrentWorksForExport(){
+      return getWorks().map(({title, category, year, medium, desc, thumb, large, youtube}) => ({
+        title, category, year, medium, desc, thumb, large, youtube
+      }));
+    }
+
+    function serializeCurrentTextContent(){
+      let saved = null;
+      try{
+        saved = JSON.parse(localStorage.getItem('wonjuSiteTextContent') || 'null');
+      }catch(e){
+        saved = null;
+      }
+      return {
+        contact: saved?.contact?.length ? saved.contact : defaultTextContent.contact,
+        exhibition: saved?.exhibition?.length ? saved.exhibition : defaultTextContent.exhibition,
+        news: saved?.news?.length ? saved.news : defaultTextContent.news
+      };
+    }
+
+    function serializeCurrentAboutContent(){
+      let saved = null;
+      try{
+        saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+      }catch(e){
+        saved = null;
+      }
+      const sharedImages = getSharedImageContent();
+      return {...defaultAboutContent, ...(saved || {}), ...sharedImages};
+    }
+
+    function exportCurrentHtml(){
+      try{
+        const html = document.documentElement.outerHTML;
+        const worksJson = JSON.stringify(serializeCurrentWorksForExport(), null, 2);
+        const textJson = JSON.stringify(serializeCurrentTextContent(), null, 2);
+        const aboutJson = JSON.stringify(serializeCurrentAboutContent(), null, 2);
+        const imagekitJson = JSON.stringify(getImagekitConfig(), null, 2);
+
+        let output = html.replace(/const sampleWorks = \[[\s\S]*?\n    \];/, `const sampleWorks = ${worksJson};`);
+        output = output.replace(/const defaultTextContent = \{[\s\S]*?\n    \};/, `const defaultTextContent = ${textJson};`);
+        output = output.replace(/const defaultAboutContent = \{[\s\S]*?\n    \};/, `const defaultAboutContent = ${aboutJson};`);
+
+        // export file should start clean without per-browser overrides
+        output = output.replace(/function getWorkOverrides\(\)\{[\s\S]*?\n    \}/, `function getWorkOverrides(){\n      return {};\n    }`);
+        output = output.replace(/function getExtraWorks\(\)\{[\s\S]*?\n    \}/, `function getExtraWorks(){\n      return [];\n    }`);
+        output = output.replace(/function getSharedImageContent\(\)\{[\s\S]*?\n    \}/, `function getSharedImageContent(){\n      return { heroImage:'', artistImage:'' };\n    }`);
+        output = output.replace(/function getImagekitConfig\(\)\{[\s\S]*?\n    \}/, `function getImagekitConfig(){\n      return ${imagekitJson};\n    }`);
+
+        const blob = new Blob([output], {type:'text/html;charset=utf-8'});
+        downloadBlob(blob, 'index.html');
+
+        const artworkStatus = qs('#artDraftStatus');
+        if(artworkStatus){
+          artworkStatus.textContent = '업로드용 HTML 저장 완료 · 이 파일을 GitHub에 올리면 다른 기기에서도 그대로 보입니다.';
+          artworkStatus.className = 'status ok';
+        }
+      }catch(err){
+        const artworkStatus = qs('#artDraftStatus');
+        if(artworkStatus){
+          artworkStatus.textContent = `업로드용 HTML 저장 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
+          artworkStatus.className = 'status bad';
+        }
+      }
+    }
+
     function escapeHtmlText(str){
       return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
     }
@@ -2306,7 +2464,12 @@
     }
 
     loadArtDraft();
+    loadImagekitConfig();
     populateArtTargetWork('__new__');
+
+    qs('#saveImagekitConfigBtn')?.addEventListener('click', saveImagekitConfig);
+    qs('#applyImagekitLinkBtn')?.addEventListener('click', applyImagekitLinkFromFilename);
+    qs('#exportHtmlBtn')?.addEventListener('click', exportCurrentHtml);
 
     qsa('[data-accordion]').forEach(btn => {
       btn.addEventListener('click', () => {
