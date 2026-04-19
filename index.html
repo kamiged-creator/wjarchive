@@ -6,7 +6,7 @@
   <meta name="google" content="notranslate" />
   <title>이원주 | 작품 포트폴리오</title>
   <meta name="description" content="이원주 작가의 작품 포트폴리오. 작품 보기와 관리자용 이미지 변환 기능을 하나의 페이지에서 제공합니다." />
-  <meta name="theme-color" content="#f6f1ea" />
+  <meta name="theme-color" content="#fbf8f4" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="이원주 | 작품 포트폴리오" />
   <meta property="og:description" content="작품 보기와 관리자 이미지 변환 기능이 포함된 포트폴리오 사이트" />
@@ -46,14 +46,25 @@
 
     .topbar{
       position:sticky;top:0;z-index:20;
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      background:rgba(251,248,244,.78);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      background:rgba(251,248,244,.92);
       border-bottom:none;
       box-shadow:none;
       margin:0;
       transition:transform .28s ease, opacity .28s ease;
       will-change:transform;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:1px;
+      background:rgba(251,248,244,.92);
+      z-index:9999;
+      pointer-events:none;
     }
     .topbar.is-hidden{
       transform:translateY(calc(-100% - 8px));
@@ -66,20 +77,17 @@
     .brand-title{font-size:18px;font-weight:800;letter-spacing:.02em}
     .brand-sub{font-size:12px;color:var(--muted)}
     .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
-    .nav a{
-      padding:10px 14px;border-radius:999px;color:var(--muted);border:1px solid transparent;
-      position:relative; top:-3px;
-    }
+    .nav a{padding:6px 12px;border-radius:999px;color:var(--muted);font-size:14px;background:transparent;transition:all .2s ease}
     .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
 
-    .hero{padding:18px 0 28px; margin-top:0;}
+    .hero{padding:10px 0 22px; margin-top:0;}
     .hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:28px;align-items:center}
     .eyebrow{
       display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
       border:1px solid var(--line);background:rgba(255,255,255,.58);font-size:13px;color:var(--muted);
     }
-    h1{margin:18px 0 14px;font-size:clamp(34px,6vw,64px);line-height:1.08;letter-spacing:-.04em}
-    .lead{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:620px}
+    h1{margin:14px 0 12px;font-size:clamp(34px,6vw,64px);line-height:1.05;letter-spacing:-.045em}
+    .lead{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:620px;line-height:1.72;letter-spacing:-.01em}
     .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
     .btn{
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -103,7 +111,7 @@
     .hero-caption{display:none}
     #aboutSectionCopy{display:none}
 
-    section{padding:36px 0;scroll-margin-top:170px;margin-top:0}
+    section{padding:34px 0;scroll-margin-top:100px;margin-top:0}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
     .section-title{font-size:clamp(24px,4vw,34px);margin:0;letter-spacing:-.03em}
     .section-copy{margin:0;color:var(--muted);max-width:700px}
@@ -224,7 +232,7 @@
     .viewer-image img{max-height:min(78vh,860px);width:auto;object-fit:contain}
     .viewer-body{padding:24px;color:#f5efe8}
     .viewer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0 0 8px}
-    .viewer-body h3{margin:0;font-size:28px;line-height:1.2}
+    .viewer-body h3{margin:0;font-size:22px;line-height:1.2}
     .viewer-meta{color:#d4c7ba;font-size:13px;margin-bottom:12px}
     .viewer-desc{color:#eee4d8}
     .viewer-youtube{
@@ -253,12 +261,12 @@
     .viewer-youtube a:hover{
       color:#ff2d2d;
       opacity:1;
-      transform:translateY(-1px);
+      transform:translateY(-0.5px);
     }
     .viewer-close{margin-top:18px;background:#2a231f;color:#fff;border:none}
 
     .admin-overlay{
-      position:fixed;inset:0;background:rgba(17,15,13,.72);backdrop-filter:blur(10px);display:none;z-index:90;padding:16px;
+      position:fixed;inset:0;background:rgba(17,15,13,.72);backdrop-filter:blur(14px);display:none;z-index:90;padding:16px;
     }
     .admin-overlay.open{display:block}
     .admin-shell{
@@ -296,8 +304,37 @@
     .dropzone{
       border:1.5px dashed rgba(139,104,71,.38);border-radius:18px;padding:18px;background:linear-gradient(180deg,#fff, #fbf7f1);
       text-align:center;
+      transition:border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease;
     }
-    .dropzone strong{display:block;font-size:16px;margin-bottom:6px}
+    .dropzone.is-dragover{
+      border-color:rgba(139,104,71,.78);
+      background:linear-gradient(180deg,#fff7ef,#f7efe5);
+      box-shadow:0 0 0 4px rgba(139,104,71,.10);
+      transform:translateY(-0.5px);
+    }
+    .dropzone-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .dropzone strong{display:block;font-size:16px;margin-bottom:0}
+    .file-count-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:54px;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      border:1px solid rgba(139,104,71,.18);
+      background:rgba(231,214,196,.42);
+      color:#6b5746;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
     .hint{font-size:12px;color:var(--muted)}
     .status{font-size:13px;margin-top:8px;color:var(--muted)}
     .status.ok{color:var(--ok)}
@@ -333,7 +370,7 @@
     .password-wrap{
       max-width:420px;margin:10vh auto 0;background:#fffdf9;border:1px solid var(--line);border-radius:28px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.18)
     }
-    .password-wrap h2{margin:0 0 8px;font-size:28px;letter-spacing:-.03em}
+    .password-wrap h2{margin:0 0 8px;font-size:22px;letter-spacing:-.03em}
     .password-wrap p{margin:0 0 14px;color:var(--muted)}
     .hidden{display:none !important}
     .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
@@ -350,7 +387,7 @@
     }
     .artwork-actions .btn{
       width:100%;
-      min-height:56px;
+      min-height:46px;
       font-size:16px;
     }
 
@@ -392,7 +429,7 @@
 
 
 
-    #news,#contact,#exhibitionAccordion,#contactAccordion{scroll-margin-top:230px}
+    #news,#contact,#exhibitionAccordion,#contactAccordion{scroll-margin-top:120px}
 
     @media (max-width: 1020px){
       .hero-grid,.intro,.note,.contact,.admin-grid,.viewer-grid,.about-profile{grid-template-columns:1fr}
@@ -400,10 +437,10 @@
       .artist-photo{min-height:440px;background-position:center top}
     }
     @media (max-width: 680px){
-      section{scroll-margin-top:190px}
+      section{scroll-margin-top:110px}
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:18px 0 12px}
       .wrap{padding:0 18px}
-      .hero{padding-top:14px}
+      .hero{padding-top:8px}
       .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
       .asset-preview{grid-template-columns:1fr}
       .btn{width:100%}
@@ -423,7 +460,7 @@
       }
       .top-tools{width:100%}
       .top-nav-row{width:100%;flex-wrap:wrap;gap:8px}
-      .nav{width:100%;justify-content:space-between}
+      .nav{width:100%;justify-content:space-between;margin-top:2px}
       .top-left-tools,.top-right-tools{display:flex;align-items:center}
       .top-left-tools{justify-content:flex-start;padding-left:0}
       .top-right-tools{justify-content:flex-end;padding-right:0}
@@ -680,9 +717,50 @@
       color:var(--text);
     }
 
+
+    .to-top-badge{
+      position:fixed;
+      right:14px;
+      bottom:16px;
+      z-index:120;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.52);
+      color:#111;
+      font-size:20px;
+      font-weight:600;
+      line-height:1;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+      backdrop-filter:blur(18px) saturate(140%);
+      -webkit-backdrop-filter:blur(18px) saturate(140%);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(10px) scale(.96);
+      transition:opacity .25s ease, transform .25s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .to-top-badge:hover,
+    .to-top-badge:active{
+      background:rgba(255,255,255,.62);
+      box-shadow:0 6px 14px rgba(0,0,0,.10);
+      transform:translateY(0) scale(.985);
+    }
+    .to-top-badge.show{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0) scale(1);
+    }
+
   </style>
 </head>
-<body>
+<body id="top">
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
@@ -758,7 +836,7 @@
     </section>
 
     <section id="works">
-      <div class="wrap">
+      <div class="wrap" style="padding-top:4px">
         <div class="section-head">
           <div>
             <h2 class="section-title" id="worksSectionTitle">작품</h2>
@@ -894,9 +972,13 @@
             <div class="admin-card">
               <h3>1. 사진 올리기</h3>
               <p style="margin:0 0 12px;color:#8e8e93;font-size:13px;line-height:1.55">원본 사진 업로드 → 웹용 이미지 1개 생성 → 개별 또는 ZIP 다운로드</p>
-              <div class="dropzone">
-                <strong>원본 사진 여러 장 업로드</strong>
+              <div class="dropzone" id="uploadDropzone">
+                <div class="dropzone-head">
+                  <strong>원본 사진 여러 장 업로드</strong>
+                  <span class="file-count-badge" id="fileCountBadge">0장</span>
+                </div>
                 <div class="hint">JPG, PNG, WebP 권장 · 사진은 브라우저 안에서만 변환됩니다.</div>
+                <div class="hint" id="dragGuideText" style="margin-top:6px">파일 선택 또는 여기로 드래그해서 넣기</div>
                 <input id="fileInput" type="file" accept="image/*" multiple style="margin-top:12px;width:100%">
               </div>
               <div class="status" id="fileStatus">아직 업로드된 파일이 없습니다.</div>
@@ -2180,20 +2262,64 @@
     qs('#loginBtn').addEventListener('click', handleLogin);
     qs('#adminPassword').addEventListener('keydown', e => { if(e.key === 'Enter') handleLogin(); });
 
-    qs('#fileInput').addEventListener('change', async (e) => {
-      state.files = [...(e.target.files || [])].filter(file => file.type.startsWith('image/'));
+    function updateFileSelectionStatus(files){
       const fileStatus = qs('#fileStatus');
+      const fileCountBadge = qs('#fileCountBadge');
+      state.files = [...(files || [])].filter(file => file.type && file.type.startsWith('image/'));
+
       if(!state.files.length){
-        fileStatus.textContent = '아직 업로드된 파일이 없습니다.';
-        fileStatus.className = 'status';
+        if(fileStatus){
+          fileStatus.textContent = '아직 업로드된 파일이 없습니다.';
+          fileStatus.className = 'status';
+        }
+        if(fileCountBadge) fileCountBadge.textContent = '0장';
         updateCapacityStats();
         return;
       }
-      const totalMB = (state.files.reduce((sum,f)=> sum + f.size, 0) / (1024*1024)).toFixed(2);
-      fileStatus.textContent = `${state.files.length}장 선택됨 · 원본 합계 ${totalMB}MB`;
-      fileStatus.className = 'status ok';
+
+      const totalMB = (state.files.reduce((sum, f) => sum + (f.size || 0), 0) / (1024*1024)).toFixed(2);
+      if(fileStatus){
+        fileStatus.textContent = `${state.files.length}장 선택됨 · 원본 합계 ${totalMB}MB`;
+        fileStatus.className = 'status ok';
+      }
+      if(fileCountBadge) fileCountBadge.textContent = `${state.files.length}장`;
       updateCapacityStats();
-    });
+    }
+
+    function bindFileDropzone(){
+      const dropzone = qs('#uploadDropzone');
+      const fileInput = qs('#fileInput');
+      if(!dropzone || !fileInput) return;
+
+      const setDragState = (on) => dropzone.classList.toggle('is-dragover', !!on);
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setDragState(true);
+        });
+      });
+
+      ['dragleave', 'dragend', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setDragState(false);
+        });
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const droppedFiles = [...(e.dataTransfer?.files || [])];
+        updateFileSelectionStatus(droppedFiles);
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        updateFileSelectionStatus(e.target.files || []);
+      });
+    }
+
+    bindFileDropzone();
 
     function mimeToExt(mime){
       if(mime === 'image/jpeg') return 'jpg';
@@ -2743,8 +2869,50 @@
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
+
+    function bindToTopBadge(){
+      const badge = qs('#toTopBadge');
+      if(!badge) return;
+
+      const pressOn = () => { badge.style.transform = badge.classList.contains('show') ? 'translateY(0) scale(.94)' : 'translateY(10px) scale(.94)'; };
+      const pressOff = () => { badge.style.transform = badge.classList.contains('show') ? 'translateY(0) scale(1)' : 'translateY(10px) scale(.96)'; };
+
+      badge.addEventListener('touchstart', pressOn, { passive:true });
+      badge.addEventListener('touchend', pressOff, { passive:true });
+      badge.addEventListener('mousedown', pressOn);
+      badge.addEventListener('mouseup', pressOff);
+      badge.addEventListener('mouseleave', pressOff);
+
+      badge.addEventListener('click', (e) => {
+        e.preventDefault();
+        try{
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }catch(err){
+          window.scrollTo(0, 0);
+        }
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+    }
+
+    bindToTopBadge();
+
+    window.addEventListener('scroll', () => {
+      const badge = document.getElementById('toTopBadge');
+      if(!badge) return;
+      if(window.scrollY > 360){
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
+    }, { passive:true });
+
+
   </script>
 
+
+
+  <a class="to-top-badge" id="toTopBadge" href="#top" aria-label="맨 위로" title="맨 위로">⌃</a>
 
 
 </body>
