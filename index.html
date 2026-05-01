@@ -1267,6 +1267,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const sampleWorks = [
       {
@@ -1335,6 +1336,22 @@
     // 아래 해시를 원하는 비밀번호의 SHA-256 값으로 바꾸면 비밀번호 변경 가능
     const ADMIN_HASH = 'fd02492a6b028e0a346966a0f5369c87fa8d477f203d787a0836db64e1b0ec10';
 
+    /*
+      Supabase 연결 설정
+      - Project URL은 현재 프로젝트 주소로 넣어두었습니다.
+      - 아래 SUPABASE_ANON_KEY에 Supabase > Project Settings > API > anon public key를 붙여넣으면
+        news_items / exhibitions / contact_items / site_settings / works 데이터를 홈페이지에서 바로 불러옵니다.
+      - anon key는 공개용 키라 HTML에 넣어도 되는 키입니다. 단, service_role key는 절대 넣으면 안 됩니다.
+    */
+    const SUPABASE_URL = 'https://vefeplfczeztbplowjmj.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
+    const supabaseClient = (
+      window.supabase &&
+      SUPABASE_URL &&
+      SUPABASE_ANON_KEY &&
+      !SUPABASE_ANON_KEY.includes('여기에_')
+    ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
 
     function formatMB(bytes){
       return (bytes / (1024*1024)).toFixed(2) + ' MB';
@@ -1383,7 +1400,8 @@
       currentPage: 1,
       worksPerPage: 8,
       isProcessing: false,
-      cancelRequested: false
+      cancelRequested: false,
+      dbWorks: null
     };
 
     qs('#year').textContent = new Date().getFullYear();
@@ -1490,6 +1508,13 @@
     }
 
     function getWorks(){
+      if(Array.isArray(state.dbWorks)){
+        return state.dbWorks.map((work, index) => ({
+          ...work,
+          _sourceType: 'db',
+          _sourceIndex: index
+        })).filter(work => !work._deleted);
+      }
       const overrides = getWorkOverrides();
       const baseWorks = sampleWorks.map((work, index) => ({
         ...work,
@@ -1609,6 +1634,35 @@
       }
 
       try{
+        if(supabaseReady()){
+          const saveResult = await saveArtworkToSupabase({
+            info, title, category, year, desc, youtube, thumbUrl, fullUrl
+          });
+          if(!saveResult.ok){
+            if(status){
+              status.textContent = `Supabase 저장 실패: ${saveResult.message}`;
+              status.className = 'status bad';
+            }
+            return;
+          }
+          await loadSupabaseWorks();
+          populateArtTargetWork('__new__');
+          renderGallery();
+          if(status){
+            status.textContent = saveResult.message || `${title || '작품'} Supabase 저장 완료`;
+            status.className = 'status ok';
+          }
+          if(qs('#artFeatured')?.checked){
+            const currentAbout = {...defaultAboutContent};
+            currentAbout.heroImage = fullUrl || thumbUrl || '';
+            currentAbout.heroCaption = title || currentAbout.heroCaption;
+            applyAboutContentToPage(currentAbout);
+            await saveAboutContentToSupabase(currentAbout);
+          }
+          flashApplyButton(true);
+          return;
+        }
+
         if(info.type === 'new'){
           const extraWorks = getExtraWorks();
           extraWorks.unshift({
@@ -1871,6 +1925,7 @@
           status.textContent = '메인 / 작가소개 내용이 저장되었습니다.';
           status.className = 'status ok';
         }
+        saveAboutContentToSupabase(data);
       }else if(status){
         status.textContent = '메인 / 작가소개 내용이 화면에 반영되었습니다.';
         status.className = 'status ok';
@@ -2131,7 +2186,7 @@
     }
 
 
-    function deleteSelectedArtwork(){
+    async function deleteSelectedArtwork(){
       const info = getSelectedWorkInfo();
       const status = qs('#artDraftStatus');
 
@@ -2144,6 +2199,26 @@
       }
 
       const label = buildWorkLabel(info.work);
+
+      if(info.type === 'db'){
+        const result = await deleteArtworkFromSupabase(info);
+        if(!result.ok){
+          if(status){
+            status.textContent = `Supabase 삭제 실패: ${result.message}`;
+            status.className = 'status bad';
+          }
+          return;
+        }
+        await loadSupabaseWorks();
+        resetArtDraft();
+        populateArtTargetWork('__new__');
+        renderGallery();
+        if(status){
+          status.textContent = `${label || '선택 작품'} 삭제 완료`;
+          status.className = 'status ok';
+        }
+        return;
+      }
 
       if(info.type === 'sample'){
         const overrides = getWorkOverrides();
@@ -2757,6 +2832,7 @@
           status.textContent = '문구가 저장되었고 화면에도 반영되었습니다.';
           status.className = 'status ok';
         }
+        saveEditableTextContentToSupabase({contactLines, exhibitionLines, newsLines});
       }else{
         if(status){
           status.textContent = '문구가 화면에 반영되었습니다. 저장하려면 문구 저장을 누르세요.';
@@ -2811,6 +2887,307 @@
         if(target) target.classList.toggle('open');
       });
     });
+
+
+
+    function supabaseReady(){
+      return !!supabaseClient;
+    }
+
+    function setSupabaseStatus(message, ok){
+      const targets = ['#textContentStatus', '#aboutContentStatus', '#artDraftStatus'];
+      targets.forEach(sel => {
+        const el = qs(sel);
+        if(el && message){
+          el.textContent = message;
+          el.className = ok ? 'status ok' : 'status bad';
+        }
+      });
+    }
+
+    function valueToObject(value){
+      if(!value) return {};
+      if(typeof value === 'object') return value;
+      try{ return JSON.parse(value); }catch(e){ return {}; }
+    }
+
+    function dbRowsToLines(rows){
+      return (rows || [])
+        .filter(row => row && row.is_visible !== false)
+        .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+        .map(row => String(row.content || '').trim())
+        .filter(Boolean);
+    }
+
+    function applyAboutContentToPage(data){
+      if(!data) return;
+      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow || defaultAboutContent.heroEyebrow;
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle || defaultAboutContent.heroTitle;
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead || defaultAboutContent.heroLead;
+      if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption || defaultAboutContent.heroCaption;
+      if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || defaultAboutContent.aboutSectionCopy;
+      if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1 || defaultAboutContent.paragraph1;
+      if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2 || defaultAboutContent.paragraph2;
+
+      if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow || defaultAboutContent.heroEyebrow;
+      if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = String(data.heroTitle || defaultAboutContent.heroTitle).replace(/<br\s*\/?>/gi, '\n');
+      if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = data.heroLead || defaultAboutContent.heroLead;
+      if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = data.heroCaption || defaultAboutContent.heroCaption;
+      if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy || defaultAboutContent.aboutSectionCopy;
+      if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1 || defaultAboutContent.paragraph1;
+      if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2 || defaultAboutContent.paragraph2;
+
+      if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
+      if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
+    }
+
+    async function loadSupabaseLists(){
+      if(!supabaseReady()) return;
+      const requests = await Promise.all([
+        supabaseClient.from('contact_items').select('content, sort_order, is_visible').eq('is_visible', true).order('sort_order', {ascending:true}),
+        supabaseClient.from('exhibitions').select('content, sort_order, is_visible').eq('is_visible', true).order('sort_order', {ascending:true}),
+        supabaseClient.from('news_items').select('content, sort_order, is_visible').eq('is_visible', true).order('sort_order', {ascending:true})
+      ]);
+
+      const [contactRes, exhibitionRes, newsRes] = requests;
+      if(contactRes.error || exhibitionRes.error || newsRes.error){
+        console.warn('Supabase 목록 불러오기 오류', contactRes.error || exhibitionRes.error || newsRes.error);
+        return;
+      }
+
+      const contactLines = dbRowsToLines(contactRes.data);
+      const exhibitionLines = dbRowsToLines(exhibitionRes.data);
+      const newsLines = dbRowsToLines(newsRes.data);
+
+      if(contactLines.length){
+        renderListItems('#contactDisplayList', contactLines);
+        if(qs('#contactEditor')) qs('#contactEditor').value = contactLines.join('\n');
+      }
+      if(exhibitionLines.length){
+        renderListItems('#exhibitionDisplayList', exhibitionLines);
+        if(qs('#exhibitionEditor')) qs('#exhibitionEditor').value = exhibitionLines.join('\n');
+      }
+      if(newsLines.length){
+        renderListItems('#newsDisplayList', newsLines);
+        if(qs('#newsEditor')) qs('#newsEditor').value = newsLines.join('\n');
+      }
+    }
+
+    async function loadSupabaseSiteSettings(){
+      if(!supabaseReady()) return;
+      const {data, error} = await supabaseClient
+        .from('site_settings')
+        .select('key, value')
+        .in('key', ['hero', 'about']);
+      if(error){
+        console.warn('Supabase site_settings 불러오기 오류', error);
+        return;
+      }
+
+      const merged = {...defaultAboutContent};
+      (data || []).forEach(row => {
+        const value = valueToObject(row.value);
+        if(row.key === 'hero'){
+          if(value.eyebrow) merged.heroEyebrow = value.eyebrow;
+          if(value.heroEyebrow) merged.heroEyebrow = value.heroEyebrow;
+          if(value.title) merged.heroTitle = String(value.title).replace(/\n/g, '<br>');
+          if(value.heroTitle) merged.heroTitle = String(value.heroTitle).replace(/\n/g, '<br>');
+          if(value.lead) merged.heroLead = value.lead;
+          if(value.heroLead) merged.heroLead = value.heroLead;
+          if(value.caption) merged.heroCaption = value.caption;
+          if(value.heroCaption) merged.heroCaption = value.heroCaption;
+          if(value.image) merged.heroImage = value.image;
+          if(value.heroImage) merged.heroImage = value.heroImage;
+        }
+        if(row.key === 'about'){
+          if(value.aboutSectionCopy) merged.aboutSectionCopy = value.aboutSectionCopy;
+          if(value.sectionCopy) merged.aboutSectionCopy = value.sectionCopy;
+          if(value.paragraph1) merged.paragraph1 = value.paragraph1;
+          if(value.paragraph2) merged.paragraph2 = value.paragraph2;
+          if(value.artistImage) merged.artistImage = value.artistImage;
+          if(value.image) merged.artistImage = value.image;
+        }
+      });
+
+      applyAboutContentToPage(merged);
+    }
+
+    function mapDbWork(row){
+      const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_url || row.large || '');
+      const large = normalizeArtworkImageUrl(row.large_url || row.large || row.full_url || thumb || '');
+      return {
+        title: row.title || '제목 없음',
+        category: row.category || '기타',
+        year: row.year_text || row.year || '',
+        medium: row.medium || row.category || '',
+        desc: row.description || row.desc || row.content || '',
+        thumb,
+        large: large || thumb,
+        youtube: row.youtube_url || row.youtube || '',
+        _dbId: row.id
+      };
+    }
+
+    async function loadSupabaseWorks(){
+      if(!supabaseReady()) return;
+      const {data, error} = await supabaseClient
+        .from('works')
+        .select('*')
+        .eq('is_visible', true)
+        .order('sort_order', {ascending:true});
+      if(error){
+        console.warn('Supabase works 불러오기 오류', error);
+        return;
+      }
+      state.dbWorks = (data || []).map(mapDbWork);
+      renderGallery();
+      populateArtTargetWork('__new__');
+    }
+
+    async function loadSupabaseData(){
+      if(!supabaseReady()){
+        console.warn('Supabase anon key가 아직 입력되지 않아 로컬 기본값으로 표시합니다.');
+        return;
+      }
+      try{
+        await Promise.all([
+          loadSupabaseLists(),
+          loadSupabaseSiteSettings(),
+          loadSupabaseWorks()
+        ]);
+      }catch(err){
+        console.warn('Supabase 데이터 불러오기 실패', err);
+      }
+    }
+
+    async function replaceSupabaseTextRows(tableName, lines){
+      if(!supabaseReady()) return {ok:false, message:'Supabase anon key가 아직 입력되지 않았습니다.'};
+      const {error: deleteError} = await supabaseClient
+        .from(tableName)
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      if(deleteError) return {ok:false, message:deleteError.message};
+
+      const rows = lines.map((content, index) => ({
+        content,
+        sort_order: (index + 1) * 10,
+        is_visible: true
+      }));
+      const {error: insertError} = await supabaseClient.from(tableName).insert(rows);
+      if(insertError) return {ok:false, message:insertError.message};
+      return {ok:true, message:'저장 완료'};
+    }
+
+    async function saveEditableTextContentToSupabase({contactLines, exhibitionLines, newsLines}){
+      if(!supabaseReady()) return;
+      const results = await Promise.all([
+        replaceSupabaseTextRows('contact_items', contactLines),
+        replaceSupabaseTextRows('exhibitions', exhibitionLines),
+        replaceSupabaseTextRows('news_items', newsLines)
+      ]);
+      const failed = results.find(r => !r.ok);
+      const status = qs('#textContentStatus');
+      if(status){
+        if(failed){
+          status.textContent = `브라우저 저장은 완료. Supabase 저장 실패: ${failed.message}`;
+          status.className = 'status bad';
+        }else{
+          status.textContent = 'Supabase DB까지 저장되었습니다.';
+          status.className = 'status ok';
+        }
+      }
+    }
+
+    async function saveAboutContentToSupabase(data){
+      if(!supabaseReady()) return;
+      const rows = [
+        {
+          key: 'hero',
+          value: {
+            eyebrow: data.heroEyebrow,
+            title: String(data.heroTitle || '').replace(/<br\s*\/?>/gi, '\n'),
+            lead: data.heroLead,
+            caption: data.heroCaption,
+            image: data.heroImage || ''
+          }
+        },
+        {
+          key: 'about',
+          value: {
+            aboutSectionCopy: data.aboutSectionCopy,
+            paragraph1: data.paragraph1,
+            paragraph2: data.paragraph2,
+            artistImage: data.artistImage || ''
+          }
+        }
+      ];
+      const {error} = await supabaseClient.from('site_settings').upsert(rows, {onConflict:'key'});
+      const status = qs('#aboutContentStatus');
+      if(status){
+        if(error){
+          status.textContent = `브라우저 저장은 완료. Supabase 저장 실패: ${error.message}`;
+          status.className = 'status bad';
+        }else{
+          status.textContent = '메인 / 작가소개가 Supabase DB까지 저장되었습니다.';
+          status.className = 'status ok';
+        }
+      }
+    }
+
+    function buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl}){
+      return {
+        title: title || '새 작품',
+        category: category || '기타',
+        year_text: year || String(new Date().getFullYear()),
+        medium: category || '',
+        description: desc || '',
+        thumb_url: thumbUrl || fullUrl || '',
+        large_url: fullUrl || thumbUrl || '',
+        youtube_url: youtube || '',
+        is_visible: true
+      };
+    }
+
+    async function getNextWorkSortOrder(){
+      if(!supabaseReady()) return 10;
+      const {data, error} = await supabaseClient
+        .from('works')
+        .select('sort_order')
+        .order('sort_order', {ascending:false})
+        .limit(1);
+      if(error || !data || !data.length) return 10;
+      return Number(data[0].sort_order || 0) + 10;
+    }
+
+    async function saveArtworkToSupabase({info, title, category, year, desc, youtube, thumbUrl, fullUrl}){
+      if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
+      const payload = buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl});
+
+      if(info?.type === 'db' && info.work?._dbId){
+        const {error} = await supabaseClient
+          .from('works')
+          .update(payload)
+          .eq('id', info.work._dbId);
+        if(error) return {ok:false, message:error.message};
+        return {ok:true, message:`${payload.title} 작품이 Supabase works에 수정 저장되었습니다.`};
+      }
+
+      payload.sort_order = await getNextWorkSortOrder();
+      const {error} = await supabaseClient.from('works').insert(payload);
+      if(error) return {ok:false, message:error.message};
+      return {ok:true, message:`${payload.title} 작품이 Supabase works에 새로 등록되었습니다.`};
+    }
+
+    async function deleteArtworkFromSupabase(info){
+      if(!supabaseReady() || info?.type !== 'db' || !info.work?._dbId) return {ok:false, message:'Supabase 작품이 아닙니다.'};
+      const {error} = await supabaseClient
+        .from('works')
+        .update({is_visible:false})
+        .eq('id', info.work._dbId);
+      if(error) return {ok:false, message:error.message};
+      return {ok:true, message:'Supabase works에서 숨김 처리했습니다.'};
+    }
+
 
 
 
@@ -2878,6 +3255,7 @@
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
+    loadSupabaseData();
 
     function bindToTopBadge(){
       const badge = qs('#toTopBadge');
