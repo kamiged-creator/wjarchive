@@ -688,15 +688,6 @@
       border-radius:14px;
       box-shadow:none;
     }
-
-    /* PC admin output-setting layout fix: keep narrow admin cards readable */
-    .admin-card .field-row-3{
-      grid-template-columns:1fr;
-    }
-    .admin-card .field-row-3 > div{
-      min-width:0;
-    }
-
     @media (max-width: 1020px){
       .admin-grid{grid-template-columns:1fr}
     }
@@ -877,10 +868,10 @@
     <section id="note">
       <div class="wrap note">
         <article class="card">
-          <p class="note-quote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
+          <p class="note-quote" id="noteQuote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
         </article>
         <article class="card">
-          <p>
+          <p id="noteBody">
             작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
             쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.
           </p>
@@ -1102,7 +1093,7 @@
 
             <div class="admin-card">
               <h3>5. 메인 / 작가소개 편집</h3>
-              <p>상단 큰 제목과 설명, 메인 대표 이미지와 작가소개 이미지, 작가소개 문구를 관리자에서 바꿀 수 있습니다.</p>
+              <p>상단 큰 제목과 설명, 메인 대표 이미지와 작가소개 이미지, 작가소개 문구, 작가 노트를 관리자에서 바꿀 수 있습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div>
                   <label class="label" for="heroCaptionEditor">대표 이미지 캡션</label>
@@ -1132,17 +1123,27 @@
                   <label class="label" for="aboutParagraph2Editor">작가 소개 본문 2</label>
                   <textarea class="editor-area" id="aboutParagraph2Editor" placeholder="작가 소개 두 번째 문단"></textarea>
                 </div>
+                <div>
+                  <label class="label" for="noteQuoteEditor">작가 노트 인용문</label>
+                  <textarea class="editor-area" id="noteQuoteEditor" placeholder="작가 노트 왼쪽 카드 문구"></textarea>
+                  <div class="mini-note">작가 노트 왼쪽 큰 인용문에 반영됩니다.</div>
+                </div>
+                <div>
+                  <label class="label" for="noteBodyEditor">작가 노트 본문</label>
+                  <textarea class="editor-area" id="noteBodyEditor" placeholder="작가 노트 오른쪽 설명 문구"></textarea>
+                  <div class="mini-note">작가 노트 오른쪽 카드 설명에 반영됩니다.</div>
+                </div>
                 <div class="field-row">
                   <div>
-                    <label class="label" for="heroImageInput">대표 이미지 링크</label>
-                    <input class="field-sm" id="heroImageInput" type="url" placeholder="https://ik.imagekit.io/...">
-                    <div class="image-size-note">ImageKit 이미지 URL을 붙여넣으세요. 권장 비율 4:5</div>
+                    <label class="label" for="heroImageInput">대표 이미지 교체</label>
+                    <input class="field-sm" id="heroImageInput" type="file" accept="image/*">
+                    <div class="image-size-note">권장 크기 1400 × 1750px (4:5)</div>
                     <div class="image-size-status" id="heroImageSizeStatus">현재 이미지 크기 확인 전</div>
                   </div>
                   <div>
-                    <label class="label" for="artistImageInput">작가소개 이미지 링크</label>
-                    <input class="field-sm" id="artistImageInput" type="url" placeholder="https://ik.imagekit.io/...">
-                    <div class="image-size-note">ImageKit 이미지 URL을 붙여넣으세요. 권장 크기 1200 × 1500px 이상</div>
+                    <label class="label" for="artistImageInput">작가소개 이미지 교체</label>
+                    <input class="field-sm" id="artistImageInput" type="file" accept="image/*">
+                    <div class="image-size-note">권장 크기 1200 × 1500px 이상</div>
                     <div class="image-size-status" id="artistImageSizeStatus">현재 이미지 크기 확인 전</div>
                   </div>
                 </div>
@@ -1151,7 +1152,7 @@
                   <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
                   <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
                 </div>
-                <div class="status" id="aboutContentStatus">상단 제목/설명, 대표 이미지 링크와 작가소개 이미지 링크, 문구를 수정할 수 있습니다.</div>
+                <div class="status" id="aboutContentStatus">상단 제목/설명, 메인 이미지와 작가소개 이미지, 문구를 수정할 수 있습니다.</div>
               </div>
             </div>
 
@@ -1842,6 +1843,9 @@
                 정적인 장면 안에서 흐르는 미세한 움직임과 빛의 결을 포착하며, 익숙한 풍경을 낯선 감각으로 다시 보여주는 데 집중합니다.`,
       paragraph2: `대표 작업은 사진 기반 연작, 오브제 기록, 공간 아카이브, 전시 설치 이미지 등으로 확장되며,
                 상업적 이미지보다 작품 자체의 온도와 밀도를 우선하는 방식으로 발표됩니다.`,
+      noteQuote: '“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”',
+      noteBody: `작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
+            쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.`,
       heroImage: '',
       artistImage: ''
     };
@@ -1879,6 +1883,8 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
+      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote || defaultAboutContent.noteQuote;
+      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody || defaultAboutContent.noteBody;
 
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = data.heroTitle.replace(/<br\s*\/?>/gi, '\n');
@@ -1887,8 +1893,8 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2;
-      if(qs('#heroImageInput')) qs('#heroImageInput').value = data.heroImage || '';
-      if(qs('#artistImageInput')) qs('#artistImageInput').value = data.artistImage || '';
+      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = data.noteQuote || defaultAboutContent.noteQuote;
+      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = data.noteBody || defaultAboutContent.noteBody;
 
       if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
@@ -1914,8 +1920,10 @@
         aboutSectionCopy: qs('#aboutSectionCopyEditor')?.value?.trim() || defaultAboutContent.aboutSectionCopy,
         paragraph1: qs('#aboutParagraph1Editor')?.value?.trim() || defaultAboutContent.paragraph1,
         paragraph2: qs('#aboutParagraph2Editor')?.value?.trim() || defaultAboutContent.paragraph2,
-        heroImage: normalizeArtworkImageUrl(qs('#heroImageInput')?.value || prev.heroImage || ''),
-        artistImage: normalizeArtworkImageUrl(qs('#artistImageInput')?.value || prev.artistImage || '')
+        noteQuote: qs('#noteQuoteEditor')?.value?.trim() || defaultAboutContent.noteQuote,
+        noteBody: qs('#noteBodyEditor')?.value?.trim() || defaultAboutContent.noteBody,
+        heroImage: prev.heroImage || '',
+        artistImage: prev.artistImage || ''
       };
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
@@ -1925,8 +1933,8 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
-      if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
-      if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
+      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote;
+      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody;
 
       if(save){
         localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
@@ -1935,12 +1943,12 @@
           artistImage: data.artistImage
         });
         if(status){
-          status.textContent = '메인 / 작가소개 내용이 저장되었습니다.';
+          status.textContent = '메인 / 작가소개 / 작가 노트 내용이 저장되었습니다.';
           status.className = 'status ok';
         }
         saveAboutContentToSupabase(data);
       }else if(status){
-        status.textContent = '메인 / 작가소개 내용이 화면에 반영되었습니다.';
+        status.textContent = '메인 / 작가소개 / 작가 노트 내용이 화면에 반영되었습니다.';
         status.className = 'status ok';
       }
     }
@@ -1955,8 +1963,8 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
-      if(qs('#heroImageInput')) qs('#heroImageInput').value = '';
-      if(qs('#artistImageInput')) qs('#artistImageInput').value = '';
+      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = defaultAboutContent.noteQuote;
+      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = defaultAboutContent.noteBody;
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = defaultAboutContent.heroEyebrow;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = defaultAboutContent.heroTitle;
@@ -1965,6 +1973,8 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = defaultAboutContent.paragraph2;
+      if(qs('#noteQuote')) qs('#noteQuote').textContent = defaultAboutContent.noteQuote;
+      if(qs('#noteBody')) qs('#noteBody').textContent = defaultAboutContent.noteBody;
 
       const heroArt = qs('#heroArt');
       const artistPhoto = qs('#artistPhoto');
@@ -1973,7 +1983,7 @@
 
       const status = qs('#aboutContentStatus');
       if(status){
-        status.textContent = '메인 / 작가소개 내용이 기본값으로 복원되었습니다.';
+        status.textContent = '메인 / 작가소개 / 작가 노트 내용이 기본값으로 복원되었습니다.';
         status.className = 'status';
       }
     }
@@ -2089,28 +2099,45 @@
     }
 
         function bindAboutImageInputs(){
-      const updateFromLink = async (inputSelector, key, targetSelector, label) => {
-        const input = qs(inputSelector);
-        if(!input) return;
-        const url = normalizeArtworkImageUrl(input.value || '');
-        if(url){
-          setBackgroundImage(qs(targetSelector), url);
-        }
-        const size = await getImageSizeFromDataUrl(url);
-        const statusId = key === 'heroImage' ? '#heroImageSizeStatus' : '#artistImageSizeStatus';
-        const sizeStatus = qs(statusId);
-        if(sizeStatus){
-          sizeStatus.textContent = size ? `현재 링크 이미지: ${size.width} × ${size.height}px` : (url ? '이미지 크기 확인 실패 · 링크는 저장 가능' : '현재 이미지 링크 없음');
-        }
-        const status = qs('#aboutContentStatus');
-        if(status && url){
-          status.textContent = `${label} 링크가 화면에 반영되었습니다. 저장을 눌러 Supabase에 저장하세요.`;
-          status.className = 'status ok';
-        }
+      const readFile = async (file, key, targetSelector, statusText) => {
+        const size = await getImageSizeFromFile(file);
+        const reader = new FileReader();
+        reader.onload = async () => {
+          let saved = null;
+          try{
+            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+          }catch(e){
+            saved = null;
+          }
+          const sharedImages = getSharedImageContent();
+          const merged = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
+          merged[key] = reader.result;
+          localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(merged));
+          writeSharedImageContent({
+            heroImage: key === 'heroImage' ? reader.result : (merged.heroImage || ''),
+            artistImage: key === 'artistImage' ? reader.result : (merged.artistImage || '')
+          });
+          setBackgroundImage(qs(targetSelector), reader.result);
+          await updateAboutImageSizeDisplay();
+          const status = qs('#aboutContentStatus');
+          if(status){
+            const sizeText = size ? ` (${size.width} × ${size.height}px)` : '';
+            status.textContent = statusText + sizeText;
+            status.className = 'status ok';
+          }
+        };
+        reader.readAsDataURL(file);
       };
 
-      qs('#heroImageInput')?.addEventListener('change', () => updateFromLink('#heroImageInput', 'heroImage', '#heroArt', '대표 이미지'));
-      qs('#artistImageInput')?.addEventListener('change', () => updateFromLink('#artistImageInput', 'artistImage', '#artistPhoto', '작가소개 이미지'));
+      qs('#heroImageInput')?.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if(file) readFile(file, 'heroImage', '#heroArt', '대표 이미지가 저장되었습니다.');
+      });
+
+      qs('#artistImageInput')?.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if(file) readFile(file, 'artistImage', '#artistPhoto', '작가소개 이미지가 저장되었습니다.');
+      });
     }
 
 
@@ -2926,6 +2953,8 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1 || defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2 || defaultAboutContent.paragraph2;
+      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote || defaultAboutContent.noteQuote;
+      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody || defaultAboutContent.noteBody;
 
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow || defaultAboutContent.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = String(data.heroTitle || defaultAboutContent.heroTitle).replace(/<br\s*\/?>/gi, '\n');
@@ -2934,6 +2963,8 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy || defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1 || defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2 || defaultAboutContent.paragraph2;
+      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = data.noteQuote || defaultAboutContent.noteQuote;
+      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = data.noteBody || defaultAboutContent.noteBody;
 
       if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
@@ -2976,7 +3007,7 @@
       const {data, error} = await supabaseClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['hero', 'about']);
+        .in('key', ['hero', 'about', 'note']);
       if(error){
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
@@ -3005,14 +3036,20 @@
           if(value.artistImage) merged.artistImage = value.artistImage;
           if(value.image) merged.artistImage = value.image;
         }
+        if(row.key === 'note'){
+          if(value.quote) merged.noteQuote = value.quote;
+          if(value.noteQuote) merged.noteQuote = value.noteQuote;
+          if(value.body) merged.noteBody = value.body;
+          if(value.noteBody) merged.noteBody = value.noteBody;
+        }
       });
 
       applyAboutContentToPage(merged);
     }
 
     function mapDbWork(row){
-      const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_image_url || row.large_url || row.large || '');
-      const large = normalizeArtworkImageUrl(row.large_image_url || row.large_url || row.large || row.full_url || row.image_url || thumb || '');
+      const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_url || row.large || '');
+      const large = normalizeArtworkImageUrl(row.large_url || row.large || row.full_url || thumb || '');
       return {
         title: row.title || '제목 없음',
         category: row.category || '기타',
@@ -3117,6 +3154,13 @@
             paragraph2: data.paragraph2,
             artistImage: data.artistImage || ''
           }
+        },
+        {
+          key: 'note',
+          value: {
+            quote: data.noteQuote || '',
+            body: data.noteBody || ''
+          }
         }
       ];
       const {error} = await supabaseClient.from('site_settings').upsert(rows, {onConflict:'key'});
@@ -3126,25 +3170,21 @@
           status.textContent = `브라우저 저장은 완료. Supabase 저장 실패: ${error.message}`;
           status.className = 'status bad';
         }else{
-          status.textContent = '메인 / 작가소개가 Supabase DB까지 저장되었습니다.';
+          status.textContent = '메인 / 작가소개 / 작가 노트가 Supabase DB까지 저장되었습니다.';
           status.className = 'status ok';
         }
       }
     }
 
     function buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl}){
-      const imageUrl = thumbUrl || fullUrl || '';
-      const largeImageUrl = fullUrl || thumbUrl || imageUrl;
       return {
         title: title || '새 작품',
         category: category || '기타',
         year_text: year || String(new Date().getFullYear()),
         medium: category || '',
         description: desc || '',
-        image_url: imageUrl,
-        large_image_url: largeImageUrl,
-        thumb_url: imageUrl,
-        large_url: largeImageUrl,
+        thumb_url: thumbUrl || fullUrl || '',
+        large_url: fullUrl || thumbUrl || '',
         youtube_url: youtube || '',
         is_visible: true
       };
