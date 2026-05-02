@@ -688,6 +688,15 @@
       border-radius:14px;
       box-shadow:none;
     }
+
+    /* PC admin output-setting layout fix: keep narrow admin cards readable */
+    .admin-card .field-row-3{
+      grid-template-columns:1fr;
+    }
+    .admin-card .field-row-3 > div{
+      min-width:0;
+    }
+
     @media (max-width: 1020px){
       .admin-grid{grid-template-columns:1fr}
     }
@@ -868,10 +877,10 @@
     <section id="note">
       <div class="wrap note">
         <article class="card">
-          <p class="note-quote" id="noteQuote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
+          <p class="note-quote">“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”</p>
         </article>
         <article class="card">
-          <p id="noteBody">
+          <p>
             작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
             쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.
           </p>
@@ -1146,33 +1155,10 @@
               </div>
             </div>
 
-            <div class="admin-card">
-              <h3>6. 작가 노트 편집</h3>
-              <p>작가 노트의 큰글씨와 작은글씨를 관리자에서 수정하고 Supabase에 저장합니다.</p>
-              <div class="stack" style="margin-top:14px">
-                <div>
-                  <label class="label" for="noteQuoteEditor">작가 노트 큰글씨</label>
-                  <textarea class="editor-area" id="noteQuoteEditor" placeholder="작가 노트에 크게 보일 문구"></textarea>
-                  <div class="mini-note">왼쪽 큰 카드에 크게 표시됩니다.</div>
-                </div>
-                <div>
-                  <label class="label" for="noteBodyEditor">작가 노트 작은글씨</label>
-                  <textarea class="editor-area" id="noteBodyEditor" placeholder="작가 노트 설명 본문"></textarea>
-                  <div class="mini-note">오른쪽 작은 본문 카드에 표시됩니다.</div>
-                </div>
-                <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="saveNoteContentBtn">작가 노트 저장</button>
-                  <button class="btn" type="button" id="applyNoteContentBtn">화면 반영</button>
-                  <button class="btn subtle" type="button" id="resetNoteContentBtn">기본값 복원</button>
-                </div>
-                <div class="status" id="noteContentStatus">작가 노트 큰글씨와 작은글씨를 수정할 수 있습니다.</div>
-              </div>
-            </div>
-
             
             
             <div class="admin-card">
-              <h3>7. 작품 등록 추가</h3>
+              <h3>6. 작품 등록 추가</h3>
               <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.</p>
               <div class="stack" style="margin-top:14px">
                 <div class="field-row">
@@ -1236,7 +1222,7 @@
             </div>
 
             <div class="admin-card">
-              <h3>8. GitHub 업로드 용량 추정</h3>
+              <h3>7. GitHub 업로드 용량 추정</h3>
               <p>토큰 없이 현재 이 페이지에서 선택·생성한 파일 기준으로 GitHub Pages 1GB 한도 대비 여유를 계산합니다.</p>
               <div class="stats-grid">
                 <div class="stat-box">
@@ -1856,9 +1842,6 @@
                 정적인 장면 안에서 흐르는 미세한 움직임과 빛의 결을 포착하며, 익숙한 풍경을 낯선 감각으로 다시 보여주는 데 집중합니다.`,
       paragraph2: `대표 작업은 사진 기반 연작, 오브제 기록, 공간 아카이브, 전시 설치 이미지 등으로 확장되며,
                 상업적 이미지보다 작품 자체의 온도와 밀도를 우선하는 방식으로 발표됩니다.`,
-      noteQuote: '“보이는 것을 기록하는 것이 아니라, 남아 있는 감정을 포착하고 싶었습니다.”',
-      noteBody: `작업은 종종 아주 조용한 장면에서 시작됩니다. 빛이 닿는 표면, 사람이 떠난 뒤 남은 공기,
-            쉽게 지나칠 수 있는 시간의 흔적을 오래 바라보며 화면 안에 새로운 밀도를 만들어냅니다.`,
       heroImage: '',
       artistImage: ''
     };
@@ -1896,8 +1879,6 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote || defaultAboutContent.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody || defaultAboutContent.noteBody;
 
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = data.heroTitle.replace(/<br\s*\/?>/gi, '\n');
@@ -1906,8 +1887,6 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2;
-      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = data.noteQuote || defaultAboutContent.noteQuote;
-      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = data.noteBody || defaultAboutContent.noteBody;
       if(qs('#heroImageInput')) qs('#heroImageInput').value = data.heroImage || '';
       if(qs('#artistImageInput')) qs('#artistImageInput').value = data.artistImage || '';
 
@@ -1935,8 +1914,6 @@
         aboutSectionCopy: qs('#aboutSectionCopyEditor')?.value?.trim() || defaultAboutContent.aboutSectionCopy,
         paragraph1: qs('#aboutParagraph1Editor')?.value?.trim() || defaultAboutContent.paragraph1,
         paragraph2: qs('#aboutParagraph2Editor')?.value?.trim() || defaultAboutContent.paragraph2,
-        noteQuote: qs('#noteQuoteEditor')?.value?.trim() || prev.noteQuote || defaultAboutContent.noteQuote,
-        noteBody: qs('#noteBodyEditor')?.value?.trim() || prev.noteBody || defaultAboutContent.noteBody,
         heroImage: normalizeArtworkImageUrl(qs('#heroImageInput')?.value || prev.heroImage || ''),
         artistImage: normalizeArtworkImageUrl(qs('#artistImageInput')?.value || prev.artistImage || '')
       };
@@ -1948,8 +1925,6 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2;
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote || defaultAboutContent.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody || defaultAboutContent.noteBody;
       if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
 
@@ -1980,8 +1955,6 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
-      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = defaultAboutContent.noteQuote;
-      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = defaultAboutContent.noteBody;
       if(qs('#heroImageInput')) qs('#heroImageInput').value = '';
       if(qs('#artistImageInput')) qs('#artistImageInput').value = '';
 
@@ -1992,8 +1965,6 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = defaultAboutContent.paragraph2;
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = defaultAboutContent.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = defaultAboutContent.noteBody;
 
       const heroArt = qs('#heroArt');
       const artistPhoto = qs('#artistPhoto');
@@ -2003,47 +1974,6 @@
       const status = qs('#aboutContentStatus');
       if(status){
         status.textContent = '메인 / 작가소개 내용이 기본값으로 복원되었습니다.';
-        status.className = 'status';
-      }
-    }
-
-
-    function applyNoteContent(save){
-      const saved = readJSON('wonjuSiteAboutContent', null);
-      const sharedImages = getSharedImageContent();
-      const data = {
-        ...defaultAboutContent,
-        ...(saved || {}),
-        ...sharedImages,
-        noteQuote: qs('#noteQuoteEditor')?.value?.trim() || defaultAboutContent.noteQuote,
-        noteBody: qs('#noteBodyEditor')?.value?.trim() || defaultAboutContent.noteBody
-      };
-
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody;
-
-      const status = qs('#noteContentStatus');
-      if(save){
-        localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
-        saveAboutContentToSupabase(data);
-        if(status){
-          status.textContent = '작가 노트가 Supabase DB까지 저장되었습니다.';
-          status.className = 'status ok';
-        }
-      }else if(status){
-        status.textContent = '작가 노트가 화면에 반영되었습니다. 오래 남기려면 저장을 누르세요.';
-        status.className = 'status ok';
-      }
-    }
-
-    function resetNoteContent(){
-      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = defaultAboutContent.noteQuote;
-      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = defaultAboutContent.noteBody;
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = defaultAboutContent.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = defaultAboutContent.noteBody;
-      const status = qs('#noteContentStatus');
-      if(status){
-        status.textContent = '작가 노트를 기본값으로 복원했습니다. 저장을 누르면 Supabase에도 반영됩니다.';
         status.className = 'status';
       }
     }
@@ -2934,9 +2864,6 @@
     qs('#saveAboutContentBtn')?.addEventListener('click', () => applyAboutContent(true));
     qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
     qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
-    qs('#saveNoteContentBtn')?.addEventListener('click', () => applyNoteContent(true));
-    qs('#applyNoteContentBtn')?.addEventListener('click', () => applyNoteContent(false));
-    qs('#resetNoteContentBtn')?.addEventListener('click', resetNoteContent);
     bindAboutImageInputs();
     qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
     qs('#deleteArtworkBtn')?.addEventListener('click', deleteSelectedArtwork);
@@ -2999,8 +2926,6 @@
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1 || defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = data.paragraph2 || defaultAboutContent.paragraph2;
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = data.noteQuote || defaultAboutContent.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = data.noteBody || defaultAboutContent.noteBody;
 
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = data.heroEyebrow || defaultAboutContent.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = String(data.heroTitle || defaultAboutContent.heroTitle).replace(/<br\s*\/?>/gi, '\n');
@@ -3009,8 +2934,6 @@
       if(qs('#aboutSectionCopyEditor')) qs('#aboutSectionCopyEditor').value = data.aboutSectionCopy || defaultAboutContent.aboutSectionCopy;
       if(qs('#aboutParagraph1Editor')) qs('#aboutParagraph1Editor').value = data.paragraph1 || defaultAboutContent.paragraph1;
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = data.paragraph2 || defaultAboutContent.paragraph2;
-      if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = data.noteQuote || defaultAboutContent.noteQuote;
-      if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = data.noteBody || defaultAboutContent.noteBody;
 
       if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
@@ -3053,7 +2976,7 @@
       const {data, error} = await supabaseClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['hero', 'about', 'note']);
+        .in('key', ['hero', 'about']);
       if(error){
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
@@ -3081,12 +3004,6 @@
           if(value.paragraph2) merged.paragraph2 = value.paragraph2;
           if(value.artistImage) merged.artistImage = value.artistImage;
           if(value.image) merged.artistImage = value.image;
-        }
-        if(row.key === 'note'){
-          if(value.noteQuote) merged.noteQuote = value.noteQuote;
-          if(value.quote) merged.noteQuote = value.quote;
-          if(value.noteBody) merged.noteBody = value.noteBody;
-          if(value.body) merged.noteBody = value.body;
         }
       });
 
@@ -3199,13 +3116,6 @@
             paragraph1: data.paragraph1,
             paragraph2: data.paragraph2,
             artistImage: data.artistImage || ''
-          }
-        },
-        {
-          key: 'note',
-          value: {
-            noteQuote: data.noteQuote || defaultAboutContent.noteQuote,
-            noteBody: data.noteBody || defaultAboutContent.noteBody
           }
         }
       ];
