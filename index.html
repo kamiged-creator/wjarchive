@@ -3013,8 +3013,8 @@
     }
 
     function mapDbWork(row){
-      const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_url || row.large || '');
-      const large = normalizeArtworkImageUrl(row.large_url || row.large || row.full_url || thumb || '');
+      const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_image_url || row.large_url || row.large || '');
+      const large = normalizeArtworkImageUrl(row.large_image_url || row.large_url || row.large || row.full_url || row.image_url || thumb || '');
       return {
         title: row.title || '제목 없음',
         category: row.category || '기타',
@@ -3135,14 +3135,18 @@
     }
 
     function buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl}){
+      const imageUrl = thumbUrl || fullUrl || '';
+      const largeImageUrl = fullUrl || thumbUrl || imageUrl;
       return {
         title: title || '새 작품',
         category: category || '기타',
         year_text: year || String(new Date().getFullYear()),
         medium: category || '',
         description: desc || '',
-        thumb_url: thumbUrl || fullUrl || '',
-        large_url: fullUrl || thumbUrl || '',
+        image_url: imageUrl,
+        large_image_url: largeImageUrl,
+        thumb_url: imageUrl,
+        large_url: largeImageUrl,
         youtube_url: youtube || '',
         is_visible: true
       };
@@ -3159,58 +3163,22 @@
       return Number(data[0].sort_order || 0) + 10;
     }
 
-    function missingColumnNameFromError(error){
-      const msg = String(error?.message || '');
-      const match = msg.match(/Could not find the '([^']+)' column/i);
-      return match ? match[1] : '';
-    }
-
-    async function safeWorksInsert(payload){
-      let clean = {...payload};
-      for(let i = 0; i < 12; i++){
-        const {error} = await supabaseClient.from('works').insert(clean);
-        if(!error) return {ok:true, payload:clean};
-        const missing = missingColumnNameFromError(error);
-        if(missing && Object.prototype.hasOwnProperty.call(clean, missing)){
-          delete clean[missing];
-          continue;
-        }
-        return {ok:false, message:error.message};
-      }
-      return {ok:false, message:'works 테이블 칼럼 확인이 필요합니다.'};
-    }
-
-    async function safeWorksUpdate(id, payload){
-      let clean = {...payload};
-      for(let i = 0; i < 12; i++){
-        const {error} = await supabaseClient
-          .from('works')
-          .update(clean)
-          .eq('id', id);
-        if(!error) return {ok:true, payload:clean};
-        const missing = missingColumnNameFromError(error);
-        if(missing && Object.prototype.hasOwnProperty.call(clean, missing)){
-          delete clean[missing];
-          continue;
-        }
-        return {ok:false, message:error.message};
-      }
-      return {ok:false, message:'works 테이블 칼럼 확인이 필요합니다.'};
-    }
-
     async function saveArtworkToSupabase({info, title, category, year, desc, youtube, thumbUrl, fullUrl}){
       if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
       const payload = buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl});
 
       if(info?.type === 'db' && info.work?._dbId){
-        const result = await safeWorksUpdate(info.work._dbId, payload);
-        if(!result.ok) return result;
+        const {error} = await supabaseClient
+          .from('works')
+          .update(payload)
+          .eq('id', info.work._dbId);
+        if(error) return {ok:false, message:error.message};
         return {ok:true, message:`${payload.title} 작품이 Supabase works에 수정 저장되었습니다.`};
       }
 
       payload.sort_order = await getNextWorkSortOrder();
-      const result = await safeWorksInsert(payload);
-      if(!result.ok) return result;
+      const {error} = await supabaseClient.from('works').insert(payload);
+      if(error) return {ok:false, message:error.message};
       return {ok:true, message:`${payload.title} 작품이 Supabase works에 새로 등록되었습니다.`};
     }
 
