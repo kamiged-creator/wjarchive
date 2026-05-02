@@ -767,6 +767,14 @@
       #note{scroll-margin-top:86px}
     }
 
+
+    /* 관리자 출력 설정 PC 배치 보정: 사용하지 않는 보조표시는 숨기고 2칸 정렬 */
+    .admin-field-hidden{display:none !important;}
+    .admin-card .field-row-3{grid-template-columns:1fr 1fr !important;}
+    @media (max-width: 680px){
+      .admin-card .field-row-3{grid-template-columns:1fr !important;}
+    }
+
   </style>
 </head>
 <body id="top">
@@ -1023,7 +1031,7 @@
                     <label class="label" for="thumbFolder">웹용 이미지 폴더명</label>
                     <input class="field-sm" id="thumbFolder" type="text" value="images/works">
                   </div>
-                  <div>
+                  <div class="admin-field-hidden">
                     <label class="label" for="largeFolder">보조 표시</label>
                     <input class="field-sm" id="largeFolder" type="text" value="single-image-mode" disabled>
                   </div>
