@@ -3032,7 +3032,7 @@
         .from('works')
         .select('*')
         .eq('is_visible', true)
-        .order('sort_order', {ascending:true});
+        .order('sort_order', {ascending:false});
       if(error){
         console.warn('Supabase works 불러오기 오류', error);
         return;
