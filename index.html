@@ -688,15 +688,6 @@
       border-radius:14px;
       box-shadow:none;
     }
-
-    /* PC admin output-setting layout fix: keep narrow admin cards readable */
-    .admin-card .field-row-3{
-      grid-template-columns:1fr;
-    }
-    .admin-card .field-row-3 > div{
-      min-width:0;
-    }
-
     @media (max-width: 1020px){
       .admin-grid{grid-template-columns:1fr}
     }
@@ -1217,7 +1208,7 @@
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
-                <div class="status" id="artDraftStatus">반영할 기존 작품을 고른 뒤 제목·내용·카테고리, 작품 이미지 링크, 유튜브 주소를 넣고 작품/유튜브 반영을 누르면 함께 반영됩니다.</div>
+                <div class="status" id="artDraftStatus">새 작품 추가로 등록하면 전체/카테고리 목록 맨 위에 올라가고, 입력칸은 다음 등록을 위해 자동으로 비워집니다. 기존 작품을 고르면 해당 작품을 수정합니다.</div>
               </div>
             </div>
 
@@ -1657,8 +1648,10 @@
           await loadSupabaseWorks();
           populateArtTargetWork('__new__');
           renderGallery();
+          if(info.type === 'new') clearArtworkFormAfterInsert();
           if(status){
-            status.textContent = saveResult.message || `${title || '작품'} Supabase 저장 완료`;
+            const extraMessage = info.type === 'new' ? ' 입력칸은 다음 등록을 위해 비웠습니다.' : '';
+            status.textContent = (saveResult.message || `${title || '작품'} Supabase 저장 완료`) + extraMessage;
             status.className = 'status ok';
           }
           if(qs('#artFeatured')?.checked){
@@ -2033,6 +2026,17 @@
         status.textContent = '작품 등록 입력칸을 초기화했습니다.';
         status.className = 'status';
       }
+    }
+
+    function clearArtworkFormAfterInsert(){
+      localStorage.removeItem('wonjuArtworkDraft');
+      if(qs('#artTargetWork')) qs('#artTargetWork').value = '__new__';
+      if(qs('#artYear')) qs('#artYear').value = '';
+      if(qs('#artTitle')) qs('#artTitle').value = '';
+      if(qs('#artDescription')) qs('#artDescription').value = '';
+      if(qs('#artYoutube')) qs('#artYoutube').value = '';
+      if(qs('#artThumbUrl')) qs('#artThumbUrl').value = '';
+      if(qs('#artFeatured')) qs('#artFeatured').checked = false;
     }
 
 
@@ -3032,7 +3036,8 @@
         .from('works')
         .select('*')
         .eq('is_visible', true)
-        .order('sort_order', {ascending:true});
+        .order('created_at', {ascending:false, nullsFirst:false})
+        .order('sort_order', {ascending:false});
       if(error){
         console.warn('Supabase works 불러오기 오류', error);
         return;
