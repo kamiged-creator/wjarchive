@@ -435,6 +435,33 @@
       border-color:rgba(139,104,71,.28);
       color:var(--text);
     }
+    .news-link-label{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .new-badge{
+      display:none;
+      align-items:center;
+      justify-content:center;
+      min-height:18px;
+      padding:0 7px;
+      border-radius:999px;
+      background:rgba(139,104,71,.14);
+      color:#7a5638;
+      font-size:10px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.04em;
+    }
+    .new-badge.show{display:inline-flex}
+    .contact-item.has-new{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .contact-item.has-new .contact-item-text{min-width:0}
     .accordion-item.news-accent{
       background:linear-gradient(180deg, rgba(231,214,196,.34), rgba(255,253,249,.90));
       border-color:rgba(139,104,71,.18);
@@ -788,7 +815,7 @@
       <div class="brand">
         <div class="brand-top">
           <div class="brand-title" id="adminTapTarget" role="button" aria-label="작가명">이원주</div>
-          <a class="news-mini news-mobile" href="#news">소식</a>
+          <a class="news-mini news-mobile" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
         </div>
         <div class="brand-sub">Seal · Calligraphy</div>
       </div>
@@ -799,7 +826,7 @@
             <a href="#works">작품</a>
             <a href="#note">작가 노트</a>
             <a href="#contact">문의</a>
-            <a class="news-desktop-link" href="#news">소식</a>
+            <a class="news-desktop-link" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
           </nav>
         </div>
       </div>
@@ -897,7 +924,7 @@
         <div class="accordion">
           <article class="accordion-item news-accent" id="newsAccordion">
             <button class="accordion-btn" type="button" data-accordion="newsAccordion">
-              <span>소식</span>
+              <span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span>
               <span>＋</span>
             </button>
             <div class="accordion-panel">
@@ -2812,10 +2839,43 @@
         .filter(Boolean);
     }
 
+    function isRecentNewsLine(line){
+      const match = String(line || '').match(/^(\d{4})[.-](\d{1,2})[.-](\d{1,2})\b/);
+      if(!match) return false;
+
+      const year = Number(match[1]);
+      const month = Number(match[2]) - 1;
+      const day = Number(match[3]);
+      const newsDate = new Date(year, month, day);
+      if(Number.isNaN(newsDate.getTime())) return false;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      newsDate.setHours(0, 0, 0, 0);
+
+      const diffDays = (today - newsDate) / (1000 * 60 * 60 * 24);
+      return diffDays >= 0 && diffDays <= 7;
+    }
+
+    function updateNewsBadges(lines){
+      const hasRecentNews = (lines || []).some(isRecentNewsLine);
+      qsa('[data-news-badge]').forEach(badge => {
+        badge.classList.toggle('show', hasRecentNews);
+      });
+    }
+
     function renderListItems(targetId, lines){
       const el = qs(targetId);
       if(!el) return;
-      el.innerHTML = lines.map(line => `<div class="contact-item">${escapeHtmlText(line)}</div>`).join('');
+      const isNewsList = targetId === '#newsDisplayList';
+      el.innerHTML = lines.map(line => {
+        const safeLine = escapeHtmlText(line);
+        if(isNewsList && isRecentNewsLine(line)){
+          return `<div class="contact-item has-new"><span class="contact-item-text">${safeLine}</span><span class="new-badge show">NEW</span></div>`;
+        }
+        return `<div class="contact-item">${safeLine}</div>`;
+      }).join('');
+      if(isNewsList) updateNewsBadges(lines);
     }
 
     function loadEditableTextContent(){
