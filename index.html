@@ -40,6 +40,10 @@
     }
     img{max-width:100%;display:block}
     main{margin:0;padding:0}
+    body.is-loading main,
+    body.is-loading footer{
+      opacity:0;
+    }
     a{text-decoration:none;color:inherit}
     button,input,textarea,select{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
@@ -816,7 +820,7 @@
 
   </style>
 </head>
-<body id="top">
+<body id="top" class="is-loading">
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand">
@@ -3162,6 +3166,7 @@
     async function loadSupabaseData(){
       if(!supabaseReady()){
         console.warn('Supabase anon key가 아직 입력되지 않아 로컬 기본값으로 표시합니다.');
+        revealSiteContent();
         return;
       }
       try{
@@ -3172,6 +3177,8 @@
         ]);
       }catch(err){
         console.warn('Supabase 데이터 불러오기 실패', err);
+      }finally{
+        revealSiteContent();
       }
     }
 
@@ -3377,6 +3384,10 @@
     bindCategoryFilters();
     renderGallery();
     updateCapacityStats();
+    function revealSiteContent(){
+      document.body.classList.remove('is-loading');
+    }
+    window.setTimeout(revealSiteContent, 2200);
     loadSupabaseData();
 
     function bindCleanHashLinks(){
