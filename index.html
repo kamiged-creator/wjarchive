@@ -3364,6 +3364,38 @@
     updateCapacityStats();
     loadSupabaseData();
 
+    function bindCleanHashLinks(){
+      qsa('a[href^="#"]').forEach(link => {
+        link.addEventListener('click', (event) => {
+          const hash = link.getAttribute('href');
+          if(!hash || hash === '#') return;
+
+          const target = hash === '#top' ? document.body : document.querySelector(hash);
+          if(!target) return;
+
+          event.preventDefault();
+          const scrollTarget = hash === '#top' ? 0 : target.getBoundingClientRect().top + window.scrollY;
+          try{
+            window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+          }catch(err){
+            window.scrollTo(0, scrollTarget);
+          }
+
+          if(window.history && window.history.replaceState){
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        });
+      });
+
+      if(window.location.hash && window.history && window.history.replaceState){
+        window.setTimeout(() => {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }, 250);
+      }
+    }
+
+    bindCleanHashLinks();
+
     function bindToTopBadge(){
       const badge = qs('#toTopBadge');
       if(!badge) return;
