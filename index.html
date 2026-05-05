@@ -717,8 +717,26 @@
       border-radius:14px;
       box-shadow:none;
     }
+    .text-editor-actions{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, auto));
+      justify-content:start;
+      gap:10px;
+      margin-top:4px;
+    }
+    .text-editor-actions .btn{
+      min-width:88px;
+    }
     @media (max-width: 1020px){
       .admin-grid{grid-template-columns:1fr}
+    }
+    @media (max-width: 520px){
+      .text-editor-actions{
+        grid-template-columns:repeat(2, minmax(0, auto));
+      }
+      .text-editor-actions .reset-action{
+        grid-column:1;
+      }
     }
     @media (max-width: 680px){
       .admin-panel{padding:14px}
@@ -1108,10 +1126,10 @@
                   <textarea class="editor-area" id="newsEditor" placeholder="한 줄에 하나씩 입력&#10;예: 2026.04 · 새 작품 업로드&#10;예: 2026.03 · 전시 준비 중"></textarea>
                   <div class="mini-note">한 줄이 소식 카드 한 줄로 들어갑니다.</div>
                 </div>
-                <div class="hero-actions" style="margin-top:4px">
+                <div class="text-editor-actions">
                   <button class="btn primary" type="button" id="saveTextContentBtn">문구 저장</button>
                   <button class="btn" type="button" id="applyTextContentBtn">화면 반영</button>
-                  <button class="btn subtle" type="button" id="resetTextContentBtn">기본값 복원</button>
+                  <button class="btn subtle reset-action" type="button" id="resetTextContentBtn">기본값 복원</button>
                 </div>
                 <div class="status" id="textContentStatus">문의 / 전시 이력 / 소식란 문구를 수정할 수 있습니다.</div>
               </div>
