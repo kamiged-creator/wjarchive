@@ -1039,7 +1039,7 @@
                     <input class="field-sm" id="thumbQuality" type="number" min="0.4" max="1" step="0.01" value="0.85">
                   </div>
                 </div>
-                <div class="field-row-3">
+                <div class="field-row">
                   <div>
                     <label class="label" for="outputType">출력 형식</label>
                     <select class="field-sm" id="outputType">
@@ -1052,11 +1052,8 @@
                     <label class="label" for="thumbFolder">웹용 이미지 폴더명</label>
                     <input class="field-sm" id="thumbFolder" type="text" value="images/works">
                   </div>
-                  <div>
-                    <label class="label" for="largeFolder">보조 표시</label>
-                    <input class="field-sm" id="largeFolder" type="text" value="single-image-mode" disabled>
-                  </div>
                 </div>
+                <input id="largeFolder" type="hidden" value="single-image-mode">
                 <div class="field-row">
                   <div>
                     <label class="label" for="batchSize">한 번에 처리할 장수</label>
