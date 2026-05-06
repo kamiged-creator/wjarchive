@@ -3442,8 +3442,6 @@
         }catch(err){
           window.scrollTo(0, 0);
         }
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
         if(window.history && window.history.replaceState){
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
         }
@@ -3467,7 +3465,7 @@
 
 
 
-  <a class="to-top-badge" id="toTopBadge" href="" aria-label="맨 위로" title="맨 위로">⌃</a>
+  <button class="to-top-badge" id="toTopBadge" type="button" aria-label="맨 위로" title="맨 위로">⌃</button>
 
 
 </body>
