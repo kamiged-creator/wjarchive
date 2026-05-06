@@ -255,6 +255,17 @@
       font-size:13px;
       word-break:break-all;
     }
+    .url-output{
+      width:100%;
+      min-height:72px;
+      resize:vertical;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      color:var(--ink);
+      padding:10px;
+      font:13px/1.45 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+    }
     .toast{
       position:fixed;
       left:50%;
@@ -398,9 +409,12 @@
             <img class="preview" id="previewImg" alt="크롭 결과 미리보기" hidden />
             <div class="empty-preview" id="emptyPreview">아직 만든 결과가 없습니다.</div>
             <div class="actions">
-              <button class="btn wide" type="button" id="downloadBtn" disabled>다운로드</button>
+              <button class="btn" type="button" id="downloadBtn" disabled>다운로드</button>
+              <button class="btn ok" type="button" id="uploadBtn" disabled>ImageKit 업로드</button>
+              <button class="btn secondary wide" type="button" id="copyUrlBtn" disabled>URL 복사</button>
             </div>
             <div class="meta" id="resultMeta">결과 파일 정보가 여기에 표시됩니다.</div>
+            <textarea class="url-output" id="uploadUrlOutput" readonly placeholder="ImageKit 업로드 URL"></textarea>
           </div>
         </section>
       </aside>
@@ -432,8 +446,17 @@
       previewImg: document.getElementById('previewImg'),
       emptyPreview: document.getElementById('emptyPreview'),
       downloadBtn: document.getElementById('downloadBtn'),
+      uploadBtn: document.getElementById('uploadBtn'),
+      copyUrlBtn: document.getElementById('copyUrlBtn'),
       resultMeta: document.getElementById('resultMeta'),
+      uploadUrlOutput: document.getElementById('uploadUrlOutput'),
       toast: document.getElementById('toast')
+    };
+
+    const imageKitConfig = {
+      publicKey: '',
+      urlEndpoint: '',
+      authenticationEndpoint: ''
     };
 
     const ctx = els.canvas.getContext('2d');
@@ -458,7 +481,8 @@
       pinchDistance: 0,
       pinchZoom: 1,
       resultUrl: '',
-      resultBlob: null
+      resultBlob: null,
+      resultFileName: ''
     };
 
     function showToast(message){
@@ -691,6 +715,9 @@
       els.previewImg.removeAttribute('src');
       els.emptyPreview.hidden = false;
       els.downloadBtn.disabled = true;
+      els.uploadBtn.disabled = true;
+      els.copyUrlBtn.disabled = true;
+      els.uploadUrlOutput.value = '';
       els.resultMeta.textContent = '결과 파일 정보가 여기에 표시됩니다.';
     }
 
@@ -724,6 +751,10 @@
       return 'jpg';
     }
 
+    function getResultFileName(){
+      return `${state.fileName}-crop-4x5-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
+    }
+
     function makePreview(){
       makeOutputBlob((blob, type, width, height) => {
         if (!blob){
@@ -737,6 +768,8 @@
         els.previewImg.hidden = false;
         els.emptyPreview.hidden = true;
         els.downloadBtn.disabled = false;
+        els.uploadBtn.disabled = false;
+        state.resultFileName = getResultFileName();
         const kb = Math.max(1, Math.round(blob.size / 1024));
         els.resultMeta.textContent = `${width} x ${height}px · ${extensionFor(type).toUpperCase()} · 약 ${kb}KB`;
         showToast('미리보기를 만들었습니다.');
@@ -745,13 +778,71 @@
 
     function downloadResult(){
       if (!state.resultBlob) return;
-      const type = els.formatSelect.value;
       const a = document.createElement('a');
       a.href = state.resultUrl;
-      a.download = `${state.fileName}-crop-4x5-${getOutputSize().width}.${extensionFor(type)}`;
+      a.download = state.resultFileName || getResultFileName();
       document.body.appendChild(a);
       a.click();
       a.remove();
+    }
+
+    async function uploadToImageKit(){
+      if (!state.resultBlob){
+        showToast('먼저 미리보기를 만들어주세요.');
+        return;
+      }
+      if (!imageKitConfig.publicKey || !imageKitConfig.urlEndpoint || !imageKitConfig.authenticationEndpoint){
+        showToast('ImageKit 키와 인증 주소를 먼저 설정해야 합니다.');
+        return;
+      }
+
+      els.uploadBtn.disabled = true;
+      els.uploadBtn.textContent = '업로드 중...';
+      try{
+        const authResponse = await fetch(imageKitConfig.authenticationEndpoint, { cache:'no-store' });
+        if (!authResponse.ok) throw new Error('인증 정보를 가져오지 못했습니다.');
+        const auth = await authResponse.json();
+        const form = new FormData();
+        form.append('file', state.resultBlob, state.resultFileName || getResultFileName());
+        form.append('fileName', state.resultFileName || getResultFileName());
+        form.append('publicKey', imageKitConfig.publicKey);
+        form.append('signature', auth.signature);
+        form.append('expire', auth.expire);
+        form.append('token', auth.token);
+        form.append('folder', '/wjarchive');
+        form.append('useUniqueFileName', 'true');
+
+        const uploadResponse = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+          method:'POST',
+          body:form
+        });
+        const result = await uploadResponse.json();
+        if (!uploadResponse.ok) throw new Error(result.message || '업로드에 실패했습니다.');
+        els.uploadUrlOutput.value = result.url || '';
+        els.copyUrlBtn.disabled = !result.url;
+        showToast('ImageKit 업로드가 완료되었습니다.');
+      }catch(error){
+        showToast(error.message || 'ImageKit 업로드에 실패했습니다.');
+      }finally{
+        els.uploadBtn.textContent = 'ImageKit 업로드';
+        els.uploadBtn.disabled = !state.resultBlob;
+      }
+    }
+
+    async function copyUploadUrl(){
+      const url = els.uploadUrlOutput.value.trim();
+      if (!url){
+        showToast('복사할 URL이 없습니다.');
+        return;
+      }
+      try{
+        await navigator.clipboard.writeText(url);
+        showToast('URL을 복사했습니다.');
+      }catch(error){
+        els.uploadUrlOutput.focus();
+        els.uploadUrlOutput.select();
+        showToast('URL을 선택했습니다. Ctrl+C로 복사해주세요.');
+      }
     }
 
     els.fileInput.addEventListener('change', event => {
@@ -877,6 +968,8 @@
     });
     els.makeBtn.addEventListener('click', makePreview);
     els.downloadBtn.addEventListener('click', downloadResult);
+    els.uploadBtn.addEventListener('click', uploadToImageKit);
+    els.copyUrlBtn.addEventListener('click', copyUploadUrl);
     window.addEventListener('resize', resizeCanvas);
 
     getOutputSize();
