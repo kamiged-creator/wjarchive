@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="ko" translate="no" class="notranslate">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="google" content="notranslate" />
+  <title>이미지 크롭 편집</title>
+  <meta name="description" content="작품 이미지 업로드 후 4:5 비율로 크롭하고 1600px 너비 이미지로 저장합니다." />
+  <meta name="theme-color" content="#f8f4ee" />
+  <style>
+    :root{
+      --bg:#f7f2ec;
+      --panel:#fffdf9;
+      --ink:#201a16;
+      --muted:#746960;
+      --line:rgba(32,26,22,.14);
+      --accent:#785b42;
+      --accent-2:#2f7469;
+      --danger:#a33d3d;
+      --shadow:0 18px 44px rgba(32,26,22,.1);
+      --radius:8px;
+    }
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+      color:var(--ink);
+      background:linear-gradient(180deg,#fbf8f4 0%,var(--bg) 100%);
+      line-height:1.5;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.48}
+    .shell{
+      width:min(1280px,100%);
+      margin:0 auto;
+      padding:18px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      min-height:56px;
+      padding:4px 0 18px;
+      border-bottom:1px solid var(--line);
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    h1{
+      margin:0;
+      font-size:clamp(22px,3vw,34px);
+      line-height:1.12;
+      letter-spacing:0;
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .workspace{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 336px;
+      gap:18px;
+      padding-top:18px;
+      align-items:start;
+    }
+    .editor{
+      min-width:0;
+      background:#15120f;
+      border:1px solid rgba(32,26,22,.16);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .stage-wrap{
+      position:relative;
+      width:100%;
+      min-height:320px;
+      height:min(72vh,760px);
+      touch-action:none;
+      user-select:none;
+      overflow:hidden;
+      background:
+        linear-gradient(45deg,rgba(255,255,255,.04) 25%,transparent 25%),
+        linear-gradient(-45deg,rgba(255,255,255,.04) 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,rgba(255,255,255,.04) 75%),
+        linear-gradient(-45deg,transparent 75%,rgba(255,255,255,.04) 75%),
+        #17130f;
+      background-size:28px 28px;
+      background-position:0 0,0 14px,14px -14px,-14px 0;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      height:100%;
+    }
+    .drop{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      color:#f8f1e9;
+      text-align:center;
+      background:linear-gradient(180deg,rgba(21,18,15,.2),rgba(21,18,15,.74));
+      transition:opacity .18s ease, visibility .18s ease;
+    }
+    .drop.is-hidden{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+    .drop strong{
+      display:block;
+      margin-bottom:8px;
+      font-size:22px;
+      line-height:1.25;
+    }
+    .drop span{
+      display:block;
+      color:rgba(248,241,233,.78);
+      font-size:14px;
+    }
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    .panel + .panel{margin-top:12px}
+    .group{display:grid;gap:10px}
+    .group + .group{
+      margin-top:16px;
+      padding-top:16px;
+      border-top:1px solid var(--line);
+    }
+    .label-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .label-row b{
+      color:var(--ink);
+      font-size:14px;
+    }
+    .file-label{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      padding:0 14px;
+      border:1px dashed rgba(120,91,66,.5);
+      border-radius:var(--radius);
+      background:#fbf7f1;
+      color:var(--accent);
+      font-weight:800;
+      text-align:center;
+      cursor:pointer;
+    }
+    .file-label input{display:none}
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    .field{
+      display:grid;
+      gap:6px;
+    }
+    .field label{
+      color:var(--muted);
+      font-size:13px;
+    }
+    input[type="range"]{
+      width:100%;
+      accent-color:var(--accent);
+    }
+    input[type="number"],select{
+      width:100%;
+      min-height:40px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      color:var(--ink);
+      padding:0 10px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:42px;
+      border:1px solid transparent;
+      border-radius:var(--radius);
+      padding:0 13px;
+      background:var(--accent);
+      color:#fff;
+      font-weight:850;
+      line-height:1;
+    }
+    .btn.secondary{
+      background:#fff;
+      border-color:var(--line);
+      color:var(--ink);
+    }
+    .btn.ok{background:var(--accent-2)}
+    .btn.danger{background:#fff;color:var(--danger);border-color:rgba(163,61,61,.28)}
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    .actions .wide{grid-column:1 / -1}
+    .preview-box{
+      display:grid;
+      gap:10px;
+    }
+    .preview{
+      width:100%;
+      aspect-ratio:4/5;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      background:#eee6dd;
+      object-fit:cover;
+    }
+    .empty-preview{
+      display:grid;
+      place-items:center;
+      width:100%;
+      aspect-ratio:4/5;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#f2ebe3;
+      color:var(--muted);
+      font-size:14px;
+      text-align:center;
+      padding:16px;
+    }
+    .meta{
+      display:grid;
+      gap:4px;
+      color:var(--muted);
+      font-size:13px;
+      word-break:break-all;
+    }
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%) translateY(18px);
+      z-index:20;
+      max-width:min(520px,calc(100vw - 28px));
+      padding:11px 14px;
+      border-radius:999px;
+      background:rgba(32,26,22,.92);
+      color:#fff;
+      font-size:14px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease, transform .2s ease;
+    }
+    .toast.is-on{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+    @media (max-width:900px){
+      .shell{padding:14px}
+      .topbar{
+        align-items:flex-start;
+        flex-direction:column;
+        padding-bottom:14px;
+      }
+      .workspace{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+      .stage-wrap{
+        height:min(68vh,640px);
+        min-height:360px;
+      }
+      .side{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:12px;
+      }
+      .panel + .panel{margin-top:0}
+    }
+    @media (max-width:640px){
+      .shell{padding:12px}
+      .sub{font-size:13px}
+      .stage-wrap{
+        height:62vh;
+        min-height:340px;
+      }
+      .side{grid-template-columns:1fr}
+      .row{grid-template-columns:1fr}
+      .actions{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="title">
+        <h1>이미지 크롭 편집</h1>
+        <p class="sub">작품 이미지를 4:5 비율로 자르고 1600px 너비 파일로 저장합니다.</p>
+      </div>
+      <button class="btn secondary" type="button" id="resetViewBtn">화면 맞춤</button>
+    </header>
+
+    <section class="workspace" aria-label="이미지 크롭 작업 화면">
+      <div class="editor">
+        <div class="stage-wrap" id="stageWrap">
+          <canvas id="stageCanvas" aria-label="크롭 편집 캔버스"></canvas>
+          <div class="drop" id="dropLayer">
+            <div>
+              <strong>이미지를 올려주세요</strong>
+              <span>클릭해서 선택하거나 파일을 이 화면 위로 끌어오면 됩니다.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side" aria-label="크롭 설정">
+        <section class="panel">
+          <div class="group">
+            <label class="file-label">
+              이미지 선택
+              <input id="fileInput" type="file" accept="image/*" />
+            </label>
+            <div class="meta" id="sourceMeta">선택된 이미지 없음</div>
+          </div>
+
+          <div class="group">
+            <div class="label-row">
+              <b>확대</b>
+              <span id="zoomValue">100%</span>
+            </div>
+            <input id="zoomRange" type="range" min="1" max="5" step="0.01" value="1" disabled />
+          </div>
+
+          <div class="group">
+            <div class="row">
+              <div class="field">
+                <label for="formatSelect">형식</label>
+                <select id="formatSelect">
+                  <option value="image/jpeg">JPG</option>
+                  <option value="image/webp">WebP</option>
+                  <option value="image/png">PNG</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="qualityInput">품질</label>
+                <input id="qualityInput" type="number" min="0.1" max="1" step="0.01" value="0.85" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="widthInput">출력 너비</label>
+                <input id="widthInput" type="number" min="320" max="4000" step="10" value="1600" />
+              </div>
+              <div class="field">
+                <label for="heightOutput">출력 높이</label>
+                <input id="heightOutput" type="number" value="2000" readonly />
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <div class="actions">
+              <button class="btn secondary" type="button" id="centerBtn" disabled>가운데</button>
+              <button class="btn danger" type="button" id="clearBtn" disabled>초기화</button>
+              <button class="btn ok wide" type="button" id="makeBtn" disabled>미리보기 만들기</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="preview-box">
+            <div class="label-row">
+              <b>결과 미리보기</b>
+              <span>4:5</span>
+            </div>
+            <img class="preview" id="previewImg" alt="크롭 결과 미리보기" hidden />
+            <div class="empty-preview" id="emptyPreview">아직 만든 결과가 없습니다.</div>
+            <div class="actions">
+              <button class="btn wide" type="button" id="downloadBtn" disabled>다운로드</button>
+            </div>
+            <div class="meta" id="resultMeta">결과 파일 정보가 여기에 표시됩니다.</div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const aspect = 4 / 5;
+    const els = {
+      stageWrap: document.getElementById('stageWrap'),
+      canvas: document.getElementById('stageCanvas'),
+      dropLayer: document.getElementById('dropLayer'),
+      fileInput: document.getElementById('fileInput'),
+      sourceMeta: document.getElementById('sourceMeta'),
+      zoomRange: document.getElementById('zoomRange'),
+      zoomValue: document.getElementById('zoomValue'),
+      formatSelect: document.getElementById('formatSelect'),
+      qualityInput: document.getElementById('qualityInput'),
+      widthInput: document.getElementById('widthInput'),
+      heightOutput: document.getElementById('heightOutput'),
+      resetViewBtn: document.getElementById('resetViewBtn'),
+      centerBtn: document.getElementById('centerBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      makeBtn: document.getElementById('makeBtn'),
+      previewImg: document.getElementById('previewImg'),
+      emptyPreview: document.getElementById('emptyPreview'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      resultMeta: document.getElementById('resultMeta'),
+      toast: document.getElementById('toast')
+    };
+
+    const ctx = els.canvas.getContext('2d');
+    const state = {
+      image: null,
+      fileName: 'artwork',
+      naturalWidth: 0,
+      naturalHeight: 0,
+      crop: { x: 0, y: 0, w: 0, h: 0 },
+      baseScale: 1,
+      zoom: 1,
+      offsetX: 0,
+      offsetY: 0,
+      dragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      startOffsetX: 0,
+      startOffsetY: 0,
+      activePointers: new Map(),
+      pinchDistance: 0,
+      pinchZoom: 1,
+      resultUrl: '',
+      resultBlob: null
+    };
+
+    function showToast(message){
+      els.toast.textContent = message;
+      els.toast.classList.add('is-on');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove('is-on'), 2100);
+    }
+
+    function setControlsEnabled(enabled){
+      els.zoomRange.disabled = !enabled;
+      els.centerBtn.disabled = !enabled;
+      els.clearBtn.disabled = !enabled;
+      els.makeBtn.disabled = !enabled;
+    }
+
+    function getOutputSize(){
+      const width = clamp(Number(els.widthInput.value) || 1600, 320, 4000);
+      const height = Math.round(width / aspect);
+      els.widthInput.value = width;
+      els.heightOutput.value = height;
+      return { width, height };
+    }
+
+    function clamp(value, min, max){
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function resizeCanvas(){
+      const rect = els.stageWrap.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      els.canvas.width = Math.max(1, Math.round(rect.width * ratio));
+      els.canvas.height = Math.max(1, Math.round(rect.height * ratio));
+      els.canvas.style.width = rect.width + 'px';
+      els.canvas.style.height = rect.height + 'px';
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      updateCropBox(rect.width, rect.height);
+      if (state.image) fitImage(false);
+      draw();
+    }
+
+    function updateCropBox(width, height){
+      const pad = width < 640 ? 28 : 52;
+      let cropW = Math.min(width - pad * 2, (height - pad * 2) * aspect);
+      let cropH = cropW / aspect;
+      if (cropH > height - pad * 2){
+        cropH = height - pad * 2;
+        cropW = cropH * aspect;
+      }
+      state.crop = {
+        x: (width - cropW) / 2,
+        y: (height - cropH) / 2,
+        w: cropW,
+        h: cropH
+      };
+    }
+
+    function fitImage(resetZoom = true){
+      if (!state.image) return;
+      const scaleX = state.crop.w / state.naturalWidth;
+      const scaleY = state.crop.h / state.naturalHeight;
+      state.baseScale = Math.max(scaleX, scaleY);
+      if (resetZoom){
+        state.zoom = 1;
+        els.zoomRange.value = 1;
+      }
+      updateZoomText();
+      centerImage();
+    }
+
+    function centerImage(){
+      if (!state.image) return;
+      const scaledW = state.naturalWidth * state.baseScale * state.zoom;
+      const scaledH = state.naturalHeight * state.baseScale * state.zoom;
+      state.offsetX = state.crop.x + (state.crop.w - scaledW) / 2;
+      state.offsetY = state.crop.y + (state.crop.h - scaledH) / 2;
+      keepImageCoveringCrop();
+      draw();
+    }
+
+    function keepImageCoveringCrop(){
+      if (!state.image) return;
+      const scaledW = state.naturalWidth * state.baseScale * state.zoom;
+      const scaledH = state.naturalHeight * state.baseScale * state.zoom;
+      const minX = state.crop.x + state.crop.w - scaledW;
+      const maxX = state.crop.x;
+      const minY = state.crop.y + state.crop.h - scaledH;
+      const maxY = state.crop.y;
+      state.offsetX = scaledW <= state.crop.w ? state.crop.x + (state.crop.w - scaledW) / 2 : clamp(state.offsetX, minX, maxX);
+      state.offsetY = scaledH <= state.crop.h ? state.crop.y + (state.crop.h - scaledH) / 2 : clamp(state.offsetY, minY, maxY);
+    }
+
+    function draw(){
+      const rect = els.stageWrap.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = '#17130f';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+
+      if (state.image){
+        const scaledW = state.naturalWidth * state.baseScale * state.zoom;
+        const scaledH = state.naturalHeight * state.baseScale * state.zoom;
+        ctx.drawImage(state.image, state.offsetX, state.offsetY, scaledW, scaledH);
+      }
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,.56)';
+      ctx.fillRect(0, 0, rect.width, state.crop.y);
+      ctx.fillRect(0, state.crop.y + state.crop.h, rect.width, rect.height - state.crop.y - state.crop.h);
+      ctx.fillRect(0, state.crop.y, state.crop.x, state.crop.h);
+      ctx.fillRect(state.crop.x + state.crop.w, state.crop.y, rect.width - state.crop.x - state.crop.w, state.crop.h);
+
+      ctx.strokeStyle = 'rgba(255,255,255,.92)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(state.crop.x, state.crop.y, state.crop.w, state.crop.h);
+
+      ctx.strokeStyle = 'rgba(255,255,255,.35)';
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 3; i++){
+        const x = state.crop.x + (state.crop.w / 3) * i;
+        const y = state.crop.y + (state.crop.h / 3) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, state.crop.y);
+        ctx.lineTo(x, state.crop.y + state.crop.h);
+        ctx.moveTo(state.crop.x, y);
+        ctx.lineTo(state.crop.x + state.crop.w, y);
+        ctx.stroke();
+      }
+
+      if (!state.image){
+        ctx.fillStyle = 'rgba(255,255,255,.5)';
+        ctx.font = '600 14px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('4:5 crop area', state.crop.x + state.crop.w / 2, state.crop.y + state.crop.h / 2);
+      }
+      ctx.restore();
+    }
+
+    function handleFile(file){
+      if (!file || !file.type.startsWith('image/')){
+        showToast('이미지 파일을 선택해주세요.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          state.image = img;
+          state.fileName = file.name.replace(/\.[^.]+$/, '') || 'artwork';
+          state.naturalWidth = img.naturalWidth;
+          state.naturalHeight = img.naturalHeight;
+          els.sourceMeta.textContent = `${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px`;
+          els.dropLayer.classList.add('is-hidden');
+          setControlsEnabled(true);
+          clearResult();
+          fitImage(true);
+          draw();
+        };
+        img.onerror = () => showToast('이미지를 불러오지 못했습니다.');
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateZoomText(){
+      els.zoomValue.textContent = Math.round(state.zoom * 100) + '%';
+      els.zoomRange.value = state.zoom;
+    }
+
+    function setZoom(nextZoom, anchorX, anchorY){
+      if (!state.image) return;
+      const oldZoom = state.zoom;
+      const zoom = clamp(nextZoom, Number(els.zoomRange.min), Number(els.zoomRange.max));
+      if (zoom === oldZoom) return;
+      const imageX = (anchorX - state.offsetX) / oldZoom;
+      const imageY = (anchorY - state.offsetY) / oldZoom;
+      state.zoom = zoom;
+      state.offsetX = anchorX - imageX * zoom;
+      state.offsetY = anchorY - imageY * zoom;
+      keepImageCoveringCrop();
+      updateZoomText();
+      draw();
+    }
+
+    function getPinchInfo(){
+      const points = Array.from(state.activePointers.values());
+      if (points.length < 2) return null;
+      const a = points[0];
+      const b = points[1];
+      const distance = Math.hypot(a.x - b.x, a.y - b.y);
+      return {
+        distance,
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2
+      };
+    }
+
+    function clearResult(){
+      if (state.resultUrl) URL.revokeObjectURL(state.resultUrl);
+      state.resultUrl = '';
+      state.resultBlob = null;
+      els.previewImg.hidden = true;
+      els.previewImg.removeAttribute('src');
+      els.emptyPreview.hidden = false;
+      els.downloadBtn.disabled = true;
+      els.resultMeta.textContent = '결과 파일 정보가 여기에 표시됩니다.';
+    }
+
+    function makeOutputBlob(callback){
+      if (!state.image) return;
+      const { width, height } = getOutputSize();
+      const out = document.createElement('canvas');
+      out.width = width;
+      out.height = height;
+      const outCtx = out.getContext('2d');
+
+      const visibleScale = state.baseScale * state.zoom;
+      const sx = (state.crop.x - state.offsetX) / visibleScale;
+      const sy = (state.crop.y - state.offsetY) / visibleScale;
+      const sw = state.crop.w / visibleScale;
+      const sh = state.crop.h / visibleScale;
+
+      outCtx.fillStyle = '#fff';
+      outCtx.fillRect(0, 0, width, height);
+      outCtx.drawImage(state.image, sx, sy, sw, sh, 0, 0, width, height);
+
+      const type = els.formatSelect.value;
+      const quality = clamp(Number(els.qualityInput.value) || 0.85, 0.1, 1);
+      els.qualityInput.value = quality;
+      out.toBlob(blob => callback(blob, type, width, height), type, type === 'image/png' ? undefined : quality);
+    }
+
+    function extensionFor(type){
+      if (type === 'image/webp') return 'webp';
+      if (type === 'image/png') return 'png';
+      return 'jpg';
+    }
+
+    function makePreview(){
+      makeOutputBlob((blob, type, width, height) => {
+        if (!blob){
+          showToast('결과 이미지를 만들지 못했습니다.');
+          return;
+        }
+        clearResult();
+        state.resultBlob = blob;
+        state.resultUrl = URL.createObjectURL(blob);
+        els.previewImg.src = state.resultUrl;
+        els.previewImg.hidden = false;
+        els.emptyPreview.hidden = true;
+        els.downloadBtn.disabled = false;
+        const kb = Math.max(1, Math.round(blob.size / 1024));
+        els.resultMeta.textContent = `${width} x ${height}px · ${extensionFor(type).toUpperCase()} · 약 ${kb}KB`;
+        showToast('미리보기를 만들었습니다.');
+      });
+    }
+
+    function downloadResult(){
+      if (!state.resultBlob) return;
+      const type = els.formatSelect.value;
+      const a = document.createElement('a');
+      a.href = state.resultUrl;
+      a.download = `${state.fileName}-crop-4x5-${getOutputSize().width}.${extensionFor(type)}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    els.fileInput.addEventListener('change', event => {
+      handleFile(event.target.files[0]);
+    });
+
+    els.dropLayer.addEventListener('click', () => els.fileInput.click());
+    els.stageWrap.addEventListener('dragover', event => {
+      event.preventDefault();
+    });
+    els.stageWrap.addEventListener('drop', event => {
+      event.preventDefault();
+      handleFile(event.dataTransfer.files[0]);
+    });
+
+    els.stageWrap.addEventListener('pointerdown', event => {
+      if (!state.image) return;
+      const rect = els.stageWrap.getBoundingClientRect();
+      state.activePointers.set(event.pointerId, {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      });
+      els.stageWrap.setPointerCapture(event.pointerId);
+      if (state.activePointers.size === 1){
+        state.dragging = true;
+        state.dragStartX = event.clientX;
+        state.dragStartY = event.clientY;
+        state.startOffsetX = state.offsetX;
+        state.startOffsetY = state.offsetY;
+      }
+      if (state.activePointers.size === 2){
+        const pinch = getPinchInfo();
+        state.dragging = false;
+        state.pinchDistance = pinch.distance;
+        state.pinchZoom = state.zoom;
+      }
+    });
+    els.stageWrap.addEventListener('pointermove', event => {
+      if (!state.activePointers.has(event.pointerId)) return;
+      const rect = els.stageWrap.getBoundingClientRect();
+      state.activePointers.set(event.pointerId, {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      });
+      if (state.activePointers.size >= 2){
+        const pinch = getPinchInfo();
+        if (pinch && state.pinchDistance > 0){
+          setZoom(state.pinchZoom * (pinch.distance / state.pinchDistance), pinch.x, pinch.y);
+        }
+        return;
+      }
+      if (!state.dragging) return;
+      state.offsetX = state.startOffsetX + event.clientX - state.dragStartX;
+      state.offsetY = state.startOffsetY + event.clientY - state.dragStartY;
+      keepImageCoveringCrop();
+      draw();
+    });
+    els.stageWrap.addEventListener('pointerup', event => {
+      state.activePointers.delete(event.pointerId);
+      state.dragging = false;
+      if (els.stageWrap.hasPointerCapture(event.pointerId)) els.stageWrap.releasePointerCapture(event.pointerId);
+      if (state.activePointers.size === 1){
+        const remaining = Array.from(state.activePointers.values())[0];
+        const rect = els.stageWrap.getBoundingClientRect();
+        state.dragging = true;
+        state.dragStartX = remaining.x + rect.left;
+        state.dragStartY = remaining.y + rect.top;
+        state.startOffsetX = state.offsetX;
+        state.startOffsetY = state.offsetY;
+      }
+    });
+    els.stageWrap.addEventListener('pointercancel', event => {
+      state.activePointers.delete(event.pointerId);
+      state.dragging = false;
+    });
+    els.stageWrap.addEventListener('wheel', event => {
+      if (!state.image) return;
+      event.preventDefault();
+      const rect = els.stageWrap.getBoundingClientRect();
+      const anchorX = event.clientX - rect.left;
+      const anchorY = event.clientY - rect.top;
+      const delta = event.deltaY > 0 ? -0.08 : 0.08;
+      setZoom(state.zoom + delta, anchorX, anchorY);
+    }, { passive:false });
+
+    els.zoomRange.addEventListener('input', () => {
+      setZoom(Number(els.zoomRange.value), state.crop.x + state.crop.w / 2, state.crop.y + state.crop.h / 2);
+    });
+    els.widthInput.addEventListener('change', () => {
+      getOutputSize();
+      clearResult();
+    });
+    els.formatSelect.addEventListener('change', clearResult);
+    els.qualityInput.addEventListener('change', clearResult);
+    els.centerBtn.addEventListener('click', centerImage);
+    els.resetViewBtn.addEventListener('click', () => {
+      if (state.image) fitImage(true);
+      draw();
+    });
+    els.clearBtn.addEventListener('click', () => {
+      state.image = null;
+      state.fileName = 'artwork';
+      state.naturalWidth = 0;
+      state.naturalHeight = 0;
+      els.fileInput.value = '';
+      els.sourceMeta.textContent = '선택된 이미지 없음';
+      els.dropLayer.classList.remove('is-hidden');
+      setControlsEnabled(false);
+      clearResult();
+      draw();
+    });
+    els.makeBtn.addEventListener('click', makePreview);
+    els.downloadBtn.addEventListener('click', downloadResult);
+    window.addEventListener('resize', resizeCanvas);
+
+    getOutputSize();
+    resizeCanvas();
+  </script>
+</body>
+</html>
