@@ -338,7 +338,7 @@
           <div class="group">
             <label class="file-label">
               이미지 선택
-              <input id="fileInput" type="file" accept="image/*" />
+              <input id="fileInput" type="file" accept="image/*" multiple />
             </label>
             <div class="meta" id="sourceMeta">선택된 이미지 없음</div>
           </div>
@@ -380,6 +380,8 @@
 
           <div class="group">
             <div class="actions">
+              <button class="btn secondary" type="button" id="prevBtn" disabled>이전</button>
+              <button class="btn secondary" type="button" id="nextBtn" disabled>다음</button>
               <button class="btn secondary" type="button" id="centerBtn" disabled>가운데</button>
               <button class="btn danger" type="button" id="clearBtn" disabled>초기화</button>
               <button class="btn ok wide" type="button" id="makeBtn" disabled>미리보기 만들기</button>
@@ -422,6 +424,8 @@
       widthInput: document.getElementById('widthInput'),
       heightOutput: document.getElementById('heightOutput'),
       resetViewBtn: document.getElementById('resetViewBtn'),
+      prevBtn: document.getElementById('prevBtn'),
+      nextBtn: document.getElementById('nextBtn'),
       centerBtn: document.getElementById('centerBtn'),
       clearBtn: document.getElementById('clearBtn'),
       makeBtn: document.getElementById('makeBtn'),
@@ -435,6 +439,8 @@
     const ctx = els.canvas.getContext('2d');
     const state = {
       image: null,
+      files: [],
+      fileIndex: 0,
       fileName: 'artwork',
       naturalWidth: 0,
       naturalHeight: 0,
@@ -464,9 +470,17 @@
 
     function setControlsEnabled(enabled){
       els.zoomRange.disabled = !enabled;
+      els.prevBtn.disabled = !enabled || state.fileIndex <= 0;
+      els.nextBtn.disabled = !enabled || state.fileIndex >= state.files.length - 1;
       els.centerBtn.disabled = !enabled;
       els.clearBtn.disabled = !enabled;
       els.makeBtn.disabled = !enabled;
+    }
+
+    function updateNavButtons(){
+      const enabled = Boolean(state.image);
+      els.prevBtn.disabled = !enabled || state.fileIndex <= 0;
+      els.nextBtn.disabled = !enabled || state.fileIndex >= state.files.length - 1;
     }
 
     function getOutputSize(){
@@ -590,6 +604,24 @@
       ctx.restore();
     }
 
+    function handleFiles(fileList){
+      const imageFiles = Array.from(fileList || []).filter(file => file.type.startsWith('image/'));
+      if (!imageFiles.length){
+        showToast('이미지 파일을 선택해주세요.');
+        return;
+      }
+      state.files = imageFiles.slice(0, 20);
+      state.fileIndex = 0;
+      if (imageFiles.length > 20){
+        showToast('최대 20장까지만 불러왔습니다.');
+      }
+      loadCurrentFile();
+    }
+
+    function loadCurrentFile(){
+      handleFile(state.files[state.fileIndex]);
+    }
+
     function handleFile(file){
       if (!file || !file.type.startsWith('image/')){
         showToast('이미지 파일을 선택해주세요.');
@@ -603,9 +635,11 @@
           state.fileName = file.name.replace(/\.[^.]+$/, '') || 'artwork';
           state.naturalWidth = img.naturalWidth;
           state.naturalHeight = img.naturalHeight;
-          els.sourceMeta.textContent = `${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px`;
+          const countText = state.files.length > 1 ? `${state.fileIndex + 1}/${state.files.length} · ` : '';
+          els.sourceMeta.textContent = `${countText}${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px`;
           els.dropLayer.classList.add('is-hidden');
           setControlsEnabled(true);
+          updateNavButtons();
           clearResult();
           fitImage(true);
           draw();
@@ -721,7 +755,7 @@
     }
 
     els.fileInput.addEventListener('change', event => {
-      handleFile(event.target.files[0]);
+      handleFiles(event.target.files);
     });
 
     els.dropLayer.addEventListener('click', () => els.fileInput.click());
@@ -730,7 +764,7 @@
     });
     els.stageWrap.addEventListener('drop', event => {
       event.preventDefault();
-      handleFile(event.dataTransfer.files[0]);
+      handleFiles(event.dataTransfer.files);
     });
 
     els.stageWrap.addEventListener('pointerdown', event => {
@@ -813,12 +847,24 @@
     els.formatSelect.addEventListener('change', clearResult);
     els.qualityInput.addEventListener('change', clearResult);
     els.centerBtn.addEventListener('click', centerImage);
+    els.prevBtn.addEventListener('click', () => {
+      if (state.fileIndex <= 0) return;
+      state.fileIndex -= 1;
+      loadCurrentFile();
+    });
+    els.nextBtn.addEventListener('click', () => {
+      if (state.fileIndex >= state.files.length - 1) return;
+      state.fileIndex += 1;
+      loadCurrentFile();
+    });
     els.resetViewBtn.addEventListener('click', () => {
       if (state.image) fitImage(true);
       draw();
     });
     els.clearBtn.addEventListener('click', () => {
       state.image = null;
+      state.files = [];
+      state.fileIndex = 0;
       state.fileName = 'artwork';
       state.naturalWidth = 0;
       state.naturalHeight = 0;
