@@ -3437,6 +3437,9 @@
         const startY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
         const duration = Math.min(1400, Math.max(850, startY * 0.5));
         const startTime = performance.now();
+        const root = document.documentElement;
+        const previousScrollBehavior = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
 
         const step = (now) => {
           const progress = Math.min(1, (now - startTime) / duration);
@@ -3447,6 +3450,7 @@
             scrollAnimation = requestAnimationFrame(step);
           }else{
             scrollAnimation = null;
+            root.style.scrollBehavior = previousScrollBehavior;
             if(window.history && window.history.replaceState){
               window.history.replaceState(null, '', window.location.pathname + window.location.search);
             }
