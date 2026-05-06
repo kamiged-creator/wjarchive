@@ -786,6 +786,7 @@
       font-size:20px;
       font-weight:600;
       line-height:1;
+      font-family:inherit;
       box-shadow:0 4px 10px rgba(0,0,0,.08);
       backdrop-filter:blur(18px) saturate(140%);
       -webkit-backdrop-filter:blur(18px) saturate(140%);
@@ -3428,6 +3429,33 @@
 
       const pressOn = () => { badge.style.transform = badge.classList.contains('show') ? 'translateY(0) scale(.94)' : 'translateY(10px) scale(.94)'; };
       const pressOff = () => { badge.style.transform = badge.classList.contains('show') ? 'translateY(0) scale(1)' : 'translateY(10px) scale(.96)'; };
+      let scrollAnimation = null;
+
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const scrollToTopSlowly = () => {
+        if(scrollAnimation) cancelAnimationFrame(scrollAnimation);
+
+        const startY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const duration = Math.min(1200, Math.max(650, startY * 0.45));
+        const startTime = performance.now();
+
+        const step = (now) => {
+          const progress = Math.min(1, (now - startTime) / duration);
+          const nextY = Math.round(startY * (1 - easeOutCubic(progress)));
+          window.scrollTo(0, nextY);
+
+          if(progress < 1){
+            scrollAnimation = requestAnimationFrame(step);
+          }else{
+            scrollAnimation = null;
+            if(window.history && window.history.replaceState){
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+          }
+        };
+
+        scrollAnimation = requestAnimationFrame(step);
+      };
 
       badge.addEventListener('touchstart', pressOn, { passive:true });
       badge.addEventListener('touchend', pressOff, { passive:true });
@@ -3437,14 +3465,7 @@
 
       badge.addEventListener('click', (e) => {
         e.preventDefault();
-        try{
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }catch(err){
-          window.scrollTo(0, 0);
-        }
-        if(window.history && window.history.replaceState){
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        }
+        scrollToTopSlowly();
       });
     }
 
