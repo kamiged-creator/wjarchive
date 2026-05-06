@@ -3431,7 +3431,6 @@
       const pressOff = () => { badge.style.transform = badge.classList.contains('show') ? 'translateY(0) scale(1)' : 'translateY(10px) scale(.96)'; };
       let scrollAnimation = null;
 
-      const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
       const scrollToTopSlowly = () => {
         if(scrollAnimation) cancelAnimationFrame(scrollAnimation);
 
@@ -3441,7 +3440,7 @@
 
         const step = (now) => {
           const progress = Math.min(1, (now - startTime) / duration);
-          const nextY = Math.round(startY * (1 - easeInOutSine(progress)));
+          const nextY = Math.round(startY * (1 - progress));
           window.scrollTo(0, nextY);
 
           if(progress < 1){
