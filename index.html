@@ -3431,17 +3431,17 @@
       const pressOff = () => { badge.style.transform = badge.classList.contains('show') ? 'translateY(0) scale(1)' : 'translateY(10px) scale(.96)'; };
       let scrollAnimation = null;
 
-      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
       const scrollToTopSlowly = () => {
         if(scrollAnimation) cancelAnimationFrame(scrollAnimation);
 
         const startY = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        const duration = Math.min(1200, Math.max(650, startY * 0.45));
+        const duration = Math.min(1400, Math.max(850, startY * 0.5));
         const startTime = performance.now();
 
         const step = (now) => {
           const progress = Math.min(1, (now - startTime) / duration);
-          const nextY = Math.round(startY * (1 - easeOutCubic(progress)));
+          const nextY = Math.round(startY * (1 - easeInOutSine(progress)));
           window.scrollTo(0, nextY);
 
           if(progress < 1){
