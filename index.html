@@ -3469,7 +3469,11 @@
       });
     }
 
-    bindToTopBadge();
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', bindToTopBadge);
+    }else{
+      bindToTopBadge();
+    }
 
     window.addEventListener('scroll', () => {
       const badge = document.getElementById('toTopBadge');
