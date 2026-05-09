@@ -6,18 +6,20 @@
   <meta name="google" content="notranslate" />
   <title>이미지 크롭 편집</title>
   <meta name="description" content="작품 이미지 업로드 후 4:5 비율로 크롭하고 1600px 너비 이미지로 저장합니다." />
-  <meta name="theme-color" content="#f8f4ee" />
+  <meta name="theme-color" content="#fbf8f4" />
   <style>
     :root{
-      --bg:#f7f2ec;
+      --bg:#f6f1ea;
       --panel:#fffdf9;
-      --ink:#201a16;
-      --muted:#746960;
-      --line:rgba(32,26,22,.14);
-      --accent:#785b42;
-      --accent-2:#2f7469;
-      --danger:#a33d3d;
-      --shadow:0 18px 44px rgba(32,26,22,.1);
+      --ink:#1f1a17;
+      --muted:#6e655d;
+      --line:rgba(31,26,23,.12);
+      --accent:#8b6847;
+      --accent-2:#2f7d4d;
+      --warm:#e7d6c4;
+      --soft:#fbf7f1;
+      --danger:#b33d3d;
+      --shadow:0 18px 44px rgba(31,26,23,.09);
       --radius:8px;
     }
     *{box-sizing:border-box}
@@ -26,7 +28,9 @@
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
       color:var(--ink);
-      background:linear-gradient(180deg,#fbf8f4 0%,var(--bg) 100%);
+      background:
+        radial-gradient(circle at top left, rgba(231,214,196,.58), transparent 28%),
+        linear-gradient(180deg,#fbf8f4 0%,var(--bg) 100%);
       line-height:1.5;
       -webkit-font-smoothing:antialiased;
       text-rendering:optimizeLegibility;
@@ -47,6 +51,12 @@
       min-height:56px;
       padding:4px 0 18px;
       border-bottom:1px solid var(--line);
+    }
+    .top-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
     .title{
       display:flex;
@@ -74,8 +84,8 @@
     }
     .editor{
       min-width:0;
-      background:#15120f;
-      border:1px solid rgba(32,26,22,.16);
+      background:#181412;
+      border:1px solid rgba(31,26,23,.16);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       overflow:hidden;
@@ -89,11 +99,11 @@
       user-select:none;
       overflow:hidden;
       background:
-        linear-gradient(45deg,rgba(255,255,255,.04) 25%,transparent 25%),
-        linear-gradient(-45deg,rgba(255,255,255,.04) 25%,transparent 25%),
-        linear-gradient(45deg,transparent 75%,rgba(255,255,255,.04) 75%),
-        linear-gradient(-45deg,transparent 75%,rgba(255,255,255,.04) 75%),
-        #17130f;
+        linear-gradient(45deg,rgba(255,255,255,.035) 25%,transparent 25%),
+        linear-gradient(-45deg,rgba(255,255,255,.035) 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,rgba(255,255,255,.035) 75%),
+        linear-gradient(-45deg,transparent 75%,rgba(255,255,255,.035) 75%),
+        #0e0c0b;
       background-size:28px 28px;
       background-position:0 0,0 14px,14px -14px,-14px 0;
     }
@@ -108,9 +118,9 @@
       display:grid;
       place-items:center;
       padding:24px;
-      color:#f8f1e9;
+      color:#f5efe8;
       text-align:center;
-      background:linear-gradient(180deg,rgba(21,18,15,.2),rgba(21,18,15,.74));
+      background:linear-gradient(180deg,rgba(24,20,18,.2),rgba(24,20,18,.76));
       transition:opacity .18s ease, visibility .18s ease;
     }
     .drop.is-hidden{
@@ -126,7 +136,7 @@
     }
     .drop span{
       display:block;
-      color:rgba(248,241,233,.78);
+      color:rgba(245,239,232,.78);
       font-size:14px;
     }
     .panel{
@@ -161,7 +171,7 @@
       justify-content:center;
       min-height:46px;
       padding:0 14px;
-      border:1px dashed rgba(120,91,66,.5);
+      border:1px dashed rgba(139,104,71,.42);
       border-radius:var(--radius);
       background:#fbf7f1;
       color:var(--accent);
@@ -216,7 +226,7 @@
       color:var(--ink);
     }
     .btn.ok{background:var(--accent-2)}
-    .btn.danger{background:#fff;color:var(--danger);border-color:rgba(163,61,61,.28)}
+    .btn.danger{background:#fff5f5;color:var(--danger);border-color:rgba(179,61,61,.18)}
     .actions{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -232,7 +242,7 @@
       aspect-ratio:4/5;
       border-radius:var(--radius);
       border:1px solid var(--line);
-      background:#eee6dd;
+      background:#e9dfd3;
       object-fit:cover;
     }
     .empty-preview{
@@ -275,7 +285,7 @@
       max-width:min(520px,calc(100vw - 28px));
       padding:11px 14px;
       border-radius:999px;
-      background:rgba(32,26,22,.92);
+      background:rgba(31,26,23,.92);
       color:#fff;
       font-size:14px;
       opacity:0;
@@ -328,7 +338,10 @@
         <h1>이미지 크롭 편집</h1>
         <p class="sub">작품 이미지를 4:5 비율로 자르고 1600px 너비 파일로 저장합니다.</p>
       </div>
-      <button class="btn secondary" type="button" id="resetViewBtn">화면 맞춤</button>
+      <div class="top-actions">
+        <button class="btn secondary" type="button" id="resetViewBtn" disabled>화면 맞춤</button>
+        <button class="btn secondary" type="button" id="coverCropBtn" disabled>크롭 채움</button>
+      </div>
     </header>
 
     <section class="workspace" aria-label="이미지 크롭 작업 화면">
@@ -355,11 +368,25 @@
           </div>
 
           <div class="group">
+            <div class="row">
+              <div class="field">
+                <label for="sequenceInput">시작 번호</label>
+                <input id="sequenceInput" type="number" min="1" step="1" value="1" />
+              </div>
+              <div class="field">
+                <label for="nextSequenceOutput">다음 번호</label>
+                <input id="nextSequenceOutput" type="number" value="1" readonly />
+              </div>
+            </div>
+            <div class="meta" id="sequenceMeta">업로드 성공하면 다음 번호를 자동으로 기억합니다.</div>
+          </div>
+
+          <div class="group">
             <div class="label-row">
-              <b>확대</b>
+              <b>사진 크기</b>
               <span id="zoomValue">100%</span>
             </div>
-            <input id="zoomRange" type="range" min="1" max="5" step="0.01" value="1" disabled />
+            <input id="zoomRange" type="range" min="0.3" max="3" step="0.01" value="1" disabled />
           </div>
 
           <div class="group">
@@ -431,6 +458,9 @@
       dropLayer: document.getElementById('dropLayer'),
       fileInput: document.getElementById('fileInput'),
       sourceMeta: document.getElementById('sourceMeta'),
+      sequenceInput: document.getElementById('sequenceInput'),
+      nextSequenceOutput: document.getElementById('nextSequenceOutput'),
+      sequenceMeta: document.getElementById('sequenceMeta'),
       zoomRange: document.getElementById('zoomRange'),
       zoomValue: document.getElementById('zoomValue'),
       formatSelect: document.getElementById('formatSelect'),
@@ -438,6 +468,7 @@
       widthInput: document.getElementById('widthInput'),
       heightOutput: document.getElementById('heightOutput'),
       resetViewBtn: document.getElementById('resetViewBtn'),
+      coverCropBtn: document.getElementById('coverCropBtn'),
       prevBtn: document.getElementById('prevBtn'),
       nextBtn: document.getElementById('nextBtn'),
       centerBtn: document.getElementById('centerBtn'),
@@ -460,16 +491,19 @@
     };
 
     const ctx = els.canvas.getContext('2d');
+    const sequenceStorageKey = 'wjarchiveCropNextSequence';
     const state = {
       image: null,
       files: [],
       fileIndex: 0,
       fileName: 'artwork',
+      sequenceStart: 1,
       naturalWidth: 0,
       naturalHeight: 0,
       crop: { x: 0, y: 0, w: 0, h: 0 },
       baseScale: 1,
       zoom: 1,
+      fitMode: 'cover',
       offsetX: 0,
       offsetY: 0,
       dragging: false,
@@ -482,7 +516,8 @@
       pinchZoom: 1,
       resultUrl: '',
       resultBlob: null,
-      resultFileName: ''
+      resultFileName: '',
+      uploadedUrls: []
     };
 
     function showToast(message){
@@ -499,6 +534,8 @@
       els.centerBtn.disabled = !enabled;
       els.clearBtn.disabled = !enabled;
       els.makeBtn.disabled = !enabled;
+      els.resetViewBtn.disabled = !enabled;
+      els.coverCropBtn.disabled = !enabled;
     }
 
     function updateNavButtons(){
@@ -519,6 +556,57 @@
       return Math.max(min, Math.min(max, value));
     }
 
+    function readSavedSequence(){
+      const saved = Number(localStorage.getItem(sequenceStorageKey));
+      return Number.isFinite(saved) && saved > 0 ? Math.floor(saved) : 1;
+    }
+
+    function saveNextSequence(nextSequence){
+      const value = Math.max(1, Math.floor(Number(nextSequence) || 1));
+      localStorage.setItem(sequenceStorageKey, String(value));
+      if (!state.files.length) els.sequenceInput.value = value;
+      updateSequenceUi();
+    }
+
+    function getSequenceStart(){
+      const value = Math.max(1, Math.floor(Number(els.sequenceInput.value) || 1));
+      els.sequenceInput.value = value;
+      return value;
+    }
+
+    function getCurrentSequence(){
+      return state.sequenceStart + state.fileIndex;
+    }
+
+    function updateSequenceUi(){
+      const start = getSequenceStart();
+      const current = state.files.length ? state.sequenceStart + state.fileIndex : start;
+      const next = state.files.length ? state.sequenceStart + state.files.length : start;
+      els.nextSequenceOutput.value = next;
+      els.sequenceMeta.textContent = state.files.length
+        ? `현재 이미지는 ${current}번으로 저장됩니다. 이 묶음 다음 번호는 ${next}번입니다.`
+        : `${start}번부터 파일명을 만듭니다.`;
+    }
+
+    function sanitizeFileName(name){
+      return (name || 'artwork')
+        .trim()
+        .replace(/\.[^.]+$/, '')
+        .replace(/[\\/:*?"<>|]+/g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'artwork';
+    }
+
+    function formatSequence(sequence){
+      return String(Math.max(1, Math.floor(sequence))).padStart(4, '0');
+    }
+
+    function updateUploadUrlOutput(){
+      els.uploadUrlOutput.value = state.uploadedUrls.join('\n');
+      els.copyUrlBtn.disabled = !state.uploadedUrls.length;
+    }
+
     function resizeCanvas(){
       const rect = els.stageWrap.getBoundingClientRect();
       const ratio = window.devicePixelRatio || 1;
@@ -528,7 +616,7 @@
       els.canvas.style.height = rect.height + 'px';
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       updateCropBox(rect.width, rect.height);
-      if (state.image) fitImage(false);
+      if (state.image) fitImage(state.fitMode, false);
       draw();
     }
 
@@ -548,17 +636,35 @@
       };
     }
 
-    function fitImage(resetZoom = true){
+    function getCoverScale(){
       if (!state.image) return;
       const scaleX = state.crop.w / state.naturalWidth;
       const scaleY = state.crop.h / state.naturalHeight;
-      state.baseScale = Math.max(scaleX, scaleY);
+      return Math.max(scaleX, scaleY);
+    }
+
+    function getContainScale(){
+      if (!state.image) return;
+      const rect = els.stageWrap.getBoundingClientRect();
+      const padding = rect.width < 640 ? 48 : 72;
+      const scaleX = (rect.width - padding * 2) / state.naturalWidth;
+      const scaleY = (rect.height - padding * 2) / state.naturalHeight;
+      return Math.max(0.02, Math.min(scaleX, scaleY) * 0.86);
+    }
+
+    function fitImage(mode = 'cover', resetZoom = true){
+      if (!state.image) return;
+      state.fitMode = mode;
+      state.baseScale = mode === 'contain' ? getContainScale() : getCoverScale();
+      els.zoomRange.min = mode === 'contain' ? '0.3' : '1';
+      els.zoomRange.max = mode === 'contain' ? '3' : '5';
       if (resetZoom){
         state.zoom = 1;
         els.zoomRange.value = 1;
       }
       updateZoomText();
-      centerImage();
+      if (mode === 'contain') centerImageInStage();
+      else centerImage();
     }
 
     function centerImage(){
@@ -568,6 +674,16 @@
       state.offsetX = state.crop.x + (state.crop.w - scaledW) / 2;
       state.offsetY = state.crop.y + (state.crop.h - scaledH) / 2;
       keepImageCoveringCrop();
+      draw();
+    }
+
+    function centerImageInStage(){
+      if (!state.image) return;
+      const rect = els.stageWrap.getBoundingClientRect();
+      const scaledW = state.naturalWidth * state.baseScale * state.zoom;
+      const scaledH = state.naturalHeight * state.baseScale * state.zoom;
+      state.offsetX = (rect.width - scaledW) / 2;
+      state.offsetY = (rect.height - scaledH) / 2;
       draw();
     }
 
@@ -586,7 +702,7 @@
     function draw(){
       const rect = els.stageWrap.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
-      ctx.fillStyle = '#17130f';
+      ctx.fillStyle = '#0e0c0b';
       ctx.fillRect(0, 0, rect.width, rect.height);
 
       if (state.image){
@@ -636,6 +752,10 @@
       }
       state.files = imageFiles.slice(0, 20);
       state.fileIndex = 0;
+      state.sequenceStart = getSequenceStart();
+      state.uploadedUrls = [];
+      updateUploadUrlOutput();
+      updateSequenceUi();
       if (imageFiles.length > 20){
         showToast('최대 20장까지만 불러왔습니다.');
       }
@@ -656,16 +776,17 @@
         const img = new Image();
         img.onload = () => {
           state.image = img;
-          state.fileName = file.name.replace(/\.[^.]+$/, '') || 'artwork';
+          state.fileName = sanitizeFileName(file.name);
           state.naturalWidth = img.naturalWidth;
           state.naturalHeight = img.naturalHeight;
           const countText = state.files.length > 1 ? `${state.fileIndex + 1}/${state.files.length} · ` : '';
-          els.sourceMeta.textContent = `${countText}${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px`;
+          els.sourceMeta.textContent = `${countText}${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px · 저장 번호 ${getCurrentSequence()}`;
           els.dropLayer.classList.add('is-hidden');
           setControlsEnabled(true);
           updateNavButtons();
+          updateSequenceUi();
           clearResult();
-          fitImage(true);
+          fitImage('contain', true);
           draw();
         };
         img.onerror = () => showToast('이미지를 불러오지 못했습니다.');
@@ -682,14 +803,18 @@
     function setZoom(nextZoom, anchorX, anchorY){
       if (!state.image) return;
       const oldZoom = state.zoom;
-      const zoom = clamp(nextZoom, Number(els.zoomRange.min), Number(els.zoomRange.max));
+      const minZoom = state.fitMode === 'cover' ? 1 : Number(els.zoomRange.min);
+      const maxZoom = Number(els.zoomRange.max);
+      const zoom = clamp(nextZoom, minZoom, maxZoom);
       if (zoom === oldZoom) return;
-      const imageX = (anchorX - state.offsetX) / oldZoom;
-      const imageY = (anchorY - state.offsetY) / oldZoom;
+      const oldScale = state.baseScale * oldZoom;
+      const imageX = (anchorX - state.offsetX) / oldScale;
+      const imageY = (anchorY - state.offsetY) / oldScale;
       state.zoom = zoom;
-      state.offsetX = anchorX - imageX * zoom;
-      state.offsetY = anchorY - imageY * zoom;
-      keepImageCoveringCrop();
+      const nextScale = state.baseScale * zoom;
+      state.offsetX = anchorX - imageX * nextScale;
+      state.offsetY = anchorY - imageY * nextScale;
+      if (state.fitMode === 'cover') keepImageCoveringCrop();
       updateZoomText();
       draw();
     }
@@ -716,8 +841,7 @@
       els.emptyPreview.hidden = false;
       els.downloadBtn.disabled = true;
       els.uploadBtn.disabled = true;
-      els.copyUrlBtn.disabled = true;
-      els.uploadUrlOutput.value = '';
+      updateUploadUrlOutput();
       els.resultMeta.textContent = '결과 파일 정보가 여기에 표시됩니다.';
     }
 
@@ -752,10 +876,14 @@
     }
 
     function getResultFileName(){
-      return `${state.fileName}-crop-4x5-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
+      return `${state.fileName}-${formatSequence(getCurrentSequence())}-crop-4x5-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
     }
 
     function makePreview(){
+      if (state.image && state.fitMode !== 'cover'){
+        fitImage('cover', true);
+        showToast('저장용으로 크롭 영역을 꽉 채웠습니다.');
+      }
       makeOutputBlob((blob, type, width, height) => {
         if (!blob){
           showToast('결과 이미지를 만들지 못했습니다.');
@@ -818,8 +946,11 @@
         });
         const result = await uploadResponse.json();
         if (!uploadResponse.ok) throw new Error(result.message || '업로드에 실패했습니다.');
-        els.uploadUrlOutput.value = result.url || '';
-        els.copyUrlBtn.disabled = !result.url;
+        if (result.url){
+          state.uploadedUrls.push(result.url);
+          updateUploadUrlOutput();
+        }
+        saveNextSequence(getCurrentSequence() + 1);
         showToast('ImageKit 업로드가 완료되었습니다.');
       }catch(error){
         showToast(error.message || 'ImageKit 업로드에 실패했습니다.');
@@ -847,6 +978,12 @@
 
     els.fileInput.addEventListener('change', event => {
       handleFiles(event.target.files);
+    });
+
+    els.sequenceInput.addEventListener('change', () => {
+      state.sequenceStart = getSequenceStart();
+      updateSequenceUi();
+      clearResult();
     });
 
     els.dropLayer.addEventListener('click', () => els.fileInput.click());
@@ -897,7 +1034,7 @@
       if (!state.dragging) return;
       state.offsetX = state.startOffsetX + event.clientX - state.dragStartX;
       state.offsetY = state.startOffsetY + event.clientY - state.dragStartY;
-      keepImageCoveringCrop();
+      if (state.fitMode === 'cover') keepImageCoveringCrop();
       draw();
     });
     els.stageWrap.addEventListener('pointerup', event => {
@@ -937,7 +1074,10 @@
     });
     els.formatSelect.addEventListener('change', clearResult);
     els.qualityInput.addEventListener('change', clearResult);
-    els.centerBtn.addEventListener('click', centerImage);
+    els.centerBtn.addEventListener('click', () => {
+      if (state.fitMode === 'contain') centerImageInStage();
+      else centerImage();
+    });
     els.prevBtn.addEventListener('click', () => {
       if (state.fileIndex <= 0) return;
       state.fileIndex -= 1;
@@ -949,7 +1089,11 @@
       loadCurrentFile();
     });
     els.resetViewBtn.addEventListener('click', () => {
-      if (state.image) fitImage(true);
+      if (state.image) fitImage('contain', true);
+      draw();
+    });
+    els.coverCropBtn.addEventListener('click', () => {
+      if (state.image) fitImage('cover', true);
       draw();
     });
     els.clearBtn.addEventListener('click', () => {
@@ -957,12 +1101,15 @@
       state.files = [];
       state.fileIndex = 0;
       state.fileName = 'artwork';
+      state.sequenceStart = getSequenceStart();
+      state.uploadedUrls = [];
       state.naturalWidth = 0;
       state.naturalHeight = 0;
       els.fileInput.value = '';
       els.sourceMeta.textContent = '선택된 이미지 없음';
       els.dropLayer.classList.remove('is-hidden');
       setControlsEnabled(false);
+      updateSequenceUi();
       clearResult();
       draw();
     });
@@ -973,6 +1120,9 @@
     window.addEventListener('resize', resizeCanvas);
 
     getOutputSize();
+    els.sequenceInput.value = readSavedSequence();
+    state.sequenceStart = getSequenceStart();
+    updateSequenceUi();
     resizeCanvas();
   </script>
 </body>
