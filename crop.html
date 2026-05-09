@@ -517,7 +517,7 @@
       activePointers: new Map(),
       pinchDistance: 0,
       pinchZoom: 1,
-      undoState: null,
+      undoStack: [],
       resultUrl: '',
       resultBlob: null,
       resultFileName: '',
@@ -540,7 +540,7 @@
       els.makeBtn.disabled = !enabled;
       els.resetViewBtn.disabled = !enabled;
       els.coverCropBtn.disabled = !enabled;
-      els.undoBtn.disabled = !enabled || !state.undoState;
+      els.undoBtn.disabled = !enabled || !state.undoStack.length;
     }
 
     function updateNavButtons(){
@@ -561,7 +561,11 @@
 
     function rememberUndo(){
       if (!state.image) return;
-      state.undoState = captureViewState();
+      const nextState = captureViewState();
+      const lastState = state.undoStack[state.undoStack.length - 1];
+      if (lastState && JSON.stringify(lastState) === JSON.stringify(nextState)) return;
+      state.undoStack.push(nextState);
+      if (state.undoStack.length > 10) state.undoStack.shift();
       els.undoBtn.disabled = false;
     }
 
@@ -579,11 +583,10 @@
     }
 
     function undoLastChange(){
-      if (!state.undoState) return;
-      const previous = state.undoState;
-      state.undoState = null;
+      if (!state.undoStack.length) return;
+      const previous = state.undoStack.pop();
       restoreViewState(previous);
-      els.undoBtn.disabled = true;
+      els.undoBtn.disabled = !state.undoStack.length;
       clearResult();
       showToast('이전 상태로 되돌렸습니다.');
     }
@@ -837,7 +840,7 @@
           els.dropLayer.classList.add('is-hidden');
           setControlsEnabled(true);
           updateNavButtons();
-          state.undoState = null;
+          state.undoStack = [];
           updateSequenceUi();
           clearResult();
           fitImage('contain', true);
@@ -1171,6 +1174,7 @@
       state.fileName = 'artwork';
       state.sequenceStart = getSequenceStart();
       state.uploadedUrls = [];
+      state.undoStack = [];
       state.naturalWidth = 0;
       state.naturalHeight = 0;
       els.fileInput.value = '';
