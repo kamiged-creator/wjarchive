@@ -1,6 +1,20 @@
 const crypto = require('crypto');
 
 const tokenLifetimeSeconds = 12 * 60 * 60;
+const allowedOrigins = new Set([
+  'https://wjarchive.vercel.app',
+  'https://ycuve.com'
+]);
+
+function setCors(req, res) {
+  const origin = req.headers.origin;
+  if (allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
 
 function signToken(secret, expire, nonce) {
   return crypto
@@ -16,6 +30,13 @@ function safeEqual(a, b) {
 }
 
 module.exports = function handler(req, res) {
+  setCors(req, res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   if (req.method !== 'POST') {
     res.status(405).json({ message: 'Method not allowed.' });
     return;

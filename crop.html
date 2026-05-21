@@ -557,11 +557,11 @@
     const imageKitConfig = {
       publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
       urlEndpoint: 'https://ik.imagekit.io/gig3jr5rp',
-      authenticationEndpoint: '/api/imagekit-auth'
+      authenticationEndpoint: 'https://wjarchive.vercel.app/api/imagekit-auth'
     };
 
     const authConfig = {
-      loginEndpoint: '/api/crop-auth',
+      loginEndpoint: 'https://wjarchive.vercel.app/api/crop-auth',
       tokenStorageKey: 'wjarchiveCropAccessToken'
     };
 
@@ -637,11 +637,15 @@
       els.authSubmitBtn.textContent = '확인 중...';
       els.authMeta.textContent = '';
       try{
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 12000);
         const response = await fetch(authConfig.loginEndpoint, {
           method:'POST',
           headers:{ 'Content-Type':'application/json' },
-          body:JSON.stringify({ password })
+          body:JSON.stringify({ password }),
+          signal:controller.signal
         });
+        clearTimeout(timer);
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.message || '비밀번호가 맞지 않습니다.');
         sessionStorage.setItem(authConfig.tokenStorageKey, result.accessToken);
@@ -650,7 +654,7 @@
         showToast('크롭 도구 잠금이 해제되었습니다.');
       }catch(error){
         sessionStorage.removeItem(authConfig.tokenStorageKey);
-        els.authMeta.textContent = error.message || '잠금 해제에 실패했습니다.';
+        els.authMeta.textContent = error.name === 'AbortError' ? '인증 서버 응답이 지연되고 있습니다.' : (error.message || '잠금 해제에 실패했습니다.');
         els.authPassword.select();
       }finally{
         els.authSubmitBtn.textContent = '열기';

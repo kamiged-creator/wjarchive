@@ -1,5 +1,20 @@
 const crypto = require('crypto');
 
+const allowedOrigins = new Set([
+  'https://wjarchive.vercel.app',
+  'https://ycuve.com'
+]);
+
+function setCors(req, res) {
+  const origin = req.headers.origin;
+  if (allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
 function verifyAccessToken(token, secret) {
   const parts = String(token || '').split(':');
   if (parts.length !== 3) return false;
@@ -18,6 +33,13 @@ function verifyAccessToken(token, secret) {
 }
 
 module.exports = function handler(req, res) {
+  setCors(req, res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
   const accessPassword = process.env.CROP_ACCESS_PASSWORD;
 
