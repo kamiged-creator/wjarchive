@@ -276,6 +276,41 @@
       padding:10px;
       font:13px/1.45 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
     }
+    .url-badges{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .url-badge{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      width:100%;
+      min-height:38px;
+      border:1px solid rgba(47,125,77,.2);
+      border-radius:999px;
+      background:#f3fbf5;
+      color:var(--accent-2);
+      padding:8px 12px;
+      text-align:left;
+      font-size:13px;
+      font-weight:800;
+    }
+    .url-badge::before{
+      content:"URL";
+      flex:0 0 auto;
+      border-radius:999px;
+      background:var(--accent-2);
+      color:#fff;
+      padding:2px 7px;
+      font-size:11px;
+      line-height:1.4;
+    }
+    .url-badge span{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
     .toast{
       position:fixed;
       left:50%;
@@ -496,6 +531,7 @@
             </div>
             <div class="meta" id="resultMeta">결과 파일 정보가 여기에 표시됩니다.</div>
             <textarea class="url-output" id="uploadUrlOutput" readonly placeholder="ImageKit 업로드 URL"></textarea>
+            <div class="url-badges" id="urlBadges" aria-label="업로드 URL 빠른 복사"></div>
           </div>
         </section>
       </aside>
@@ -546,6 +582,7 @@
       copyUrlBtn: document.getElementById('copyUrlBtn'),
       resultMeta: document.getElementById('resultMeta'),
       uploadUrlOutput: document.getElementById('uploadUrlOutput'),
+      urlBadges: document.getElementById('urlBadges'),
       authOverlay: document.getElementById('authOverlay'),
       authForm: document.getElementById('authForm'),
       authPassword: document.getElementById('authPassword'),
@@ -783,6 +820,29 @@
     function updateUploadUrlOutput(){
       els.uploadUrlOutput.value = state.uploadedUrls.join('\n');
       els.copyUrlBtn.disabled = !state.uploadedUrls.length;
+      els.urlBadges.innerHTML = '';
+      state.uploadedUrls.forEach((url, index) => {
+        const badge = document.createElement('button');
+        badge.className = 'url-badge';
+        badge.type = 'button';
+        badge.dataset.url = url;
+        badge.title = '업로드 URL 복사';
+        const label = document.createElement('span');
+        label.textContent = `${index + 1}. ${url}`;
+        badge.appendChild(label);
+        els.urlBadges.appendChild(badge);
+      });
+    }
+
+    async function copyText(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        showToast('URL을 복사했습니다.');
+      }catch(error){
+        els.uploadUrlOutput.focus();
+        els.uploadUrlOutput.select();
+        showToast('URL을 선택했습니다. Ctrl+C로 복사해주세요.');
+      }
     }
 
     function resizeCanvas(){
@@ -1164,14 +1224,13 @@
         showToast('복사할 URL이 없습니다.');
         return;
       }
-      try{
-        await navigator.clipboard.writeText(url);
-        showToast('URL을 복사했습니다.');
-      }catch(error){
-        els.uploadUrlOutput.focus();
-        els.uploadUrlOutput.select();
-        showToast('URL을 선택했습니다. Ctrl+C로 복사해주세요.');
-      }
+      await copyText(url);
+    }
+
+    async function copyBadgeUrl(event){
+      const badge = event.target.closest('.url-badge');
+      if (!badge) return;
+      await copyText(badge.dataset.url || '');
     }
 
     els.fileInput.addEventListener('change', event => {
@@ -1329,6 +1388,7 @@
     els.downloadBtn.addEventListener('click', downloadResult);
     els.uploadBtn.addEventListener('click', uploadToImageKit);
     els.copyUrlBtn.addEventListener('click', copyUploadUrl);
+    els.urlBadges.addEventListener('click', copyBadgeUrl);
     els.authForm.addEventListener('submit', unlockCropTool);
     window.addEventListener('resize', resizeCanvas);
 
