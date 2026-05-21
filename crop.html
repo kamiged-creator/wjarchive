@@ -296,6 +296,59 @@
       opacity:1;
       transform:translateX(-50%) translateY(0);
     }
+    .auth-overlay{
+      position:fixed;
+      inset:0;
+      z-index:20;
+      display:grid;
+      place-items:center;
+      padding:20px;
+      background:rgba(251,248,244,.86);
+      backdrop-filter:blur(10px);
+    }
+    .auth-overlay[hidden]{display:none}
+    .auth-card{
+      width:min(420px,100%);
+      padding:24px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:var(--panel);
+      box-shadow:var(--shadow);
+    }
+    .auth-card h2{
+      margin:0 0 8px;
+      font-size:24px;
+      line-height:1.2;
+      letter-spacing:0;
+    }
+    .auth-card p{
+      margin:0 0 18px;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .auth-card label{
+      display:block;
+      margin-bottom:8px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:700;
+    }
+    .auth-card input{
+      width:100%;
+      margin-bottom:12px;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      padding:12px;
+      color:var(--ink);
+    }
+    .auth-card .btn{width:100%}
+    .auth-meta{
+      min-height:20px;
+      margin-top:10px;
+      color:var(--danger);
+      font-size:13px;
+    }
     @media (max-width:900px){
       .shell{padding:14px}
       .topbar{
@@ -450,6 +503,16 @@
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="auth-overlay" id="authOverlay" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <form class="auth-card" id="authForm">
+      <h2 id="authTitle">크롭 도구 잠금</h2>
+      <p>작업용 비밀번호를 입력하면 이미지 크롭과 ImageKit 업로드를 사용할 수 있습니다.</p>
+      <label for="authPassword">비밀번호</label>
+      <input id="authPassword" type="password" autocomplete="current-password" />
+      <button class="btn ok" type="submit" id="authSubmitBtn">열기</button>
+      <div class="auth-meta" id="authMeta" role="status" aria-live="polite"></div>
+    </form>
+  </div>
 
   <script>
     const aspect = 4 / 5;
@@ -483,6 +546,11 @@
       copyUrlBtn: document.getElementById('copyUrlBtn'),
       resultMeta: document.getElementById('resultMeta'),
       uploadUrlOutput: document.getElementById('uploadUrlOutput'),
+      authOverlay: document.getElementById('authOverlay'),
+      authForm: document.getElementById('authForm'),
+      authPassword: document.getElementById('authPassword'),
+      authSubmitBtn: document.getElementById('authSubmitBtn'),
+      authMeta: document.getElementById('authMeta'),
       toast: document.getElementById('toast')
     };
 
@@ -490,6 +558,11 @@
       publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
       urlEndpoint: 'https://ik.imagekit.io/gig3jr5rp',
       authenticationEndpoint: '/api/imagekit-auth'
+    };
+
+    const authConfig = {
+      loginEndpoint: '/api/crop-auth',
+      tokenStorageKey: 'wjarchiveCropAccessToken'
     };
 
     const ctx = els.canvas.getContext('2d');
@@ -529,6 +602,60 @@
       els.toast.classList.add('is-on');
       clearTimeout(showToast.timer);
       showToast.timer = setTimeout(() => els.toast.classList.remove('is-on'), 2100);
+    }
+
+    function getAccessToken(){
+      return sessionStorage.getItem(authConfig.tokenStorageKey) || '';
+    }
+
+    function tokenIsFresh(token){
+      const expire = Number(String(token).split(':')[0]);
+      return Number.isFinite(expire) && expire > Math.floor(Date.now() / 1000) + 15;
+    }
+
+    function setLocked(locked){
+      els.authOverlay.hidden = !locked;
+      if (locked){
+        setTimeout(() => els.authPassword.focus(), 0);
+      }
+    }
+
+    function initAccessLock(){
+      setLocked(!tokenIsFresh(getAccessToken()));
+    }
+
+    async function unlockCropTool(event){
+      event.preventDefault();
+      const password = els.authPassword.value;
+      if (!password){
+        els.authMeta.textContent = '비밀번호를 입력해주세요.';
+        els.authPassword.focus();
+        return;
+      }
+
+      els.authSubmitBtn.disabled = true;
+      els.authSubmitBtn.textContent = '확인 중...';
+      els.authMeta.textContent = '';
+      try{
+        const response = await fetch(authConfig.loginEndpoint, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body:JSON.stringify({ password })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.message || '비밀번호가 맞지 않습니다.');
+        sessionStorage.setItem(authConfig.tokenStorageKey, result.accessToken);
+        els.authPassword.value = '';
+        setLocked(false);
+        showToast('크롭 도구 잠금이 해제되었습니다.');
+      }catch(error){
+        sessionStorage.removeItem(authConfig.tokenStorageKey);
+        els.authMeta.textContent = error.message || '잠금 해제에 실패했습니다.';
+        els.authPassword.select();
+      }finally{
+        els.authSubmitBtn.textContent = '열기';
+        els.authSubmitBtn.disabled = false;
+      }
     }
 
     function setControlsEnabled(enabled){
@@ -985,7 +1112,16 @@
       els.uploadBtn.disabled = true;
       els.uploadBtn.textContent = '업로드 중...';
       try{
-        const authResponse = await fetch(imageKitConfig.authenticationEndpoint, { cache:'no-store' });
+        const accessToken = getAccessToken();
+        if (!tokenIsFresh(accessToken)){
+          sessionStorage.removeItem(authConfig.tokenStorageKey);
+          setLocked(true);
+          throw new Error('비밀번호를 다시 입력해주세요.');
+        }
+        const authResponse = await fetch(imageKitConfig.authenticationEndpoint, {
+          cache:'no-store',
+          headers:{ Authorization:`Bearer ${accessToken}` }
+        });
         if (!authResponse.ok) throw new Error('인증 정보를 가져오지 못했습니다.');
         const auth = await authResponse.json();
         const form = new FormData();
@@ -1189,12 +1325,14 @@
     els.downloadBtn.addEventListener('click', downloadResult);
     els.uploadBtn.addEventListener('click', uploadToImageKit);
     els.copyUrlBtn.addEventListener('click', copyUploadUrl);
+    els.authForm.addEventListener('submit', unlockCropTool);
     window.addEventListener('resize', resizeCanvas);
 
     getOutputSize();
     els.sequenceInput.value = readSavedSequence();
     state.sequenceStart = getSequenceStart();
     updateSequenceUi();
+    initAccessLock();
     resizeCanvas();
   </script>
 </body>
