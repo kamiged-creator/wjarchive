@@ -140,6 +140,7 @@
       font-size:14px;
     }
     .panel{
+      min-width:0;
       background:var(--panel);
       border:1px solid var(--line);
       border-radius:var(--radius);
@@ -236,6 +237,7 @@
     .preview-box{
       display:grid;
       gap:10px;
+      min-width:0;
     }
     .preview{
       width:100%;
@@ -280,12 +282,16 @@
       display:flex;
       flex-direction:column;
       gap:8px;
+      min-width:0;
+      max-width:100%;
     }
     .url-badge{
       display:flex;
       align-items:center;
       gap:8px;
       width:100%;
+      max-width:100%;
+      min-width:0;
       min-height:38px;
       border:1px solid rgba(47,125,77,.2);
       border-radius:999px;
@@ -307,6 +313,7 @@
       line-height:1.4;
     }
     .url-badge span{
+      min-width:0;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
