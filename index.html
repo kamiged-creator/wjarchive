@@ -1256,6 +1256,11 @@
                   <label class="label" for="artThumbUrl">작품 이미지 링크</label>
                   <input class="field" id="artThumbUrl" type="url" placeholder="https://ik.imagekit.io/... 또는 https://drive.google.com/file/d/.../view">
                 </div>
+                <div>
+                  <label class="label" for="artBatchUrls">여러 작품 이미지 링크</label>
+                  <textarea class="editor-area" id="artBatchUrls" placeholder="crop.html에서 복사한 ImageKit URL을 여러 줄로 붙여넣기"></textarea>
+                  <div class="mini-note">여러 줄을 넣고 일괄 추가를 누르면 URL마다 새 작품 1개씩 등록됩니다.</div>
+                </div>
                 <div class="mini-note" style="font-size:13px;line-height:1.6">※ 이미지 링크와 유튜브 주소를 넣고 버튼 한 번만 누르면 함께 반영됩니다.</div>
 
                 <div class="field-row">
@@ -1268,10 +1273,12 @@
                 <div>
                   <label class="label" for="artTargetWork">반영할 기존 작품</label>
                   <select class="field-sm" id="artTargetWork"></select>
+                  <input id="artEditingWorkId" type="hidden" value="">
                 </div>
 
                 <div class="hero-actions artwork-actions" style="margin-top:10px">
                   <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품/유튜브 반영</button>
+                  <button class="btn" type="button" id="batchAddArtworkBtn">URL 목록 일괄 추가</button>
                   <button class="btn" type="button" id="exportHtmlBtnInline">업로드용 HTML 저장</button>
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
@@ -1334,7 +1341,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const sampleWorks = [
@@ -1527,6 +1533,26 @@
       return folderPath ? `${baseUrl}/${folderPath}/${filePath}` : `${baseUrl}/${filePath}`;
     }
 
+    function withImagekitTransform(url, transform){
+      const value = String(url || '').trim();
+      if(!value || value.startsWith('data:image/') || !/ik\.imagekit\.io/i.test(value)) return value;
+      if(/[?&]tr=/.test(value)) return value;
+      const separator = value.includes('?') ? '&' : '?';
+      return `${value}${separator}tr=${transform}`;
+    }
+
+    function getGalleryImageUrl(url){
+      return withImagekitTransform(url, 'w-720,q-75,f-auto');
+    }
+
+    function getViewerImageUrl(url){
+      return withImagekitTransform(url, 'w-1600,q-82,f-auto');
+    }
+
+    function cssImageUrl(url){
+      return String(url || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
     function loadImagekitConfig(){
       const config = getImagekitConfig();
       if(qs('#imagekitBaseUrl')) qs('#imagekitBaseUrl').value = config.baseUrl || '';
@@ -1602,6 +1628,11 @@
       const select = qs('#artTargetWork');
       const value = select?.value || 'sample:0';
       if(value === '__new__') return { type:'new', value };
+      if(value.startsWith('dbid:')){
+        const dbId = value.slice(5);
+        const work = getWorks().find(item => item._sourceType === 'db' && item._dbId === dbId);
+        return { type:'db', dbId, value, work };
+      }
       const [type, rawIndex] = value.split(':');
       const sourceIndex = Number(rawIndex);
       const work = getWorks().find(item => item._sourceType === type && item._sourceIndex === sourceIndex);
@@ -1621,6 +1652,7 @@
       if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
       if(qs('#artYoutube')) qs('#artYoutube').value = work.youtube || '';
       if(qs('#artThumbUrl')) qs('#artThumbUrl').value = work.thumb || '';
+      if(qs('#artEditingWorkId')) qs('#artEditingWorkId').value = work._sourceType === 'db' ? (work._dbId || '') : '';
     }
 
     function fileToDataURL(file){
@@ -1657,6 +1689,25 @@
       return buildImagekitUrl(value);
     }
 
+    function parseArtworkUrlList(value){
+      const seen = new Set();
+      return String(value || '')
+        .split(/[\s,]+/)
+        .map(url => normalizeArtworkImageUrl(url))
+        .filter(url => {
+          if(!url || seen.has(url)) return false;
+          seen.add(url);
+          return /^(https?:\/\/|data:image\/)/i.test(url);
+        });
+    }
+
+    function getBatchWorkTitle(baseTitle, index, total){
+      const title = String(baseTitle || '').trim();
+      if(total <= 1) return title || '새 작품';
+      const suffix = String(index + 1).padStart(2, '0');
+      return title ? `${title} ${suffix}` : `새 작품 ${suffix}`;
+    }
+
     function flashApplyButton(ok){
       const btn = qs('#applyArtworkBtn');
       if(!btn) return;
@@ -1668,6 +1719,77 @@
           btn.classList.remove('applied');
           btn.textContent = '작품/유튜브 반영';
         }, 1800);
+      }
+    }
+
+    async function addBatchArtworksFromUrls(){
+      const status = qs('#artDraftStatus');
+      const urls = parseArtworkUrlList([
+        qs('#artBatchUrls')?.value || '',
+        qs('#artThumbUrl')?.value || ''
+      ].join('\n'));
+      const title = (qs('#artTitle')?.value || '').trim();
+      const category = (qs('#artCategory')?.value || '').trim() || '필선';
+      const year = (qs('#artYear')?.value || '').trim() || String(new Date().getFullYear());
+      const desc = (qs('#artDescription')?.value || '').trim();
+      const youtube = urls.length === 1 ? (qs('#artYoutube')?.value || '').trim() : '';
+
+      if(!urls.length){
+        if(status){
+          status.textContent = '일괄 추가할 ImageKit 또는 이미지 URL을 한 줄 이상 넣어주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      if(!supabaseReady()){
+        if(status){
+          status.textContent = 'Supabase 연결이 없어 공개 사이트에 등록할 수 없습니다. 다른 PC에서도 보이려면 Supabase 저장이 필요합니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      try{
+        let lastSavedDbId = '';
+        for(let index = 0; index < urls.length; index += 1){
+          const url = urls[index];
+          const saveResult = await saveArtworkToSupabase({
+            info:{type:'new'},
+            title:getBatchWorkTitle(title, index, urls.length),
+            category,
+            year,
+            desc,
+            youtube,
+            thumbUrl:url,
+            fullUrl:url
+          });
+          if(!saveResult.ok) throw new Error(saveResult.message);
+          lastSavedDbId = saveResult.dbId || lastSavedDbId;
+        }
+        await loadSupabaseWorks();
+        selectCategoryFilter(category);
+        populateArtTargetWork(lastSavedDbId ? getDbWorkSelectValue(lastSavedDbId) : '__new__');
+        renderGallery();
+
+        if(qs('#artFeatured')?.checked && urls[0]){
+          const currentAbout = {...defaultAboutContent};
+          currentAbout.heroImage = urls[0];
+          currentAbout.heroCaption = getBatchWorkTitle(title, 0, urls.length);
+          applyAboutContentToPage(currentAbout);
+          if(supabaseReady()) await saveAboutContentToSupabase(currentAbout);
+        }
+
+        if(qs('#artBatchUrls')) qs('#artBatchUrls').value = '';
+        if(status){
+          status.textContent = `${urls.length}개 작품을 Supabase에 추가했습니다. 다른 PC에서도 공개 페이지에 표시됩니다.`;
+          status.className = 'status ok';
+        }
+      }catch(err){
+        if(status){
+          status.textContent = `일괄 추가 중 오류가 생겼습니다. ${err?.message || ''}`.trim();
+          status.className = 'status bad';
+        }
       }
     }
 
@@ -1684,12 +1806,31 @@
       }
 
       const info = getSelectedWorkInfo();
+      const editingDbId = qs('#artEditingWorkId')?.value || '';
+      if(info.type !== 'new' && info.work?._dbId && qs('#artEditingWorkId')){
+        qs('#artEditingWorkId').value = info.work._dbId;
+      }
+      if(info.type === 'new' && editingDbId){
+        const work = getWorks().find(item => item._sourceType === 'db' && item._dbId === editingDbId);
+        if(work){
+          info.type = 'db';
+          info.dbId = editingDbId;
+          info.value = `dbid:${editingDbId}`;
+          info.work = work;
+        }
+      }
       const title = (qs('#artTitle')?.value || '').trim();
       const category = (qs('#artCategory')?.value || '').trim() || '필선';
       const year = (qs('#artYear')?.value || '').trim();
       const desc = (qs('#artDescription')?.value || '').trim();
       const youtube = (qs('#artYoutube')?.value || '').trim();
-      const singleUrl = normalizeArtworkImageUrl(qs('#artThumbUrl')?.value || '');
+      const rawSingleUrl = qs('#artThumbUrl')?.value || '';
+      const pastedUrls = parseArtworkUrlList(rawSingleUrl);
+      if(info.type === 'new' && pastedUrls.length > 1){
+        await addBatchArtworksFromUrls();
+        return;
+      }
+      const singleUrl = normalizeArtworkImageUrl(rawSingleUrl);
       const thumbUrl = singleUrl;
       const fullUrl = singleUrl;
 
@@ -1701,121 +1842,41 @@
         return;
       }
 
+      if(!supabaseReady()){
+        if(status){
+          status.textContent = 'Supabase 연결이 없어 공개 사이트에 등록할 수 없습니다. 다른 PC에서도 보이려면 Supabase 저장이 필요합니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
       try{
-        if(supabaseReady()){
-          const saveResult = await saveArtworkToSupabase({
-            info, title, category, year, desc, youtube, thumbUrl, fullUrl
-          });
-          if(!saveResult.ok){
-            if(status){
-              status.textContent = `Supabase 저장 실패: ${saveResult.message}`;
-              status.className = 'status bad';
-            }
-            return;
-          }
-          await loadSupabaseWorks();
-          populateArtTargetWork('__new__');
-          renderGallery();
+        const saveResult = await saveArtworkToSupabase({
+          info, title, category, year, desc, youtube, thumbUrl, fullUrl
+        });
+        if(!saveResult.ok){
           if(status){
-            status.textContent = saveResult.message || `${title || '작품'} Supabase 저장 완료`;
-            status.className = 'status ok';
+            status.textContent = `Supabase 저장 실패: ${saveResult.message}`;
+            status.className = 'status bad';
           }
-          if(qs('#artFeatured')?.checked){
-            const currentAbout = {...defaultAboutContent};
-            currentAbout.heroImage = fullUrl || thumbUrl || '';
-            currentAbout.heroCaption = title || currentAbout.heroCaption;
-            applyAboutContentToPage(currentAbout);
-            await saveAboutContentToSupabase(currentAbout);
-          }
-          flashApplyButton(true);
           return;
         }
-
-        if(info.type === 'new'){
-          const extraWorks = getExtraWorks();
-          extraWorks.unshift({
-            title: title || '새 작품',
-            category,
-            year: year || String(new Date().getFullYear()),
-            medium: category,
-            desc: desc || '작품 설명',
-            thumb: thumbUrl || fullUrl || '',
-            large: fullUrl || thumbUrl || '',
-            youtube
-          });
-
-          writeExtraWorks(extraWorks);
-          populateArtTargetWork('extra:0');
-          renderGallery();
-
-          if(status){
-            status.textContent = `${title || '새 작품'} 작품이 추가되었습니다. 기존 작품은 그대로 아래에 유지됩니다.`;
-            status.className = 'status ok';
-          }
-        } else if(info.work){
-          if(info.type === 'sample'){
-            const overrides = getWorkOverrides();
-            const current = overrides[String(info.sourceIndex)] || info.work;
-            overrides[String(info.sourceIndex)] = {
-              ...current,
-              title: title || current.title || '',
-              category: category || current.category || '',
-              year: year || current.year || '',
-              medium: category || current.medium || '',
-              desc: desc || current.desc || '',
-              youtube,
-              ...(thumbUrl ? { thumb: thumbUrl } : {}),
-              ...(fullUrl ? { large: fullUrl } : {})
-            };
-            writeJSON('wonjuWorkOverrides', overrides);
-          } else {
-            const extraWorks = getExtraWorks();
-            const current = extraWorks[info.sourceIndex] || info.work;
-            extraWorks[info.sourceIndex] = {
-              ...current,
-              title: title || current.title || '',
-              category: category || current.category || '',
-              year: year || current.year || '',
-              medium: category || current.medium || '',
-              desc: desc || current.desc || '',
-              youtube,
-              ...(thumbUrl ? { thumb: thumbUrl } : {}),
-              ...(fullUrl ? { large: fullUrl } : {})
-            };
-            writeExtraWorks(extraWorks);
-          }
-
-          renderGallery();
-          populateArtTargetWork(info.value);
-
-          if(status){
-            status.textContent = `${title || buildWorkLabel(info.work)} 작품 반영 완료`;
-            status.className = 'status ok';
-          }
+        await loadSupabaseWorks();
+        selectCategoryFilter(category);
+        populateArtTargetWork(saveResult.dbId ? getDbWorkSelectValue(saveResult.dbId) : '__new__');
+        if(qs('#artEditingWorkId')) qs('#artEditingWorkId').value = saveResult.dbId || '';
+        renderGallery();
+        if(status){
+          status.textContent = saveResult.message || `${title || '작품'} Supabase 저장 완료`;
+          status.className = 'status ok';
         }
 
         if(qs('#artFeatured')?.checked){
-          let saved = null;
-          try{
-            saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
-          }catch(e){
-            saved = null;
-          }
-          const sharedImages = getSharedImageContent();
-          const currentAbout = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
-          const works = getWorks();
-          const selected = info.type === 'new' ? works.find(w => w._sourceType === 'extra' && w._sourceIndex === 0) : getSelectedWorkInfo().work;
-          if(selected?.large || selected?.thumb){
-            currentAbout.heroImage = selected.large || selected.thumb;
-            currentAbout.heroCaption = title || selected.title || currentAbout.heroCaption;
-            localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(currentAbout));
-            writeSharedImageContent({
-              heroImage: currentAbout.heroImage,
-              artistImage: currentAbout.artistImage
-            });
-            loadAboutContent();
-            updateAboutImageSizeDisplay();
-          }
+          const currentAbout = {...defaultAboutContent};
+          currentAbout.heroImage = fullUrl || thumbUrl || '';
+          currentAbout.heroCaption = title || currentAbout.heroCaption;
+          applyAboutContentToPage(currentAbout);
+          await saveAboutContentToSupabase(currentAbout);
         }
 
         flashApplyButton(true);
@@ -1843,9 +1904,10 @@
 
       grid.innerHTML = pageWorks.map((work) => {
         const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
+        const thumb = getGalleryImageUrl(work.thumb || work.large || '');
         return `
         <article class="work" data-index="${index}">
-          <div class="work-img" style="background-image:url('${work.thumb}')"></div>
+          <div class="work-img" style="background-image:url('${cssImageUrl(thumb)}')"></div>
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
             <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
@@ -1886,6 +1948,16 @@
           qsa('#filterBar .filter-btn').forEach(el => el.classList.toggle('active', el === btn));
           renderGallery();
         });
+      });
+    }
+
+    function selectCategoryFilter(category){
+      const nextCategory = category || '전체';
+      const target = qs(`#filterBar .filter-btn[data-category="${CSS.escape(nextCategory)}"]`);
+      state.currentCategory = target ? nextCategory : '전체';
+      state.currentPage = 1;
+      qsa('#filterBar .filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === state.currentCategory);
       });
     }
 
@@ -2101,6 +2173,7 @@
       qs('#artDescription') && (qs('#artDescription').value = '');
       qs('#artYoutube') && (qs('#artYoutube').value = '');
       qs('#artThumbUrl') && (qs('#artThumbUrl').value = '');
+      qs('#artEditingWorkId') && (qs('#artEditingWorkId').value = '');
       qs('#artFeatured') && (qs('#artFeatured').checked = false);
       const status = qs('#artDraftStatus');
       if(status){
@@ -2209,7 +2282,12 @@
       const currentValue = preferredValue || select.value || '__new__';
       const works = getWorks();
       const options = [`<option value="__new__">새 작품 추가</option>`].concat(
-        works.map(work => `<option value="${work._sourceType}:${work._sourceIndex}">${escapeHtml(buildWorkLabel(work))}</option>`)
+        works.map(work => {
+          const value = work._sourceType === 'db' && work._dbId
+            ? `dbid:${work._dbId}`
+            : `${work._sourceType}:${work._sourceIndex}`;
+          return `<option value="${value}">${escapeHtml(buildWorkLabel(work))}</option>`;
+        })
       );
       select.innerHTML = options.join('');
       if([...select.options].some(opt => opt.value === currentValue)){
@@ -2223,9 +2301,16 @@
       populateArtTargetWork(qs('#artTargetWork')?.value || '__new__');
     }
 
+    function getDbWorkSelectValue(dbId){
+      if(!dbId) return '__new__';
+      const match = getWorks().find(work => work._sourceType === 'db' && work._dbId === dbId);
+      return match ? `dbid:${dbId}` : '__new__';
+    }
+
     function handleArtTargetChange(){
       const info = getSelectedWorkInfo();
       if(info.type === 'new'){
+        if(qs('#artEditingWorkId')) qs('#artEditingWorkId').value = '';
         resetArtDraft();
         return;
       }
@@ -2342,7 +2427,7 @@
       const work = getWorks()[index];
       if(!work) return;
       const youtubeMap = getSavedYoutubeMap();
-      qs('#viewerImg').src = work.large;
+      qs('#viewerImg').src = getViewerImageUrl(work.large || work.thumb || '');
       qs('#viewerTitle').textContent = work.title;
       qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
@@ -2717,12 +2802,34 @@
       qs('#processStatus').className = 'status';
     });
 
+    function ensureJSZip(){
+      if(window.JSZip) return Promise.resolve(window.JSZip);
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-jszip]');
+        if(existing){
+          existing.addEventListener('load', () => resolve(window.JSZip), {once:true});
+          existing.addEventListener('error', reject, {once:true});
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+        script.async = true;
+        script.dataset.jszip = 'true';
+        script.onload = () => resolve(window.JSZip);
+        script.onerror = () => reject(new Error('ZIP 라이브러리를 불러오지 못했습니다.'));
+        document.head.appendChild(script);
+      });
+    }
+
     async function downloadZip(kind){
       if(!state.results.length){
         qs('#zipStatus').textContent = '먼저 이미지를 변환해 주세요.';
         qs('#zipStatus').className = 'status bad';
         return;
       }
+      qs('#zipStatus').textContent = 'ZIP 기능 준비 중...';
+      qs('#zipStatus').className = 'status';
+      await ensureJSZip();
       const zip = new JSZip();
       const thumbFolder = (qs('#thumbFolder').value || 'images/thumbs').replace(/^\/+|\/+$/g,'');
       const largeFolder = (qs('#largeFolder').value || 'images/large').replace(/^\/+|\/+$/g,'');
@@ -2985,6 +3092,7 @@
     qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
     bindAboutImageInputs();
     qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
+    qs('#batchAddArtworkBtn')?.addEventListener('click', addBatchArtworksFromUrls);
     qs('#deleteArtworkBtn')?.addEventListener('click', deleteSelectedArtwork);
     qs('#artTargetWork')?.addEventListener('change', handleArtTargetChange);
     ['#artTitle', '#artCategory', '#artYear'].forEach(sel => {
@@ -3280,11 +3388,34 @@
         year_text: year || String(new Date().getFullYear()),
         medium: category || '',
         description: desc || '',
-        thumb_url: thumbUrl || fullUrl || '',
-        large_url: fullUrl || thumbUrl || '',
+        image_url: thumbUrl || fullUrl || '',
+        large_image_url: fullUrl || thumbUrl || '',
         youtube_url: youtube || '',
         is_visible: true
       };
+    }
+
+    function normalizeWorkUrlForCompare(url){
+      return String(url || '')
+        .trim()
+        .replace(/[?&]tr=[^&]+/g, '')
+        .replace(/[?&]$/, '');
+    }
+
+    function findExistingDbWorkForPayload(payload){
+      const targetUrls = [
+        normalizeWorkUrlForCompare(payload.image_url),
+        normalizeWorkUrlForCompare(payload.large_image_url)
+      ].filter(Boolean);
+      if(!targetUrls.length) return null;
+      return getWorks().find(work => {
+        if(work._sourceType !== 'db' || !work._dbId) return false;
+        const workUrls = [
+          normalizeWorkUrlForCompare(work.thumb),
+          normalizeWorkUrlForCompare(work.large)
+        ].filter(Boolean);
+        return workUrls.some(url => targetUrls.includes(url));
+      }) || null;
     }
 
     async function getNextWorkSortOrder(){
@@ -3301,20 +3432,21 @@
     async function saveArtworkToSupabase({info, title, category, year, desc, youtube, thumbUrl, fullUrl}){
       if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
       const payload = buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl});
+      const existingDbId = info?.work?._dbId || info?.dbId || qs('#artEditingWorkId')?.value || findExistingDbWorkForPayload(payload)?._dbId || '';
 
-      if(info?.type === 'db' && info.work?._dbId){
+      if(existingDbId){
         const {error} = await supabaseClient
           .from('works')
           .update(payload)
-          .eq('id', info.work._dbId);
+          .eq('id', existingDbId);
         if(error) return {ok:false, message:error.message};
-        return {ok:true, message:`${payload.title} 작품이 Supabase works에 수정 저장되었습니다.`};
+        return {ok:true, dbId:existingDbId, message:`${payload.title} 작품이 Supabase works에 수정 저장되었습니다.`};
       }
 
       payload.sort_order = await getNextWorkSortOrder();
-      const {error} = await supabaseClient.from('works').insert(payload);
+      const {data, error} = await supabaseClient.from('works').insert(payload).select('id').single();
       if(error) return {ok:false, message:error.message};
-      return {ok:true, message:`${payload.title} 작품이 Supabase works에 새로 등록되었습니다.`};
+      return {ok:true, dbId:data?.id, message:`${payload.title} 작품이 Supabase works에 새로 등록되었습니다.`};
     }
 
     async function deleteArtworkFromSupabase(info){
