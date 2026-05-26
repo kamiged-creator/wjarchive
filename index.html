@@ -45,6 +45,9 @@
     body.is-loading footer{
       opacity:0;
     }
+    body.is-loading #galleryGrid{
+      visibility:hidden;
+    }
     a{text-decoration:none;color:inherit}
     button,input,textarea,select{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
@@ -3552,7 +3555,6 @@
     bindHiddenAdminTrigger();
     bindAutoHideTopbar();
     bindCategoryFilters();
-    renderGallery();
     updateCapacityStats();
     function revealSiteContent(){
       document.body.classList.remove('is-loading');
