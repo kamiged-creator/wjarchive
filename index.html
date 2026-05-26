@@ -1553,8 +1553,22 @@
       return withImagekitTransform(url, 'w-1600,q-82,f-auto');
     }
 
+    function getBackgroundImageUrl(url){
+      return withImagekitTransform(url, 'w-1400,q-78,f-auto');
+    }
+
+    function browserSafeImageUrl(url){
+      const value = String(url || '').trim();
+      if(!value || value.startsWith('data:image/')) return value;
+      try{
+        return encodeURI(value);
+      }catch(err){
+        return value;
+      }
+    }
+
     function cssImageUrl(url){
-      return String(url || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      return browserSafeImageUrl(url).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     }
 
     function loadImagekitConfig(){
@@ -1988,10 +2002,10 @@
     function setBackgroundImage(el, dataUrl){
       if(!el) return;
       if(dataUrl){
-        const base = getComputedStyle(el).backgroundImage;
-        el.style.backgroundImage = `linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)), url("${dataUrl}")`;
+        const imageUrl = cssImageUrl(getBackgroundImageUrl(dataUrl));
+        el.style.backgroundImage = `linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)), url("${imageUrl}")`;
         if(el.id === 'artistPhoto'){
-          el.style.backgroundImage = `linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)), url("${dataUrl}")`;
+          el.style.backgroundImage = `linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)), url("${imageUrl}")`;
         }
       }else{
         el.style.backgroundImage = '';
@@ -2432,7 +2446,7 @@
       const work = getWorks()[index];
       if(!work) return;
       const youtubeMap = getSavedYoutubeMap();
-      qs('#viewerImg').src = getViewerImageUrl(work.large || work.thumb || '');
+      qs('#viewerImg').src = browserSafeImageUrl(getViewerImageUrl(work.large || work.thumb || ''));
       qs('#viewerTitle').textContent = work.title;
       qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
