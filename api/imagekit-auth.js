@@ -2,7 +2,8 @@ const crypto = require('crypto');
 
 const allowedOrigins = new Set([
   'https://wjarchive.vercel.app',
-  'https://ycuve.com'
+  'https://ycuve.com',
+  'https://www.ycuve.com'
 ]);
 
 function setCors(req, res) {

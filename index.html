@@ -1426,7 +1426,7 @@
     ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     const adminAuthConfig = {
-      loginEndpoint: 'https://wjarchive.vercel.app/api/crop-auth',
+      loginEndpoint: 'https://ycuve.com/api/crop-auth',
       tokenStorageKey: 'wjarchiveAdminAccessToken'
     };
 
@@ -1605,13 +1605,14 @@
       writeJSON('wonjuExtraWorks', list);
     }
 
-    function getWorks(){
+    function getWorks(options = {}){
+      const includeHidden = Boolean(options.includeHidden);
       if(Array.isArray(state.dbWorks)){
         return state.dbWorks.map((work, index) => ({
           ...work,
           _sourceType: 'db',
           _sourceIndex: index
-        })).filter(work => !work._deleted);
+        })).filter(work => !work._deleted && (includeHidden || work._isVisible !== false));
       }
       const overrides = getWorkOverrides();
       const baseWorks = sampleWorks.map((work, index) => ({
@@ -1634,12 +1635,12 @@
       if(value === '__new__') return { type:'new', value };
       if(value.startsWith('dbid:')){
         const dbId = value.slice(5);
-        const work = getWorks().find(item => item._sourceType === 'db' && item._dbId === dbId);
+        const work = getWorks({includeHidden:true}).find(item => item._sourceType === 'db' && item._dbId === dbId);
         return { type:'db', dbId, value, work };
       }
       const [type, rawIndex] = value.split(':');
       const sourceIndex = Number(rawIndex);
-      const work = getWorks().find(item => item._sourceType === type && item._sourceIndex === sourceIndex);
+      const work = getWorks({includeHidden:true}).find(item => item._sourceType === type && item._sourceIndex === sourceIndex);
       return { type, sourceIndex, value, work };
     }
 
@@ -1815,7 +1816,7 @@
         qs('#artEditingWorkId').value = info.work._dbId;
       }
       if(info.type === 'new' && editingDbId){
-        const work = getWorks().find(item => item._sourceType === 'db' && item._dbId === editingDbId);
+        const work = getWorks({includeHidden:true}).find(item => item._sourceType === 'db' && item._dbId === editingDbId);
         if(work){
           info.type = 'db';
           info.dbId = editingDbId;
@@ -2284,7 +2285,7 @@
       const select = qs('#artTargetWork');
       if(!select) return;
       const currentValue = preferredValue || select.value || '__new__';
-      const works = getWorks();
+      const works = getWorks({includeHidden:true});
       const options = [`<option value="__new__">새 작품 추가</option>`].concat(
         works.map(work => {
           const value = work._sourceType === 'db' && work._dbId
@@ -2307,7 +2308,7 @@
 
     function getDbWorkSelectValue(dbId){
       if(!dbId) return '__new__';
-      const match = getWorks().find(work => work._sourceType === 'db' && work._dbId === dbId);
+      const match = getWorks({includeHidden:true}).find(work => work._sourceType === 'db' && work._dbId === dbId);
       return match ? `dbid:${dbId}` : '__new__';
     }
 
@@ -3292,7 +3293,8 @@
         thumb,
         large: large || thumb,
         youtube: row.youtube_url || row.youtube || '',
-        _dbId: row.id
+        _dbId: row.id,
+        _isVisible: row.is_visible !== false
       };
     }
 
@@ -3301,7 +3303,6 @@
       const {data, error} = await supabaseClient
         .from('works')
         .select('*')
-        .eq('is_visible', true)
         .order('sort_order', {ascending:false});
       if(error){
         console.warn('Supabase works 불러오기 오류', error);
@@ -3439,7 +3440,7 @@
         normalizeWorkUrlForCompare(payload.large_image_url)
       ].filter(Boolean);
       if(!targetUrls.length) return null;
-      return getWorks().find(work => {
+      return getWorks({includeHidden:true}).find(work => {
         if(work._sourceType !== 'db' || !work._dbId) return false;
         const workUrls = [
           normalizeWorkUrlForCompare(work.thumb),
