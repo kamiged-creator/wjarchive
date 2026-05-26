@@ -1406,10 +1406,6 @@
       }
     ];
 
-    // 기본 비밀번호: wonju2026!
-    // 아래 해시를 원하는 비밀번호의 SHA-256 값으로 바꾸면 비밀번호 변경 가능
-    const ADMIN_HASH = 'fd02492a6b028e0a346966a0f5369c87fa8d477f203d787a0836db64e1b0ec10';
-
     /*
       Supabase 연결 설정
       - Project URL은 현재 프로젝트 주소로 넣어두었습니다.
@@ -1425,6 +1421,11 @@
       SUPABASE_ANON_KEY &&
       !SUPABASE_ANON_KEY.includes('여기에_')
     ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    const adminAuthConfig = {
+      loginEndpoint: 'https://wjarchive.vercel.app/api/crop-auth',
+      tokenStorageKey: 'wjarchiveAdminAccessToken'
+    };
 
 
     function formatMB(bytes){
@@ -2449,8 +2450,18 @@
       return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
     }
 
+    function getAdminAccessToken(){
+      return sessionStorage.getItem(adminAuthConfig.tokenStorageKey) || '';
+    }
+
+    function adminTokenIsFresh(token){
+      const expire = Number(String(token || '').split(':')[0]);
+      return Number.isFinite(expire) && expire > Math.floor(Date.now() / 1000) + 15;
+    }
+
     function openAdmin(){
       state.adminOpen = true;
+      state.loggedIn = adminTokenIsFresh(getAdminAccessToken());
       qs('#adminOverlay').classList.add('open');
       qs('#adminOverlay').setAttribute('aria-hidden', 'false');
       if(state.loggedIn){
@@ -2469,6 +2480,7 @@
     }
     function logoutAdmin(){
       state.loggedIn = false;
+      sessionStorage.removeItem(adminAuthConfig.tokenStorageKey);
       qs('#adminPassword').value = '';
       qs('#loginStatus').textContent = '로그아웃되었습니다.';
       qs('#passwordGate').classList.remove('hidden');
@@ -2481,30 +2493,46 @@
     qs('#logoutBtn').addEventListener('click', logoutAdmin);
     qs('#adminOverlay').addEventListener('click', e => { if(e.target.id === 'adminOverlay') closeAdmin(); });
 
-    async function sha256(text){
-      const enc = new TextEncoder().encode(text);
-      const buf = await crypto.subtle.digest('SHA-256', enc);
-      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
-    }
-
     async function handleLogin(){
       const pw = qs('#adminPassword').value.trim();
       const status = qs('#loginStatus');
+      const btn = qs('#loginBtn');
       if(!pw){
         status.textContent = '비밀번호를 입력해 주세요.';
         status.className = 'status bad';
         return;
       }
-      const digest = await sha256(pw);
-      if(digest === ADMIN_HASH){
+      btn.disabled = true;
+      btn.textContent = '확인 중...';
+      status.textContent = '';
+      try{
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 12000);
+        const response = await fetch(adminAuthConfig.loginEndpoint, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({password:pw}),
+          signal:controller.signal
+        });
+        clearTimeout(timer);
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '비밀번호가 맞지 않습니다.');
+        sessionStorage.setItem(adminAuthConfig.tokenStorageKey, result.accessToken);
         state.loggedIn = true;
+        qs('#adminPassword').value = '';
         status.textContent = '비밀번호 확인 완료. 관리자 모드가 열렸습니다.';
         status.className = 'status ok';
         qs('#passwordGate').classList.add('hidden');
         qs('#adminApp').classList.remove('hidden');
-      } else {
-        status.textContent = '비밀번호가 맞지 않습니다.';
+      }catch(error){
+        state.loggedIn = false;
+        sessionStorage.removeItem(adminAuthConfig.tokenStorageKey);
+        status.textContent = error.name === 'AbortError' ? '인증 서버 응답이 지연되고 있습니다.' : (error.message || '비밀번호가 맞지 않습니다.');
         status.className = 'status bad';
+        qs('#adminPassword').select();
+      }finally{
+        btn.textContent = '들어가기';
+        btn.disabled = false;
       }
     }
     qs('#loginBtn').addEventListener('click', handleLogin);
