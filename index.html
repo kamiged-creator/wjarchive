@@ -1741,8 +1741,9 @@
         .split(/[\s,]+/)
         .map(url => normalizeArtworkImageUrl(url))
         .filter(url => {
-          if(!url || seen.has(url)) return false;
-          seen.add(url);
+          const key = normalizeWorkUrlForCompare(url);
+          if(!url || seen.has(key)) return false;
+          seen.add(key);
           return /^(https?:\/\/|data:image\/)/i.test(url);
         });
     }
@@ -3507,10 +3508,23 @@
     }
 
     function normalizeWorkUrlForCompare(url){
-      return String(url || '')
-        .trim()
-        .replace(/[?&]tr=[^&]+/g, '')
-        .replace(/[?&]$/, '');
+      const value = String(url || '').trim();
+      if(!value) return '';
+      try{
+        const parsed = new URL(value);
+        if(/drive\.google\.com$/i.test(parsed.hostname) && parsed.searchParams.get('id')){
+          return `${parsed.origin}${parsed.pathname}?id=${parsed.searchParams.get('id')}`;
+        }
+        parsed.hash = '';
+        parsed.search = '';
+        return parsed.toString().replace(/\/+$/, '').toLowerCase();
+      }catch(error){
+        return value
+          .replace(/[?&]tr=[^&]+/g, '')
+          .replace(/[?#].*$/, '')
+          .replace(/\/+$/, '')
+          .toLowerCase();
+      }
     }
 
     function findExistingDbWorkForPayload(payload){
@@ -3529,6 +3543,32 @@
       }) || null;
     }
 
+    async function findExistingSupabaseWorkForPayload(payload){
+      if(!supabaseReady()) return null;
+      const targetUrls = [
+        normalizeWorkUrlForCompare(payload.image_url),
+        normalizeWorkUrlForCompare(payload.large_image_url)
+      ].filter(Boolean);
+      if(!targetUrls.length) return null;
+
+      const {data, error} = await supabaseClient
+        .from('works')
+        .select('id, image_url, large_image_url, thumb_url, thumb, large_url, large, is_visible');
+      if(error || !data) return null;
+
+      return data.find(row => {
+        const rowUrls = [
+          row.image_url,
+          row.large_image_url,
+          row.thumb_url,
+          row.thumb,
+          row.large_url,
+          row.large
+        ].map(normalizeWorkUrlForCompare).filter(Boolean);
+        return rowUrls.some(url => targetUrls.includes(url));
+      }) || null;
+    }
+
     async function getNextWorkSortOrder(){
       if(!supabaseReady()) return 10;
       const {data, error} = await supabaseClient
@@ -3543,7 +3583,12 @@
     async function saveArtworkToSupabase({info, title, category, year, desc, youtube, thumbUrl, fullUrl}){
       if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
       const payload = buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl});
-      const existingDbId = info?.work?._dbId || info?.dbId || qs('#artEditingWorkId')?.value || findExistingDbWorkForPayload(payload)?._dbId || '';
+      const existingDbId = info?.work?._dbId
+        || info?.dbId
+        || qs('#artEditingWorkId')?.value
+        || findExistingDbWorkForPayload(payload)?._dbId
+        || (await findExistingSupabaseWorkForPayload(payload))?.id
+        || '';
 
       if(existingDbId){
         const {error} = await supabaseClient
