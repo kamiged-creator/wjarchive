@@ -184,7 +184,16 @@
     .work-body{padding:16px}
     .work-title{margin:0 0 6px;font-size:18px}
     .work-meta{font-size:13px;color:var(--muted);margin-bottom:10px}
-    .work-text{margin:0;color:var(--muted);font-size:14px}
+    .work-text{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.55;
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
 
     .pagination{
       display:flex;
@@ -252,7 +261,7 @@
     .viewer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0 0 8px}
     .viewer-body h3{margin:0;font-size:22px;line-height:1.2}
     .viewer-meta{color:#d4c7ba;font-size:13px;margin-bottom:12px}
-    .viewer-desc{color:#eee4d8}
+    .viewer-desc{color:#eee4d8;line-height:1.72;max-height:42vh;overflow:auto;padding-right:4px}
     .viewer-youtube{
       flex:0 0 auto;
       margin-top:4px;
@@ -1931,13 +1940,14 @@
       grid.innerHTML = pageWorks.map((work) => {
         const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
         const thumb = getGalleryImageUrl(work.thumb || work.large || '');
+        const shortDesc = truncateText(work.desc, 68);
         return `
         <article class="work" data-index="${index}">
           <div class="work-img" style="background-image:url('${cssImageUrl(thumb)}')"></div>
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
             <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
-            <p class="work-text">${escapeHtml(work.desc)}</p>
+            <p class="work-text" title="${escapeHtml(work.desc)}">${escapeHtml(shortDesc)}</p>
           </div>
         </article>
       `;
@@ -2473,6 +2483,12 @@
 
     function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    function truncateText(text, maxLength){
+      const clean = String(text || '').replace(/\s+/g, ' ').trim();
+      if(clean.length <= maxLength) return clean;
+      return clean.slice(0, maxLength).trimEnd() + '...';
     }
 
     function getAdminAccessToken(){
