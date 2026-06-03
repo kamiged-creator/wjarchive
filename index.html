@@ -1269,6 +1269,10 @@
                   <input class="field" id="artThumbUrl" type="url" placeholder="https://ik.imagekit.io/... 또는 https://drive.google.com/file/d/.../view">
                 </div>
                 <div>
+                  <label class="label" for="artFullUrl">전체보기 이미지 링크</label>
+                  <input class="field" id="artFullUrl" type="url" placeholder="선택 사항 · 클릭했을 때 원본 전체를 보여줄 이미지 URL">
+                </div>
+                <div>
                   <label class="label" for="artBatchUrls">여러 작품 이미지 링크</label>
                   <textarea class="editor-area" id="artBatchUrls" placeholder="crop.html에서 복사한 ImageKit URL을 여러 줄로 붙여넣기"></textarea>
                   <div class="mini-note">여러 줄을 넣고 일괄 추가를 누르면 URL마다 새 작품 1개씩 등록됩니다.</div>
@@ -1681,11 +1685,13 @@
       if(qs('#artDescription')) qs('#artDescription').value = work.desc || '';
       if(qs('#artYoutube')) qs('#artYoutube').value = work.youtube || '';
       if(qs('#artThumbUrl')) qs('#artThumbUrl').value = work.thumb || '';
+      if(qs('#artFullUrl')) qs('#artFullUrl').value = work.large || work.thumb || '';
       if(qs('#artEditingWorkId')) qs('#artEditingWorkId').value = work._sourceType === 'db' ? (work._dbId || '') : '';
     }
 
     function clearArtworkImageInputs(){
       if(qs('#artThumbUrl')) qs('#artThumbUrl').value = '';
+      if(qs('#artFullUrl')) qs('#artFullUrl').value = '';
       if(qs('#artBatchUrls')) qs('#artBatchUrls').value = '';
     }
 
@@ -1895,6 +1901,7 @@
       const desc = (qs('#artDescription')?.value || '').trim();
       const youtube = (qs('#artYoutube')?.value || '').trim();
       const rawSingleUrl = qs('#artThumbUrl')?.value || '';
+      const rawFullUrl = qs('#artFullUrl')?.value || '';
       const pastedUrls = parseArtworkUrlList(rawSingleUrl);
       if(info.type === 'new' && pastedUrls.length > 1){
         await addBatchArtworksFromUrls();
@@ -1902,7 +1909,7 @@
       }
       const singleUrl = normalizeArtworkImageUrl(rawSingleUrl);
       const thumbUrl = singleUrl;
-      const fullUrl = singleUrl;
+      const fullUrl = normalizeArtworkImageUrl(rawFullUrl) || singleUrl;
       const isNewArtwork = info.type === 'new';
 
       if(!title && !desc && !year && !thumbUrl && !fullUrl && !youtube){
@@ -2222,6 +2229,7 @@
       qs('#artDescription') && (qs('#artDescription').value = saved.description || '');
       qs('#artYoutube') && (qs('#artYoutube').value = saved.youtube || '');
       qs('#artThumbUrl') && (qs('#artThumbUrl').value = saved.thumbUrl || '');
+      qs('#artFullUrl') && (qs('#artFullUrl').value = saved.fullUrl || '');
       qs('#artFeatured') && (qs('#artFeatured').checked = !!saved.featured);
       const status = qs('#artDraftStatus');
       if(status){
@@ -2238,6 +2246,7 @@
         description: qs('#artDescription')?.value?.trim() || '',
         youtube: qs('#artYoutube')?.value?.trim() || '',
         thumbUrl: qs('#artThumbUrl')?.value?.trim() || '',
+        fullUrl: qs('#artFullUrl')?.value?.trim() || '',
         featured: !!qs('#artFeatured')?.checked
       };
       localStorage.setItem('wonjuArtworkDraft', JSON.stringify(data));
@@ -2256,6 +2265,7 @@
       qs('#artDescription') && (qs('#artDescription').value = '');
       qs('#artYoutube') && (qs('#artYoutube').value = '');
       qs('#artThumbUrl') && (qs('#artThumbUrl').value = '');
+      qs('#artFullUrl') && (qs('#artFullUrl').value = '');
       qs('#artEditingWorkId') && (qs('#artEditingWorkId').value = '');
       qs('#artFeatured') && (qs('#artFeatured').checked = false);
       const status = qs('#artDraftStatus');
