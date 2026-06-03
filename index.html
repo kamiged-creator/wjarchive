@@ -2431,8 +2431,10 @@
       const status = qs('#artDraftStatus');
 
       if(info.type === 'new'){
+        clearArtworkFormInputs();
+        populateArtTargetWork('__new__');
         if(status){
-          status.textContent = '새 작품 추가 선택 상태에서는 삭제할 작품이 없습니다.';
+          status.textContent = '새 작품 입력칸을 비웠습니다.';
           status.className = 'status';
         }
         return;
@@ -2450,7 +2452,7 @@
           return;
         }
         await loadSupabaseWorks();
-        resetArtDraft();
+        clearArtworkFormInputs();
         populateArtTargetWork('__new__');
         renderGallery();
         if(status){
@@ -2489,7 +2491,7 @@
         localStorage.setItem('wonjuWorkYoutubeMap', JSON.stringify(youtubeMap));
       }catch(e){}
 
-      resetArtDraft();
+      clearArtworkFormInputs();
       populateArtTargetWork('__new__');
       renderGallery();
 
