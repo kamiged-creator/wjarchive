@@ -16,6 +16,10 @@ function setCors(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
+function normalizePassword(value) {
+  return String(value || '').normalize('NFC').trim();
+}
+
 function verifyAccessToken(token, secret) {
   const parts = String(token || '').split(':');
   if (parts.length !== 3) return false;
@@ -42,7 +46,7 @@ module.exports = function handler(req, res) {
   }
 
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
-  const accessPassword = process.env.CROP_ACCESS_PASSWORD;
+  const accessPassword = normalizePassword(process.env.CROP_ACCESS_PASSWORD);
 
   if (!privateKey) {
     res.status(500).json({ message: 'IMAGEKIT_PRIVATE_KEY is not configured.' });

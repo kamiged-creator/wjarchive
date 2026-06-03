@@ -30,6 +30,10 @@ function safeEqual(a, b) {
   return left.length === right.length && crypto.timingSafeEqual(left, right);
 }
 
+function normalizePassword(value) {
+  return String(value || '').normalize('NFC').trim();
+}
+
 module.exports = function handler(req, res) {
   setCors(req, res);
 
@@ -43,7 +47,7 @@ module.exports = function handler(req, res) {
     return;
   }
 
-  const password = process.env.CROP_ACCESS_PASSWORD;
+  const password = normalizePassword(process.env.CROP_ACCESS_PASSWORD);
 
   if (!password) {
     res.status(500).json({ message: 'CROP_ACCESS_PASSWORD is not configured.' });
@@ -59,7 +63,7 @@ module.exports = function handler(req, res) {
     }
   }
 
-  if (!safeEqual(body.password || '', password)) {
+  if (!safeEqual(normalizePassword(body.password), password)) {
     res.status(401).json({ message: '비밀번호가 맞지 않습니다.' });
     return;
   }

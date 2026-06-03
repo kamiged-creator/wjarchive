@@ -670,7 +670,7 @@
 
     async function unlockCropTool(event){
       event.preventDefault();
-      const password = els.authPassword.value;
+      const password = els.authPassword.value.trim();
       if (!password){
         els.authMeta.textContent = '비밀번호를 입력해주세요.';
         els.authPassword.focus();
