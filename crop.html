@@ -474,7 +474,7 @@
                 <input id="nextSequenceOutput" type="number" value="1" readonly />
               </div>
             </div>
-            <div class="meta" id="sequenceMeta">업로드 성공하면 다음 번호를 자동으로 기억합니다.</div>
+            <div class="meta" id="sequenceMeta">파일명은 날짜-시간-번호 방식으로 저장됩니다.</div>
           </div>
 
           <div class="group">
@@ -617,6 +617,7 @@
       fileIndex: 0,
       fileName: 'artwork',
       sequenceStart: 1,
+      batchStamp: '',
       naturalWidth: 0,
       naturalHeight: 0,
       crop: { x: 0, y: 0, w: 0, h: 0 },
@@ -806,8 +807,8 @@
       const next = state.files.length ? state.sequenceStart + state.files.length : start;
       els.nextSequenceOutput.value = next;
       els.sequenceMeta.textContent = state.files.length
-        ? `현재 이미지는 ${current}번으로 저장됩니다. 이 묶음 다음 번호는 ${next}번입니다.`
-        : `${start}번부터 파일명을 만듭니다.`;
+        ? `현재 이미지는 ${state.batchStamp || createBatchStamp()}-${formatSequence(current)} 번호로 저장됩니다. 이 묶음 다음 번호는 ${next}번입니다.`
+        : `${start}번부터 날짜-시간-번호 파일명을 만듭니다.`;
     }
 
     function sanitizeFileName(name){
@@ -822,6 +823,15 @@
 
     function formatSequence(sequence){
       return String(Math.max(1, Math.floor(sequence))).padStart(4, '0');
+    }
+
+    function createBatchStamp(date = new Date()){
+      const pad = value => String(value).padStart(2, '0');
+      return [
+        date.getFullYear(),
+        pad(date.getMonth() + 1),
+        pad(date.getDate())
+      ].join('') + '-' + [pad(date.getHours()), pad(date.getMinutes())].join('');
     }
 
     function updateUploadUrlOutput(){
@@ -1007,6 +1017,7 @@
       state.files = imageFiles.slice(0, 20);
       state.fileIndex = 0;
       state.sequenceStart = getSequenceStart();
+      state.batchStamp = createBatchStamp();
       state.uploadedUrls = [];
       updateUploadUrlOutput();
       updateSequenceUi();
@@ -1034,7 +1045,7 @@
           state.naturalWidth = img.naturalWidth;
           state.naturalHeight = img.naturalHeight;
           const countText = state.files.length > 1 ? `${state.fileIndex + 1}/${state.files.length} · ` : '';
-          els.sourceMeta.textContent = `${countText}${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px · 저장 번호 ${getCurrentSequence()}`;
+          els.sourceMeta.textContent = `${countText}${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px · 저장 번호 ${state.batchStamp || createBatchStamp()}-${formatSequence(getCurrentSequence())}`;
           els.dropLayer.classList.add('is-hidden');
           setControlsEnabled(true);
           updateNavButtons();
@@ -1132,7 +1143,8 @@
     }
 
     function getResultFileName(){
-      return `${state.fileName}-${formatSequence(getCurrentSequence())}-crop-4x5-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
+      const stamp = state.batchStamp || createBatchStamp();
+      return `${state.fileName}-${stamp}-${formatSequence(getCurrentSequence())}-crop-4x5-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
     }
 
     function makePreview(){
@@ -1379,6 +1391,7 @@
       state.fileIndex = 0;
       state.fileName = 'artwork';
       state.sequenceStart = getSequenceStart();
+      state.batchStamp = '';
       state.uploadedUrls = [];
       state.undoStack = [];
       state.naturalWidth = 0;
