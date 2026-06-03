@@ -2356,7 +2356,7 @@
       const select = qs('#artTargetWork');
       if(!select) return;
       const currentValue = preferredValue || select.value || '__new__';
-      const works = getWorks({includeHidden:true});
+      const works = getWorks();
       const options = [`<option value="__new__">새 작품 추가</option>`].concat(
         works.map(work => {
           const value = work._sourceType === 'db' && work._dbId
@@ -2379,7 +2379,7 @@
 
     function getDbWorkSelectValue(dbId){
       if(!dbId) return '__new__';
-      const match = getWorks({includeHidden:true}).find(work => work._sourceType === 'db' && work._dbId === dbId);
+      const match = getWorks().find(work => work._sourceType === 'db' && work._dbId === dbId);
       return match ? `dbid:${dbId}` : '__new__';
     }
 
