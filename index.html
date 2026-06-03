@@ -1813,6 +1813,8 @@
       setArtworkSaving(true, '일괄 추가 중...');
       try{
         let lastSavedDbId = '';
+        let savedCount = 0;
+        let skippedCount = 0;
         for(let index = 0; index < urls.length; index += 1){
           const url = urls[index];
           const saveResult = await saveArtworkToSupabase({
@@ -1826,7 +1828,9 @@
             fullUrl:url
           });
           if(!saveResult.ok) throw new Error(saveResult.message);
-          lastSavedDbId = saveResult.dbId || lastSavedDbId;
+          if(saveResult.skipped) skippedCount += 1;
+          else savedCount += 1;
+          if(!saveResult.skipped) lastSavedDbId = saveResult.dbId || lastSavedDbId;
         }
         await loadSupabaseWorks();
         selectCategoryFilter(category);
@@ -1843,7 +1847,9 @@
 
         clearArtworkFormInputs();
         if(status){
-          status.textContent = `${urls.length}개 작품을 Supabase에 추가했습니다. 다른 PC에서도 공개 페이지에 표시됩니다.`;
+          status.textContent = skippedCount
+            ? `${savedCount}개 작품을 추가했고, 이미 등록된 ${skippedCount}개 이미지는 건너뛰었습니다.`
+            : `${savedCount}개 작품을 Supabase에 추가했습니다. 다른 PC에서도 공개 페이지에 표시됩니다.`;
           status.className = 'status ok';
         }
       }catch(err){
@@ -3583,12 +3589,22 @@
     async function saveArtworkToSupabase({info, title, category, year, desc, youtube, thumbUrl, fullUrl}){
       if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
       const payload = buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl});
-      const existingDbId = info?.work?._dbId
+      const explicitDbId = info?.work?._dbId
         || info?.dbId
         || qs('#artEditingWorkId')?.value
-        || findExistingDbWorkForPayload(payload)?._dbId
-        || (await findExistingSupabaseWorkForPayload(payload))?.id
         || '';
+      const existingWork = findExistingDbWorkForPayload(payload) || await findExistingSupabaseWorkForPayload(payload);
+
+      if(!explicitDbId && info?.type === 'new' && existingWork){
+        return {
+          ok:true,
+          dbId:existingWork._dbId || existingWork.id || '',
+          skipped:true,
+          message:`${payload.title} 이미지는 이미 등록되어 있어 새로 추가하지 않았습니다.`
+        };
+      }
+
+      const existingDbId = explicitDbId || existingWork?._dbId || existingWork?.id || '';
 
       if(existingDbId){
         const {error} = await supabaseClient
