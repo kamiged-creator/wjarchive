@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google" content="notranslate" />
   <title>이미지 크롭 편집</title>
-  <meta name="description" content="작품 이미지 업로드 후 4:5 비율로 크롭하고 1600px 너비 이미지로 저장합니다." />
+  <meta name="description" content="작품 이미지를 원본 비율로 1600px 너비 파일로 저장합니다." />
   <meta name="theme-color" content="#fbf8f4" />
   <style>
     :root{
@@ -241,11 +241,12 @@
     }
     .preview{
       width:100%;
-      aspect-ratio:4/5;
+      max-height:520px;
+      aspect-ratio:auto;
       border-radius:var(--radius);
       border:1px solid var(--line);
       background:#e9dfd3;
-      object-fit:cover;
+      object-fit:contain;
     }
     .empty-preview{
       display:grid;
@@ -431,11 +432,11 @@
     <header class="topbar">
       <div class="title">
         <h1>이미지 크롭 편집</h1>
-        <p class="sub">작품 이미지를 4:5 비율로 자르고 1600px 너비 파일로 저장합니다.</p>
+        <p class="sub">작품 이미지를 원본 비율로 1600px 너비 파일로 저장합니다.</p>
       </div>
       <div class="top-actions">
         <button class="btn secondary" type="button" id="resetViewBtn" disabled>화면 맞춤</button>
-        <button class="btn secondary" type="button" id="coverCropBtn" disabled>크롭 채움</button>
+        <button class="btn secondary" type="button" id="coverCropBtn" disabled>카드 미리보기 채움</button>
         <button class="btn secondary" type="button" id="undoBtn" disabled>되돌리기</button>
       </div>
     </header>
@@ -527,7 +528,7 @@
           <div class="preview-box">
             <div class="label-row">
               <b>결과 미리보기</b>
-              <span>4:5</span>
+              <span>원본 비율</span>
             </div>
             <img class="preview" id="previewImg" alt="크롭 결과 미리보기" hidden />
             <div class="empty-preview" id="emptyPreview">아직 만든 결과가 없습니다.</div>
@@ -769,7 +770,9 @@
 
     function getOutputSize(){
       const width = clamp(Number(els.widthInput.value) || 1600, 320, 4000);
-      const height = Math.round(width / aspect);
+      const height = state.naturalWidth && state.naturalHeight
+        ? Math.round(width * state.naturalHeight / state.naturalWidth)
+        : Math.round(width / aspect);
       els.widthInput.value = width;
       els.heightOutput.value = height;
       return { width, height };
@@ -1120,15 +1123,9 @@
       out.height = height;
       const outCtx = out.getContext('2d');
 
-      const visibleScale = state.baseScale * state.zoom;
-      const sx = (state.crop.x - state.offsetX) / visibleScale;
-      const sy = (state.crop.y - state.offsetY) / visibleScale;
-      const sw = state.crop.w / visibleScale;
-      const sh = state.crop.h / visibleScale;
-
       outCtx.fillStyle = '#fff';
       outCtx.fillRect(0, 0, width, height);
-      outCtx.drawImage(state.image, sx, sy, sw, sh, 0, 0, width, height);
+      outCtx.drawImage(state.image, 0, 0, state.naturalWidth, state.naturalHeight, 0, 0, width, height);
 
       const type = els.formatSelect.value;
       const quality = clamp(Number(els.qualityInput.value) || 0.85, 0.1, 1);
@@ -1144,14 +1141,10 @@
 
     function getResultFileName(){
       const stamp = state.batchStamp || createBatchStamp();
-      return `${state.fileName}-${stamp}-${formatSequence(getCurrentSequence())}-crop-4x5-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
+      return `${state.fileName}-${stamp}-${formatSequence(getCurrentSequence())}-full-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
     }
 
     function makePreview(){
-      if (state.image && state.fitMode !== 'cover'){
-        fitImage('cover', true);
-        showToast('저장용으로 크롭 영역을 꽉 채웠습니다.');
-      }
       makeOutputBlob((blob, type, width, height) => {
         if (!blob){
           showToast('결과 이미지를 만들지 못했습니다.');
