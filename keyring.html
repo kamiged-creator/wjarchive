@@ -96,19 +96,16 @@
       min-height: 360px;
       display: block;
       object-fit: cover;
-      object-position: center;
+      object-position: center 58%;
     }
 
     .promo-caption {
-      position: absolute;
-      left: 16px;
-      bottom: 16px;
-      right: 16px;
+      margin-top: 12px;
       padding: 14px 16px;
       border-radius: 16px;
-      color: #fff;
-      background: linear-gradient(135deg, rgba(0,0,0,0.72), rgba(0,0,0,0.34));
-      backdrop-filter: blur(6px);
+      color: #222;
+      background: #f7f3eb;
+      border: 1px solid rgba(0,0,0,0.06);
     }
 
     .promo-caption strong {
@@ -119,7 +116,7 @@
 
     .promo-caption span {
       font-size: 13px;
-      opacity: 0.9;
+      color: #555;
       line-height: 1.45;
     }
 
@@ -728,9 +725,11 @@
       </div>
 
       <div class="promo-grid">
-        <div class="promo-photo">
-          <!-- 이미지 파일은 GitHub에 assets/keyring-promo.jpg 이름으로 올리면 됩니다. -->
-          <img src="assets/keyring-promo.jpg" alt="호랑이 작품 키링 가방 착용컷" />
+        <div>
+          <div class="promo-photo">
+            <!-- 이미지 파일은 GitHub에 assets/keyring-promo.jpg 이름으로 올리면 됩니다. -->
+            <img src="assets/keyring-promo.jpg" alt="호랑이 작품 키링 가방 착용컷" />
+          </div>
           <div class="promo-caption">
             <strong>가방 위에 얹히는 작은 작품</strong>
             <span>검은 가방 위에서 호랑이 작품과 붉은 낙관이 포인트로 살아납니다.</span>
