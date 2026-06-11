@@ -159,6 +159,51 @@
       border: 1px solid rgba(0,0,0,0.06);
     }
 
+
+    .promo-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .promo-card {
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.07);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .promo-card .promo-photo {
+      border-radius: 0;
+      min-height: 320px;
+      box-shadow: none;
+    }
+
+    .promo-card .promo-photo img {
+      min-height: 320px;
+    }
+
+    .promo-card .promo-caption {
+      margin-top: 0;
+      border-radius: 0;
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      background: #fff;
+    }
+
+    .promo-card-tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     .promo-link-btn {
       display: inline-block;
       margin-top: 16px;
@@ -551,6 +596,90 @@
     }
 
 
+
+    /* ===== 네모형 정밀 색상표 ===== */
+
+    .picker-box > label {
+      margin-bottom: 12px;
+    }
+
+    .square-picker-wrap:first-of-type {
+      margin-top: 0;
+    }
+
+    .square-picker-wrap {
+      margin: 12px 0 14px;
+    }
+
+    .square-picker {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: crosshair;
+      background:
+        linear-gradient(to top, #000, transparent),
+        linear-gradient(to right, #fff, var(--picker-hue, #ff0000));
+      box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,0.12),
+        0 8px 20px rgba(0,0,0,0.10);
+    }
+
+    .square-dot {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      left: 65%;
+      top: 35%;
+      background: #9950eb;
+    }
+
+    .hue-slider {
+      width: 100%;
+      height: 22px;
+      margin-top: 12px;
+      border-radius: 999px;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+      background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.14);
+    }
+
+    .hue-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #111;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .hue-slider::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #111;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .picker-mode-note {
+      margin: 8px 0 0;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .direct-toggle {
       width: 100%;
       font-weight: 700;
@@ -576,35 +705,7 @@
       font-weight: 700;
       margin-bottom: 10px;
     }
-
-    .custom-wheel {
-      width: 220px;
-      height: 220px;
-      margin: 0 auto 14px;
-      border-radius: 50%;
-      position: relative;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.25) 36%, rgba(255,255,255,0) 58%),
-        conic-gradient(red, #ff8a00, yellow, #36ff00, cyan, #005cff, #7a00ff, magenta, red);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), 0 8px 22px rgba(0,0,0,0.12);
-      overflow: hidden;
-    }
-
-    .wheel-dot {
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 4px solid #fff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      left: 50%;
-      top: 50%;
-      background: #1F4A3A;
-    }
-
-    .mini-palette {
+.mini-palette {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       gap: 8px;
@@ -672,6 +773,10 @@
         grid-template-columns: 1fr;
       }
 
+      .promo-gallery {
+        grid-template-columns: 1fr;
+      }
+
       .promo-photo,
       .promo-photo img {
         min-height: 320px;
@@ -719,20 +824,33 @@
       <div class="promo-head">
         <div>
           <h2>실사용 착용컷</h2>
-          <p>가방에 달았을 때 작품 키링이 어떻게 보이는지 확인할 수 있는 홍보용 이미지입니다.</p>
+          <p>가방·스트랩에 달았을 때 작품 키링이 어떻게 보이는지 확인할 수 있는 홍보용 이미지입니다.</p>
         </div>
         <div class="promo-badge">호랑이 키링</div>
       </div>
 
       <div class="promo-grid">
-        <div>
-          <div class="promo-photo">
-            <!-- 이미지 파일은 GitHub에 assets/keyring-promo.jpg 이름으로 올리면 됩니다. -->
-            <img src="assets/keyring-promo.jpg" alt="호랑이 작품 키링 가방 착용컷" />
+        <div class="promo-gallery">
+          <div class="promo-card">
+            <div class="promo-photo">
+              <img src="assets/keyring-promo.jpg" alt="호랑이 작품 키링 가방 착용컷" />
+            </div>
+            <div class="promo-caption">
+              <span class="promo-card-tag">호랑이 키링</span>
+              <strong>가방 위에 얹히는 작은 작품</strong>
+              <span>검은 가방 위에서 호랑이 작품과 붉은 낙관이 포인트로 살아납니다.</span>
+            </div>
           </div>
-          <div class="promo-caption">
-            <strong>가방 위에 얹히는 작은 작품</strong>
-            <span>검은 가방 위에서 호랑이 작품과 붉은 낙관이 포인트로 살아납니다.</span>
+
+          <div class="promo-card">
+            <div class="promo-photo">
+              <img src="assets/keyring-promo-bok.jpg" alt="복의 율동 작품 키링 소품 착용컷" />
+            </div>
+            <div class="promo-caption">
+              <span class="promo-card-tag">복(福) 키링</span>
+              <strong>보기만 해도 기분 좋은 복 키링</strong>
+              <span>스트랩이나 소품에 달았을 때 귀엽고 따뜻한 선물 느낌이 살아납니다.</span>
+            </div>
           </div>
         </div>
 
@@ -835,8 +953,16 @@
 
           <button class="direct-toggle" id="toggleBgPicker">바탕색 직접 선택</button>
           <div class="picker-box" id="bgPickerBox">
-            <label>바탕색 색상표</label>
-            <div class="custom-wheel" id="bgWheel"></div>
+            <label>바탕색 정밀 색상표</label>
+<div class="square-picker-wrap">
+              <label>정밀 색상 선택</label>
+              <div class="square-picker" id="bgSquarePicker">
+                <div class="square-dot" id="bgSquareDot"></div>
+              </div>
+              <input class="hue-slider" id="bgHueSlider" type="range" min="0" max="360" value="150" />
+              <div class="picker-mode-note">네모 안에서 좌우는 채도, 위아래는 밝기입니다.</div>
+            </div>
+
             <div class="mini-palette" id="bgMiniPalette"></div>
             <div class="selected-line">
               <span>선택 색상</span>
@@ -851,8 +977,16 @@
 
           <button class="direct-toggle" id="toggleTextPicker">글씨색 직접 선택</button>
           <div class="picker-box" id="textPickerBox">
-            <label>글씨색 색상표</label>
-            <div class="custom-wheel" id="textWheel"></div>
+            <label>글씨색 정밀 색상표</label>
+<div class="square-picker-wrap">
+              <label>정밀 색상 선택</label>
+              <div class="square-picker" id="textSquarePicker">
+                <div class="square-dot" id="textSquareDot"></div>
+              </div>
+              <input class="hue-slider" id="textHueSlider" type="range" min="0" max="360" value="45" />
+              <div class="picker-mode-note">네모 안에서 좌우는 채도, 위아래는 밝기입니다.</div>
+            </div>
+
             <div class="mini-palette" id="textMiniPalette"></div>
             <div class="selected-line">
               <span>선택 색상</span>
@@ -864,7 +998,7 @@
           </div>
 
           <div class="notice">
-            ※ 휴대폰 기본 색상창 대신, 페이지 안에서 바로 고르는 원형 색상표입니다.
+            ※ 네모형 정밀 색상표에서 채도와 밝기를 조절해 색상을 고를 수 있습니다.
           </div>
         </div>
 
@@ -1058,16 +1192,12 @@
         customBg.value = upper;
         document.getElementById("bgSelectedHex").textContent = upper;
         document.getElementById("bgSelectedSwatch").style.background = upper;
-        const dot = document.querySelector("#bgWheel .wheel-dot");
-        if (dot) dot.style.background = upper;
       }
 
       if (type === "text") {
         customText.value = upper;
         document.getElementById("textSelectedHex").textContent = upper;
         document.getElementById("textSelectedSwatch").style.background = upper;
-        const dot = document.querySelector("#textWheel .wheel-dot");
-        if (dot) dot.style.background = upper;
       }
     }
 
@@ -1124,38 +1254,59 @@
       return "#" + toHex(r) + toHex(g) + toHex(b);
     }
 
-    function setupWheel(wheelId, type) {
-      const wheel = document.getElementById(wheelId);
-      const dot = document.createElement("div");
-      dot.className = "wheel-dot";
-      wheel.appendChild(dot);
 
-      function pick(event) {
-        const rect = wheel.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const x = event.clientX - cx;
-        const y = event.clientY - cy;
-        const radius = rect.width / 2;
-        const distance = Math.min(Math.sqrt(x*x + y*y), radius);
-        const sat = distance / radius;
-        let angle = Math.atan2(y, x) * 180 / Math.PI;
-        angle = (angle + 360) % 360;
+    function updateSquareBase(type, hue) {
+      const picker = document.getElementById(type + "SquarePicker");
+      if (!picker) return;
+      picker.style.setProperty("--picker-hue", hsvToHex(Number(hue), 1, 1));
+    }
 
-        const hex = hsvToHex(angle, sat, 0.92);
+    function setupSquarePicker(type) {
+      const picker = document.getElementById(type + "SquarePicker");
+      const dot = document.getElementById(type + "SquareDot");
+      const slider = document.getElementById(type + "HueSlider");
+      if (!picker || !dot || !slider) return;
 
-        const dotX = 50 + (x / radius) * 50;
-        const dotY = 50 + (y / radius) * 50;
-        dot.style.left = Math.max(4, Math.min(96, dotX)) + "%";
-        dot.style.top = Math.max(4, Math.min(96, dotY)) + "%";
+      let hue = Number(slider.value);
+      updateSquareBase(type, hue);
+
+      function pickFromPoint(clientX, clientY) {
+        const rect = picker.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+        const saturation = x / rect.width;
+        const value = 1 - (y / rect.height);
+        const hex = hsvToHex(hue, saturation, value);
+
+        dot.style.left = (saturation * 100) + "%";
+        dot.style.top = ((1 - value) * 100) + "%";
         dot.style.background = hex;
 
         setPickerUI(type, hex);
       }
 
-      wheel.addEventListener("click", pick);
-    }
+      picker.addEventListener("click", event => {
+        pickFromPoint(event.clientX, event.clientY);
+      });
 
+      picker.addEventListener("touchstart", event => {
+        const touch = event.touches[0];
+        pickFromPoint(touch.clientX, touch.clientY);
+        event.preventDefault();
+      }, { passive: false });
+
+      picker.addEventListener("touchmove", event => {
+        const touch = event.touches[0];
+        pickFromPoint(touch.clientX, touch.clientY);
+        event.preventDefault();
+      }, { passive: false });
+
+      slider.addEventListener("input", event => {
+        hue = Number(event.target.value);
+        updateSquareBase(type, hue);
+      });
+    }
     function setupMiniPalette(targetId, type) {
       const target = document.getElementById(targetId);
       target.innerHTML = "";
@@ -1202,8 +1353,8 @@
       if (event.key === "Enter") setCustomTextColor(event.target.value.trim());
     });
 
-    setupWheel("bgWheel", "bg");
-    setupWheel("textWheel", "text");
+    setupSquarePicker("bg");
+    setupSquarePicker("text");
     setupMiniPalette("bgMiniPalette", "bg");
     setupMiniPalette("textMiniPalette", "text");
     setPickerUI("bg", "#1F4A3A");
