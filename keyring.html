@@ -33,6 +33,147 @@
       margin: 0 auto;
     }
 
+
+    /* ===== 홍보용 실사용 이미지 영역 ===== */
+    .promo-section {
+      background: #fff;
+      border-radius: 22px;
+      padding: 22px;
+      margin: 22px 0 24px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    }
+
+    .promo-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .promo-head h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.6px;
+    }
+
+    .promo-head p {
+      margin: 6px 0 0;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .promo-badge {
+      flex: 0 0 auto;
+      background: #111;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .promo-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .promo-photo {
+      position: relative;
+      min-height: 360px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #eee;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    }
+
+    .promo-photo img {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      display: block;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .promo-caption {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      right: 16px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(0,0,0,0.72), rgba(0,0,0,0.34));
+      backdrop-filter: blur(6px);
+    }
+
+    .promo-caption strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .promo-caption span {
+      font-size: 13px;
+      opacity: 0.9;
+      line-height: 1.45;
+    }
+
+    .promo-copy {
+      border-radius: 20px;
+      background: #f7f3eb;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .promo-copy h3 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: -0.8px;
+    }
+
+    .promo-copy p {
+      margin: 0 0 14px;
+      color: #555;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .promo-points {
+      display: grid;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .promo-point {
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #333;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .promo-link-btn {
+      display: inline-block;
+      margin-top: 16px;
+      text-decoration: none;
+      color: #fff;
+      background: #1f4a3a;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
     .layout {
       display: grid;
       grid-template-columns: 1fr 360px;
@@ -268,7 +409,7 @@
 
     .back-content {
       position: absolute;
-      top: 34%;
+      top: 36%;
       left: 50%;
       width: 90%;
       transform: translate(-50%, -50%);
@@ -280,7 +421,7 @@
     .back-title {
       font-size: 24px;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       letter-spacing: -0.5px;
     }
 
@@ -291,15 +432,15 @@
 
     .stamp {
       position: absolute;
-      width: 36px;
-      height: 36px;
+      width: 42px;
+      height: 42px;
       background: #b33a2b;
       color: #fff;
-      font-size: 12px;
-      line-height: 36px;
+      font-size: 13px;
+      line-height: 42px;
       text-align: center;
       left: 50%;
-      bottom: 22px;
+      bottom: 30px;
       transform: translateX(-50%);
       font-weight: 700;
       opacity: 0.92;
@@ -314,28 +455,6 @@
       right: 26px;
       bottom: 34px;
       transform: none;
-    }
-
-
-    .keyring.square .back-content {
-      top: 32%;
-    }
-
-    .keyring.square .back-title {
-      font-size: 22px;
-      margin-bottom: 9px;
-    }
-
-    .keyring.square .back-artist {
-      font-size: 15px;
-    }
-
-    .keyring.square .stamp:not(.front-stamp) {
-      bottom: 18px;
-      width: 34px;
-      height: 34px;
-      line-height: 34px;
-      font-size: 11px;
     }
 
     .panel {
@@ -542,6 +661,29 @@
 
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
+
+      .promo-head {
+        display: block;
+      }
+
+      .promo-badge {
+        display: inline-block;
+        margin-top: 10px;
+      }
+
+      .promo-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .promo-photo,
+      .promo-photo img {
+        min-height: 320px;
+      }
+
+      .promo-copy h3 {
+        font-size: 21px;
+      }
+
       .palette { grid-template-columns: repeat(3, 1fr); }
 
       .keyring.vertical {
@@ -552,19 +694,6 @@
       .keyring.square {
         width: 220px;
         height: 220px;
-      }
-
-
-      .keyring.square .back-content {
-        top: 31%;
-      }
-
-      .keyring.square .stamp:not(.front-stamp) {
-        bottom: 14px;
-      }
-
-      .back-content {
-        top: 33%;
       }
 
       .metal-clip {
@@ -585,8 +714,47 @@
     <h1>작품 키링 색상 시안</h1>
     <div class="desc">
       사용자가 작품, 크기, 바탕색, 글씨색을 선택하면 앞면/뒷면 시안이 바로 바뀌는 주문용 미리보기 페이지입니다.
-      금색·실버색은 일반 출력용 색상값이며, 진짜 메탈릭/금박은 별도 특수인쇄 옵션입니다.
+      금색·실버색은 일반 출력용 색상값이며, 진짜 메탈릭/금박은 별도 특수인쇄 옵션입니다. 뒷면 낙관은 이름과 겹치지 않도록 하단으로 조정했습니다.
     </div>
+
+
+    <section class="promo-section">
+      <div class="promo-head">
+        <div>
+          <h2>실사용 착용컷</h2>
+          <p>가방에 달았을 때 작품 키링이 어떻게 보이는지 확인할 수 있는 홍보용 이미지입니다.</p>
+        </div>
+        <div class="promo-badge">호랑이 키링</div>
+      </div>
+
+      <div class="promo-grid">
+        <div class="promo-photo">
+          <!-- 이미지 파일은 GitHub에 assets/keyring-promo.jpg 이름으로 올리면 됩니다. -->
+          <img src="assets/keyring-promo.jpg" alt="호랑이 작품 키링 가방 착용컷" />
+          <div class="promo-caption">
+            <strong>가방 위에 얹히는 작은 작품</strong>
+            <span>검은 가방 위에서 호랑이 작품과 붉은 낙관이 포인트로 살아납니다.</span>
+          </div>
+        </div>
+
+        <div class="promo-copy">
+          <h3>일상에 걸어두는<br>작은 작품 키링</h3>
+          <p>
+            단순한 장식이 아니라 작품 이미지, 작가명, 낙관을 담은 아크릴 키링입니다.
+            가방·파우치·차키에 자연스럽게 어울리며 선물용 굿즈로도 활용할 수 있습니다.
+          </p>
+
+          <div class="promo-points">
+            <div class="promo-point">✔ 작품 이미지 기반 아크릴 키링</div>
+            <div class="promo-point">✔ 45×55mm / 50×50mm 선택 가능</div>
+            <div class="promo-point">✔ 기본 색상 또는 맞춤 색상 시안 확인</div>
+            <div class="promo-point">✔ 맞춤 색상 제작은 수량 확인 후 진행</div>
+          </div>
+
+          <a class="promo-link-btn" href="#previewTitle">색상 시안 바로 보기</a>
+        </div>
+      </div>
+    </section>
 
     <div class="layout">
       <div class="preview-area">
