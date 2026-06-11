@@ -196,6 +196,53 @@
       overflow-x: auto;
     }
 
+
+    .action-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0 16px;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      background: #1f4a3a;
+      padding: 11px 15px;
+      border-radius: 13px;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 8px 18px rgba(31,74,58,0.18);
+    }
+
+    .action-link.secondary {
+      background: #111;
+    }
+
+
+    .inline-link {
+      color: #0f5f45;
+      font-weight: 900;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .big-crop-link {
+      display: block;
+      margin: 14px 0 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #1f4a3a;
+      color: #fff !important;
+      text-decoration: none;
+      font-weight: 900;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(31,74,58,0.22);
+    }
+
     .footer {
       text-align: center;
       color: #777;
@@ -269,6 +316,10 @@
       <span class="eyebrow">YCUVE 관리자 가이드</span>
       <h1>이원주 작품 사이트 사용법</h1>
       <p>작품 이미지 업로드, 작품 등록, 삭제, 화면 표시 방식까지 한눈에 보기 쉽게 정리한 모바일용 가이드입니다.</p>
+      <div class="action-links">
+        <a class="action-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">작품 이미지 업로드 바로가기</a>
+        <a class="action-link secondary" href="https://ycuve.com/keyring.html" target="_blank" rel="noopener">키링 시안 페이지</a>
+      </div>
     </header>
 
     <nav class="quick">
@@ -285,7 +336,12 @@
       <div class="card-number">1</div>
       <div class="card-content">
         <h2>1. 작품 이미지 업로드</h2>
-        <div class="step"><span>1)</span><p>crop.html 페이지를 엽니다.</p></div>
+        <a class="big-crop-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">작품 이미지 업로드 페이지 열기</a>
+        <div class="action-links">
+          <a class="action-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">crop.html 열기</a>
+          <a class="action-link secondary" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">새 창으로 열기</a>
+        </div>
+        <div class="step"><span>1)</span><p><a class="inline-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">crop.html 페이지를 엽니다.</a></p></div>
 <div class="step"><span>2)</span><p>비밀번호를 입력합니다.</p></div>
 <div class="step"><span>3)</span><p>이미지 선택을 눌러 작품 이미지를 선택합니다.</p></div>
 <div class="step"><span>4)</span><p>필요하면 화면에서 이미지 위치와 크기를 확인합니다.</p></div>
