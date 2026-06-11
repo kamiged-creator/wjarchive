@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>작품 키링 색상 시안</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #f4f1ec;
+      color: #222;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .desc {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+    }
+
+    .preview-area {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .preview-title {
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 18px;
+      font-size: 18px;
+    }
+
+    .preview-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .keyring-box { text-align: center; }
+
+    .keyring-label {
+      margin-top: 10px;
+      font-weight: 700;
+      color: #555;
+    }
+
+
+    .real-keyring {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 0;
+      filter: drop-shadow(0 16px 22px rgba(0,0,0,0.18));
+    }
+
+    .metal-clip {
+      position: relative;
+      width: 78px;
+      height: 112px;
+      margin-bottom: -2px;
+      z-index: 5;
+    }
+
+    .clip-loop {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 44px;
+      height: 72px;
+      transform: translateX(-50%);
+      border-radius: 26px 26px 18px 18px;
+      border: 8px solid #b9b6ae;
+      background:
+        linear-gradient(90deg, #7e7b75 0%, #f6f2e8 24%, #aaa69f 48%, #fffdf5 70%, #77736d 100%);
+      box-shadow:
+        inset 0 0 6px rgba(0,0,0,0.28),
+        0 2px 5px rgba(0,0,0,0.22);
+    }
+
+    .clip-loop::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      width: 19px;
+      height: 43px;
+      transform: translateX(-50%);
+      border-radius: 16px;
+      background: #f7f3ea;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.15);
+    }
+
+    .clip-body {
+      position: absolute;
+      left: 50%;
+      top: 58px;
+      width: 52px;
+      height: 29px;
+      transform: translateX(-50%);
+      border-radius: 7px;
+      background:
+        linear-gradient(90deg, #77736d 0%, #f7f4ec 28%, #aaa69f 54%, #fffefa 76%, #807c75 100%);
+      border: 1px solid rgba(80,80,80,0.45);
+      box-shadow:
+        inset 0 1px 3px rgba(255,255,255,0.8),
+        inset 0 -2px 4px rgba(0,0,0,0.16),
+        0 3px 6px rgba(0,0,0,0.24);
+    }
+
+    .clip-body::before {
+      content: "";
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff, #aaa 45%, #555 100%);
+      box-shadow: 0 0 1px rgba(0,0,0,0.6);
+    }
+
+    .clip-ring {
+      position: absolute;
+      left: 50%;
+      top: 78px;
+      width: 36px;
+      height: 36px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 7px solid #bcb8b0;
+      background: transparent;
+      box-shadow:
+        inset 0 0 4px rgba(0,0,0,0.28),
+        0 2px 4px rgba(0,0,0,0.18);
+    }
+
+    .small-ring {
+      position: absolute;
+      left: 50%;
+      top: 105px;
+      width: 18px;
+      height: 18px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 4px solid #bcb8b0;
+      background: transparent;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+    }
+
+    .keyring {
+      position: relative;
+      background: #1f4a3a;
+      border: 12px solid rgba(236, 244, 239, 0.72);
+      box-shadow:
+        0 16px 28px rgba(0,0,0,0.18),
+        inset 0 0 0 1px rgba(255,255,255,0.42),
+        inset 0 0 18px rgba(0,0,0,0.09);
+      overflow: hidden;
+      transition: 0.25s ease;
+    }
+
+    .keyring::before {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.42), rgba(255,255,255,0.03) 36%, rgba(0,0,0,0.04) 72%, rgba(255,255,255,0.28));
+      z-index: 2;
+      mix-blend-mode: screen;
+      opacity: 0.48;
+    }
+
+    .keyring::after {
+      content: "";
+      position: absolute;
+      left: 9%;
+      top: 5%;
+      width: 82%;
+      height: 18%;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.35;
+    }
+
+    .acrylic-hole {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 45px;
+      height: 27px;
+      border-radius: 50%;
+      border: 7px solid rgba(221, 235, 229, 0.78);
+      background: rgba(255,255,255,0.08);
+      box-shadow:
+        inset 0 0 5px rgba(0,0,0,0.18),
+        0 1px 4px rgba(255,255,255,0.35);
+      z-index: 4;
+    }
+
+    .keyring.vertical {
+      width: 245px;
+      height: 300px;
+      border-radius: 24px;
+    }
+
+    .keyring.square {
+      width: 270px;
+      height: 270px;
+      border-radius: 24px;
+    }
+
+    .art-symbol,
+    .back-content,
+    .stamp {
+      z-index: 3;
+    }
+
+    .art-symbol {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      font-size: 92px;
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -8px;
+      color: #111;
+      text-align: center;
+      white-space: pre-line;
+      font-family: "Noto Serif KR", serif;
+      transition: 0.25s ease;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.15);
+    }
+
+    .keyring.vertical .art-symbol { font-size: 84px; }
+    .keyring.square .art-symbol { font-size: 78px; }
+
+    .back-content {
+      position: absolute;
+      top: 34%;
+      left: 50%;
+      width: 90%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #111;
+      transition: 0.25s ease;
+    }
+
+    .back-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .back-artist {
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .stamp {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: #b33a2b;
+      color: #fff;
+      font-size: 12px;
+      line-height: 36px;
+      text-align: center;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      font-weight: 700;
+      opacity: 0.92;
+    }
+
+    .front-stamp {
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      font-size: 9px;
+      left: auto;
+      right: 26px;
+      bottom: 34px;
+      transform: none;
+    }
+
+
+    .keyring.square .back-content {
+      top: 32%;
+    }
+
+    .keyring.square .back-title {
+      font-size: 22px;
+      margin-bottom: 9px;
+    }
+
+    .keyring.square .back-artist {
+      font-size: 15px;
+    }
+
+    .keyring.square .stamp:not(.front-stamp) {
+      bottom: 18px;
+      width: 34px;
+      height: 34px;
+      line-height: 34px;
+      font-size: 11px;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .section { margin-bottom: 24px; }
+
+    .section h2 {
+      font-size: 17px;
+      margin: 0 0 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.active {
+      border: 2px solid #111;
+      font-weight: 700;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .color-chip {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 8px;
+      cursor: pointer;
+      background: #fff;
+      text-align: center;
+      min-height: 86px;
+    }
+
+    .color-chip.active { border: 2px solid #111; }
+
+    .swatch {
+      width: 100%;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.15);
+      margin-bottom: 6px;
+    }
+
+    .chip-name {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .chip-code {
+      font-size: 10px;
+      color: #666;
+      word-break: break-all;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 15px;
+    }
+
+    .order-info {
+      background: #f7f7f7;
+      padding: 14px;
+      border-radius: 12px;
+      line-height: 1.6;
+      font-size: 14px;
+      white-space: pre-line;
+    }
+
+    .notice {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+
+    .direct-toggle {
+      width: 100%;
+      font-weight: 700;
+      background: #111;
+      color: #fff;
+      border: none;
+    }
+
+    .picker-box {
+      display: none;
+      margin-top: 10px;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 18px;
+      background: #fafafa;
+    }
+
+    .picker-box.open { display: block; }
+
+    .picker-box label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .custom-wheel {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.25) 36%, rgba(255,255,255,0) 58%),
+        conic-gradient(red, #ff8a00, yellow, #36ff00, cyan, #005cff, #7a00ff, magenta, red);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), 0 8px 22px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+
+    .wheel-dot {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      left: 50%;
+      top: 50%;
+      background: #1F4A3A;
+    }
+
+    .mini-palette {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mini-chip {
+      height: 36px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.18);
+      cursor: pointer;
+    }
+
+    .mini-chip.active {
+      box-shadow: 0 0 0 3px #111;
+    }
+
+    .selected-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .selected-line strong {
+      margin-left: auto;
+      font-size: 14px;
+    }
+
+    .selected-line i {
+      display: block;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.2);
+      background: #1F4A3A;
+    }
+
+    .picker-box button {
+      width: 100%;
+      margin-top: 10px;
+      background: #333;
+      color: #fff;
+      border: none;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .palette { grid-template-columns: repeat(3, 1fr); }
+
+      .keyring.vertical {
+        width: 200px;
+        height: 244px;
+      }
+
+      .keyring.square {
+        width: 220px;
+        height: 220px;
+      }
+
+
+      .keyring.square .back-content {
+        top: 31%;
+      }
+
+      .keyring.square .stamp:not(.front-stamp) {
+        bottom: 14px;
+      }
+
+      .back-content {
+        top: 33%;
+      }
+
+      .metal-clip {
+        transform: scale(0.82);
+        transform-origin: bottom center;
+        margin-bottom: -12px;
+      }
+
+      .art-symbol { font-size: 64px !important; }
+      .back-title { font-size: 19px; }
+      .back-artist { font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>작품 키링 색상 시안</h1>
+    <div class="desc">
+      사용자가 작품, 크기, 바탕색, 글씨색을 선택하면 앞면/뒷면 시안이 바로 바뀌는 주문용 미리보기 페이지입니다.
+      금색·실버색은 일반 출력용 색상값이며, 진짜 메탈릭/금박은 별도 특수인쇄 옵션입니다.
+    </div>
+
+    <div class="layout">
+      <div class="preview-area">
+        <div class="preview-title" id="previewTitle">복(福)의 율동 / 45×55mm</div>
+
+        <div class="preview-wrap">
+          <div class="keyring-box">
+            <div class="real-keyring">
+              <div class="metal-clip">
+                <div class="clip-loop"></div>
+                <div class="clip-body"></div>
+                <div class="clip-ring"></div>
+                <div class="small-ring"></div>
+              </div>
+
+              <div class="keyring vertical" id="frontKeyring">
+                <div class="acrylic-hole"></div>
+                <div class="art-symbol" id="frontArt">福</div>
+                <div class="stamp front-stamp">印</div>
+              </div>
+            </div>
+            <div class="keyring-label">앞면</div>
+          </div>
+
+          <div class="keyring-box">
+            <div class="real-keyring">
+              <div class="metal-clip">
+                <div class="clip-loop"></div>
+                <div class="clip-body"></div>
+                <div class="clip-ring"></div>
+                <div class="small-ring"></div>
+              </div>
+
+              <div class="keyring vertical" id="backKeyring">
+                <div class="acrylic-hole"></div>
+                <div class="back-content" id="backText">
+                  <div class="back-title" id="backTitle">복(福)의 율동</div>
+                  <div class="back-artist">이원주 作</div>
+                </div>
+                <div class="stamp">印</div>
+              </div>
+            </div>
+            <div class="keyring-label">뒷면</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section">
+          <h2>1. 작품 선택</h2>
+          <div class="btn-row">
+            <button class="art-btn active" data-art="복(福)의 율동" data-symbol="福" data-default-size="vertical">복의 율동</button>
+            <button class="art-btn" data-art="복(福)의 춤" data-symbol="舞" data-default-size="vertical">복의 춤</button>
+            <button class="art-btn" data-art="호(虎) / 존재의 무게" data-symbol="虎" data-default-size="square">호랑이</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>2. 크기 선택</h2>
+          <div class="btn-row">
+            <button class="size-btn active" data-size="vertical" data-size-name="45×55mm">45×55mm</button>
+            <button class="size-btn" data-size="square" data-size-name="50×50mm">50×50mm</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>3. 바탕색 선택</h2>
+          <div class="palette" id="backgroundPalette"></div>
+          <div class="notice">※ 화면 색상과 실제 출력 색상은 다를 수 있습니다. 최종은 업체 테스트 인쇄 기준입니다.</div>
+        </div>
+
+        <div class="section">
+          <h2>4. 글씨색 선택</h2>
+          <div class="palette" id="textPalette"></div>
+        </div>
+
+        <div class="section">
+          <h2>5. 직접 색상 선택</h2>
+
+          <button class="direct-toggle" id="toggleBgPicker">바탕색 직접 선택</button>
+          <div class="picker-box" id="bgPickerBox">
+            <label>바탕색 색상표</label>
+            <div class="custom-wheel" id="bgWheel"></div>
+            <div class="mini-palette" id="bgMiniPalette"></div>
+            <div class="selected-line">
+              <span>선택 색상</span>
+              <strong id="bgSelectedHex">#1F4A3A</strong>
+              <i id="bgSelectedSwatch"></i>
+            </div>
+            <input type="text" id="customBg" placeholder="바탕색 HEX 입력 예: #1F4A3A" />
+            <button id="applyBgColor">바탕색 적용</button>
+          </div>
+
+          <br><br>
+
+          <button class="direct-toggle" id="toggleTextPicker">글씨색 직접 선택</button>
+          <div class="picker-box" id="textPickerBox">
+            <label>글씨색 색상표</label>
+            <div class="custom-wheel" id="textWheel"></div>
+            <div class="mini-palette" id="textMiniPalette"></div>
+            <div class="selected-line">
+              <span>선택 색상</span>
+              <strong id="textSelectedHex">#C9A646</strong>
+              <i id="textSelectedSwatch"></i>
+            </div>
+            <input type="text" id="customText" placeholder="글씨색 HEX 입력 예: #C9A646" />
+            <button id="applyTextColor">글씨색 적용</button>
+          </div>
+
+          <div class="notice">
+            ※ 휴대폰 기본 색상창 대신, 페이지 안에서 바로 고르는 원형 색상표입니다.
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>선택 주문 정보</h2>
+          <div class="order-info" id="orderInfo"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const backgroundColors = [
+      { name: "딥그린", hex: "#1F4A3A", cmyk: "C70 M35 Y65 K45", note: "고급, 차분" },
+      { name: "올리브그린", hex: "#7B9A6A", cmyk: "C45 M20 Y60 K15", note: "자연, 부드러움" },
+      { name: "베이지", hex: "#E6DCC1", cmyk: "C9 M11 Y25 K0", note: "한지 느낌" },
+      { name: "아이보리", hex: "#F4EEDC", cmyk: "C4 M5 Y15 K0", note: "부드러운 기본" },
+      { name: "와인", hex: "#6B1F2A", cmyk: "C35 M85 Y60 K35", note: "고급 선물" },
+      { name: "네이비", hex: "#172A46", cmyk: "C90 M75 Y40 K45", note: "차분, 남성적" },
+      { name: "블랙", hex: "#1A1A1A", cmyk: "C0 M0 Y0 K90", note: "강한 대비" },
+      { name: "화이트", hex: "#FFFFFF", cmyk: "C0 M0 Y0 K0", note: "깔끔" }
+    ];
+
+    const textColors = [
+      { name: "검정", hex: "#111111", cmyk: "C0 M0 Y0 K95", type: "일반 컬러" },
+      { name: "흰색", hex: "#FFFFFF", cmyk: "C0 M0 Y0 K0", type: "일반 컬러" },
+      { name: "일반 금색", hex: "#C9A646", cmyk: "C20 M30 Y75 K10", type: "일반 출력용 금색" },
+      { name: "진한 금색", hex: "#B08A2E", cmyk: "C25 M38 Y85 K15", type: "일반 출력용 금색" },
+      { name: "연금색", hex: "#E5C76B", cmyk: "C10 M20 Y65 K0", type: "일반 출력용 금색" },
+      { name: "일반 실버", hex: "#BFC1C2", cmyk: "C25 M18 Y18 K0", type: "일반 출력용 실버" },
+      { name: "진한 실버", hex: "#8E9396", cmyk: "C35 M25 Y25 K10", type: "일반 출력용 실버" },
+      { name: "먹색", hex: "#333333", cmyk: "C0 M0 Y0 K80", type: "일반 컬러" }
+    ];
+
+    const frontKeyring = document.getElementById("frontKeyring");
+    const backKeyring = document.getElementById("backKeyring");
+    const frontArt = document.getElementById("frontArt");
+    const backText = document.getElementById("backText");
+    const backTitle = document.getElementById("backTitle");
+    const previewTitle = document.getElementById("previewTitle");
+    const orderInfo = document.getElementById("orderInfo");
+
+    let selectedArt = { name: "복(福)의 율동", symbol: "福" };
+    let selectedSize = { type: "vertical", name: "45×55mm" };
+    let selectedBackground = backgroundColors[0];
+    let selectedText = textColors[0];
+
+    function renderPalette(colors, targetId, mode) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = "";
+
+      colors.forEach((color, index) => {
+        const chip = document.createElement("div");
+        chip.className = "color-chip";
+        if (index === 0) chip.classList.add("active");
+
+        chip.innerHTML = `
+          <div class="swatch" style="background:${color.hex}"></div>
+          <div class="chip-name">${color.name}</div>
+          <div class="chip-code">${color.hex}</div>
+        `;
+
+        chip.addEventListener("click", () => {
+          document.querySelectorAll("#" + targetId + " .color-chip").forEach(el => {
+            el.classList.remove("active");
+          });
+          chip.classList.add("active");
+
+          if (mode === "background") {
+            selectedBackground = color;
+            applyBackground(color.hex);
+          }
+
+          if (mode === "text") {
+            selectedText = color;
+            applyTextColor(color.hex);
+          }
+
+          updateOrderInfo();
+        });
+
+        target.appendChild(chip);
+      });
+    }
+
+    function applyBackground(hex) {
+      frontKeyring.style.backgroundColor = hex;
+      backKeyring.style.backgroundColor = hex;
+    }
+
+    function applyTextColor(hex) {
+      frontArt.style.color = hex;
+      backText.style.color = hex;
+    }
+
+    function applySize(sizeType, sizeName) {
+      frontKeyring.classList.remove("vertical", "square");
+      backKeyring.classList.remove("vertical", "square");
+
+      frontKeyring.classList.add(sizeType);
+      backKeyring.classList.add(sizeType);
+
+      selectedSize = { type: sizeType, name: sizeName };
+
+      document.querySelectorAll(".size-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.size === sizeType);
+      });
+
+      updateOrderInfo();
+    }
+
+    function updateOrderInfo() {
+      previewTitle.textContent = `${selectedArt.name} / ${selectedSize.name}`;
+
+      const bgCmyk = selectedBackground.cmyk || "직접 입력 색상";
+      const textCmyk = selectedText.cmyk || "직접 입력 색상";
+      const textType = selectedText.type || "직접 입력 색상";
+
+      orderInfo.textContent =
+`작품: ${selectedArt.name}
+크기: ${selectedSize.name}
+바탕색: ${selectedBackground.name} / ${selectedBackground.hex}
+바탕색 참고 CMYK: ${bgCmyk}
+
+글씨색: ${selectedText.name} / ${selectedText.hex}
+글씨색 참고 CMYK: ${textCmyk}
+글씨색 유형: ${textType}
+
+낙관: 붉은색 고정
+주의: 금색/실버는 일반 출력용 색상값이며, 반짝이는 금박/메탈릭은 별도 특수인쇄 문의 필요`;
+    }
+
+    document.querySelectorAll(".art-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".art-btn").forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+
+        selectedArt = {
+          name: button.dataset.art,
+          symbol: button.dataset.symbol
+        };
+
+        frontArt.textContent = button.dataset.symbol;
+        backTitle.textContent = button.dataset.art.split(" / ")[0];
+
+        const defaultSize = button.dataset.defaultSize;
+        if (defaultSize === "square") applySize("square", "50×50mm");
+        else applySize("vertical", "45×55mm");
+
+        updateOrderInfo();
+      });
+    });
+
+    document.querySelectorAll(".size-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        applySize(button.dataset.size, button.dataset.sizeName);
+      });
+    });
+
+    const bgPickerBox = document.getElementById("bgPickerBox");
+    const textPickerBox = document.getElementById("textPickerBox");
+    const customBg = document.getElementById("customBg");
+    const customText = document.getElementById("customText");
+
+    const quickColors = [
+      "#1F4A3A", "#7B9A6A", "#E6DCC1", "#F4EEDC",
+      "#6B1F2A", "#172A46", "#1A1A1A", "#FFFFFF",
+      "#C9A646", "#B08A2E", "#E5C76B", "#BFC1C2"
+    ];
+
+    function isValidHex(hex) {
+      return /^#[0-9A-Fa-f]{6}$/.test(hex);
+    }
+
+    function openPicker(type) {
+      if (type === "bg") {
+        bgPickerBox.classList.toggle("open");
+        textPickerBox.classList.remove("open");
+      }
+
+      if (type === "text") {
+        textPickerBox.classList.toggle("open");
+        bgPickerBox.classList.remove("open");
+      }
+    }
+
+    function setPickerUI(type, hex) {
+      const upper = hex.toUpperCase();
+
+      if (type === "bg") {
+        customBg.value = upper;
+        document.getElementById("bgSelectedHex").textContent = upper;
+        document.getElementById("bgSelectedSwatch").style.background = upper;
+        const dot = document.querySelector("#bgWheel .wheel-dot");
+        if (dot) dot.style.background = upper;
+      }
+
+      if (type === "text") {
+        customText.value = upper;
+        document.getElementById("textSelectedHex").textContent = upper;
+        document.getElementById("textSelectedSwatch").style.background = upper;
+        const dot = document.querySelector("#textWheel .wheel-dot");
+        if (dot) dot.style.background = upper;
+      }
+    }
+
+    function setCustomBackground(hex) {
+      if (!isValidHex(hex)) {
+        alert("HEX 형식으로 입력해줘. 예: #1F4A3A");
+        return;
+      }
+
+      selectedBackground = {
+        name: "직접 선택 바탕색",
+        hex: hex.toUpperCase(),
+        cmyk: "업체 변환 필요",
+        note: "사용자 지정"
+      };
+
+      applyBackground(selectedBackground.hex);
+      setPickerUI("bg", selectedBackground.hex);
+      updateOrderInfo();
+    }
+
+    function setCustomTextColor(hex) {
+      if (!isValidHex(hex)) {
+        alert("HEX 형식으로 입력해줘. 예: #C9A646");
+        return;
+      }
+
+      selectedText = {
+        name: "직접 선택 글씨색",
+        hex: hex.toUpperCase(),
+        cmyk: "업체 변환 필요",
+        type: "사용자 지정"
+      };
+
+      applyTextColor(selectedText.hex);
+      setPickerUI("text", selectedText.hex);
+      updateOrderInfo();
+    }
+
+    function hsvToHex(h, s, v) {
+      const c = v * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = v - c;
+      let r = 0, g = 0, b = 0;
+
+      if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+      else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+      else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+      else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+      else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+
+      const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, "0");
+      return "#" + toHex(r) + toHex(g) + toHex(b);
+    }
+
+    function setupWheel(wheelId, type) {
+      const wheel = document.getElementById(wheelId);
+      const dot = document.createElement("div");
+      dot.className = "wheel-dot";
+      wheel.appendChild(dot);
+
+      function pick(event) {
+        const rect = wheel.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const x = event.clientX - cx;
+        const y = event.clientY - cy;
+        const radius = rect.width / 2;
+        const distance = Math.min(Math.sqrt(x*x + y*y), radius);
+        const sat = distance / radius;
+        let angle = Math.atan2(y, x) * 180 / Math.PI;
+        angle = (angle + 360) % 360;
+
+        const hex = hsvToHex(angle, sat, 0.92);
+
+        const dotX = 50 + (x / radius) * 50;
+        const dotY = 50 + (y / radius) * 50;
+        dot.style.left = Math.max(4, Math.min(96, dotX)) + "%";
+        dot.style.top = Math.max(4, Math.min(96, dotY)) + "%";
+        dot.style.background = hex;
+
+        setPickerUI(type, hex);
+      }
+
+      wheel.addEventListener("click", pick);
+    }
+
+    function setupMiniPalette(targetId, type) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = "";
+
+      quickColors.forEach(hex => {
+        const chip = document.createElement("div");
+        chip.className = "mini-chip";
+        chip.style.background = hex;
+        chip.title = hex;
+
+        chip.addEventListener("click", () => {
+          target.querySelectorAll(".mini-chip").forEach(el => el.classList.remove("active"));
+          chip.classList.add("active");
+          setPickerUI(type, hex);
+        });
+
+        target.appendChild(chip);
+      });
+    }
+
+    document.getElementById("toggleBgPicker").addEventListener("click", () => {
+      openPicker("bg");
+    });
+
+    document.getElementById("toggleTextPicker").addEventListener("click", () => {
+      openPicker("text");
+    });
+
+    document.getElementById("applyBgColor").addEventListener("click", () => {
+      const hex = customBg.value.trim();
+      setCustomBackground(hex);
+    });
+
+    document.getElementById("applyTextColor").addEventListener("click", () => {
+      const hex = customText.value.trim();
+      setCustomTextColor(hex);
+    });
+
+    customBg.addEventListener("keydown", event => {
+      if (event.key === "Enter") setCustomBackground(event.target.value.trim());
+    });
+
+    customText.addEventListener("keydown", event => {
+      if (event.key === "Enter") setCustomTextColor(event.target.value.trim());
+    });
+
+    setupWheel("bgWheel", "bg");
+    setupWheel("textWheel", "text");
+    setupMiniPalette("bgMiniPalette", "bg");
+    setupMiniPalette("textMiniPalette", "text");
+    setPickerUI("bg", "#1F4A3A");
+    setPickerUI("text", "#C9A646");
+
+    renderPalette(backgroundColors, "backgroundPalette", "background");
+    renderPalette(textColors, "textPalette", "text");
+
+    applyBackground(selectedBackground.hex);
+    applyTextColor(selectedText.hex);
+    updateOrderInfo();
+  </script>
+</body>
+</html>
