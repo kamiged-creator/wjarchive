@@ -971,7 +971,7 @@
 
   
 
-    /* Galaxy Flip / 좁은 화면: 검은 배경으로 사진 가장자리 자연스럽게 보정 */
+    /* Galaxy Flip / 좁은 화면: 사진 전체가 더 보이도록 검은 액자 여백 적용 */
     @media (max-width: 740px){
       .artist-photo-card{
         min-height:0;
@@ -985,8 +985,8 @@
         aspect-ratio:3/4;
         border-radius:28px;
         overflow:hidden;
-        background-size:cover !important;
-        background-position:center top !important;
+        background-size:92% auto !important;
+        background-position:center center !important;
         background-repeat:no-repeat !important;
         background-color:#05070a;
       }
