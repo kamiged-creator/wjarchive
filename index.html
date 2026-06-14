@@ -135,7 +135,7 @@
       align-items:stretch;
     }
     .artist-photo-card{
-      background:var(--paper);
+      background:#05070a;
       border:1px solid var(--line);
       border-radius:28px;
       overflow:hidden;
@@ -971,19 +971,24 @@
 
   
 
-    /* Galaxy Flip / 아주 좁고 긴 화면에서 작가 사진 위쪽 잘림 방지 */
+    /* Galaxy Flip / 좁은 화면: 검은 배경으로 사진 가장자리 자연스럽게 보정 */
     @media (max-width: 740px){
       .artist-photo-card{
         min-height:0;
+        border-radius:28px;
+        overflow:hidden;
+        background:#05070a;
       }
       .artist-photo{
         height:auto !important;
         min-height:0 !important;
         aspect-ratio:3/4;
-        background-size:contain !important;
+        border-radius:28px;
+        overflow:hidden;
+        background-size:cover !important;
         background-position:center top !important;
         background-repeat:no-repeat !important;
-        background-color:#f1ebe3;
+        background-color:#05070a;
       }
     }
 </style>
