@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이원주 작품 사이트 사용법</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      background: #f5f1e9;
+      color: #222;
+      line-height: 1.7;
+    }
+
+    .wrap {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 60px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1f4a3a, #0f241c);
+      color: #fff;
+      border-radius: 26px;
+      padding: 34px 28px;
+      box-shadow: 0 16px 34px rgba(0,0,0,0.16);
+      margin-bottom: 22px;
+    }
+
+    .hero .eyebrow {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 999px;
+      font-size: 13px;
+      opacity: 0.95;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1.2;
+      letter-spacing: -1.4px;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      color: rgba(255,255,255,0.82);
+      font-size: 16px;
+    }
+
+    .quick {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #fff;
+      border-radius: 20px;
+      padding: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+    }
+
+    .quick a {
+      text-decoration: none;
+      color: #1f4a3a;
+      background: #edf4ef;
+      border: 1px solid #dbe8df;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 14px;
+      background: #fff;
+      border-radius: 22px;
+      padding: 22px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.065);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .card-number {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      background: #1f4a3a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 20px;
+      box-shadow: 0 8px 18px rgba(31,74,58,0.22);
+    }
+
+    .card h2 {
+      margin: 4px 0 14px;
+      font-size: clamp(21px, 4vw, 28px);
+      letter-spacing: -0.8px;
+      line-height: 1.25;
+    }
+
+    .card p {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #444;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-bottom: 1px dashed #e6e0d6;
+    }
+
+    .step:last-child {
+      border-bottom: none;
+    }
+
+    .step span {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: #f0eadf;
+      color: #3b3026;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .step p {
+      margin: 3px 0 0;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .bullet {
+      position: relative;
+      margin: 9px 0;
+      padding: 12px 14px 12px 36px;
+      border-radius: 14px;
+      background: #faf7f0;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .bullet::before {
+      content: "✓";
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      color: #1f4a3a;
+      font-weight: 900;
+    }
+
+    .example-label {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 10px 0 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: #1f1f1f;
+      color: #f5f5f5;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+
+    .action-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 14px 0 16px;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      background: #1f4a3a;
+      padding: 11px 15px;
+      border-radius: 13px;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 8px 18px rgba(31,74,58,0.18);
+    }
+
+    .action-link.secondary {
+      background: #111;
+    }
+
+
+    .inline-link {
+      color: #0f5f45;
+      font-weight: 900;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .big-crop-link {
+      display: block;
+      margin: 14px 0 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #1f4a3a;
+      color: #fff !important;
+      text-decoration: none;
+      font-weight: 900;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(31,74,58,0.22);
+    }
+
+    .footer {
+      text-align: center;
+      color: #777;
+      font-size: 13px;
+      margin-top: 28px;
+    }
+
+    .top-btn {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: #1f4a3a;
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+      font-weight: 900;
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        width: min(100% - 22px, 960px);
+        padding-top: 16px;
+      }
+
+      .hero {
+        padding: 28px 20px;
+        border-radius: 22px;
+      }
+
+      .quick {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 12px;
+      }
+
+      .quick a {
+        white-space: nowrap;
+      }
+
+      .card {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+
+      .card-number {
+        width: 42px;
+        height: 42px;
+      }
+
+      .step {
+        grid-template-columns: 38px 1fr;
+      }
+
+      .step p,
+      .card p,
+      .bullet {
+        font-size: 15.5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <span class="eyebrow">YCUVE 관리자 가이드</span>
+      <h1>이원주 작품 사이트 사용법</h1>
+      <p>작품 이미지 업로드, 작품 등록, 삭제, 화면 표시 방식까지 한눈에 보기 쉽게 정리한 모바일용 가이드입니다.</p>
+      <div class="action-links">
+        <a class="action-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">작품 이미지 업로드 바로가기</a>
+        <a class="action-link secondary" href="https://ycuve.com/keyring.html" target="_blank" rel="noopener">키링 시안 페이지</a>
+      </div>
+    </header>
+
+    <nav class="quick">
+      <a href="#section-1">1. 작품 이미지 업로드</a>
+<a href="#section-2">2. 작품 1개 등록</a>
+<a href="#section-3">3. 여러 작품 한 번에 등록</a>
+<a href="#section-4">4. 작품 삭제</a>
+<a href="#section-5">5. 화면 표시 방식</a>
+<a href="#section-6">6. 작업 전 주의사항</a>
+    </nav>
+
+    
+    <section class="card" id="section-1">
+      <div class="card-number">1</div>
+      <div class="card-content">
+        <h2>1. 작품 이미지 업로드</h2>
+        <a class="big-crop-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">작품 이미지 업로드 페이지 열기</a>
+        <div class="action-links">
+          <a class="action-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">crop.html 열기</a>
+          <a class="action-link secondary" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">새 창으로 열기</a>
+        </div>
+        <div class="step"><span>1)</span><p><a class="inline-link" href="https://ycuve.com/crop.html" target="_blank" rel="noopener">crop.html 페이지를 엽니다.</a></p></div>
+<div class="step"><span>2)</span><p>비밀번호를 입력합니다.</p></div>
+<div class="step"><span>3)</span><p>이미지 선택을 눌러 작품 이미지를 선택합니다.</p></div>
+<div class="step"><span>4)</span><p>필요하면 화면에서 이미지 위치와 크기를 확인합니다.</p></div>
+<div class="step"><span>5)</span><p>미리보기를 누릅니다.</p></div>
+<div class="step"><span>6)</span><p>ImageKit 업로드를 누릅니다.</p></div>
+<div class="step"><span>7)</span><p>업로드가 끝나면 URL 복사를 누릅니다.</p></div>
+<p>업로드 파일명은 날짜, 시간, 번호가 함께 들어갑니다.</p>
+<div class="example-label">예시</div>
+<pre>작품명-20260603-2145-0001-full-1600.webp</pre>
+      </div>
+    </section>
+    
+
+    <section class="card" id="section-2">
+      <div class="card-number">2</div>
+      <div class="card-content">
+        <h2>2. 작품 1개 등록</h2>
+        <div class="step"><span>1)</span><p>메인 페이지에서 관리자 페이지를 엽니다.</p></div>
+<div class="step"><span>2)</span><p>비밀번호를 입력합니다.</p></div>
+<div class="step"><span>3)</span><p>작품 등록 추가 영역으로 이동합니다.</p></div>
+<div class="step"><span>4)</span><p>카테고리, 연도, 작품 제목, 작품 설명을 입력합니다.</p></div>
+<div class="step"><span>5)</span><p>작품 이미지 링크에 crop 페이지에서 복사한 URL을 붙여넣습니다.</p></div>
+<div class="step"><span>6)</span><p>작품/유튜브 반영을 누릅니다.</p></div>
+<p>등록 후 입력값은 자동으로 비워집니다.</p>
+      </div>
+    </section>
+    
+
+    <section class="card" id="section-3">
+      <div class="card-number">3</div>
+      <div class="card-content">
+        <h2>3. 여러 작품 한 번에 등록</h2>
+        <div class="step"><span>1)</span><p>crop 페이지에서 여러 이미지를 차례대로 업로드합니다.</p></div>
+<div class="step"><span>2)</span><p>오른쪽 URL 목록에 업로드한 URL들이 쌓였는지 확인합니다.</p></div>
+<div class="step"><span>3)</span><p>URL 복사를 누릅니다.</p></div>
+<div class="step"><span>4)</span><p>관리자 페이지의 여러 작품 이미지 링크에 붙여넣습니다.</p></div>
+<div class="step"><span>5)</span><p>작품 제목, 설명, 카테고리, 연도를 입력합니다.</p></div>
+<div class="step"><span>6)</span><p>URL 목록 일괄 추가를 누릅니다.</p></div>
+<p>여러 장을 일괄 추가하면 작품 제목 뒤에 번호가 자동으로 붙습니다.</p>
+<div class="example-label">예시</div>
+<pre>복의 율동 01
+복의 율동 02
+복의 율동 03</pre>
+      </div>
+    </section>
+    
+
+    <section class="card" id="section-4">
+      <div class="card-number">4</div>
+      <div class="card-content">
+        <h2>4. 작품 삭제</h2>
+        <div class="step"><span>1)</span><p>관리자 페이지의 반영할 기존 작품에서 삭제할 작품을 선택합니다.</p></div>
+<div class="step"><span>2)</span><p>선택 작품 삭제를 누릅니다.</p></div>
+<div class="step"><span>3)</span><p>삭제한 작품은 메인 화면과 선택 목록에서 보이지 않습니다.</p></div>
+<p>새 작품 추가 상태에서 삭제 버튼을 누르면 현재 입력값만 비워집니다.</p>
+      </div>
+    </section>
+    
+
+    <section class="card" id="section-5">
+      <div class="card-number">5</div>
+      <div class="card-content">
+        <h2>5. 화면 표시 방식</h2>
+        <div class="bullet">메인 카드에서는 이미지가 보기 좋게 일부 잘려 보일 수 있습니다.</div>
+<div class="bullet">작품을 클릭하면 전체 이미지가 보입니다.</div>
+<div class="bullet">crop 페이지는 원본 비율 이미지를 업로드합니다.</div>
+      </div>
+    </section>
+    
+
+    <section class="card" id="section-6">
+      <div class="card-number">6</div>
+      <div class="card-content">
+        <h2>6. 작업 전 주의사항</h2>
+        <div class="bullet">작업 전 페이지를 새로고침합니다.</div>
+<div class="bullet">바뀐 내용이 바로 안 보이면 Ctrl + F5로 강력 새로고침합니다.</div>
+<div class="bullet">같은 URL을 다시 등록하면 새 작품으로 중복 추가하지 않고 건너뜁니다.</div>
+<div class="bullet">여러 명이 작업해도 파일명에 날짜와 시간이 들어가서 ImageKit 파일명이 헷갈릴 가능성이 줄어듭니다.</div>
+      </div>
+    </section>
+    
+
+    <div class="footer">
+      ycuve.com · 관리자용 사용 가이드
+    </div>
+  </div>
+
+  <a class="top-btn" href="#">↑</a>
+</body>
+</html>

@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>작품 키링 색상 시안</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #f4f1ec;
+      color: #222;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .desc {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+
+    /* ===== 홍보용 실사용 이미지 영역 ===== */
+    .promo-section {
+      background: #fff;
+      border-radius: 22px;
+      padding: 22px;
+      margin: 22px 0 24px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    }
+
+    .promo-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .promo-head h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.6px;
+    }
+
+    .promo-head p {
+      margin: 6px 0 0;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .promo-badge {
+      flex: 0 0 auto;
+      background: #111;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .promo-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .promo-photo {
+      position: relative;
+      min-height: 360px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #eee;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+    }
+
+    .promo-photo img {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      display: block;
+      object-fit: cover;
+      object-position: center 58%;
+    }
+
+    .promo-caption {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: #222;
+      background: #f7f3eb;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .promo-caption strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .promo-caption span {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.45;
+    }
+
+    .promo-copy {
+      border-radius: 20px;
+      background: #f7f3eb;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .promo-copy h3 {
+      margin: 0 0 12px;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: -0.8px;
+    }
+
+    .promo-copy p {
+      margin: 0 0 14px;
+      color: #555;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .promo-points {
+      display: grid;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .promo-point {
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      color: #333;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+
+    .promo-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .promo-card {
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.07);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .promo-card .promo-photo {
+      border-radius: 0;
+      min-height: 320px;
+      box-shadow: none;
+    }
+
+    .promo-card .promo-photo img {
+      min-height: 320px;
+    }
+
+    .promo-card .promo-caption {
+      margin-top: 0;
+      border-radius: 0;
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      background: #fff;
+    }
+
+    .promo-card-tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .promo-link-btn {
+      display: inline-block;
+      margin-top: 16px;
+      text-decoration: none;
+      color: #fff;
+      background: #1f4a3a;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+    }
+
+    .preview-area {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .preview-title {
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 18px;
+      font-size: 18px;
+    }
+
+    .preview-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .keyring-box { text-align: center; }
+
+    .keyring-label {
+      margin-top: 10px;
+      font-weight: 700;
+      color: #555;
+    }
+
+
+    .real-keyring {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 0;
+      filter: drop-shadow(0 16px 22px rgba(0,0,0,0.18));
+    }
+
+    .metal-clip {
+      position: relative;
+      width: 78px;
+      height: 112px;
+      margin-bottom: -2px;
+      z-index: 5;
+    }
+
+    .clip-loop {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 44px;
+      height: 72px;
+      transform: translateX(-50%);
+      border-radius: 26px 26px 18px 18px;
+      border: 8px solid #b9b6ae;
+      background:
+        linear-gradient(90deg, #7e7b75 0%, #f6f2e8 24%, #aaa69f 48%, #fffdf5 70%, #77736d 100%);
+      box-shadow:
+        inset 0 0 6px rgba(0,0,0,0.28),
+        0 2px 5px rgba(0,0,0,0.22);
+    }
+
+    .clip-loop::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      width: 19px;
+      height: 43px;
+      transform: translateX(-50%);
+      border-radius: 16px;
+      background: #f7f3ea;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.15);
+    }
+
+    .clip-body {
+      position: absolute;
+      left: 50%;
+      top: 58px;
+      width: 52px;
+      height: 29px;
+      transform: translateX(-50%);
+      border-radius: 7px;
+      background:
+        linear-gradient(90deg, #77736d 0%, #f7f4ec 28%, #aaa69f 54%, #fffefa 76%, #807c75 100%);
+      border: 1px solid rgba(80,80,80,0.45);
+      box-shadow:
+        inset 0 1px 3px rgba(255,255,255,0.8),
+        inset 0 -2px 4px rgba(0,0,0,0.16),
+        0 3px 6px rgba(0,0,0,0.24);
+    }
+
+    .clip-body::before {
+      content: "";
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #fff, #aaa 45%, #555 100%);
+      box-shadow: 0 0 1px rgba(0,0,0,0.6);
+    }
+
+    .clip-ring {
+      position: absolute;
+      left: 50%;
+      top: 78px;
+      width: 36px;
+      height: 36px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 7px solid #bcb8b0;
+      background: transparent;
+      box-shadow:
+        inset 0 0 4px rgba(0,0,0,0.28),
+        0 2px 4px rgba(0,0,0,0.18);
+    }
+
+    .small-ring {
+      position: absolute;
+      left: 50%;
+      top: 105px;
+      width: 18px;
+      height: 18px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 4px solid #bcb8b0;
+      background: transparent;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+    }
+
+    .keyring {
+      position: relative;
+      background: #1f4a3a;
+      border: 12px solid rgba(236, 244, 239, 0.72);
+      box-shadow:
+        0 16px 28px rgba(0,0,0,0.18),
+        inset 0 0 0 1px rgba(255,255,255,0.42),
+        inset 0 0 18px rgba(0,0,0,0.09);
+      overflow: hidden;
+      transition: 0.25s ease;
+    }
+
+    .keyring::before {
+      content: "";
+      position: absolute;
+      inset: -12px;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.42), rgba(255,255,255,0.03) 36%, rgba(0,0,0,0.04) 72%, rgba(255,255,255,0.28));
+      z-index: 2;
+      mix-blend-mode: screen;
+      opacity: 0.48;
+    }
+
+    .keyring::after {
+      content: "";
+      position: absolute;
+      left: 9%;
+      top: 5%;
+      width: 82%;
+      height: 18%;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0.35;
+    }
+
+    .acrylic-hole {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 45px;
+      height: 27px;
+      border-radius: 50%;
+      border: 7px solid rgba(221, 235, 229, 0.78);
+      background: rgba(255,255,255,0.08);
+      box-shadow:
+        inset 0 0 5px rgba(0,0,0,0.18),
+        0 1px 4px rgba(255,255,255,0.35);
+      z-index: 4;
+    }
+
+    .keyring.vertical {
+      width: 245px;
+      height: 300px;
+      border-radius: 24px;
+    }
+
+    .keyring.square {
+      width: 270px;
+      height: 270px;
+      border-radius: 24px;
+    }
+
+    .art-symbol,
+    .back-content,
+    .stamp {
+      z-index: 3;
+    }
+
+    .art-symbol {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      font-size: 92px;
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -8px;
+      color: #111;
+      text-align: center;
+      white-space: pre-line;
+      font-family: "Noto Serif KR", serif;
+      transition: 0.25s ease;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.15);
+    }
+
+    .keyring.vertical .art-symbol { font-size: 84px; }
+    .keyring.square .art-symbol { font-size: 78px; }
+
+    .back-content {
+      position: absolute;
+      top: 36%;
+      left: 50%;
+      width: 90%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #111;
+      transition: 0.25s ease;
+    }
+
+    .back-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .back-artist {
+      font-size: 17px;
+      font-weight: 500;
+    }
+
+    .stamp {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      background: #b33a2b;
+      color: #fff;
+      font-size: 13px;
+      line-height: 42px;
+      text-align: center;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-weight: 700;
+      opacity: 0.92;
+    }
+
+    .front-stamp {
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      font-size: 9px;
+      left: auto;
+      right: 26px;
+      bottom: 34px;
+      transform: none;
+    }
+
+    .panel {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .section { margin-bottom: 24px; }
+
+    .section h2 {
+      font-size: 17px;
+      margin: 0 0 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border: 1px solid #ddd;
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.active {
+      border: 2px solid #111;
+      font-weight: 700;
+    }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .color-chip {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 8px;
+      cursor: pointer;
+      background: #fff;
+      text-align: center;
+      min-height: 86px;
+    }
+
+    .color-chip.active { border: 2px solid #111; }
+
+    .swatch {
+      width: 100%;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.15);
+      margin-bottom: 6px;
+    }
+
+    .chip-name {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .chip-code {
+      font-size: 10px;
+      color: #666;
+      word-break: break-all;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 15px;
+    }
+
+    .order-info {
+      background: #f7f7f7;
+      padding: 14px;
+      border-radius: 12px;
+      line-height: 1.6;
+      font-size: 14px;
+      white-space: pre-line;
+    }
+
+    .notice {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+
+
+
+    /* ===== 네모형 정밀 색상표 ===== */
+
+    .picker-box > label {
+      margin-bottom: 12px;
+    }
+
+    .square-picker-wrap:first-of-type {
+      margin-top: 0;
+    }
+
+    .square-picker-wrap {
+      margin: 12px 0 14px;
+    }
+
+    .square-picker {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: crosshair;
+      background:
+        linear-gradient(to top, #000, transparent),
+        linear-gradient(to right, #fff, var(--picker-hue, #ff0000));
+      box-shadow:
+        inset 0 0 0 1px rgba(0,0,0,0.12),
+        0 8px 20px rgba(0,0,0,0.10);
+    }
+
+    .square-dot {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      left: 65%;
+      top: 35%;
+      background: #9950eb;
+    }
+
+    .hue-slider {
+      width: 100%;
+      height: 22px;
+      margin-top: 12px;
+      border-radius: 999px;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      cursor: pointer;
+      background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.14);
+    }
+
+    .hue-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #111;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .hue-slider::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: #111;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .picker-mode-note {
+      margin: 8px 0 0;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .direct-toggle {
+      width: 100%;
+      font-weight: 700;
+      background: #111;
+      color: #fff;
+      border: none;
+    }
+
+    .picker-box {
+      display: none;
+      margin-top: 10px;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 18px;
+      background: #fafafa;
+    }
+
+    .picker-box.open { display: block; }
+
+    .picker-box label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+.mini-palette {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .mini-chip {
+      height: 36px;
+      border-radius: 999px;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.18);
+      cursor: pointer;
+    }
+
+    .mini-chip.active {
+      box-shadow: 0 0 0 3px #111;
+    }
+
+    .selected-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0f0f0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .selected-line strong {
+      margin-left: auto;
+      font-size: 14px;
+    }
+
+    .selected-line i {
+      display: block;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.2);
+      background: #1F4A3A;
+    }
+
+    .picker-box button {
+      width: 100%;
+      margin-top: 10px;
+      background: #333;
+      color: #fff;
+      border: none;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+
+      .promo-head {
+        display: block;
+      }
+
+      .promo-badge {
+        display: inline-block;
+        margin-top: 10px;
+      }
+
+      .promo-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .promo-gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .promo-photo,
+      .promo-photo img {
+        min-height: 320px;
+      }
+
+      .promo-copy h3 {
+        font-size: 21px;
+      }
+
+      .palette { grid-template-columns: repeat(3, 1fr); }
+
+      .keyring.vertical {
+        width: 200px;
+        height: 244px;
+      }
+
+      .keyring.square {
+        width: 220px;
+        height: 220px;
+      }
+
+      .metal-clip {
+        transform: scale(0.82);
+        transform-origin: bottom center;
+        margin-bottom: -12px;
+      }
+
+      .art-symbol { font-size: 64px !important; }
+      .back-title { font-size: 19px; }
+      .back-artist { font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>작품 키링 색상 시안</h1>
+    <div class="desc">
+      사용자가 작품, 크기, 바탕색, 글씨색을 선택하면 앞면/뒷면 시안이 바로 바뀌는 주문용 미리보기 페이지입니다.
+      금색·실버색은 일반 출력용 색상값이며, 진짜 메탈릭/금박은 별도 특수인쇄 옵션입니다. 뒷면 낙관은 이름과 겹치지 않도록 하단으로 조정했습니다.
+    </div>
+
+
+    <section class="promo-section">
+      <div class="promo-head">
+        <div>
+          <h2>실사용 착용컷</h2>
+          <p>가방·스트랩에 달았을 때 작품 키링이 어떻게 보이는지 확인할 수 있는 홍보용 이미지입니다.</p>
+        </div>
+        <div class="promo-badge">호랑이 키링</div>
+      </div>
+
+      <div class="promo-grid">
+        <div class="promo-gallery">
+          <div class="promo-card">
+            <div class="promo-photo">
+              <img src="assets/keyring-promo.jpg" alt="호랑이 작품 키링 가방 착용컷" />
+            </div>
+            <div class="promo-caption">
+              <span class="promo-card-tag">호랑이 키링</span>
+              <strong>가방 위에 얹히는 작은 작품</strong>
+              <span>검은 가방 위에서 호랑이 작품과 붉은 낙관이 포인트로 살아납니다.</span>
+            </div>
+          </div>
+
+          <div class="promo-card">
+            <div class="promo-photo">
+              <img src="assets/keyring-promo-bok.jpg" alt="복의 율동 작품 키링 소품 착용컷" />
+            </div>
+            <div class="promo-caption">
+              <span class="promo-card-tag">복(福) 키링</span>
+              <strong>보기만 해도 기분 좋은 복 키링</strong>
+              <span>스트랩이나 소품에 달았을 때 귀엽고 따뜻한 선물 느낌이 살아납니다.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="promo-copy">
+          <h3>일상에 걸어두는<br>작은 작품 키링</h3>
+          <p>
+            단순한 장식이 아니라 작품 이미지, 작가명, 낙관을 담은 아크릴 키링입니다.
+            가방·파우치·차키에 자연스럽게 어울리며 선물용 굿즈로도 활용할 수 있습니다.
+          </p>
+
+          <div class="promo-points">
+            <div class="promo-point">✔ 작품 이미지 기반 아크릴 키링</div>
+            <div class="promo-point">✔ 45×55mm / 50×50mm 선택 가능</div>
+            <div class="promo-point">✔ 기본 색상 또는 맞춤 색상 시안 확인</div>
+            <div class="promo-point">✔ 맞춤 색상 제작은 수량 확인 후 진행</div>
+          </div>
+
+          <a class="promo-link-btn" href="#previewTitle">색상 시안 바로 보기</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <div class="preview-area">
+        <div class="preview-title" id="previewTitle">복(福)의 율동 / 45×55mm</div>
+
+        <div class="preview-wrap">
+          <div class="keyring-box">
+            <div class="real-keyring">
+              <div class="metal-clip">
+                <div class="clip-loop"></div>
+                <div class="clip-body"></div>
+                <div class="clip-ring"></div>
+                <div class="small-ring"></div>
+              </div>
+
+              <div class="keyring vertical" id="frontKeyring">
+                <div class="acrylic-hole"></div>
+                <div class="art-symbol" id="frontArt">福</div>
+                <div class="stamp front-stamp">印</div>
+              </div>
+            </div>
+            <div class="keyring-label">앞면</div>
+          </div>
+
+          <div class="keyring-box">
+            <div class="real-keyring">
+              <div class="metal-clip">
+                <div class="clip-loop"></div>
+                <div class="clip-body"></div>
+                <div class="clip-ring"></div>
+                <div class="small-ring"></div>
+              </div>
+
+              <div class="keyring vertical" id="backKeyring">
+                <div class="acrylic-hole"></div>
+                <div class="back-content" id="backText">
+                  <div class="back-title" id="backTitle">복(福)의 율동</div>
+                  <div class="back-artist">이원주 作</div>
+                </div>
+                <div class="stamp">印</div>
+              </div>
+            </div>
+            <div class="keyring-label">뒷면</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section">
+          <h2>1. 작품 선택</h2>
+          <div class="btn-row">
+            <button class="art-btn active" data-art="복(福)의 율동" data-symbol="福" data-default-size="vertical">복의 율동</button>
+            <button class="art-btn" data-art="복(福)의 춤" data-symbol="舞" data-default-size="vertical">복의 춤</button>
+            <button class="art-btn" data-art="호(虎) / 존재의 무게" data-symbol="虎" data-default-size="square">호랑이</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>2. 크기 선택</h2>
+          <div class="btn-row">
+            <button class="size-btn active" data-size="vertical" data-size-name="45×55mm">45×55mm</button>
+            <button class="size-btn" data-size="square" data-size-name="50×50mm">50×50mm</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>3. 바탕색 선택</h2>
+          <div class="palette" id="backgroundPalette"></div>
+          <div class="notice">※ 화면 색상과 실제 출력 색상은 다를 수 있습니다. 최종은 업체 테스트 인쇄 기준입니다.</div>
+        </div>
+
+        <div class="section">
+          <h2>4. 글씨색 선택</h2>
+          <div class="palette" id="textPalette"></div>
+        </div>
+
+        <div class="section">
+          <h2>5. 직접 색상 선택</h2>
+
+          <button class="direct-toggle" id="toggleBgPicker">바탕색 직접 선택</button>
+          <div class="picker-box" id="bgPickerBox">
+            <label>바탕색 정밀 색상표</label>
+<div class="square-picker-wrap">
+              <label>정밀 색상 선택</label>
+              <div class="square-picker" id="bgSquarePicker">
+                <div class="square-dot" id="bgSquareDot"></div>
+              </div>
+              <input class="hue-slider" id="bgHueSlider" type="range" min="0" max="360" value="150" />
+              <div class="picker-mode-note">네모 안에서 좌우는 채도, 위아래는 밝기입니다.</div>
+            </div>
+
+            <div class="mini-palette" id="bgMiniPalette"></div>
+            <div class="selected-line">
+              <span>선택 색상</span>
+              <strong id="bgSelectedHex">#1F4A3A</strong>
+              <i id="bgSelectedSwatch"></i>
+            </div>
+            <input type="text" id="customBg" placeholder="바탕색 HEX 입력 예: #1F4A3A" />
+            <button id="applyBgColor">바탕색 적용</button>
+          </div>
+
+          <br><br>
+
+          <button class="direct-toggle" id="toggleTextPicker">글씨색 직접 선택</button>
+          <div class="picker-box" id="textPickerBox">
+            <label>글씨색 정밀 색상표</label>
+<div class="square-picker-wrap">
+              <label>정밀 색상 선택</label>
+              <div class="square-picker" id="textSquarePicker">
+                <div class="square-dot" id="textSquareDot"></div>
+              </div>
+              <input class="hue-slider" id="textHueSlider" type="range" min="0" max="360" value="45" />
+              <div class="picker-mode-note">네모 안에서 좌우는 채도, 위아래는 밝기입니다.</div>
+            </div>
+
+            <div class="mini-palette" id="textMiniPalette"></div>
+            <div class="selected-line">
+              <span>선택 색상</span>
+              <strong id="textSelectedHex">#C9A646</strong>
+              <i id="textSelectedSwatch"></i>
+            </div>
+            <input type="text" id="customText" placeholder="글씨색 HEX 입력 예: #C9A646" />
+            <button id="applyTextColor">글씨색 적용</button>
+          </div>
+
+          <div class="notice">
+            ※ 네모형 정밀 색상표에서 채도와 밝기를 조절해 색상을 고를 수 있습니다.
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>선택 주문 정보</h2>
+          <div class="order-info" id="orderInfo"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const backgroundColors = [
+      { name: "딥그린", hex: "#1F4A3A", cmyk: "C70 M35 Y65 K45", note: "고급, 차분" },
+      { name: "올리브그린", hex: "#7B9A6A", cmyk: "C45 M20 Y60 K15", note: "자연, 부드러움" },
+      { name: "베이지", hex: "#E6DCC1", cmyk: "C9 M11 Y25 K0", note: "한지 느낌" },
+      { name: "아이보리", hex: "#F4EEDC", cmyk: "C4 M5 Y15 K0", note: "부드러운 기본" },
+      { name: "와인", hex: "#6B1F2A", cmyk: "C35 M85 Y60 K35", note: "고급 선물" },
+      { name: "네이비", hex: "#172A46", cmyk: "C90 M75 Y40 K45", note: "차분, 남성적" },
+      { name: "블랙", hex: "#1A1A1A", cmyk: "C0 M0 Y0 K90", note: "강한 대비" },
+      { name: "화이트", hex: "#FFFFFF", cmyk: "C0 M0 Y0 K0", note: "깔끔" }
+    ];
+
+    const textColors = [
+      { name: "검정", hex: "#111111", cmyk: "C0 M0 Y0 K95", type: "일반 컬러" },
+      { name: "흰색", hex: "#FFFFFF", cmyk: "C0 M0 Y0 K0", type: "일반 컬러" },
+      { name: "일반 금색", hex: "#C9A646", cmyk: "C20 M30 Y75 K10", type: "일반 출력용 금색" },
+      { name: "진한 금색", hex: "#B08A2E", cmyk: "C25 M38 Y85 K15", type: "일반 출력용 금색" },
+      { name: "연금색", hex: "#E5C76B", cmyk: "C10 M20 Y65 K0", type: "일반 출력용 금색" },
+      { name: "일반 실버", hex: "#BFC1C2", cmyk: "C25 M18 Y18 K0", type: "일반 출력용 실버" },
+      { name: "진한 실버", hex: "#8E9396", cmyk: "C35 M25 Y25 K10", type: "일반 출력용 실버" },
+      { name: "먹색", hex: "#333333", cmyk: "C0 M0 Y0 K80", type: "일반 컬러" }
+    ];
+
+    const frontKeyring = document.getElementById("frontKeyring");
+    const backKeyring = document.getElementById("backKeyring");
+    const frontArt = document.getElementById("frontArt");
+    const backText = document.getElementById("backText");
+    const backTitle = document.getElementById("backTitle");
+    const previewTitle = document.getElementById("previewTitle");
+    const orderInfo = document.getElementById("orderInfo");
+
+    let selectedArt = { name: "복(福)의 율동", symbol: "福" };
+    let selectedSize = { type: "vertical", name: "45×55mm" };
+    let selectedBackground = backgroundColors[0];
+    let selectedText = textColors[0];
+
+    function renderPalette(colors, targetId, mode) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = "";
+
+      colors.forEach((color, index) => {
+        const chip = document.createElement("div");
+        chip.className = "color-chip";
+        if (index === 0) chip.classList.add("active");
+
+        chip.innerHTML = `
+          <div class="swatch" style="background:${color.hex}"></div>
+          <div class="chip-name">${color.name}</div>
+          <div class="chip-code">${color.hex}</div>
+        `;
+
+        chip.addEventListener("click", () => {
+          document.querySelectorAll("#" + targetId + " .color-chip").forEach(el => {
+            el.classList.remove("active");
+          });
+          chip.classList.add("active");
+
+          if (mode === "background") {
+            selectedBackground = color;
+            applyBackground(color.hex);
+          }
+
+          if (mode === "text") {
+            selectedText = color;
+            applyTextColor(color.hex);
+          }
+
+          updateOrderInfo();
+        });
+
+        target.appendChild(chip);
+      });
+    }
+
+    function applyBackground(hex) {
+      frontKeyring.style.backgroundColor = hex;
+      backKeyring.style.backgroundColor = hex;
+    }
+
+    function applyTextColor(hex) {
+      frontArt.style.color = hex;
+      backText.style.color = hex;
+    }
+
+    function applySize(sizeType, sizeName) {
+      frontKeyring.classList.remove("vertical", "square");
+      backKeyring.classList.remove("vertical", "square");
+
+      frontKeyring.classList.add(sizeType);
+      backKeyring.classList.add(sizeType);
+
+      selectedSize = { type: sizeType, name: sizeName };
+
+      document.querySelectorAll(".size-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.size === sizeType);
+      });
+
+      updateOrderInfo();
+    }
+
+    function updateOrderInfo() {
+      previewTitle.textContent = `${selectedArt.name} / ${selectedSize.name}`;
+
+      const bgCmyk = selectedBackground.cmyk || "직접 입력 색상";
+      const textCmyk = selectedText.cmyk || "직접 입력 색상";
+      const textType = selectedText.type || "직접 입력 색상";
+
+      orderInfo.textContent =
+`작품: ${selectedArt.name}
+크기: ${selectedSize.name}
+바탕색: ${selectedBackground.name} / ${selectedBackground.hex}
+바탕색 참고 CMYK: ${bgCmyk}
+
+글씨색: ${selectedText.name} / ${selectedText.hex}
+글씨색 참고 CMYK: ${textCmyk}
+글씨색 유형: ${textType}
+
+낙관: 붉은색 고정
+주의: 금색/실버는 일반 출력용 색상값이며, 반짝이는 금박/메탈릭은 별도 특수인쇄 문의 필요`;
+    }
+
+    document.querySelectorAll(".art-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".art-btn").forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+
+        selectedArt = {
+          name: button.dataset.art,
+          symbol: button.dataset.symbol
+        };
+
+        frontArt.textContent = button.dataset.symbol;
+        backTitle.textContent = button.dataset.art.split(" / ")[0];
+
+        const defaultSize = button.dataset.defaultSize;
+        if (defaultSize === "square") applySize("square", "50×50mm");
+        else applySize("vertical", "45×55mm");
+
+        updateOrderInfo();
+      });
+    });
+
+    document.querySelectorAll(".size-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        applySize(button.dataset.size, button.dataset.sizeName);
+      });
+    });
+
+    const bgPickerBox = document.getElementById("bgPickerBox");
+    const textPickerBox = document.getElementById("textPickerBox");
+    const customBg = document.getElementById("customBg");
+    const customText = document.getElementById("customText");
+
+    const quickColors = [
+      "#1F4A3A", "#7B9A6A", "#E6DCC1", "#F4EEDC",
+      "#6B1F2A", "#172A46", "#1A1A1A", "#FFFFFF",
+      "#C9A646", "#B08A2E", "#E5C76B", "#BFC1C2"
+    ];
+
+    function isValidHex(hex) {
+      return /^#[0-9A-Fa-f]{6}$/.test(hex);
+    }
+
+    function openPicker(type) {
+      if (type === "bg") {
+        bgPickerBox.classList.toggle("open");
+        textPickerBox.classList.remove("open");
+      }
+
+      if (type === "text") {
+        textPickerBox.classList.toggle("open");
+        bgPickerBox.classList.remove("open");
+      }
+    }
+
+    function setPickerUI(type, hex) {
+      const upper = hex.toUpperCase();
+
+      if (type === "bg") {
+        customBg.value = upper;
+        document.getElementById("bgSelectedHex").textContent = upper;
+        document.getElementById("bgSelectedSwatch").style.background = upper;
+      }
+
+      if (type === "text") {
+        customText.value = upper;
+        document.getElementById("textSelectedHex").textContent = upper;
+        document.getElementById("textSelectedSwatch").style.background = upper;
+      }
+    }
+
+    function setCustomBackground(hex) {
+      if (!isValidHex(hex)) {
+        alert("HEX 형식으로 입력해줘. 예: #1F4A3A");
+        return;
+      }
+
+      selectedBackground = {
+        name: "직접 선택 바탕색",
+        hex: hex.toUpperCase(),
+        cmyk: "업체 변환 필요",
+        note: "사용자 지정"
+      };
+
+      applyBackground(selectedBackground.hex);
+      setPickerUI("bg", selectedBackground.hex);
+      updateOrderInfo();
+    }
+
+    function setCustomTextColor(hex) {
+      if (!isValidHex(hex)) {
+        alert("HEX 형식으로 입력해줘. 예: #C9A646");
+        return;
+      }
+
+      selectedText = {
+        name: "직접 선택 글씨색",
+        hex: hex.toUpperCase(),
+        cmyk: "업체 변환 필요",
+        type: "사용자 지정"
+      };
+
+      applyTextColor(selectedText.hex);
+      setPickerUI("text", selectedText.hex);
+      updateOrderInfo();
+    }
+
+    function hsvToHex(h, s, v) {
+      const c = v * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = v - c;
+      let r = 0, g = 0, b = 0;
+
+      if (0 <= h && h < 60) { r = c; g = x; b = 0; }
+      else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+      else if (120 <= h && h < 180) { r = 0; g = c; b = x; }
+      else if (180 <= h && h < 240) { r = 0; g = x; b = c; }
+      else if (240 <= h && h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+
+      const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, "0");
+      return "#" + toHex(r) + toHex(g) + toHex(b);
+    }
+
+
+    function updateSquareBase(type, hue) {
+      const picker = document.getElementById(type + "SquarePicker");
+      if (!picker) return;
+      picker.style.setProperty("--picker-hue", hsvToHex(Number(hue), 1, 1));
+    }
+
+    function setupSquarePicker(type) {
+      const picker = document.getElementById(type + "SquarePicker");
+      const dot = document.getElementById(type + "SquareDot");
+      const slider = document.getElementById(type + "HueSlider");
+      if (!picker || !dot || !slider) return;
+
+      let hue = Number(slider.value);
+      updateSquareBase(type, hue);
+
+      function pickFromPoint(clientX, clientY) {
+        const rect = picker.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+        const y = Math.max(0, Math.min(rect.height, clientY - rect.top));
+
+        const saturation = x / rect.width;
+        const value = 1 - (y / rect.height);
+        const hex = hsvToHex(hue, saturation, value);
+
+        dot.style.left = (saturation * 100) + "%";
+        dot.style.top = ((1 - value) * 100) + "%";
+        dot.style.background = hex;
+
+        setPickerUI(type, hex);
+      }
+
+      picker.addEventListener("click", event => {
+        pickFromPoint(event.clientX, event.clientY);
+      });
+
+      picker.addEventListener("touchstart", event => {
+        const touch = event.touches[0];
+        pickFromPoint(touch.clientX, touch.clientY);
+        event.preventDefault();
+      }, { passive: false });
+
+      picker.addEventListener("touchmove", event => {
+        const touch = event.touches[0];
+        pickFromPoint(touch.clientX, touch.clientY);
+        event.preventDefault();
+      }, { passive: false });
+
+      slider.addEventListener("input", event => {
+        hue = Number(event.target.value);
+        updateSquareBase(type, hue);
+      });
+    }
+    function setupMiniPalette(targetId, type) {
+      const target = document.getElementById(targetId);
+      target.innerHTML = "";
+
+      quickColors.forEach(hex => {
+        const chip = document.createElement("div");
+        chip.className = "mini-chip";
+        chip.style.background = hex;
+        chip.title = hex;
+
+        chip.addEventListener("click", () => {
+          target.querySelectorAll(".mini-chip").forEach(el => el.classList.remove("active"));
+          chip.classList.add("active");
+          setPickerUI(type, hex);
+        });
+
+        target.appendChild(chip);
+      });
+    }
+
+    document.getElementById("toggleBgPicker").addEventListener("click", () => {
+      openPicker("bg");
+    });
+
+    document.getElementById("toggleTextPicker").addEventListener("click", () => {
+      openPicker("text");
+    });
+
+    document.getElementById("applyBgColor").addEventListener("click", () => {
+      const hex = customBg.value.trim();
+      setCustomBackground(hex);
+    });
+
+    document.getElementById("applyTextColor").addEventListener("click", () => {
+      const hex = customText.value.trim();
+      setCustomTextColor(hex);
+    });
+
+    customBg.addEventListener("keydown", event => {
+      if (event.key === "Enter") setCustomBackground(event.target.value.trim());
+    });
+
+    customText.addEventListener("keydown", event => {
+      if (event.key === "Enter") setCustomTextColor(event.target.value.trim());
+    });
+
+    setupSquarePicker("bg");
+    setupSquarePicker("text");
+    setupMiniPalette("bgMiniPalette", "bg");
+    setupMiniPalette("textMiniPalette", "text");
+    setPickerUI("bg", "#1F4A3A");
+    setPickerUI("text", "#C9A646");
+
+    renderPalette(backgroundColors, "backgroundPalette", "background");
+    renderPalette(textColors, "textPalette", "text");
+
+    applyBackground(selectedBackground.hex);
+    applyTextColor(selectedText.hex);
+    updateOrderInfo();
+  </script>
+</body>
+</html>
