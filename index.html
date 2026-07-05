@@ -2233,8 +2233,8 @@
       if(dataUrl){
         const imageUrl = cssImageUrl(getBackgroundImageUrl(dataUrl));
         el.style.backgroundImage = `linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)), url("${imageUrl}")`;
-        el.style.backgroundSize = 'contain';
-        el.style.backgroundPosition = 'center';
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center 42%';
         el.style.backgroundRepeat = 'no-repeat';
         if(el.id === 'artistPhoto'){
           el.style.backgroundImage = `linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)), url("${imageUrl}")`;
