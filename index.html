@@ -48,6 +48,10 @@
     body.is-loading #galleryGrid{
       visibility:hidden;
     }
+    body.is-loading #heroArt,
+    body.is-loading #artistPhoto{
+      visibility:hidden;
+    }
     a{text-decoration:none;color:inherit}
     button,input,textarea,select{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
@@ -120,6 +124,16 @@
 
     .hero-caption{display:none}
     #aboutSectionCopy{display:none}
+    .hero-art{
+      background:
+        linear-gradient(145deg, rgba(139,104,71,.18), rgba(255,255,255,.06)),
+        #e9dfd3;
+    }
+    .artist-photo{
+      background:
+        linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)),
+        #101217;
+    }
 
     section{padding:34px 0;scroll-margin-top:100px;margin-top:0}
     .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
@@ -1043,7 +1057,7 @@
         <button class="btn primary" type="button" id="loginBtn">들어가기</button>
         <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
       </div>
-      <div class="status" id="loginStatus">기본 비밀번호는 파일 전달 시 안내된 값으로 시작해, 코드에서 해시값을 바꿔 직접 변경해 사용할 수 있습니다.</div>
+      <div class="status" id="loginStatus">crop.html과 같은 관리자 비밀번호를 입력하면 관리자 모드가 열립니다.</div>
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
@@ -3369,7 +3383,7 @@
 
     function mapDbWork(row){
       const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_url || row.large || '');
-      const large = normalizeArtworkImageUrl(row.large_url || row.large || row.full_url || thumb || '');
+      const large = normalizeArtworkImageUrl(row.large_image_url || row.large_url || row.large || row.full_url || thumb || '');
       return {
         title: row.title || '제목 없음',
         category: row.category || '기타',
