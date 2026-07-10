@@ -514,6 +514,10 @@
         max-height:calc(100svh - 40px);
         overflow:hidden;
       }
+      .viewer-grid{
+        max-height:inherit;
+        grid-template-rows:auto minmax(0, 1fr);
+      }
       .viewer-image{
         min-height:0;
       }
@@ -545,13 +549,22 @@
         border-radius:20px;
       }
       .viewer-body{
+        display:flex;
+        flex-direction:column;
+        min-height:0;
         padding:18px;
       }
       .viewer-desc{
-        max-height:none;
+        flex:1 1 auto;
+        min-height:0;
+        max-height:min(26svh, 210px);
+        overflow:auto;
+        -webkit-overflow-scrolling:touch;
       }
       .viewer-close{
-        width:auto;
+        flex:0 0 auto;
+        width:100%;
+        margin-top:12px;
       }
       .viewer-image img{
         max-height:min(50svh, 420px);
