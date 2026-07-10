@@ -644,8 +644,23 @@
         margin-top:2px;
       }
       .nav a{
+        position:relative;
+        display:inline-flex;
+        align-items:center;
         padding-left:10px;
         padding-right:10px;
+      }
+      .nav a + a::before{
+        content:"";
+        position:absolute;
+        left:-9px;
+        top:50%;
+        width:1px;
+        height:12px;
+        border-radius:999px;
+        background:rgba(31,26,23,.18);
+        transform:translateY(-50%);
+        pointer-events:none;
       }
       .top-left-tools,.top-right-tools{display:flex;align-items:center}
       .top-left-tools{justify-content:flex-start;padding-left:0}
