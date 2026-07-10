@@ -318,20 +318,32 @@
     }
     .image-zoom.open{display:block}
     .image-zoom-stage{
+      position:relative;
       width:100%;
       height:100%;
-      overflow:auto;
-      -webkit-overflow-scrolling:touch;
+      overflow:hidden;
+      touch-action:none;
       overscroll-behavior:contain;
     }
     .image-zoom-img{
       display:block;
+      position:absolute;
+      top:50%;
+      left:50%;
       width:auto;
       height:auto;
-      max-width:none;
-      max-height:none;
+      max-width:100%;
+      max-height:100%;
       margin:0 auto;
-      cursor:zoom-out;
+      cursor:grab;
+      transform:translate(-50%, -50%) scale(1);
+      transform-origin:center center;
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-user-drag:none;
+    }
+    .image-zoom-img.is-dragging{
+      cursor:grabbing;
     }
     .image-zoom-close{
       position:fixed;
@@ -2838,19 +2850,16 @@
       if(!viewer.classList.contains('open') || viewer.classList.contains('loading') || !viewerImg.src) return;
       const zoom = qs('#imageZoom');
       const zoomImg = qs('#imageZoomImg');
-      const stage = qs('#imageZoomStage');
+      resetImageZoomTransform();
       zoomImg.src = viewerImg.currentSrc || viewerImg.src;
       zoom.classList.add('open');
       zoom.setAttribute('aria-hidden', 'false');
-      requestAnimationFrame(() => {
-        stage.scrollTop = 0;
-        stage.scrollLeft = Math.max(0, (zoomImg.scrollWidth - stage.clientWidth) / 2);
-      });
     }
     function closeImageZoom(){
       const zoom = qs('#imageZoom');
       zoom.classList.remove('open');
       zoom.setAttribute('aria-hidden', 'true');
+      resetImageZoomTransform();
     }
     function closeViewer(){
       closeImageZoom();
@@ -2861,7 +2870,119 @@
     qs('#viewerImg').addEventListener('click', openImageZoom);
     qs('#imageZoomClose').addEventListener('click', closeImageZoom);
     qs('#imageZoom').addEventListener('click', e => { if(e.target.id === 'imageZoom') closeImageZoom(); });
-    qs('#imageZoomImg').addEventListener('click', closeImageZoom);
+
+    const imageZoomState = {
+      scale:1,
+      x:0,
+      y:0,
+      pointers:new Map(),
+      startScale:1,
+      startX:0,
+      startY:0,
+      startDistance:0,
+      startCenter:{x:0,y:0},
+      lastTap:0
+    };
+    function clamp(value, min, max){
+      return Math.max(min, Math.min(max, value));
+    }
+    function getPointerCenter(points){
+      return {
+        x:points.reduce((sum, point) => sum + point.x, 0) / points.length,
+        y:points.reduce((sum, point) => sum + point.y, 0) / points.length
+      };
+    }
+    function getPointerDistance(points){
+      const dx = points[0].x - points[1].x;
+      const dy = points[0].y - points[1].y;
+      return Math.hypot(dx, dy);
+    }
+    function applyImageZoomTransform(){
+      const img = qs('#imageZoomImg');
+      img.style.transform = `translate(-50%, -50%) translate(${imageZoomState.x}px, ${imageZoomState.y}px) scale(${imageZoomState.scale})`;
+    }
+    function resetImageZoomTransform(){
+      imageZoomState.scale = 1;
+      imageZoomState.x = 0;
+      imageZoomState.y = 0;
+      imageZoomState.pointers.clear();
+      qs('#imageZoomImg')?.classList.remove('is-dragging');
+      applyImageZoomTransform();
+    }
+    function startImageZoomGesture(){
+      const points = [...imageZoomState.pointers.values()];
+      imageZoomState.startScale = imageZoomState.scale;
+      imageZoomState.startX = imageZoomState.x;
+      imageZoomState.startY = imageZoomState.y;
+      imageZoomState.startCenter = getPointerCenter(points);
+      imageZoomState.startDistance = points.length >= 2 ? getPointerDistance(points) : 0;
+    }
+    function updateImageZoomGesture(){
+      const points = [...imageZoomState.pointers.values()];
+      if(points.length === 1){
+        if(imageZoomState.scale <= 1) return;
+        const point = points[0];
+        imageZoomState.x = imageZoomState.startX + point.x - imageZoomState.startCenter.x;
+        imageZoomState.y = imageZoomState.startY + point.y - imageZoomState.startCenter.y;
+      } else if(points.length >= 2){
+        const center = getPointerCenter(points);
+        const distance = getPointerDistance(points);
+        const nextScale = clamp(imageZoomState.startScale * (distance / Math.max(imageZoomState.startDistance, 1)), 1, 5);
+        imageZoomState.scale = nextScale;
+        imageZoomState.x = imageZoomState.startX + center.x - imageZoomState.startCenter.x;
+        imageZoomState.y = imageZoomState.startY + center.y - imageZoomState.startCenter.y;
+        if(nextScale === 1){
+          imageZoomState.x = 0;
+          imageZoomState.y = 0;
+        }
+      }
+      applyImageZoomTransform();
+    }
+    function toggleImageZoomScale(){
+      if(imageZoomState.scale > 1){
+        resetImageZoomTransform();
+      } else {
+        imageZoomState.scale = 2.4;
+        imageZoomState.x = 0;
+        imageZoomState.y = 0;
+        applyImageZoomTransform();
+      }
+    }
+    const imageZoomStage = qs('#imageZoomStage');
+    imageZoomStage.addEventListener('pointerdown', e => {
+      if(!qs('#imageZoom')?.classList.contains('open')) return;
+      e.preventDefault();
+      imageZoomStage.setPointerCapture?.(e.pointerId);
+      imageZoomState.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      qs('#imageZoomImg').classList.add('is-dragging');
+      startImageZoomGesture();
+      if(imageZoomState.pointers.size === 1){
+        const now = Date.now();
+        if(now - imageZoomState.lastTap < 280){
+          toggleImageZoomScale();
+          imageZoomState.lastTap = 0;
+        } else {
+          imageZoomState.lastTap = now;
+        }
+      }
+    });
+    imageZoomStage.addEventListener('pointermove', e => {
+      if(!imageZoomState.pointers.has(e.pointerId)) return;
+      e.preventDefault();
+      imageZoomState.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      updateImageZoomGesture();
+    });
+    function endImageZoomPointer(e){
+      if(!imageZoomState.pointers.has(e.pointerId)) return;
+      imageZoomState.pointers.delete(e.pointerId);
+      if(imageZoomState.pointers.size){
+        startImageZoomGesture();
+      } else {
+        qs('#imageZoomImg').classList.remove('is-dragging');
+      }
+    }
+    imageZoomStage.addEventListener('pointerup', endImageZoomPointer);
+    imageZoomStage.addEventListener('pointercancel', endImageZoomPointer);
 
     function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
