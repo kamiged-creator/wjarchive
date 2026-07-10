@@ -272,7 +272,8 @@
     }
     .viewer-grid{display:grid;grid-template-columns:1.15fr .85fr}
     .viewer-image{background:#0e0c0b;min-height:340px;display:flex;align-items:center;justify-content:center}
-    .viewer-image img{max-height:min(78vh,860px);width:auto;object-fit:contain}
+    .viewer-image img{max-height:min(78vh,860px);width:auto;object-fit:contain;transition:opacity .12s ease}
+    .viewer.loading .viewer-image img{opacity:0}
     .viewer-body{padding:24px;color:#f5efe8}
     .viewer-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0 0 8px}
     .viewer-body h3{margin:0;font-size:22px;line-height:1.2}
@@ -2729,14 +2730,27 @@
       const youtubeMap = getSavedYoutubeMap();
       const viewer = qs('#viewer');
       const viewerImg = qs('#viewerImg');
+      const nextImageSrc = browserSafeImageUrl(getViewerImageUrl(work.large || work.thumb || ''));
       const updateViewerImageShape = () => {
         const ratio = viewerImg.naturalHeight / Math.max(viewerImg.naturalWidth, 1);
         viewer.classList.toggle('tall-art', ratio >= 1.35);
       };
       viewer.classList.remove('tall-art');
-      viewerImg.onload = updateViewerImageShape;
-      viewerImg.src = browserSafeImageUrl(getViewerImageUrl(work.large || work.thumb || ''));
-      if(viewerImg.complete && viewerImg.naturalWidth) updateViewerImageShape();
+      viewer.classList.add('loading');
+      viewerImg.dataset.pendingSrc = nextImageSrc;
+      viewerImg.onload = () => {
+        if(viewerImg.dataset.pendingSrc !== nextImageSrc) return;
+        updateViewerImageShape();
+        viewer.classList.remove('loading');
+      };
+      viewerImg.onerror = () => {
+        if(viewerImg.dataset.pendingSrc === nextImageSrc) viewer.classList.remove('loading');
+      };
+      viewerImg.src = nextImageSrc;
+      if(viewerImg.complete && viewerImg.naturalWidth){
+        updateViewerImageShape();
+        viewer.classList.remove('loading');
+      }
       qs('#viewerTitle').textContent = work.title;
       qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
