@@ -262,6 +262,7 @@
     .viewer{
       position:fixed;inset:0;background:rgba(17,15,13,.82);display:none;align-items:center;justify-content:center;
       padding:20px;z-index:70;overflow:auto;
+      touch-action:pan-y;
       overscroll-behavior:contain;
       -webkit-overflow-scrolling:touch;
     }
@@ -3008,6 +3009,21 @@
     }
     imageZoomStage.addEventListener('pointerup', endImageZoomPointer);
     imageZoomStage.addEventListener('pointercancel', endImageZoomPointer);
+    function viewerPinchShouldBeBlocked(target){
+      return qs('#viewer')?.classList.contains('open')
+        && !qs('#imageZoom')?.classList.contains('open')
+        && target?.closest?.('#viewer');
+    }
+    function blockViewerPinch(e){
+      if(viewerPinchShouldBeBlocked(e.target)) e.preventDefault();
+    }
+    document.addEventListener('gesturestart', blockViewerPinch, {passive:false});
+    document.addEventListener('gesturechange', blockViewerPinch, {passive:false});
+    document.addEventListener('touchmove', e => {
+      if(e.touches && e.touches.length > 1 && viewerPinchShouldBeBlocked(e.target)){
+        e.preventDefault();
+      }
+    }, {passive:false});
 
     function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
