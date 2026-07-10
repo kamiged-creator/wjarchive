@@ -261,7 +261,9 @@
 
     .viewer{
       position:fixed;inset:0;background:rgba(17,15,13,.82);display:none;align-items:center;justify-content:center;
-      padding:20px;z-index:70;
+      padding:20px;z-index:70;overflow:auto;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
     }
     .viewer.open{display:flex}
     .viewer-panel{
@@ -503,6 +505,22 @@
       .hero-grid,.intro,.note,.contact,.admin-grid,.viewer-grid,.about-profile{grid-template-columns:1fr}
       .gallery{grid-template-columns:repeat(2,1fr)}
       .artist-photo{min-height:440px;background-position:center 20%}
+      .viewer{
+        align-items:flex-start;
+      }
+      .viewer-panel{
+        max-height:calc(100dvh - 40px);
+        max-height:calc(100svh - 40px);
+        overflow:hidden;
+      }
+      .viewer-image{
+        min-height:0;
+      }
+      .viewer-image img{
+        width:auto;
+        max-width:100%;
+        max-height:min(58dvh, 560px);
+      }
     }
     @media (max-width: 680px){
       section{scroll-margin-top:110px}
@@ -517,6 +535,29 @@
       .viewer-body h3{font-size:22px}
       .viewer-header{gap:10px}
       .viewer-youtube{font-size:13px;margin-top:3px}
+      .viewer{
+        padding:10px;
+      }
+      .viewer-panel{
+        max-height:calc(100dvh - 20px);
+        max-height:calc(100svh - 20px);
+        border-radius:20px;
+      }
+      .viewer-body{
+        padding:18px;
+      }
+      .viewer-desc{
+        max-height:none;
+      }
+      .viewer-close{
+        width:auto;
+      }
+      .viewer-image img{
+        max-height:min(50svh, 420px);
+      }
+      .viewer.tall-art .viewer-image img{
+        max-height:min(44svh, 360px);
+      }
       .artist-photo{min-height:360px;background-position:center 18%}
       .brand{width:100%}
       .brand-top{
@@ -2686,7 +2727,16 @@
       const work = getWorks()[index];
       if(!work) return;
       const youtubeMap = getSavedYoutubeMap();
-      qs('#viewerImg').src = browserSafeImageUrl(getViewerImageUrl(work.large || work.thumb || ''));
+      const viewer = qs('#viewer');
+      const viewerImg = qs('#viewerImg');
+      const updateViewerImageShape = () => {
+        const ratio = viewerImg.naturalHeight / Math.max(viewerImg.naturalWidth, 1);
+        viewer.classList.toggle('tall-art', ratio >= 1.35);
+      };
+      viewer.classList.remove('tall-art');
+      viewerImg.onload = updateViewerImageShape;
+      viewerImg.src = browserSafeImageUrl(getViewerImageUrl(work.large || work.thumb || ''));
+      if(viewerImg.complete && viewerImg.naturalWidth) updateViewerImageShape();
       qs('#viewerTitle').textContent = work.title;
       qs('#viewerMeta').textContent = `${work.category} · ${work.year}`;
       qs('#viewerDesc').textContent = work.desc;
@@ -2698,7 +2748,14 @@
           ? `<a href="${escapeHtml(youtube)}" target="_blank" rel="noopener noreferrer" aria-label="유튜브 열기" title="유튜브 열기"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.6 3.5 12 3.5 12 3.5s-7.6 0-9.4.6A3 3 0 0 0 .5 6.2 31.8 31.8 0 0 0 0 12a31.8 31.8 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1A31.8 31.8 0 0 0 24 12a31.8 31.8 0 0 0-.5-5.8ZM9.6 15.7V8.3l6.5 3.7-6.5 3.7Z"/></svg></a>`
           : '';
       }
-      qs('#viewer').classList.add('open');
+      const panel = qs('.viewer-panel');
+      viewer.classList.add('open');
+      viewer.scrollTop = 0;
+      if(panel) panel.scrollTop = 0;
+      requestAnimationFrame(() => {
+        viewer.scrollTop = 0;
+        if(panel) panel.scrollTop = 0;
+      });
     }
     function closeViewer(){ qs('#viewer').classList.remove('open'); }
     qs('#viewerClose').addEventListener('click', closeViewer);
