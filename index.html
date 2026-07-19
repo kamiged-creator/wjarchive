@@ -1598,7 +1598,35 @@
         }
         if(!settingsRes.error){
           const merged = {};
-          (settingsRes.data || []).forEach(row => Object.assign(merged, valueToObject(row.value)));
+          (settingsRes.data || []).forEach(row => {
+            const value = valueToObject(row.value);
+            if(row.key === 'hero'){
+              if(value.eyebrow) merged.heroEyebrow = value.eyebrow;
+              if(value.heroEyebrow) merged.heroEyebrow = value.heroEyebrow;
+              if(value.title) merged.heroTitle = String(value.title).replace(/\n/g, '<br>');
+              if(value.heroTitle) merged.heroTitle = String(value.heroTitle).replace(/\n/g, '<br>');
+              if(value.lead) merged.heroLead = value.lead;
+              if(value.heroLead) merged.heroLead = value.heroLead;
+              if(value.caption) merged.heroCaption = value.caption;
+              if(value.heroCaption) merged.heroCaption = value.heroCaption;
+              if(value.image) merged.heroImage = value.image;
+              if(value.heroImage) merged.heroImage = value.heroImage;
+            }
+            if(row.key === 'about'){
+              if(value.aboutSectionCopy) merged.aboutSectionCopy = value.aboutSectionCopy;
+              if(value.sectionCopy) merged.aboutSectionCopy = value.sectionCopy;
+              if(value.paragraph1) merged.paragraph1 = value.paragraph1;
+              if(value.paragraph2) merged.paragraph2 = value.paragraph2;
+              if(value.artistImage) merged.artistImage = value.artistImage;
+              if(value.image) merged.artistImage = value.image;
+            }
+            if(row.key === 'note'){
+              if(value.quote) merged.noteQuote = value.quote;
+              if(value.noteQuote) merged.noteQuote = value.noteQuote;
+              if(value.body) merged.noteBody = value.body;
+              if(value.noteBody) merged.noteBody = value.noteBody;
+            }
+          });
           applyAboutContentToPage(merged);
         }
         if(!worksRes.error && Array.isArray(worksRes.data)){
