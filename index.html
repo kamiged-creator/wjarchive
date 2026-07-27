@@ -1588,7 +1588,7 @@
           supabaseClient.from('exhibitions').select('content, sort_order, is_visible').eq('is_visible', true).order('sort_order', {ascending:true}),
           supabaseClient.from('news_items').select('content, sort_order, is_visible').eq('is_visible', true).order('sort_order', {ascending:true}),
           supabaseClient.from('site_settings').select('key, value'),
-          supabaseClient.from('works').select('*').eq('is_visible', true).order('sort_order', {ascending:true}).order('created_at', {ascending:false})
+          supabaseClient.from('works').select('*').eq('is_visible', true).order('sort_order', {ascending:false}).order('created_at', {ascending:false})
         ]);
         if(!contactRes.error) renderListItems('#contactDisplayList', dbRowsToLines(contactRes.data));
         if(!exhibitionRes.error) renderListItems('#exhibitionDisplayList', dbRowsToLines(exhibitionRes.data));
