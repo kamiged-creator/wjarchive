@@ -1454,7 +1454,7 @@
       const pagination = qs('#pagination');
       const works = getWorks();
       const visibleWorks = state.currentCategory === '전체'
-        ? works
+        ? works.filter(work => String(work.category || '').trim() !== '기타')
         : works.filter(work => work.category === state.currentCategory);
       const totalPages = Math.max(1, Math.ceil(visibleWorks.length / state.worksPerPage));
       if(state.currentPage > totalPages) state.currentPage = totalPages;
