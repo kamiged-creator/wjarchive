@@ -1556,7 +1556,7 @@
     function updateNewsBadges(lines){
       const hasRecent = (lines || []).some(isRecentNewsLine);
       qsa('[data-news-badge]').forEach(badge => {
-        badge.style.display = hasRecent ? '' : 'none';
+        badge.classList.toggle('show', hasRecent);
       });
     }
     function mapDbWork(row){
