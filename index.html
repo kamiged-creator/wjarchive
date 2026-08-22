@@ -600,7 +600,7 @@
     }
     @media (max-width: 680px){
       section{scroll-margin-top:110px}
-      .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:26px 0 12px}
+      .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:calc(26px + env(safe-area-inset-top, 0px)) 0 12px}
       .wrap{padding:0 18px}
       .hero{padding-top:8px}
       .gallery,.preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
