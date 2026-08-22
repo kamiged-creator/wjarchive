@@ -1739,9 +1739,17 @@
           event.preventDefault();
           const scrollTarget = hash === '#top' ? 0 : target.getBoundingClientRect().top + window.scrollY;
           window.scrollTo({top:scrollTarget, behavior:'smooth'});
-          if(history.pushState) history.pushState(null, '', window.location.pathname + window.location.search);
+          if(window.history && window.history.replaceState){
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
         });
       });
+
+      if(window.location.hash && window.history && window.history.replaceState){
+        window.setTimeout(() => {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }, 250);
+      }
     }
     function bindAccordions(){
       qsa('[data-accordion]').forEach(btn => {
