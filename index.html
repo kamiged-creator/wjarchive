@@ -19,6 +19,14 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="이원주 | 작품 포트폴리오" />
   <meta property="og:description" content="작품 보기와 작가 소개, 소식과 문의 정보가 포함된 포트폴리오 사이트" />
+  <script>
+    (function(){
+      if(window.location.hash && window.history && window.history.replaceState){
+        window.__initialSectionHash = window.location.hash;
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    })();
+  </script>
   <style>
     :root{
       --bg:#f6f1ea;
@@ -1745,10 +1753,18 @@
         });
       });
 
-      if(window.location.hash && window.history && window.history.replaceState){
+      const initialHash = window.__initialSectionHash || window.location.hash;
+      if(initialHash){
         window.setTimeout(() => {
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
-        }, 250);
+          const target = initialHash === '#top' ? document.body : document.querySelector(initialHash);
+          if(target){
+            const scrollTarget = initialHash === '#top' ? 0 : target.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({top:scrollTarget, behavior:'smooth'});
+          }
+          if(window.history && window.history.replaceState){
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        }, 80);
       }
     }
     function bindAccordions(){
