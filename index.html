@@ -1753,7 +1753,12 @@
         });
       });
 
-      const initialHash = window.__initialSectionHash || window.location.hash;
+      let storedHash = '';
+      try{
+        storedHash = sessionStorage.getItem('wjarchive:sectionTarget') || '';
+        if(storedHash) sessionStorage.removeItem('wjarchive:sectionTarget');
+      }catch(err){}
+      const initialHash = storedHash || window.__initialSectionHash || window.location.hash;
       if(initialHash){
         window.setTimeout(() => {
           const target = initialHash === '#top' ? document.body : document.querySelector(initialHash);

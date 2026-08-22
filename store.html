@@ -244,19 +244,19 @@
       <div class="brand">
         <div class="brand-top">
           <a class="brand-title" href="/">이원주</a>
-          <a class="news-mini news-mobile" href="/#news"><span class="news-link-label">소식 <span class="new-badge">NEW</span></span></a>
+          <a class="news-mini news-mobile" href="/" data-section-target="#news"><span class="news-link-label">소식 <span class="new-badge">NEW</span></span></a>
         </div>
         <div class="brand-sub">Seal · Calligraphy</div>
       </div>
       <div class="top-tools">
         <div class="top-nav-row">
           <nav class="nav" aria-label="주요 메뉴">
-            <a href="/#about">작가 소개</a>
-            <a href="/#works">작품</a>
+            <a href="/" data-section-target="#about">작가 소개</a>
+            <a href="/" data-section-target="#works">작품</a>
             <a class="is-active" href="/store.html" aria-current="page">스토어</a>
-            <a href="/#note">작가 노트</a>
-            <a href="/#contact">문의</a>
-            <a class="news-desktop-link" href="/#news"><span class="news-link-label">소식 <span class="new-badge">NEW</span></span></a>
+            <a href="/" data-section-target="#note">작가 노트</a>
+            <a href="/" data-section-target="#contact">문의</a>
+            <a class="news-desktop-link" href="/" data-section-target="#news"><span class="news-link-label">소식 <span class="new-badge">NEW</span></span></a>
           </nav>
         </div>
       </div>
@@ -271,10 +271,23 @@
         <p class="lead">작품 키링과 소품을 정리하고 있습니다. 준비가 끝나면 이 페이지에서 바로 안내하겠습니다.</p>
         <div class="actions">
           <a class="btn primary" href="/">홈으로 이동</a>
-          <a class="btn" href="/#contact">문의하기</a>
+          <a class="btn" href="/" data-section-target="#contact">문의하기</a>
         </div>
       </section>
     </div>
   </main>
+  <script>
+    document.querySelectorAll('[data-section-target]').forEach(link => {
+      link.addEventListener('click', event => {
+        const target = link.getAttribute('data-section-target');
+        if(!target) return;
+        try{
+          sessionStorage.setItem('wjarchive:sectionTarget', target);
+        }catch(err){}
+        event.preventDefault();
+        window.location.href = '/';
+      });
+    });
+  </script>
 </body>
 </html>
