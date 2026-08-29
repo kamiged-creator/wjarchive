@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0d3b66" />
+<title>DrugLens | 한국·미국 의약품 통합검색</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --navy:#08131f;--teal:#0f6d79;--mint:#22a7a0;--bg:#0b1118;
+    --text:#eef4f8;--muted:#98a7b5;--line:#24303b;--white:#121a23;
+  }
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,"Noto Sans KR","Apple SD Gothic Neo",sans-serif}
+  button,input{font:inherit}
+  button{cursor:pointer}
+  .wrap{width:min(1100px,calc(100% - 32px));margin:auto}
+  .hero{background:linear-gradient(145deg,#07111b 0%,#0b3442 58%,#0f6d79 100%);color:#fff;padding:26px 0 40px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#fff;color:#0d6379;font-weight:900;font-size:20px;box-shadow:0 8px 24px #062a4330}
+  .brand b{font-size:21px;display:block}.brand small{opacity:.8}
+  h1{font-size:clamp(34px,6vw,60px);line-height:1.06;letter-spacing:-2px;margin:44px 0 14px}
+  h1 em{font-style:normal;color:#c8fff4}.sub{opacity:.92;font-size:17px}
+  .search{display:flex;background:#121a23;padding:7px;border-radius:18px;max-width:790px;margin-top:26px;box-shadow:0 14px 34px #082e4b40}
+  .search input{flex:1;border:0;outline:0;padding:15px 17px;font-size:17px;min-width:0;background:transparent;color:#eef4f8}
+  .search button{border:0;border-radius:13px;background:#126f8a;color:#fff;padding:0 28px;font-weight:800}
+  .tabs{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .tabs button{border:1px solid #ffffff55;background:#ffffff14;color:#fff;border-radius:999px;padding:9px 16px}
+  .tabs button.active{background:#dffcff;color:#0b5965;border-color:#fff;font-weight:800}
+  .content{padding:26px 0 46px}
+  .notice,.warning,.error{border-radius:14px;padding:13px 15px;margin-bottom:12px;font-size:14px;line-height:1.55}
+  .notice{background:#102131;border:1px solid #264158;color:#d8e8f5}
+  .warning{background:#271218;border:1px solid #6f2938;color:#ffd9df}
+  .error{background:#321819;border:1px solid #6a2d31;color:#ffb8bc}
+  .settings{background:#121a23;border:1px solid var(--line);border-radius:18px;padding:18px;margin:18px 0}
+  .settings summary{font-weight:800}
+  .settings p{color:var(--muted);font-size:13px;line-height:1.55}
+  .keyrow{display:flex;gap:8px}.keyrow input{flex:1;border:1px solid #31404d;border-radius:11px;padding:11px;background:#0d151d;color:#eef4f8}
+  .keyrow button{border:0;border-radius:11px;background:#153e65;color:#fff;padding:0 16px;font-weight:700}
+  .summary{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}.summary span{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:18px}
+  .results{display:flex;flex-direction:column;gap:10px;max-height:720px;overflow:auto;padding-right:4px}
+  .card{width:100%;text-align:left;border:1px solid var(--line);background:#121a23;color:#eef4f8;border-radius:16px;padding:14px;display:flex;gap:12px;transition:.15s}
+  .card:hover,.card.selected{border-color:#1a8fa0;box-shadow:0 5px 18px #1c3d5a16}
+  .flag{flex:0 0 42px;height:42px;border-radius:11px;color:#fff;display:grid;place-items:center;font-weight:900;font-size:12px}
+  .flag.kr,.badge.kr{background:#2e6fd4}.flag.us,.badge.us{background:#bb3b49}
+  .source{font-size:12px;color:#718092;margin-bottom:3px}.card h3{font-size:17px;margin:0 0 5px;letter-spacing:-.3px}
+  .card p{font-size:13px;color:#b7c4cf;margin:0 0 5px}.card small{color:#91a0ad}
+  .detail{min-height:520px;background:#121a23;border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:0 8px 28px #2032470c;position:sticky;top:14px;align-self:start}
+  .detailHead{display:flex;gap:10px;align-items:center;color:#778391;font-size:13px}.badge{color:#fff;border-radius:999px;padding:5px 9px;font-weight:700}
+  .detail h2{font-size:28px;margin:17px 0 7px}.generic,.maker{margin:5px 0;color:#a9b6c2}
+  .drugimg{max-width:230px;max-height:130px;object-fit:contain;margin:18px 0;border-radius:10px}
+  details.info{border-top:1px solid #edf0f4}.info summary{padding:16px 2px;font-weight:800}.info p{white-space:pre-wrap;line-height:1.7;color:#c8d2db;margin:0 3px 18px}
+  .official{display:inline-block;margin-top:18px;background:#153e65;color:#fff;text-decoration:none;padding:12px 16px;border-radius:12px;font-weight:700}
+  .empty{text-align:center;color:#8fa0ae;padding:100px 20px}.empty .pill{font-size:52px}.empty b{display:block;color:#e7eef4;font-size:20px;margin:12px}.empty p{margin:0;line-height:1.5}
+  .loader{padding:28px;text-align:center;color:#5f6f81}
+  footer{text-align:center;padding:24px;color:#8593a0;font-size:12px;border-top:1px solid #24303b;background:#0e151d;line-height:1.6}
+
+  .mixbox{background:#121a23;border:1px solid var(--line);border-radius:20px;padding:20px;margin:18px 0 24px}
+  .mixbox h2{margin:0 0 8px;font-size:22px}.mixbox>p{margin:0 0 15px;color:var(--muted);font-size:14px;line-height:1.55}
+  .drugInputs{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+  #multiDrugInputs{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .multiDrugRow{position:relative}
+  .multiDrugRow input{width:100%;border:1px solid #d6dce5;border-radius:12px;padding:13px 14px 13px 45px;background:#0d151d;color:#eef4f8}
+  .multiDrugRow .num{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e9f3f6;color:#0d6379;font-size:12px;font-weight:900}
+  .multiActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .multiActions button{border:1px solid #31404d;border-radius:12px;background:#18212b;color:#d9e4ec;padding:11px 15px;font-weight:800}
+  .multiActions .primary{margin-left:auto;background:#0d6379;color:#fff;border-color:#0d6379}
+  .overallBox{border-radius:18px;padding:18px;margin-bottom:14px}
+  .overallBox.green{background:#10261b;border:1px solid #285c3d}
+  .overallBox.yellow{background:#2a1116;border:1px solid #7a2635;color:#ffd8de}
+  .overallBox.red{background:#321819;border:1px solid #703238}
+  .overallBox strong{display:block;font-size:20px;margin-bottom:5px}
+  .riskGauge{margin:15px 0 18px;padding:15px 16px 14px;background:#0d151d;border:1px solid #263643;border-radius:16px}
+  .riskGaugeHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+  .riskGaugeHead b{font-size:15px;color:#e8f0f5}
+  .riskGaugeScore{font-size:13px;color:#aab8c4}
+  .riskTrackWrap{position:relative;padding-top:17px}
+  .riskTrack{height:13px;border-radius:999px;background:linear-gradient(90deg,#27b36a 0%,#72c85b 28%,#d5b442 52%,#d06a3d 74%,#b82d42 100%);box-shadow:inset 0 0 0 1px #ffffff14}
+  .riskMarker{position:absolute;top:7px;left:10%;width:20px;height:20px;border-radius:50%;background:#f3f7fa;border:4px solid #10202c;box-shadow:0 0 0 2px #dbe8ef,0 3px 10px #0008;transform:translateX(-50%);transition:left .35s ease}
+  .riskLabels{display:flex;justify-content:space-between;gap:4px;margin-top:8px;font-size:11px;font-weight:800}
+  .riskLabels .safe{color:#67d994}.riskLabels .caution{color:#e4bf57}.riskLabels .danger{color:#ff7586}
+  .riskSteps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:7px}
+  .riskSteps span{text-align:center;color:#738493;font-size:10px}
+  .pairList{display:flex;flex-direction:column;gap:10px;margin:14px 0}
+  .pairItem{border:1px solid var(--line);border-radius:15px;padding:14px;background:#0d151d;color:#eef4f8}
+  .pairTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .pairNames{font-weight:900}
+  .traffic{white-space:nowrap;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}
+  .traffic.green{background:#e5f7ec;color:#17673a}
+  .traffic.yellow{background:#651c2b;color:#ffe8ec;border:1px solid #8f3144}
+  .traffic.red{background:#ffe3e3;color:#9b2525}
+  .pairItem p{margin:9px 0 0;color:#b6c3cd;font-size:13px;line-height:1.6}
+  .drugInputs input{border:1px solid #d6dce5;border-radius:12px;padding:13px 14px;min-width:0}
+  .drugInputs button{border:0;border-radius:12px;background:#0d6379;color:#fff;padding:0 20px;font-weight:800}
+  .mixResult{margin-top:16px}
+  .mixStatus{border-radius:16px;padding:16px 17px;margin-bottom:12px;line-height:1.55}
+  .mixStatus.caution{background:#fff6e6;border:1px solid #f0cf7d}
+  .mixStatus.unknown{background:#eef5ff;border:1px solid #cfdef4}
+  .mixStatus.danger{background:#fff0f0;border:1px solid #efb5b5}
+  .mixStatus strong{display:block;font-size:18px;margin-bottom:4px}
+  .mixDrugGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mixDrugCard{border:1px solid var(--line);border-radius:15px;padding:15px;background:#0f171f}
+  .mixDrugCard h3{margin:0 0 5px;font-size:17px}.mixDrugCard small{color:var(--muted)}
+  .mixDrugCard p{font-size:13px;line-height:1.6;color:#bdc9d3}
+  .evidence{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+  .evidence h4{margin:0 0 8px}.evidence p{white-space:pre-wrap;font-size:13px;line-height:1.65;color:#bcc8d1}
+
+  .translationBox{margin-top:10px;background:#0e1b26;border:1px solid #294050;border-radius:14px;padding:14px}
+  .translationTitle{font-weight:900;color:#0d6379;margin-bottom:7px}
+  .translationBox>p{margin:0;line-height:1.65;color:#c1ced8;font-size:13px}
+
+  .readBtn{display:inline-flex;align-items:center;gap:7px;border:1px solid #355565;background:#112631;color:#e9f7fb;border-radius:11px;padding:9px 12px;font-weight:800;font-size:13px;margin-top:10px}
+  .readBtn:hover{background:#163341}
+  .readBtn.playing{background:#0f6d79;border-color:#0f6d79;color:#fff}
+  @media(max-width:780px){
+    .hero{padding-top:20px}.hero h1{margin-top:36px}.grid{grid-template-columns:1fr}.results{max-height:none}.detail{position:static;min-height:0;padding:20px}
+    .search button{padding:0 18px}.summary{font-size:14px}.detail h2{font-size:24px}.keyrow{flex-direction:column}.keyrow button{padding:11px}
+    .drugInputs{grid-template-columns:1fr}.drugInputs button{padding:13px}.mixDrugGrid{grid-template-columns:1fr}
+    #multiDrugInputs{grid-template-columns:1fr}.multiActions .primary{margin-left:0;width:100%}
+  }
+
+  input::placeholder{color:#6f8190}
+  ::selection{background:#1c7884;color:#fff}
+  body{color-scheme:dark}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="brand"><span class="logo">Rx</span><div><b>DrugLens</b><small>한국 · 미국 의약품 통합검색</small></div></div>
+    <h1>약 이름 하나로<br><em>한국과 미국 공식정보</em>를 같이 확인</h1>
+    <p class="sub">식약처 e약은요 · DailyMed · openFDA 공개정보를 한 화면에서 검색합니다.</p>
+    <form class="search" id="searchForm">
+      <input id="q" placeholder="예: 타이레놀, 아스피린, Lipitor" autocomplete="off" />
+      <button id="searchBtn">검색</button>
+    </form>
+    <div class="tabs" id="tabs">
+      <button type="button" data-region="all" class="active">통합</button>
+      <button type="button" data-region="kr">🇰🇷 한국</button>
+      <button type="button" data-region="us">🇺🇸 미국</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap content">
+  <div class="notice"><b>의료 주의</b> 이 페이지는 공개된 의약품 정보를 검색·정리하는 도구이며, 진단이나 처방을 대신하지 않습니다. 실제 복용 전에는 의사·약사와 공식 설명서를 확인하세요.</div>
+
+  <section class="mixbox">
+    <h2>💊 여러 약 같이 먹어도 되는지 확인</h2>
+    <p>약을 <b>2개부터 최대 10개까지</b> 추가해서 한꺼번에 비교해. 각 조합을 공식 라벨의 상호작용·경고 문구와 대조해 <b>🟢 비교적 문제 없음 / 🟡 주의 / 🔴 같이 복용 주의</b>로 정리하고, <b>한국어 설명과 영문 원문을 같이</b> 보여줘. 이 등급은 자동 분류이므로 최종 복용 결정은 의사·약사 확인이 필요해.</p>
+
+    <div id="multiDrugInputs"></div>
+
+    <div class="multiActions">
+      <button id="addDrug" type="button">＋ 약 추가</button>
+      <button id="removeDrug" type="button">－ 약 삭제</button>
+      <button id="multiCheck" type="button" class="primary">전체 상호작용 검사</button>
+    </div>
+
+    <div class="mixResult" id="mixResult"></div>
+  </section>
+
+  <details class="settings">
+    <summary>한국 식약처 API 설정</summary>
+    <p>한국 검색을 사용하려면 공공데이터포털에서 식약처 <b>e약은요</b> API 활용신청 후 받은 일반 인증키(ServiceKey)를 넣어주세요. 이 단일 HTML 버전은 테스트 편의를 위해 브라우저에 키를 저장합니다. 공개 배포할 때는 키를 서버에 숨기는 방식을 권장합니다.</p>
+    <div class="keyrow">
+      <input id="krKey" type="password" placeholder="공공데이터포털 ServiceKey 입력" />
+      <button id="saveKey" type="button">키 저장</button>
+    </div>
+  </details>
+
+  <div id="messages"></div>
+  <div id="summary"></div>
+
+  <div class="grid">
+    <section class="results" id="results"></section>
+    <aside class="detail" id="detail">
+      <div class="empty"><div class="pill">💊</div><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p></div>
+    </aside>
+  </div>
+</main>
+
+<footer>Data: MFDS · DailyMed/NLM · openFDA<br>사이트에 표시되는 정보는 원문·최신 라벨과 함께 확인하세요.</footer>
+
+<script>
+let region = 'all';
+let items = [];
+let selectedId = null;
+
+const $ = s => document.querySelector(s);
+const q = $('#q'), results = $('#results'), detail = $('#detail'), messages = $('#messages'), summary = $('#summary');
+const krKey = $('#krKey');
+krKey.value = localStorage.getItem('druglens_kr_key') || '';
+
+$('#saveKey').addEventListener('click', () => {
+  localStorage.setItem('druglens_kr_key', krKey.value.trim());
+  showMessage('warning','한국 식약처 API 키를 이 브라우저에 저장했어.');
+});
+
+document.querySelectorAll('#tabs button').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.remove('active'));
+  btn.classList.add('active'); region = btn.dataset.region;
+}));
+
+$('#searchForm').addEventListener('submit', e => { e.preventDefault(); searchDrug(); });
+
+function clean(v){
+  if(Array.isArray(v)) v=v.filter(Boolean).join('\n\n');
+  if(typeof v!=='string') return '';
+  const d=document.createElement('div'); d.innerHTML=v;
+  return (d.textContent||'').replace(/\s+/g,' ').trim();
+}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));}
+function showMessage(type,text){ messages.innerHTML = `<div class="${type}">${esc(text)}</div>`; }
+
+async function searchDrug(){
+  const term=q.value.trim();
+  if(term.length<2){showMessage('error','약 이름을 2글자 이상 입력해줘.');return;}
+  $('#searchBtn').disabled=true; $('#searchBtn').textContent='검색중…';
+  messages.innerHTML=''; summary.innerHTML=''; results.innerHTML='<div class="loader">공식 데이터를 검색하고 있어…</div>'; 
+  detail.innerHTML='<div class="empty"><div class="pill">🔎</div><b>검색 중</b><p>잠시만 기다려줘.</p></div>';
+
+  const jobs=[];
+  if(region==='all'||region==='us'){ jobs.push(searchOpenFDA(term)); jobs.push(searchDailyMed(term)); }
+  if(region==='all'||region==='kr'){ jobs.push(searchKorea(term)); }
+
+  const settled = await Promise.allSettled(jobs);
+  items = settled.flatMap(x => x.status==='fulfilled' ? x.value : []);
+  const errors = settled.filter(x=>x.status==='rejected').map(x=>x.reason?.message||'검색 오류');
+
+  // 중복 최소화
+  const seen=new Set();
+  items=items.filter(x=>{
+    const k=`${x.country}|${x.source}|${(x.name||'').toLowerCase()}`;
+    if(seen.has(k)) return false; seen.add(k); return true;
+  });
+
+  renderResults();
+  if(items.length){ selectItem(items[0].id); }
+  else detail.innerHTML='<div class="empty"><div class="pill">💊</div><b>검색 결과가 없어</b><p>제품명이나 성분명을 바꿔서 다시 검색해봐.</p></div>';
+
+  if(errors.length) showMessage('warning', errors.join(' / '));
+  $('#searchBtn').disabled=false; $('#searchBtn').textContent='검색';
+}
+
+async function searchKorea(term){
+  const key=(krKey.value||localStorage.getItem('druglens_kr_key')||'').trim();
+  if(!key) throw new Error('한국 검색: 식약처 API 키를 먼저 넣어줘.');
+  const url=new URL('https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList');
+  url.searchParams.set('serviceKey',key);
+  url.searchParams.set('itemName',term);
+  url.searchParams.set('pageNo','1'); url.searchParams.set('numOfRows','20'); url.searchParams.set('type','json');
+  const res=await fetch(url);
+  if(!res.ok) throw new Error(`한국 식약처 API 오류 (${res.status})`);
+  const data=await res.json();
+  const raw=data?.body?.items ?? data?.response?.body?.items ?? [];
+  const arr=Array.isArray(raw)?raw:(raw?.item?(Array.isArray(raw.item)?raw.item:[raw.item]):[]);
+  return arr.map((x,i)=>({
+    id:`kr-${x.itemSeq||x.ITEM_SEQ||i}`,country:'KR',source:'식약처 e약은요',
+    name:x.itemName||x.ITEM_NAME||'이름 없음',manufacturer:x.entpName||x.ENTP_NAME||'',
+    image:x.itemImage||x.ITEM_IMAGE||'',
+    detailUrl:`https://nedrug.mfds.go.kr/searchDrug?sort=&sortOrder=false&searchYn=true&page=1&searchDivision=detail&itemName=${encodeURIComponent(x.itemName||'')}`,
+    sections:{
+      '효능·효과':clean(x.efcyQesitm),'사용법':clean(x.useMethodQesitm),
+      '주의사항(경고)':clean(x.atpnWarnQesitm),'주의사항':clean(x.atpnQesitm),
+      '상호작용':clean(x.intrcQesitm),'부작용':clean(x.seQesitm),'보관법':clean(x.depositMethodQesitm)
+    }
+  }));
+}
+
+async function searchOpenFDA(term){
+  const safe=term.replace(/["\\]/g,' ').trim();
+  let url=new URL('https://api.fda.gov/drug/label.json');
+  url.searchParams.set('search',`(openfda.brand_name:"${safe}" OR openfda.generic_name:"${safe}")`);
+  url.searchParams.set('limit','12');
+  let res=await fetch(url);
+  if(!res.ok){
+    url=new URL('https://api.fda.gov/drug/label.json'); url.searchParams.set('search',safe); url.searchParams.set('limit','8'); res=await fetch(url);
+  }
+  if(!res.ok) return [];
+  const data=await res.json();
+  return (data.results||[]).map((x,i)=>{
+    const of=x.openfda||{},setid=of.spl_set_id?.[0];
+    return {
+      id:`us-fda-${setid||i}`,country:'US',source:'openFDA Label',
+      name:of.brand_name?.[0]||of.generic_name?.[0]||'Unnamed drug',
+      genericName:of.generic_name?.[0]||'',manufacturer:of.manufacturer_name?.[0]||'',category:of.product_type?.[0]||'',
+      detailUrl:setid?`https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=${encodeURIComponent(setid)}`:'',
+      sections:{
+        '적응증 / 용도':clean(x.indications_and_usage||x.purpose),'복용·사용법':clean(x.dosage_and_administration||x.directions),
+        '경고':clean(x.boxed_warning||x.warnings),'주의사항':clean(x.precautions),'약물상호작용':clean(x.drug_interactions),
+        '이상반응':clean(x.adverse_reactions),'임신 관련':clean(x.pregnancy),'보관':clean(x.storage_and_handling)
+      }
+    }
+  });
+}
+
+async function searchDailyMed(term){
+  const url=new URL('https://dailymed.nlm.nih.gov/dailymed/services/v2/drugnames.json');
+  url.searchParams.set('drug_name',term); url.searchParams.set('name_type','both'); url.searchParams.set('pagesize','20'); url.searchParams.set('page','1');
+  const res=await fetch(url); if(!res.ok) return [];
+  const data=await res.json(); const rows=data?.data??data?.DATA??[];
+  if(!Array.isArray(rows)) return [];
+  return rows.map((x,i)=>{
+    const name=x.drug_name||x.DRUG_NAME||x[0]||'Unnamed drug', type=x.name_type||x.NAME_TYPE||x[1]||'';
+    return {id:`us-dm-${name}-${i}`,country:'US',source:'DailyMed',name:String(name),category:String(type),
+      detailUrl:`https://dailymed.nlm.nih.gov/dailymed/search.cfm?query=${encodeURIComponent(String(name))}`,sections:{}};
+  });
+}
+
+function renderResults(){
+  const kr=items.filter(x=>x.country==='KR').length, us=items.filter(x=>x.country==='US').length;
+  summary.innerHTML=items.length?`<div class="summary"><b>검색결과 ${items.length}건</b><span>한국 ${kr} · 미국 ${us}</span></div>`:'';
+  results.innerHTML=items.map(x=>`
+    <button class="card ${x.id===selectedId?'selected':''}" onclick='selectItem(${JSON.stringify(x.id)})'>
+      <div class="flag ${x.country.toLowerCase()}">${x.country}</div>
+      <div class="cardBody">
+        <div class="source">${esc(x.source)}</div>
+        <h3>${esc(x.name)}</h3>
+        ${x.genericName && x.genericName.toLowerCase()!==x.name.toLowerCase()?`<p>${esc(x.genericName)}</p>`:''}
+        <small>${esc(x.manufacturer||x.category||'공식 의약품 정보')}</small>
+      </div>
+    </button>`).join('');
+}
+
+
+async function fetchDrugLabel(term){
+  const safe=term.replace(/["\\]/g,' ').trim();
+  const tries=[
+    `openfda.brand_name:"${safe}"`,
+    `openfda.generic_name:"${safe}"`,
+    `openfda.substance_name:"${safe}"`,
+    safe
+  ];
+  for(const search of tries){
+    const url=new URL('https://api.fda.gov/drug/label.json');
+    url.searchParams.set('search',search); url.searchParams.set('limit','5');
+    try{
+      const res=await fetch(url);
+      if(!res.ok) continue;
+      const data=await res.json();
+      if(data.results?.length){
+        const x=data.results[0], of=x.openfda||{};
+        return {
+          query:term,
+          name:of.brand_name?.[0]||of.generic_name?.[0]||term,
+          generic:of.generic_name?.[0]||of.substance_name?.[0]||'',
+          maker:of.manufacturer_name?.[0]||'',
+          purpose:clean(x.indications_and_usage||x.purpose),
+          directions:clean(x.dosage_and_administration||x.directions),
+          interactions:clean(x.drug_interactions),
+          warnings:clean([...(x.boxed_warning||[]),...(x.warnings||[]),...(x.precautions||[])]),
+          contraindications:clean(x.contraindications),
+          setid:of.spl_set_id?.[0]||''
+        };
+      }
+    }catch(e){}
+  }
+  return null;
+}
+
+function tokensForDrug(d){
+  return [d?.query,d?.name,d?.generic].filter(Boolean)
+    .flatMap(v=>String(v).toLowerCase().split(/[,;/()]+|\s+/))
+    .map(x=>x.trim()).filter(x=>x.length>=4 && !['tablet','capsule','drug','oral','sodium','hydrochloride'].includes(x));
+}
+function labelText(d){
+  return [d?.interactions,d?.warnings,d?.contraindications].filter(Boolean).join(' ').toLowerCase();
+}
+function findMentions(text, other){
+  const low=(text||'').toLowerCase();
+  return [...new Set(tokensForDrug(other).filter(t=>low.includes(t)))];
+}
+
+function koExplain(text){
+  const t=(text||'').toLowerCase();
+  if(!t) return '공식 라벨에서 별도의 설명 문구를 찾지 못했어.';
+  const parts=[];
+  const add=(cond,msg)=>{if(cond&&!parts.includes(msg))parts.push(msg);};
+
+  add(t.includes('contraindicated')||t.includes('do not use')||t.includes('avoid concomitant')||t.includes('should not be used'),
+      '함께 사용하지 않거나 피해야 한다는 경고가 포함되어 있어.');
+  add(t.includes('bleeding')||t.includes('hemorrhage'),
+      '출혈 위험이 증가할 수 있다는 내용이 있어.');
+  add(t.includes('drowsiness')||t.includes('sedation')||t.includes('somnolence'),
+      '졸림이나 진정 작용이 더 강해질 수 있어.');
+  add(t.includes('hypotension')||t.includes('low blood pressure'),
+      '혈압이 더 낮아질 수 있어.');
+  add(t.includes('serotonin'),
+      '세로토닌 관련 이상반응 위험을 주의해야 해.');
+  add(t.includes('qt prolong')||t.includes('arrhythmia'),
+      '심장 리듬 이상과 관련된 주의가 필요할 수 있어.');
+  add(t.includes('renal')||t.includes('kidney'),
+      '신장 기능과 관련된 주의가 필요할 수 있어.');
+  add(t.includes('hepatic')||t.includes('liver'),
+      '간 기능과 관련된 주의가 필요할 수 있어.');
+  add(t.includes('monitor'),
+      '함께 사용할 경우 상태나 검사 수치를 관찰하라는 내용이 있어.');
+  add(t.includes('may increase')||t.includes('increased risk'),
+      '함께 사용하면 특정 부작용이나 약효가 증가할 수 있다는 내용이 있어.');
+  add(t.includes('may decrease'),
+      '함께 사용하면 약효나 혈중 농도가 감소할 수 있다는 내용이 있어.');
+  add(t.includes('drug interaction')||t.includes('concomitant use'),
+      '다른 약과 함께 사용할 때 상호작용에 주의하라는 내용이 있어.');
+
+  if(!parts.length){
+    return '공식 영문 라벨에 상호작용 또는 주의 문구가 있지만, 자동 한국어 요약으로는 특정 위험 항목을 분류하지 못했어. 아래 영문 원문도 함께 확인해줘.';
+  }
+  return parts.join(' ');
+}
+
+function translatedEvidenceBlock(drug){
+  const src=drug.interactions||drug.warnings||drug.contraindications||'';
+  return `
+    <div class="translationBox">
+      <div class="translationTitle">🇰🇷 한국어 설명</div>
+      <p id="koExplain-${Math.random().toString(36).slice(2)}">${esc(koExplain(src))}</p>
+      <button type="button" class="readBtn" onclick="readExplanation(this,this.previousElementSibling.id)">🔊 읽기</button>
+      <details class="info">
+        <summary>🇺🇸 공식 영문 원문 보기</summary>
+        <p>${esc(shortText(src||'관련 영문 문구를 찾지 못했어.',900))}</p>
+      </details>
+    </div>`;
+}
+function shortText(t,n=520){
+  t=clean(t); return t.length>n?t.slice(0,n)+'…':t;
+}
+
+const severeWords = [
+  'contraindicated','do not use','avoid concomitant','avoid concurrent','should not be used',
+  'serious bleeding','fatal','life-threatening','severe interaction','risk of death'
+];
+const cautionWords = [
+  'caution','monitor','may increase','may decrease','increased risk','concomitant use',
+  'drug interaction','bleeding','sedation','drowsiness','hypotension','serotonin',
+  'qt prolong','renal','kidney','hepatic','liver'
+];
+
+function classifyPair(a,b){
+  const aText=labelText(a), bText=labelText(b);
+  const aMent=findMentions(aText,b), bMent=findMentions(bText,a);
+  const combined=(aText+' '+bText);
+  const direct=aMent.length>0 || bMent.length>0;
+  const severe=direct && severeWords.some(w=>combined.includes(w));
+  const caution=direct || cautionWords.some(w=>combined.includes(w) && (
+    tokensForDrug(a).some(t=>combined.includes(t)) || tokensForDrug(b).some(t=>combined.includes(t))
+  ));
+
+  if(severe){
+    return {level:'red',label:'🔴 같이 복용 주의',reason:'공식 라벨에서 상대 약/성분과 함께 심각한 경고 또는 피해야 한다는 취지의 문구가 감지됐어.'};
+  }
+  if(caution){
+    return {level:'yellow',label:'🟡 주의',reason:'공식 라벨에서 상대 약/성분 또는 병용 시 주의가 필요한 경고·상호작용 문구가 감지됐어.'};
+  }
+  return {level:'green',label:'🟢 비교적 문제 없음',reason:'이번 자동 비교에서는 두 약을 직접 연결하는 뚜렷한 상호작용 문구를 찾지 못했어. 다만 안전을 보장하는 판정은 아니야.'};
+}
+
+let drugCount=2;
+function renderDrugInputs(){
+  const box=$('#multiDrugInputs');
+  const old=[...box.querySelectorAll('input')].map(x=>x.value);
+  box.innerHTML='';
+  for(let i=0;i<drugCount;i++){
+    const row=document.createElement('div'); row.className='multiDrugRow';
+    row.innerHTML=`<span class="num">${i+1}</span><input class="multiDrugInput" placeholder="${i+1}번째 약 이름 또는 성분명" value="${esc(old[i]||'')}">`;
+    box.appendChild(row);
+  }
+}
+renderDrugInputs();
+
+$('#addDrug').addEventListener('click',()=>{
+  if(drugCount>=10){showMessage('warning','최대 10개까지 추가할 수 있어.');return;}
+  drugCount++; renderDrugInputs();
+});
+$('#removeDrug').addEventListener('click',()=>{
+  if(drugCount<=2){showMessage('warning','최소 2개부터 검사할 수 있어.');return;}
+  drugCount--; renderDrugInputs();
+});
+
+
+function riskGaugeHtml(reds,yellows,total){
+  // 표시용 단계 점수: 직접적인 위험 조합이 많을수록 오른쪽(위험)으로 이동.
+  let score=12;
+  if(total>0){
+    score=Math.min(96, Math.round(12 + (yellows/total)*45 + (reds/total)*84));
+    if(reds>0) score=Math.max(score,78);
+    else if(yellows>0) score=Math.max(score,48);
+  }
+  let label='안전 쪽';
+  if(score>=75) label='위험 높음';
+  else if(score>=45) label='주의 필요';
+  else if(score>=25) label='낮은 주의';
+  return `
+    <div class="riskGauge">
+      <div class="riskGaugeHead">
+        <b>안전 · 위험 단계</b>
+        <span class="riskGaugeScore">${label} · ${score}/100</span>
+      </div>
+      <div class="riskTrackWrap">
+        <div class="riskMarker" style="left:${score}%"></div>
+        <div class="riskTrack"></div>
+      </div>
+      <div class="riskLabels">
+        <span class="safe">안전 쪽</span>
+        <span class="caution">주의</span>
+        <span class="danger">위험</span>
+      </div>
+      <div class="riskSteps">
+        <span>1단계</span><span>2단계</span><span>3단계</span><span>4단계</span><span>5단계</span>
+      </div>
+    </div>`;
+}
+
+$('#multiCheck').addEventListener('click', async ()=>{
+  const names=[...document.querySelectorAll('.multiDrugInput')].map(x=>x.value.trim()).filter(Boolean);
+  const box=$('#mixResult');
+
+  if(names.length<2){
+    box.innerHTML='<div class="error">약을 최소 2개 입력해줘.</div>'; return;
+  }
+
+  const btn=$('#multiCheck'); btn.disabled=true; btn.textContent='검사 중…';
+  box.innerHTML=`<div class="loader">${names.length}개 약의 공식 라벨을 불러와 모든 조합을 비교하고 있어…</div>`;
+
+  const drugs=await Promise.all(names.map(fetchDrugLabel));
+  const missing=names.filter((_,i)=>!drugs[i]);
+  const found=drugs.filter(Boolean);
+
+  if(found.length<2){
+    box.innerHTML='<div class="error">공식 라벨을 충분히 찾지 못했어. 영문 제품명 또는 성분명으로 다시 입력해줘.</div>';
+    btn.disabled=false; btn.textContent='전체 상호작용 검사'; return;
+  }
+
+  const pairs=[];
+  for(let i=0;i<found.length;i++){
+    for(let j=i+1;j<found.length;j++){
+      pairs.push({a:found[i],b:found[j],...classifyPair(found[i],found[j])});
+    }
+  }
+
+  const reds=pairs.filter(x=>x.level==='red').length;
+  const yellows=pairs.filter(x=>x.level==='yellow').length;
+  const overall=reds?'red':(yellows?'yellow':'green');
+  const overallTitle=reds?'🔴 같이 복용 주의 조합이 있어':(yellows?'🟡 주의가 필요한 조합이 있어':'🟢 뚜렷한 상호작용 문구는 발견되지 않았어');
+  const overallText=reds
+    ? `${pairs.length}개 조합 중 빨간 경고 ${reds}개, 노란 주의 ${yellows}개가 감지됐어. 빨간 조합은 복용 전 전문가 확인을 권장해.`
+    : yellows
+      ? `${pairs.length}개 조합 중 노란 주의 ${yellows}개가 감지됐어. 용량·질환·다른 약까지 함께 확인해야 해.`
+      : `${pairs.length}개 조합을 비교했지만 직접적인 경고 문구는 찾지 못했어. 이것이 안전을 보장한다는 뜻은 아니야.`;
+
+  box.innerHTML=`
+    <div class="overallBox ${overall}">
+      <strong>${overallTitle}</strong>
+      ${overallText}
+      ${missing.length?`<div style="margin-top:8px;font-size:13px">라벨을 못 찾은 약: ${esc(missing.join(', '))}</div>`:''}
+    </div>
+
+    ${riskGaugeHtml(reds,yellows,pairs.length)}
+
+    <div class="mixDrugGrid">
+      ${found.map((d,i)=>drugSummaryCard(d,`${i+1}번째 약`)).join('')}
+    </div>
+
+    <div class="pairList">
+      ${pairs.map(p=>`
+        <div class="pairItem">
+          <div class="pairTop">
+            <div class="pairNames">${esc(p.a.name)} + ${esc(p.b.name)}</div>
+            <span class="traffic ${p.level}">${p.label}</span>
+          </div>
+          <p>${esc(p.reason)}</p>
+          ${(p.level!=='green' && (p.a.interactions||p.b.interactions||p.a.warnings||p.b.warnings))?`
+            <details class="info" open>
+              <summary>한국어 설명 + 공식 영문 원문</summary>
+              <p><b>${esc(p.a.name)}</b></p>
+              ${translatedEvidenceBlock(p.a)}
+              <p style="margin-top:14px"><b>${esc(p.b.name)}</b></p>
+              ${translatedEvidenceBlock(p.b)}
+            </details>`:''}
+        </div>`).join('')}
+    </div>
+
+    <div class="warning">
+      <div id="finalExplanation"><b>등급 해석:</b> 위 가로 막대의 점수는 검색된 공식 라벨 문구를 보기 쉽게 단계화한 <b>표시용 위험도</b>이며 실제 부작용 확률은 아니야. 🟢은 “이번 자동검색에서 직접적인 상호작용 문구를 못 찾음”, 🟡은 “주의·모니터링이 필요한 문구 감지”, 🔴은 “피하거나 심각한 위험 가능성을 시사하는 문구 감지”야. 처방약, 항응고제, 수면제·진정제, 임신, 고령자, 간·신장질환은 반드시 의사·약사 확인을 권장해.</div>
+      <button type="button" class="readBtn" onclick="readExplanation(this,'finalExplanation')">🔊 읽기</button>
+    </div>`;
+
+  btn.disabled=false; btn.textContent='전체 상호작용 검사';
+});
+
+function drugSummaryCard(d,label){
+  return `<div class="mixDrugCard">
+    <small>${label}</small>
+    <h3>${esc(d.name)}</h3>
+    ${d.generic?`<p><b>성분/일반명</b><br>${esc(d.generic)}</p>`:''}
+    ${d.purpose?`<p><b>무슨 약?</b><br>${esc(shortText(d.purpose,340))}</p>`:''}
+    ${d.directions?`<p><b>복용·사용법</b><br>${esc(shortText(d.directions,260))}</p>`:''}
+  </div>`;
+}
+
+
+let currentUtterance=null;
+let currentReadButton=null;
+
+function stripForSpeech(htmlText){
+  const d=document.createElement('div');
+  d.innerHTML=htmlText||'';
+  return (d.innerText||d.textContent||'').replace(/\s+/g,' ').trim();
+}
+
+function stopReading(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(currentReadButton){
+    currentReadButton.classList.remove('playing');
+    currentReadButton.textContent='🔊 읽기';
+  }
+  currentUtterance=null;
+  currentReadButton=null;
+}
+
+window.readExplanation=function(btn,targetId){
+  if(!('speechSynthesis' in window)){
+    alert('이 브라우저는 음성 읽기를 지원하지 않아.');
+    return;
+  }
+
+  if(currentReadButton===btn && window.speechSynthesis.speaking){
+    stopReading();
+    return;
+  }
+
+  stopReading();
+
+  const el=document.getElementById(targetId);
+  if(!el) return;
+  const text=stripForSpeech(el.innerHTML);
+  if(!text) return;
+
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ko-KR';
+  u.rate=0.95;
+  u.pitch=1.0;
+
+  const voices=window.speechSynthesis.getVoices();
+  const koVoice=voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('ko'));
+  if(koVoice) u.voice=koVoice;
+
+  u.onend=stopReading;
+  u.onerror=stopReading;
+
+  currentUtterance=u;
+  currentReadButton=btn;
+  btn.classList.add('playing');
+  btn.textContent='⏹ 읽기 중지';
+  window.speechSynthesis.speak(u);
+};
+
+window.selectItem=function(id){
+  selectedId=id; const x=items.find(i=>i.id===id); if(!x)return; renderResults();
+  const secs=Object.entries(x.sections||{}).filter(([,v])=>v);
+  detail.innerHTML=`
+    <div class="detailHead"><span class="badge ${x.country.toLowerCase()}">${x.country==='KR'?'대한민국':'United States'}</span><span>${esc(x.source)}</span></div>
+    <h2>${esc(x.name)}</h2>
+    ${x.genericName?`<p class="generic">성분/일반명: ${esc(x.genericName)}</p>`:''}
+    ${x.manufacturer?`<p class="maker">제조·유통: ${esc(x.manufacturer)}</p>`:''}
+    ${x.image?`<img class="drugimg" src="${esc(x.image)}" alt="${esc(x.name)}">`:''}
+    <div class="sections">${secs.length?secs.map(([k,v],idx)=>`
+      <details class="info" ${idx===0?'open':''}><summary>${esc(k)}</summary><p>${esc(v)}</p></details>`).join(''):
+      '<div class="notice">이 결과는 제품명 검색 정보야. 아래 공식 원문에서 상세 라벨을 확인해줘.</div>'}</div>
+    ${x.detailUrl?`<a class="official" href="${esc(x.detailUrl)}" target="_blank" rel="noreferrer">공식 원문 보기 ↗</a>`:''}`;
+}
+</script>
+</body>
+</html>
