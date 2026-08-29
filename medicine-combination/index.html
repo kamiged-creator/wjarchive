@@ -209,6 +209,7 @@ let items = [];
 let selectedId = null;
 
 const $ = s => document.querySelector(s);
+const PROXY_URL = 'https://wjarchive.vercel.app/api/druglens';
 const q = $('#q'), results = $('#results'), detail = $('#detail'), messages = $('#messages'), summary = $('#summary');
 const krKey = $('#krKey');
 krKey.value = localStorage.getItem('druglens_kr_key') || '';
@@ -272,11 +273,10 @@ async function searchDrug(){
 async function searchKorea(term){
   const key=normalizedServiceKey(krKey.value||localStorage.getItem('druglens_kr_key')||'');
   if(!key) throw new Error('한국 검색: 식약처 API 키를 먼저 넣어줘.');
-  const url=new URL('https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList');
-  url.searchParams.set('serviceKey',key);
-  url.searchParams.set('itemName',term);
-  url.searchParams.set('pageNo','1'); url.searchParams.set('numOfRows','20'); url.searchParams.set('type','json');
-  const res=await fetch(url);
+  const res=await fetch(PROXY_URL,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'drug',key,term})
+  });
   if(!res.ok) throw new Error(`한국 식약처 API 오류 (${res.status})`);
   const data=await res.json();
   const raw=data?.body?.items ?? data?.response?.body?.items ?? [];
@@ -325,14 +325,10 @@ pharmacyBtn.addEventListener('click',()=>{
 async function loadNearbyPharmacies(lat,lon,key){
   pharmacyStatus.textContent='주변 약국을 찾는 중…';
   try{
-    const url=new URL('https://apis.data.go.kr/B551182/pharmacyInfoService/getParmacyBasisList');
-    url.searchParams.set('ServiceKey',key);
-    url.searchParams.set('xPos',String(lon));
-    url.searchParams.set('yPos',String(lat));
-    url.searchParams.set('radius','3000');
-    url.searchParams.set('pageNo','1');
-    url.searchParams.set('numOfRows','30');
-    const res=await fetch(url);
+    const res=await fetch(PROXY_URL,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'pharmacy',key,lat,lon})
+    });
     const text=await res.text();
     if(!res.ok) throw new Error(`약국 API 오류 (${res.status})`);
     const xml=new DOMParser().parseFromString(text,'application/xml');
