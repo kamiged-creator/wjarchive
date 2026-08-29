@@ -105,7 +105,7 @@
         linear-gradient(180deg,#fbf8f4 0%,#f6f1ea 100%);
     }
     .intro{
-      padding:72px 0 54px;
+      padding:58px 0 38px;
       text-align:center;
     }
     .intro-kicker{
@@ -124,21 +124,21 @@
       text-transform:uppercase;
     }
     h1{
-      margin:18px auto 0;
-      max-width:760px;
-      font-size:clamp(36px,7vw,66px);
+      margin:16px auto 0;
+      max-width:620px;
+      font-size:clamp(32px,5.6vw,54px);
       line-height:1.08;
       letter-spacing:-.055em;
     }
     .intro-line{
       width:52px;
       height:1px;
-      margin:30px auto 0;
+      margin:24px auto 0;
       background:rgba(139,104,71,.28);
     }
     .intro-copy{
-      margin:28px auto 0;
-      max-width:620px;
+      margin:22px auto 0;
+      max-width:460px;
       color:var(--muted);
       font-size:18px;
       line-height:1.78;
@@ -146,15 +146,15 @@
 
     .products{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:32px;
-      padding:26px 0 92px;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:24px;
+      padding:22px 0 82px;
     }
     .product-card{
       display:flex;
       flex-direction:column;
       min-width:0;
-      padding:14px;
+      padding:10px;
       border:1px solid transparent;
       border-radius:8px;
       transition:border-color .28s ease, background .28s ease, transform .28s ease;
@@ -184,23 +184,23 @@
       flex-direction:column;
       align-items:center;
       text-align:center;
-      padding:24px 10px 8px;
+      padding:20px 8px 6px;
     }
     .product-title{
       margin:0;
-      font-size:24px;
+      font-size:20px;
       line-height:1.28;
       letter-spacing:-.035em;
     }
     .product-copy{
-      min-height:52px;
+      min-height:48px;
       margin:10px 0 0;
       color:var(--muted);
-      font-size:15px;
+      font-size:14px;
       line-height:1.62;
     }
     .product-price{
-      margin:18px 0 18px;
+      margin:14px 0 16px;
       color:rgba(31,26,23,.66);
       font-size:12px;
       font-weight:900;
@@ -208,7 +208,7 @@
     }
     .inquiry-btn{
       width:100%;
-      min-height:46px;
+      min-height:42px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -246,8 +246,8 @@
 
     @media (max-width: 860px){
       .products{
-        max-width:560px;
-        grid-template-columns:1fr;
+      max-width:680px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
         gap:54px;
         margin:0 auto;
         padding-top:10px;
@@ -260,16 +260,8 @@
         background:transparent;
         border-color:transparent;
       }
-      .product-card + .product-card::before{
-        content:"";
-        width:44px;
-        height:1px;
-        margin:-12px auto 26px;
-        display:block;
-        background:rgba(139,104,71,.18);
-      }
       .product-body{padding:22px 0 0}
-      .inquiry-btn{width:auto;min-width:120px;padding:0 22px}
+      .inquiry-btn{width:100%;padding:0 14px}
     }
 
     @media (max-width: 680px){
@@ -292,21 +284,30 @@
         padding:0 10px;
       }
       .intro{
-        padding:54px 0 42px;
+        padding:46px 0 34px;
       }
       h1{
-        max-width:330px;
-        font-size:34px;
+        max-width:300px;
+        font-size:31px;
         letter-spacing:-.045em;
       }
       .intro-copy{
-        max-width:320px;
+        max-width:280px;
         font-size:16px;
         line-height:1.72;
       }
       .products{
-        gap:58px;
+        grid-template-columns:1fr;
+        gap:54px;
         padding-bottom:72px;
+      }
+      .product-card + .product-card::before{
+        content:"";
+        width:44px;
+        height:1px;
+        margin:-12px auto 26px;
+        display:block;
+        background:rgba(139,104,71,.18);
       }
       .product-title{font-size:23px}
       .product-copy{font-size:14px}
@@ -327,9 +328,9 @@
     <section class="intro">
       <div class="wrap">
         <span class="intro-kicker">Bokjakso Store</span>
-        <h1>손끝으로 전하는 고요한 물건들</h1>
+        <h1>복을 담은 작은 물건들</h1>
         <div class="intro-line" aria-hidden="true"></div>
-        <p class="intro-copy">작품에서 나온 문양과 낙관을 작게 담아, 일상 가까이에 둘 수 있는 키링과 소품으로 준비하고 있습니다.</p>
+        <p class="intro-copy">키링과 소품을 차분히 준비하고 있습니다.</p>
       </div>
     </section>
 
@@ -365,6 +366,66 @@
         <div class="product-body">
           <h2 class="product-title">전통 문방 소품</h2>
           <p class="product-copy">책상과 서재에 조용히 놓이는 작은 물건들</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="복작소 준비 상품" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">낙관 목걸이</h2>
+          <p class="product-copy">작은 낙관을 가까이 두는 장식 소품</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="복작소 준비 상품" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">책갈피 소품</h2>
+          <p class="product-copy">글과 책 사이에 놓이는 작은 표식</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOVVlcmPS_Idc1xCw4f3BdT23xwJ5FSTlGg0IeTVkFaEAvMkTmhoArdhTx3QO4E97hQ0tL6O_CsTh8eNrmj8m8QMqTOUkpi4LUnzmq09nOLPgsxx4grm5RHOvpx8seENQoivY6Hkbr0fi8MRgYWqU-t2QKH-QATHOK8YXdJ54AyQdI8mqCE3STvvo_ZW_9k2oS4MOxClRIcjf82rSghukkKGqDMmiIH8virQdFM4o4uMfR8it4J3RH" alt="복작소 준비 상품" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">문양 키링</h2>
+          <p class="product-copy">작품의 선과 문양을 담은 키링</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="복작소 준비 상품" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">선물 세트</h2>
+          <p class="product-copy">작은 물건을 함께 담은 구성</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="복작소 준비 상품" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">준비중</h2>
+          <p class="product-copy">새로운 소품을 준비하고 있습니다</p>
           <div class="product-price">가격 준비중</div>
           <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
         </div>
