@@ -7,7 +7,7 @@
 <title>DrugLens | 한국·미국 의약품 통합검색</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Rounded:FILL@0..1&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
   :root{
@@ -168,10 +168,39 @@
   .pharmacyList{grid-template-columns:1fr}.pharmacyCard{border-color:#39cfc0aa;border-radius:17px;background:linear-gradient(145deg,#0b151e,#111820);box-shadow:0 0 22px #26c8bb18;padding:18px}.pharmacyTop h3{font-size:21px}.distance{background:#113e42;color:#55ddd2}.pharmacyActions a{padding:11px}.callBtn{background:transparent;border:1px solid #3fbdb7;color:#6ee4dc}.mapBtn{background:linear-gradient(100deg,#20bfb6,#42d5c9);color:#051718;border:0}
   footer{background:#080f16;border-color:#1e2c36}
   @media(max-width:620px){.wrap{width:min(100% - 28px,920px)}.hero{padding-top:24px}.brand b{font-size:22px}.brand small{font-size:12px}h1{font-size:35px;letter-spacing:-1.8px;margin-top:34px}.search button{padding:0 24px}.results{grid-template-columns:1fr}.mixbox,.pharmacyBox{padding:20px}.mixbox h2,.pharmacyBox h2{font-size:22px}}
+
+  /* Stitch desktop dashboard — mobile layout remains unchanged */
+  .desktopSidebar,.desktopTopbar{display:none}
+  @media(min-width:1100px){
+    html{scroll-behavior:smooth}
+    body{padding-left:280px;background-color:#051424;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:40px 40px}
+    .desktopSidebar{display:flex;position:fixed;inset:0 auto 0 0;width:280px;z-index:80;flex-direction:column;background:#122131;border-right:1px solid #3b4949;padding:30px 16px 22px;color:#d4e4fa}
+    .desktopBrand{display:flex;align-items:center;gap:12px;padding:0 14px 34px}.desktopBrand .desktopLogo{width:42px;height:42px;display:grid;place-items:center;border:1px solid #2ddbde66;border-radius:10px;background:#2ddbde18;color:#47eaed}.desktopBrand b{display:block;color:#47eaed;font:700 24px/1.1 Inter,sans-serif}.desktopBrand small{display:block;margin-top:4px;color:#bac9c9;font:500 11px/1.2 "JetBrains Mono",monospace;letter-spacing:.05em}
+    .desktopNew{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 14px 28px;padding:14px 12px;border-radius:5px;background:#47eaed;color:#003738;text-decoration:none;font:800 14px/1 Inter,sans-serif;box-shadow:0 0 22px #47eaed22}
+    .desktopNav{display:flex;flex-direction:column;gap:5px}.desktopNav a{display:flex;align-items:center;gap:14px;padding:13px 18px;border-left:4px solid transparent;color:#bac9c9;text-decoration:none;font:500 12px/1.2 "JetBrains Mono",monospace;letter-spacing:.05em}.desktopNav a:hover,.desktopNav a.active{border-left-color:#47eaed;background:#47eaed12;color:#47eaed}.desktopNav .material-symbols-rounded{font-size:23px}
+    .desktopDisclaimer{margin-top:auto;padding:18px 15px 0;border-top:1px solid #273647;color:#859493;font:400 11px/1.55 "JetBrains Mono",monospace}.desktopDisclaimer b{display:block;color:#ffb4ab;margin-bottom:5px}
+    .desktopTopbar{display:flex;position:fixed;left:280px;right:0;top:0;height:64px;z-index:70;align-items:center;justify-content:space-between;padding:0 30px;background:#051424e8;border-bottom:1px solid #3b4949;backdrop-filter:blur(18px)}.desktopTopbar strong{color:#d4e4fa;font:600 15px/1 Inter,sans-serif}.desktopTopbar span{color:#859493;font:500 11px/1 "JetBrains Mono",monospace}.desktopTopAction{display:flex;align-items:center;gap:8px;border:1px solid #47eaed;color:#47eaed;background:#47eaed0a;border-radius:5px;padding:9px 14px;font:600 11px/1 "JetBrains Mono",monospace;text-decoration:none;letter-spacing:.04em}
+    .hero{margin-left:0;padding:100px 0 48px;background:radial-gradient(circle at 82% 15%,#00ced126,transparent 32%),linear-gradient(145deg,#051424,#0d1c2d);border-bottom-color:#3b4949}.hero .wrap,.content.wrap{width:min(1180px,calc(100% - 64px))}.brand{display:none}.hero h1{max-width:920px;margin-top:0;font:700 clamp(42px,4.2vw,64px)/1.08 Inter,"Noto Sans KR",sans-serif;letter-spacing:-.035em}.hero h1 em{color:#47eaed}.search{max-width:980px;border-radius:5px;border-color:#3b4949;background:#010f1f;padding:5px}.search input{font-family:Inter,"Noto Sans KR",sans-serif}.search button{border-radius:4px;background:#47eaed;color:#003738;box-shadow:none}.tabs{justify-content:flex-start}.tabs button,.tabs button.active{border-radius:4px;font-family:"JetBrains Mono","Noto Sans KR",monospace;font-size:12px}
+    .content{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(320px,.75fr);gap:24px;padding-top:32px;align-items:start}.mixbox{grid-column:1;grid-row:1 / span 2;margin:0}.settings{grid-column:2;grid-row:1;margin:0}.pharmacyBox{grid-column:2;grid-row:2;margin:0}.content>#messages,.content>#summary,.content>.grid{grid-column:1/-1}.content>.grid{margin-top:0}
+    .mixbox,.pharmacyBox,.settings,.detail,.card{border-radius:8px;background:#122131cc;border-color:#ffffff1a;backdrop-filter:blur(20px);box-shadow:none}.mixbox h2,.pharmacyBox h2{font-family:Inter,"Noto Sans KR",sans-serif}.multiActions button,.locationBtn,.keyrow input,.keyrow button,.multiDrugRow input{border-radius:4px}.multiActions .primary,.locationBtn{background:#47eaed;color:#003738;box-shadow:none}.settings summary{color:#47eaed;font-family:"JetBrains Mono","Noto Sans KR",monospace}.grid{grid-template-columns:420px minmax(0,1fr);gap:24px}.results{grid-template-columns:1fr;max-height:760px}.detail{min-height:520px}.pharmacyList{grid-template-columns:1fr}.riskGauge,.overallBox,.mixDrugCard,.pairItem,.pharmacyCard{border-radius:6px}
+    footer{margin-left:0;background:#051424;border-color:#3b4949;font-family:"JetBrains Mono","Noto Sans KR",monospace}
+  }
 </style>
 </head>
 <body>
-<header class="hero">
+<aside class="desktopSidebar" aria-label="PC 전용 메뉴">
+  <div class="desktopBrand"><span class="desktopLogo material-symbols-rounded">science</span><div><b>DrugLens</b><small>CLINICAL INTELLIGENCE</small></div></div>
+  <a class="desktopNew" href="#interaction"><span class="material-symbols-rounded">add</span>새 조합 분석</a>
+  <nav class="desktopNav">
+    <a class="active" href="#overview"><span class="material-symbols-rounded">dashboard</span>OVERVIEW</a>
+    <a href="#interaction"><span class="material-symbols-rounded">medication</span>INTERACTIONS</a>
+    <a href="#pharmacies"><span class="material-symbols-rounded">local_pharmacy</span>PHARMACIES</a>
+    <a href="#api-settings"><span class="material-symbols-rounded">settings</span>API SETTINGS</a>
+  </nav>
+  <div class="desktopDisclaimer"><b>MEDICAL INFORMATION</b>공개 의약품 정보를 정리하는 도구이며 진단이나 처방을 대신하지 않습니다.</div>
+</aside>
+<div class="desktopTopbar"><div><strong>Drug interaction workspace</strong> <span>· MFDS / DailyMed / openFDA</span></div><a class="desktopTopAction" href="#interaction"><span class="material-symbols-rounded">warning</span>NEW ANALYSIS</a></div>
+<header class="hero" id="overview">
   <div class="wrap">
     <div class="brand"><span class="logo">Rx</span><div><b>DrugLens</b><small>한국 · 미국 의약품 통합검색</small></div></div>
     <h1>약 이름 하나로<br><em>한국과 미국 공식정보</em>를 같이 확인</h1>
@@ -191,7 +220,7 @@
 <main class="wrap content">
   <div class="notice"><b>의료 주의</b> 이 페이지는 공개된 의약품 정보를 검색·정리하는 도구이며, 진단이나 처방을 대신하지 않습니다. 실제 복용 전에는 의사·약사와 공식 설명서를 확인하세요.</div>
 
-  <section class="mixbox">
+  <section class="mixbox" id="interaction">
     <h2><span class="material-symbols-rounded">medication</span> 여러 약 같이 먹어도 되는지 확인</h2>
     <p>약을 <b>2개부터 최대 10개까지</b> 추가해서 한꺼번에 비교해. 공식 라벨의 상호작용·경고 문구를 바탕으로 안전 단계를 정리해. 최종 복용 결정은 의사·약사 확인이 필요해.</p>
 
@@ -206,7 +235,7 @@
     <div class="mixResult" id="mixResult"></div>
   </section>
 
-  <details class="settings">
+  <details class="settings" id="api-settings">
     <summary>한국 식약처 API 설정</summary>
     <p>한국 검색을 사용하려면 공공데이터포털에서 식약처 <b>e약은요</b> API 활용신청 후 받은 일반 인증키(ServiceKey)를 넣어주세요. 이 단일 HTML 버전은 테스트 편의를 위해 브라우저에 키를 저장합니다. 공개 배포할 때는 키를 서버에 숨기는 방식을 권장합니다.</p>
     <div class="keyrow">
@@ -215,7 +244,7 @@
     </div>
   </details>
 
-  <section class="pharmacyBox">
+  <section class="pharmacyBox" id="pharmacies">
     <h2><span class="material-symbols-rounded">location_on</span> 내 주변 약국 찾기</h2>
     <p>현재 위치를 한 번만 확인해 반경 3km 안의 약국을 가까운 순서로 보여줘. 위치는 서버나 브라우저에 저장하지 않아.</p>
     <button id="findPharmacy" type="button" class="locationBtn">내 주변 약국 찾기</button>
