@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="theme-color" content="#0d3b66" />
 <title>DrugLens | 한국·미국 의약품 통합검색</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *{box-sizing:border-box}
   :root{
@@ -135,6 +138,36 @@
   input::placeholder{color:#6f8190}
   ::selection{background:#1c7884;color:#fff}
   body{color-scheme:dark}
+
+  /* Stitch DrugLens visual system */
+  :root{--bg:#07111a;--text:#f4f7f9;--muted:#81909d;--line:#273642;--white:#111b24;--cyan:#25c9c5;--teal:#11859a}
+  html,body{background:radial-gradient(circle at 78% 8%,#07444d55 0,transparent 30%),#07111a;font-family:"Noto Sans KR",sans-serif}
+  .material-symbols-rounded{font-size:1.15em;line-height:1;vertical-align:-.12em;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 24}
+  .wrap{width:min(920px,calc(100% - 34px))}
+  .hero{background:radial-gradient(circle at 84% 12%,#126d7355,transparent 32%),linear-gradient(145deg,#07131d 0%,#083542 68%,#0b7580 145%);padding:28px 0 44px;border-bottom:1px solid #1b808b55}
+  .brand{gap:14px}.logo{width:56px;height:56px;border-radius:17px;font-size:22px;color:#176d78;box-shadow:0 14px 34px #0005}
+  .brand b{font-size:25px;letter-spacing:-.5px}.brand small{font-size:14px;color:#a8bac4;opacity:1}
+  h1{font-size:clamp(36px,6vw,58px);line-height:1.18;letter-spacing:-2.3px;margin:40px 0 15px;font-weight:900}h1 em{color:#b9fff7}
+  .sub{display:none}
+  .search{max-width:none;margin-top:28px;padding:7px;background:#08131d;border:1px solid #21323e;border-radius:20px;box-shadow:0 18px 44px #0005}
+  .search input{padding:17px 18px;font-size:17px}.search button{border-radius:14px;background:linear-gradient(135deg,#126c89,#20aab7);padding:0 32px;font-size:17px;box-shadow:0 0 26px #1aa2ad35}
+  .tabs{justify-content:center;margin-top:13px}.tabs button{background:#101d27;border-color:#30414d;color:#aab7c1}.tabs button.active{background:#d7fffb;color:#08636e;border-color:#bafff7}
+  .content{padding-top:30px}.content>.notice{display:none}
+  .mixbox,.pharmacyBox,.settings,.detail{background:linear-gradient(145deg,#111b24,#0b141d);border:1px solid #263642;box-shadow:0 18px 48px #0003}
+  .mixbox{padding:24px;border-radius:22px;margin-top:0}.mixbox h2,.pharmacyBox h2{font-size:25px;display:flex;align-items:center;gap:10px}
+  .mixbox>p{font-size:14px;color:#7f909c}.mixbox>p b{color:#afbec8}
+  .riskLegend{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:18px 0 22px}.riskLegend span{height:10px;border-radius:999px}.riskLegend span:nth-child(1){background:#65c653}.riskLegend span:nth-child(2){background:#f0bf3d}.riskLegend span:nth-child(3){background:#ee4848}.riskLegend b{display:block;text-align:center;margin-top:9px;font-size:14px}.riskLegend .safe{color:#6bc55d}.riskLegend .caution{color:#f0c54a}.riskLegend .danger{color:#ef5555}
+  #multiDrugInputs{gap:11px}.multiDrugRow input{border:1px solid #aab8c2;border-radius:15px;padding:15px 15px 15px 54px;background:#07111a;font-size:15px}.multiDrugRow .num{width:34px;height:34px;left:10px;font-size:14px}
+  .multiActions button{border-color:#30414d;background:#121d27;border-radius:13px;padding:12px 17px}.multiActions .primary,.locationBtn{background:linear-gradient(100deg,#0c738d,#23b4ba);border:0;box-shadow:0 0 30px #18a8b030}
+  .multiActions .primary{flex-basis:100%;margin:4px 0 0;padding:15px;font-size:16px}
+  .pharmacyBox{border-radius:20px;padding:24px}.pharmacyBox>p{color:#83939f}.locationBtn{border-radius:14px}
+  .settings{border-radius:17px;padding:19px 21px}.settings summary{font-size:18px}.keyrow input{background:#07111a;border-color:#30414d}
+  .grid{grid-template-columns:minmax(0,1fr);gap:14px}.results{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.card{background:#0b151e;border-color:#273742;border-radius:16px}.detail{position:static;min-height:360px;border-radius:22px}
+  .detail h2{color:#38cec4;font-weight:900}.info{background:#0d171f;border:1px solid #26343e!important;border-radius:15px;margin-top:10px;padding:0 15px}.info summary{color:#f0f5f7}.info p{color:#9eacb6}
+  .empty{padding:75px 20px}.empty .pill{color:#2bc8bf}.empty b{font-size:22px}
+  .pharmacyList{grid-template-columns:1fr}.pharmacyCard{border-color:#39cfc0aa;border-radius:17px;background:linear-gradient(145deg,#0b151e,#111820);box-shadow:0 0 22px #26c8bb18;padding:18px}.pharmacyTop h3{font-size:21px}.distance{background:#113e42;color:#55ddd2}.pharmacyActions a{padding:11px}.callBtn{background:transparent;border:1px solid #3fbdb7;color:#6ee4dc}.mapBtn{background:linear-gradient(100deg,#20bfb6,#42d5c9);color:#051718;border:0}
+  footer{background:#080f16;border-color:#1e2c36}
+  @media(max-width:620px){.wrap{width:min(100% - 28px,920px)}.hero{padding-top:24px}.brand b{font-size:22px}.brand small{font-size:12px}h1{font-size:35px;letter-spacing:-1.8px;margin-top:34px}.search button{padding:0 24px}.results{grid-template-columns:1fr}.mixbox,.pharmacyBox{padding:20px}.mixbox h2,.pharmacyBox h2{font-size:22px}}
 </style>
 </head>
 <body>
@@ -159,8 +192,9 @@
   <div class="notice"><b>의료 주의</b> 이 페이지는 공개된 의약품 정보를 검색·정리하는 도구이며, 진단이나 처방을 대신하지 않습니다. 실제 복용 전에는 의사·약사와 공식 설명서를 확인하세요.</div>
 
   <section class="mixbox">
-    <h2>💊 여러 약 같이 먹어도 되는지 확인</h2>
-    <p>약을 <b>2개부터 최대 10개까지</b> 추가해서 한꺼번에 비교해. 각 조합을 공식 라벨의 상호작용·경고 문구와 대조해 <b>🟢 비교적 문제 없음 / 🟡 주의 / 🔴 같이 복용 주의</b>로 정리하고, <b>한국어 설명과 영문 원문을 같이</b> 보여줘. 이 등급은 자동 분류이므로 최종 복용 결정은 의사·약사 확인이 필요해.</p>
+    <h2><span class="material-symbols-rounded">medication</span> 여러 약 같이 먹어도 되는지 확인</h2>
+    <div class="riskLegend" aria-label="안전 단계"><div><span></span><b class="safe">안전</b></div><div><span></span><b class="caution">주의</b></div><div><span></span><b class="danger">위험</b></div></div>
+    <p>약을 <b>2개부터 최대 10개까지</b> 추가해서 한꺼번에 비교해. 공식 라벨의 상호작용·경고 문구를 바탕으로 안전 단계를 정리해. 최종 복용 결정은 의사·약사 확인이 필요해.</p>
 
     <div id="multiDrugInputs"></div>
 
@@ -183,7 +217,7 @@
   </details>
 
   <section class="pharmacyBox">
-    <h2>📍 내 주변 약국 찾기</h2>
+    <h2><span class="material-symbols-rounded">location_on</span> 내 주변 약국 찾기</h2>
     <p>현재 위치를 한 번만 확인해 반경 3km 안의 약국을 가까운 순서로 보여줘. 위치는 서버나 브라우저에 저장하지 않아.</p>
     <button id="findPharmacy" type="button" class="locationBtn">내 주변 약국 찾기</button>
     <div id="pharmacyStatus" class="pharmacyStatus" aria-live="polite"></div>
@@ -196,7 +230,7 @@
   <div class="grid">
     <section class="results" id="results"></section>
     <aside class="detail" id="detail">
-      <div class="empty"><div class="pill">💊</div><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p></div>
+      <div class="empty"><div class="pill"><span class="material-symbols-rounded" style="font-size:58px">medication</span></div><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p></div>
     </aside>
   </div>
 </main>
@@ -264,7 +298,7 @@ async function searchDrug(){
 
   renderResults();
   if(items.length){ selectItem(items[0].id); }
-  else detail.innerHTML='<div class="empty"><div class="pill">💊</div><b>검색 결과가 없어</b><p>제품명이나 성분명을 바꿔서 다시 검색해봐.</p></div>';
+  else detail.innerHTML='<div class="empty"><div class="pill"><span class="material-symbols-rounded" style="font-size:58px">medication</span></div><b>검색 결과가 없어</b><p>제품명이나 성분명을 바꿔서 다시 검색해봐.</p></div>';
 
   if(errors.length) showMessage('warning', errors.join(' / '));
   $('#searchBtn').disabled=false; $('#searchBtn').textContent='검색';
@@ -374,7 +408,7 @@ function renderPharmacies(rows){
     return `<article class="pharmacyCard">
       <div class="pharmacyTop"><h3>${esc(p.name)}</h3><span class="distance">${distanceLabel(p.distance)}</span></div>
       <p>${esc(p.addr||'주소 정보 없음')}</p>
-      ${p.phone?`<p class="phone">☎ ${esc(p.phone)}</p>`:''}
+      ${p.phone?`<p class="phone"><span class="material-symbols-rounded">call</span> ${esc(p.phone)}</p>`:''}
       <div class="pharmacyActions">
         ${phone?`<a class="callBtn" href="tel:${esc(phone)}">전화하기</a>`:''}
         <a class="mapBtn" href="https://map.naver.com/p/search/${mapQuery}" target="_blank" rel="noreferrer">지도에서 보기</a>
