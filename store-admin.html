@@ -98,6 +98,7 @@
         <div class="form-grid">
           <label><span class="label">상품명</span><input class="field" id="titleInput" required placeholder="예: 맞춤 낙관 키링"></label>
           <label><span class="label">가격</span><input class="field" id="priceInput" placeholder="예: 19,000원"></label>
+          <label><span class="label">상품 종류</span><select class="field" id="categoryInput"><option value="keyring">키링</option><option value="desk">문방소품</option><option value="custom">주문제작</option><option value="etc">기타</option></select></label>
           <label><span class="label">상태</span><select class="field" id="statusInput"><option value="preparing">판매 준비중</option><option value="selling">판매중</option><option value="soldout">품절</option></select></label>
           <label><span class="label">정렬 숫자</span><input class="field" id="sortInput" type="number" value="10"></label>
           <label class="span-2"><span class="label">설명</span><textarea class="field" id="descInput" placeholder="상품 설명"></textarea></label>
@@ -193,6 +194,7 @@
       $('#productId').value = product.id || '';
       $('#titleInput').value = product.title || '';
       $('#priceInput').value = product.price_text || '가격 준비중';
+      $('#categoryInput').value = product.category || 'keyring';
       $('#statusInput').value = product.status || 'preparing';
       $('#sortInput').value = Number(product.sort_order || 10);
       $('#descInput').value = product.description || '';
@@ -210,6 +212,7 @@
         id: $('#productId').value,
         title: $('#titleInput').value,
         price_text: $('#priceInput').value,
+        category: $('#categoryInput').value,
         status: $('#statusInput').value,
         sort_order: Number($('#sortInput').value || 10),
         description: $('#descInput').value,
@@ -227,6 +230,9 @@
     function statusText(status){
       return status === 'selling' ? '판매중' : status === 'soldout' ? '품절' : '준비중';
     }
+    function categoryText(category){
+      return {keyring:'키링', desk:'문방소품', custom:'주문제작', etc:'기타'}[category] || '키링';
+    }
     function renderList(activeId=''){
       const list = $('#productList');
       list.innerHTML = products.map(product => `
@@ -234,7 +240,7 @@
           <img src="${product.main_image_url || product.detail_image_urls?.[0] || ''}" alt="">
           <span>
             <span class="item-title">${product.title || '새 상품'}</span>
-            <span class="item-meta">${product.price_text || '가격 준비중'} · 정렬 ${product.sort_order || 10}</span>
+            <span class="item-meta">${categoryText(product.category)} · ${product.price_text || '가격 준비중'} · 정렬 ${product.sort_order || 10}</span>
           </span>
           <span class="badge">${statusText(product.status)}</span>
         </button>
@@ -347,7 +353,7 @@
     $('#loginBtn').addEventListener('click', login);
     $('#adminPassword').addEventListener('keydown', event => { if(event.key === 'Enter') login(); });
     $('#logoutBtn').addEventListener('click', closeApp);
-    $('#newBtn').addEventListener('click', () => fillForm({price_text:'가격 준비중', status:'preparing', sort_order:10, is_visible:true}));
+    $('#newBtn').addEventListener('click', () => fillForm({price_text:'가격 준비중', category:'keyring', status:'preparing', sort_order:10, is_visible:true}));
     $('#productForm').addEventListener('submit', saveProduct);
     $('#deleteBtn').addEventListener('click', deleteProduct);
     $('#uploadBtn').addEventListener('click', uploadImage);

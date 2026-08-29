@@ -145,6 +145,34 @@
       font-size:18px;
       line-height:1.78;
     }
+    .category-filter{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      padding:0 0 14px;
+    }
+    .category-button{
+      min-height:36px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,253,249,.68);
+      color:rgba(31,26,23,.66);
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      transition:background .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .category-button:hover,
+    .category-button.is-active{
+      border-color:rgba(31,26,23,.38);
+      background:var(--text);
+      color:#fffdf9;
+    }
 
     .products{
       display:grid;
@@ -545,6 +573,18 @@
         font-size:16px;
         line-height:1.72;
       }
+      .category-filter{
+        justify-content:flex-start;
+        overflow-x:auto;
+        flex-wrap:nowrap;
+        padding:0 18px 10px;
+        margin:0 -18px;
+        scrollbar-width:none;
+      }
+      .category-filter::-webkit-scrollbar{display:none}
+      .category-button{
+        flex:0 0 auto;
+      }
       .products{
         grid-template-columns:1fr;
         gap:54px;
@@ -627,8 +667,16 @@
       </div>
     </section>
 
+    <nav class="wrap category-filter" aria-label="상품 종류">
+      <button class="category-button is-active" type="button" data-category-filter="all">전체</button>
+      <button class="category-button" type="button" data-category-filter="keyring">키링</button>
+      <button class="category-button" type="button" data-category-filter="desk">문방소품</button>
+      <button class="category-button" type="button" data-category-filter="custom">주문제작</button>
+      <button class="category-button" type="button" data-category-filter="etc">기타</button>
+    </nav>
+
     <section class="wrap products" aria-label="복작소 상품">
-      <article class="product-card">
+      <article class="product-card" data-category="keyring">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="나무 목판 키링" loading="lazy">
         </div>
@@ -640,7 +688,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="custom">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="석재 낙관 키링" loading="lazy">
         </div>
@@ -652,7 +700,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="desk">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOVVlcmPS_Idc1xCw4f3BdT23xwJ5FSTlGg0IeTVkFaEAvMkTmhoArdhTx3QO4E97hQ0tL6O_CsTh8eNrmj8m8QMqTOUkpi4LUnzmq09nOLPgsxx4grm5RHOvpx8seENQoivY6Hkbr0fi8MRgYWqU-t2QKH-QATHOK8YXdJ54AyQdI8mqCE3STvvo_ZW_9k2oS4MOxClRIcjf82rSghukkKGqDMmiIH8virQdFM4o4uMfR8it4J3RH" alt="문방 소품" loading="lazy">
         </div>
@@ -664,7 +712,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="custom">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -676,7 +724,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="desk">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -688,7 +736,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="keyring">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOVVlcmPS_Idc1xCw4f3BdT23xwJ5FSTlGg0IeTVkFaEAvMkTmhoArdhTx3QO4E97hQ0tL6O_CsTh8eNrmj8m8QMqTOUkpi4LUnzmq09nOLPgsxx4grm5RHOvpx8seENQoivY6Hkbr0fi8MRgYWqU-t2QKH-QATHOK8YXdJ54AyQdI8mqCE3STvvo_ZW_9k2oS4MOxClRIcjf82rSghukkKGqDMmiIH8virQdFM4o4uMfR8it4J3RH" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -700,7 +748,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="etc">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -712,7 +760,7 @@
         </div>
       </article>
 
-      <article class="product-card">
+      <article class="product-card" data-category="etc">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -808,8 +856,10 @@
     const productsEl = document.querySelector('.products');
     let productCards = Array.from(document.querySelectorAll('.product-card'));
     const pagination = document.querySelector('.pagination');
+    const categoryButtons = document.querySelectorAll('[data-category-filter]');
     const productsPerPage = 8;
     let currentPage = 1;
+    let activeCategory = 'all';
 
     function escapeHtml(value){
       return String(value || '').replace(/[&<>"']/g, char => ({
@@ -831,7 +881,7 @@
         const imageUrl = productImage(product);
         const detailImages = Array.isArray(product.detail_image_urls) ? product.detail_image_urls : [];
         return `
-          <article class="product-card" data-detail-images="${escapeHtml(JSON.stringify(detailImages))}" data-status="${escapeHtml(product.status || 'preparing')}">
+          <article class="product-card" data-category="${escapeHtml(product.category || 'etc')}" data-detail-images="${escapeHtml(JSON.stringify(detailImages))}" data-status="${escapeHtml(product.status || 'preparing')}">
             <div class="product-media">
               <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.title || '복작소 상품')}" loading="lazy">
             </div>
@@ -862,15 +912,17 @@
     }
 
     function showProductPage(page){
-      const totalPages = Math.max(1, Math.ceil(productCards.length / productsPerPage));
+      const visibleCards = productCards.filter(card => activeCategory === 'all' || card.dataset.category === activeCategory);
+      const totalPages = Math.max(1, Math.ceil(visibleCards.length / productsPerPage));
       currentPage = Math.min(Math.max(page, 1), totalPages);
       const start = (currentPage - 1) * productsPerPage;
       const end = start + productsPerPage;
 
-      productCards.forEach((card, index) => {
-        const isVisible = index >= start && index < end;
+      productCards.forEach(card => {
+        const filteredIndex = visibleCards.indexOf(card);
+        const isVisible = filteredIndex >= start && filteredIndex < end;
         card.classList.toggle('is-hidden', !isVisible);
-        card.classList.toggle('is-page-first', index === start);
+        card.classList.toggle('is-page-first', filteredIndex === start);
       });
 
       pagination.querySelectorAll('.page-button').forEach(button => {
@@ -881,7 +933,8 @@
     }
 
     function renderPagination(){
-      const totalPages = Math.ceil(productCards.length / productsPerPage);
+      const visibleCards = productCards.filter(card => activeCategory === 'all' || card.dataset.category === activeCategory);
+      const totalPages = Math.ceil(visibleCards.length / productsPerPage);
       if(totalPages <= 1){
         pagination.hidden = true;
         pagination.innerHTML = '';
@@ -958,6 +1011,15 @@
         });
       });
     }
+
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        activeCategory = button.dataset.categoryFilter || 'all';
+        categoryButtons.forEach(item => item.classList.toggle('is-active', item === button));
+        renderPagination();
+        showProductPage(1);
+      });
+    });
 
     detailThumbs.forEach(thumb => {
       thumb.addEventListener('click', () => {

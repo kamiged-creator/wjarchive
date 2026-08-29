@@ -3,6 +3,7 @@ create table if not exists public.store_products (
   title text not null default '새 상품',
   description text not null default '',
   price_text text not null default '가격 준비중',
+  category text not null default 'keyring',
   status text not null default 'preparing',
   main_image_url text not null default '',
   detail_image_urls jsonb not null default '[]'::jsonb,
@@ -11,6 +12,9 @@ create table if not exists public.store_products (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.store_products
+add column if not exists category text not null default 'keyring';
 
 alter table public.store_products enable row level security;
 
