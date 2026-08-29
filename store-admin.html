@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ko" translate="no" class="notranslate">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="google" content="notranslate" />
+  <title>복작소 스토어 관리자</title>
+  <style>
+    :root{--bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#6e655d;--line:rgba(31,26,23,.12);--accent:#8b6847;--bad:#b6493c;--ok:#257a45;--max:1120px}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;word-break:keep-all}
+    a{color:inherit;text-decoration:none}
+    button,input,textarea,select{font:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+    .top{position:sticky;top:0;z-index:10;background:rgba(246,241,234,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .top-inner{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{font-size:24px;font-weight:900;letter-spacing:-.05em}
+    .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .btn{min-height:38px;display:inline-flex;align-items:center;justify-content:center;padding:0 14px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--text);font-weight:850;cursor:pointer}
+    .btn.primary{border-color:var(--text);background:var(--text);color:#fffdf9}
+    .btn.danger{border-color:rgba(182,73,60,.35);color:var(--bad)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    main{padding:34px 0 72px}
+    .panel{border:1px solid var(--line);border-radius:8px;background:rgba(255,253,249,.78);box-shadow:0 18px 42px rgba(31,26,23,.06)}
+    .gate{max-width:440px;margin:9vh auto 0;padding:28px}
+    .gate h1,.section-title{margin:0;font-size:26px;letter-spacing:-.045em}
+    .gate p,.hint{margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.65}
+    .field{width:100%;min-height:42px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--text);padding:9px 11px}
+    textarea.field{min-height:92px;resize:vertical;line-height:1.6}
+    .label{display:block;margin:16px 0 7px;color:rgba(31,26,23,.72);font-size:13px;font-weight:850}
+    .status{min-height:22px;margin-top:12px;color:var(--muted);font-size:13px;line-height:1.5}
+    .status.ok{color:var(--ok)} .status.bad{color:var(--bad)}
+    .hidden{display:none!important}
+    .grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(360px,1.1fr);gap:22px;align-items:start}
+    .list-panel,.form-panel{padding:22px}
+    .section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+    .product-list{display:grid;gap:10px}
+    .product-item{width:100%;display:grid;grid-template-columns:58px 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:6px;background:#fff;padding:9px;text-align:left;cursor:pointer}
+    .product-item.is-active{border-color:rgba(31,26,23,.42)}
+    .product-item img{width:58px;height:58px;object-fit:cover;border-radius:4px;background:#eee}
+    .item-title{font-weight:900;letter-spacing:-.03em}
+    .item-meta{margin-top:3px;color:var(--muted);font-size:12px}
+    .badge{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:999px;background:#eee2d5;color:rgba(31,26,23,.72);font-size:11px;font-weight:900}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+    .span-2{grid-column:1/-1}
+    .preview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+    .preview img{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line);border-radius:4px;background:#eee}
+    .upload-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    @media(max-width:860px){.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.top-inner{align-items:flex-start;flex-direction:column;padding:16px 0}.preview{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="brand" href="/store.html">복작소 스토어 관리자</a>
+      <div class="top-actions">
+        <a class="btn" href="/store.html">스토어 보기</a>
+        <button class="btn danger hidden" type="button" id="logoutBtn">로그아웃</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="panel gate" id="passwordGate">
+      <h1>관리자 로그인</h1>
+      <p>기존 crop.html과 같은 관리자 비밀번호를 사용합니다.</p>
+      <label class="label" for="adminPassword">비밀번호</label>
+      <input class="field" id="adminPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
+      <div class="toolbar">
+        <button class="btn primary" type="button" id="loginBtn">들어가기</button>
+      </div>
+      <div class="status" id="loginStatus"></div>
+    </section>
+
+    <section class="grid hidden" id="adminApp">
+      <div class="panel list-panel">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">상품 목록</h2>
+            <p class="hint">한 페이지에는 8개씩 보입니다. 숫자가 클수록 먼저 보입니다.</p>
+          </div>
+          <button class="btn primary" type="button" id="newBtn">새 상품</button>
+        </div>
+        <div class="status" id="listStatus">상품을 불러오는 중...</div>
+        <div class="product-list" id="productList"></div>
+      </div>
+
+      <form class="panel form-panel" id="productForm">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">상품 정보</h2>
+            <p class="hint">ImageKit URL을 넣거나 파일을 업로드해서 URL을 채울 수 있습니다.</p>
+          </div>
+        </div>
+        <input type="hidden" id="productId">
+        <div class="form-grid">
+          <label><span class="label">상품명</span><input class="field" id="titleInput" required placeholder="예: 맞춤 낙관 키링"></label>
+          <label><span class="label">가격</span><input class="field" id="priceInput" placeholder="예: 19,000원"></label>
+          <label><span class="label">상태</span><select class="field" id="statusInput"><option value="preparing">판매 준비중</option><option value="selling">판매중</option><option value="soldout">품절</option></select></label>
+          <label><span class="label">정렬 숫자</span><input class="field" id="sortInput" type="number" value="10"></label>
+          <label class="span-2"><span class="label">설명</span><textarea class="field" id="descInput" placeholder="상품 설명"></textarea></label>
+          <label class="span-2"><span class="label">대표 이미지 URL</span><input class="field image-url" id="mainImageInput" type="url" placeholder="https://ik.imagekit.io/..."></label>
+          <label><span class="label">상세 이미지 1</span><input class="field image-url" id="detailImage1" type="url"></label>
+          <label><span class="label">상세 이미지 2</span><input class="field image-url" id="detailImage2" type="url"></label>
+          <label><span class="label">상세 이미지 3</span><input class="field image-url" id="detailImage3" type="url"></label>
+          <label><span class="label">표시 여부</span><select class="field" id="visibleInput"><option value="true">보이기</option><option value="false">숨기기</option></select></label>
+          <div class="span-2">
+            <span class="label">미리보기</span>
+            <div class="preview" id="previewImages"></div>
+          </div>
+          <div class="span-2 upload-row">
+            <label><span class="label">ImageKit 업로드</span><input class="field" id="uploadInput" type="file" accept="image/*"></label>
+            <button class="btn" type="button" id="uploadBtn">업로드</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" type="submit" id="saveBtn">저장</button>
+          <button class="btn danger" type="button" id="deleteBtn">삭제</button>
+        </div>
+        <div class="status" id="formStatus"></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const authConfig = {
+      loginEndpoint: '/api/crop-auth',
+      imagekitAuthEndpoint: '/api/imagekit-auth',
+      productsEndpoint: '/api/store-products',
+      tokenStorageKey: 'bokjaksoStoreAdminToken'
+    };
+    const imageKitConfig = {
+      publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
+      uploadEndpoint: 'https://upload.imagekit.io/api/v1/files/upload',
+      folder: '/bokjakso-store'
+    };
+    const $ = selector => document.querySelector(selector);
+    let products = [];
+
+    function getToken(){ return sessionStorage.getItem(authConfig.tokenStorageKey) || ''; }
+    function tokenIsFresh(token){
+      const expire = Number(String(token || '').split(':')[0]);
+      return Number.isFinite(expire) && expire > Math.floor(Date.now() / 1000) + 15;
+    }
+    function setStatus(selector, text, type=''){
+      const el = $(selector);
+      if(!el) return;
+      el.textContent = text;
+      el.className = `status ${type}`.trim();
+    }
+    function openApp(){
+      $('#passwordGate').classList.add('hidden');
+      $('#adminApp').classList.remove('hidden');
+      $('#logoutBtn').classList.remove('hidden');
+      loadProducts();
+    }
+    function closeApp(){
+      sessionStorage.removeItem(authConfig.tokenStorageKey);
+      $('#passwordGate').classList.remove('hidden');
+      $('#adminApp').classList.add('hidden');
+      $('#logoutBtn').classList.add('hidden');
+    }
+    async function login(){
+      const password = $('#adminPassword').value.trim();
+      if(!password){
+        setStatus('#loginStatus', '비밀번호를 입력해 주세요.', 'bad');
+        return;
+      }
+      $('#loginBtn').disabled = true;
+      try{
+        const response = await fetch(authConfig.loginEndpoint, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({password})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '비밀번호가 맞지 않습니다.');
+        sessionStorage.setItem(authConfig.tokenStorageKey, result.accessToken);
+        $('#adminPassword').value = '';
+        openApp();
+      }catch(error){
+        setStatus('#loginStatus', error.message || '로그인 실패', 'bad');
+      }finally{
+        $('#loginBtn').disabled = false;
+      }
+    }
+    function productImagesFromForm(){
+      return [$('#detailImage1').value, $('#detailImage2').value, $('#detailImage3').value].map(v => v.trim()).filter(Boolean);
+    }
+    function fillForm(product={}){
+      $('#productId').value = product.id || '';
+      $('#titleInput').value = product.title || '';
+      $('#priceInput').value = product.price_text || '가격 준비중';
+      $('#statusInput').value = product.status || 'preparing';
+      $('#sortInput').value = Number(product.sort_order || 10);
+      $('#descInput').value = product.description || '';
+      $('#mainImageInput').value = product.main_image_url || '';
+      const detail = Array.isArray(product.detail_image_urls) ? product.detail_image_urls : [];
+      $('#detailImage1').value = detail[0] || '';
+      $('#detailImage2').value = detail[1] || '';
+      $('#detailImage3').value = detail[2] || '';
+      $('#visibleInput').value = product.is_visible === false ? 'false' : 'true';
+      renderPreview();
+      renderList(product.id || '');
+    }
+    function formPayload(){
+      return {
+        id: $('#productId').value,
+        title: $('#titleInput').value,
+        price_text: $('#priceInput').value,
+        status: $('#statusInput').value,
+        sort_order: Number($('#sortInput').value || 10),
+        description: $('#descInput').value,
+        main_image_url: $('#mainImageInput').value,
+        detail_image_urls: productImagesFromForm(),
+        is_visible: $('#visibleInput').value === 'true'
+      };
+    }
+    function renderPreview(){
+      const urls = [$('#mainImageInput').value, ...productImagesFromForm()].filter(Boolean);
+      $('#previewImages').innerHTML = urls.length
+        ? urls.map(url => `<img src="${url.replace(/"/g, '&quot;')}" alt="">`).join('')
+        : '<p class="hint">이미지 URL을 넣으면 미리보기가 보입니다.</p>';
+    }
+    function statusText(status){
+      return status === 'selling' ? '판매중' : status === 'soldout' ? '품절' : '준비중';
+    }
+    function renderList(activeId=''){
+      const list = $('#productList');
+      list.innerHTML = products.map(product => `
+        <button class="product-item ${product.id === activeId ? 'is-active' : ''}" type="button" data-id="${product.id}">
+          <img src="${product.main_image_url || product.detail_image_urls?.[0] || ''}" alt="">
+          <span>
+            <span class="item-title">${product.title || '새 상품'}</span>
+            <span class="item-meta">${product.price_text || '가격 준비중'} · 정렬 ${product.sort_order || 10}</span>
+          </span>
+          <span class="badge">${statusText(product.status)}</span>
+        </button>
+      `).join('');
+      list.querySelectorAll('.product-item').forEach(button => {
+        button.addEventListener('click', () => fillForm(products.find(item => item.id === button.dataset.id) || {}));
+      });
+    }
+    async function loadProducts(){
+      setStatus('#listStatus', '상품을 불러오는 중...');
+      try{
+        const response = await fetch(authConfig.productsEndpoint, {cache:'no-store'});
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '상품을 불러오지 못했습니다.');
+        products = result.products || [];
+        renderList($('#productId').value);
+        setStatus('#listStatus', products.length ? `${products.length}개 상품` : '아직 등록된 상품이 없습니다.', 'ok');
+      }catch(error){
+        setStatus('#listStatus', error.message || '상품 불러오기 실패', 'bad');
+      }
+    }
+    async function saveProduct(event){
+      event.preventDefault();
+      if(!tokenIsFresh(getToken())){
+        closeApp();
+        setStatus('#loginStatus', '비밀번호를 다시 입력해 주세요.', 'bad');
+        return;
+      }
+      const payload = formPayload();
+      const method = payload.id ? 'PUT' : 'POST';
+      setStatus('#formStatus', '저장 중...');
+      $('#saveBtn').disabled = true;
+      try{
+        const response = await fetch(authConfig.productsEndpoint, {
+          method,
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${getToken()}`},
+          body:JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '저장 실패');
+        setStatus('#formStatus', '저장되었습니다.', 'ok');
+        await loadProducts();
+        if(result.product) fillForm(result.product);
+      }catch(error){
+        setStatus('#formStatus', error.message || '저장 실패', 'bad');
+      }finally{
+        $('#saveBtn').disabled = false;
+      }
+    }
+    async function deleteProduct(){
+      const id = $('#productId').value;
+      if(!id){
+        setStatus('#formStatus', '삭제할 상품을 먼저 선택해 주세요.', 'bad');
+        return;
+      }
+      if(!confirm('이 상품을 숨김 처리할까요?')) return;
+      try{
+        const response = await fetch(authConfig.productsEndpoint, {
+          method:'DELETE',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${getToken()}`},
+          body:JSON.stringify({id})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '삭제 실패');
+        fillForm({});
+        await loadProducts();
+        setStatus('#formStatus', '상품을 숨김 처리했습니다.', 'ok');
+      }catch(error){
+        setStatus('#formStatus', error.message || '삭제 실패', 'bad');
+      }
+    }
+    async function uploadImage(){
+      const file = $('#uploadInput').files?.[0];
+      if(!file){
+        setStatus('#formStatus', '업로드할 이미지를 선택해 주세요.', 'bad');
+        return;
+      }
+      setStatus('#formStatus', 'ImageKit 업로드 중...');
+      $('#uploadBtn').disabled = true;
+      try{
+        const authResponse = await fetch(authConfig.imagekitAuthEndpoint, {
+          cache:'no-store',
+          headers:{Authorization:`Bearer ${getToken()}`}
+        });
+        const auth = await authResponse.json().catch(() => ({}));
+        if(!authResponse.ok) throw new Error(auth.message || 'ImageKit 인증 실패');
+        const form = new FormData();
+        form.append('file', file, file.name);
+        form.append('fileName', file.name);
+        form.append('publicKey', imageKitConfig.publicKey);
+        form.append('signature', auth.signature);
+        form.append('expire', auth.expire);
+        form.append('token', auth.token);
+        form.append('folder', imageKitConfig.folder);
+        form.append('useUniqueFileName', 'true');
+        const uploadResponse = await fetch(imageKitConfig.uploadEndpoint, {method:'POST', body:form});
+        const result = await uploadResponse.json().catch(() => ({}));
+        if(!uploadResponse.ok) throw new Error(result.message || '업로드 실패');
+        const emptyInput = ['#mainImageInput','#detailImage1','#detailImage2','#detailImage3'].map($).find(input => !input.value.trim());
+        (emptyInput || $('#mainImageInput')).value = result.url || '';
+        renderPreview();
+        setStatus('#formStatus', 'ImageKit 업로드 완료. 저장 버튼을 눌러 상품에 반영하세요.', 'ok');
+      }catch(error){
+        setStatus('#formStatus', error.message || '업로드 실패', 'bad');
+      }finally{
+        $('#uploadBtn').disabled = false;
+      }
+    }
+
+    $('#loginBtn').addEventListener('click', login);
+    $('#adminPassword').addEventListener('keydown', event => { if(event.key === 'Enter') login(); });
+    $('#logoutBtn').addEventListener('click', closeApp);
+    $('#newBtn').addEventListener('click', () => fillForm({price_text:'가격 준비중', status:'preparing', sort_order:10, is_visible:true}));
+    $('#productForm').addEventListener('submit', saveProduct);
+    $('#deleteBtn').addEventListener('click', deleteProduct);
+    $('#uploadBtn').addEventListener('click', uploadImage);
+    document.querySelectorAll('.image-url').forEach(input => input.addEventListener('input', renderPreview));
+    if(tokenIsFresh(getToken())) openApp();
+  </script>
+</body>
+</html>

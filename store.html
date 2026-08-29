@@ -804,10 +804,61 @@
     const detailTitle = detailView.querySelector('[data-detail-title]');
     const detailCopy = detailView.querySelector('[data-detail-copy]');
     const detailPrice = detailView.querySelector('[data-detail-price]');
-    const productCards = Array.from(document.querySelectorAll('.product-card'));
+    const productsEl = document.querySelector('.products');
+    let productCards = Array.from(document.querySelectorAll('.product-card'));
     const pagination = document.querySelector('.pagination');
     const productsPerPage = 8;
     let currentPage = 1;
+
+    function escapeHtml(value){
+      return String(value || '').replace(/[&<>"']/g, char => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[char]));
+    }
+
+    function productImage(product){
+      return product.main_image_url || product.detail_image_urls?.[0] || '';
+    }
+
+    function renderProductsFromDb(products){
+      if(!Array.isArray(products) || !products.length) return;
+      productsEl.innerHTML = products.map(product => {
+        const imageUrl = productImage(product);
+        const detailImages = Array.isArray(product.detail_image_urls) ? product.detail_image_urls : [];
+        return `
+          <article class="product-card" data-detail-images="${escapeHtml(JSON.stringify(detailImages))}" data-status="${escapeHtml(product.status || 'preparing')}">
+            <div class="product-media">
+              <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.title || '복작소 상품')}" loading="lazy">
+            </div>
+            <div class="product-body">
+              <h2 class="product-title">${escapeHtml(product.title || '복작소 상품')}</h2>
+              <p class="product-copy">${escapeHtml(product.description || '상품 정보를 준비하고 있습니다.')}</p>
+              <div class="product-price">${escapeHtml(product.price_text || '가격 준비중')}</div>
+              <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+            </div>
+          </article>
+        `;
+      }).join('');
+      productCards = Array.from(document.querySelectorAll('.product-card'));
+      bindProductCards();
+      bindSectionTargets();
+      renderPagination();
+      showProductPage(1);
+    }
+
+    async function loadStoreProducts(){
+      try{
+        const response = await fetch('/api/store-products', {cache:'no-store'});
+        const result = await response.json().catch(() => ({}));
+        if(response.ok && result.products?.length) renderProductsFromDb(result.products);
+      }catch(error){
+        console.warn('스토어 상품을 불러오지 못해 기본 상품을 표시합니다.', error);
+      }
+    }
 
     function showProductPage(page){
       const totalPages = Math.max(1, Math.ceil(productCards.length / productsPerPage));
@@ -832,6 +883,7 @@
       const totalPages = Math.ceil(productCards.length / productsPerPage);
       if(totalPages <= 1){
         pagination.hidden = true;
+        pagination.innerHTML = '';
         return;
       }
 
@@ -857,12 +909,20 @@
       const title = card.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
       const copy = card.querySelector('.product-copy')?.textContent?.trim() || '상품 정보를 준비하고 있습니다.';
       const price = card.querySelector('.product-price')?.textContent?.trim() || '가격 준비중';
+      let detailImages = [];
+
+      try{
+        detailImages = JSON.parse(card.dataset.detailImages || '[]');
+      }catch(error){
+        detailImages = [];
+      }
+      detailImages = [image.src, ...detailImages].filter(Boolean);
 
       detailImage.src = image.src;
       detailImage.alt = image.alt || title;
       detailThumbs.forEach((thumb, index) => {
         const thumbImage = thumb.querySelector('img');
-        thumbImage.src = image.src;
+        thumbImage.src = detailImages[index] || image.src;
         thumbImage.alt = '';
         thumb.classList.toggle('is-active', index === 0);
       });
@@ -880,28 +940,33 @@
       document.body.style.overflow = '';
     }
 
-    productCards.forEach(card => {
-      const media = card.querySelector('.product-media');
-      media.setAttribute('tabindex', '0');
-      media.setAttribute('role', 'button');
-      media.setAttribute('aria-label', `${card.querySelector('.product-title')?.textContent?.trim() || '상품'} 상세 보기`);
-      media.addEventListener('click', () => openProductDetail(card));
-      media.addEventListener('keydown', event => {
-        if(event.key === 'Enter' || event.key === ' '){
-          event.preventDefault();
-          openProductDetail(card);
-        }
+    function bindProductCards(){
+      productCards.forEach(card => {
+        const media = card.querySelector('.product-media');
+        media.setAttribute('tabindex', '0');
+        media.setAttribute('role', 'button');
+        media.setAttribute('aria-label', `${card.querySelector('.product-title')?.textContent?.trim() || '상품'} 상세 보기`);
+        media.addEventListener('click', () => openProductDetail(card));
+        media.addEventListener('keydown', event => {
+          if(event.key === 'Enter' || event.key === ' '){
+            event.preventDefault();
+            openProductDetail(card);
+          }
+        });
       });
-    });
+    }
 
     detailThumbs.forEach(thumb => {
       thumb.addEventListener('click', () => {
+        const thumbImage = thumb.querySelector('img');
         detailThumbs.forEach(item => item.classList.remove('is-active'));
         thumb.classList.add('is-active');
+        if(thumbImage?.src) detailImage.src = thumbImage.src;
         detailImage.style.setProperty('--detail-image-transform', thumb.dataset.transform || 'none');
       });
     });
 
+    bindProductCards();
     renderPagination();
     showProductPage(1);
 
@@ -914,17 +979,23 @@
       if(event.key === 'Escape' && !detailView.hidden) closeProductDetail();
     });
 
-    document.querySelectorAll('[data-section-target]').forEach(link => {
-      link.addEventListener('click', event => {
-        const target = link.getAttribute('data-section-target');
-        if(!target) return;
-        try{
-          sessionStorage.setItem('wjarchive:sectionTarget', target);
-        }catch(err){}
-        event.preventDefault();
-        window.location.href = '/';
+    function bindSectionTargets(){
+      document.querySelectorAll('[data-section-target]').forEach(link => {
+        if(link.dataset.boundSectionTarget) return;
+        link.dataset.boundSectionTarget = 'true';
+        link.addEventListener('click', event => {
+          const target = link.getAttribute('data-section-target');
+          if(!target) return;
+          try{
+            sessionStorage.setItem('wjarchive:sectionTarget', target);
+          }catch(err){}
+          event.preventDefault();
+          window.location.href = '/';
+        });
       });
-    });
+    }
+    bindSectionTargets();
+    loadStoreProducts();
   </script>
 </body>
 </html>

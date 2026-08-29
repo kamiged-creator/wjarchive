@@ -4,7 +4,9 @@ const tokenLifetimeSeconds = 12 * 60 * 60;
 const allowedOrigins = new Set([
   'https://wjarchive.vercel.app',
   'https://ycuve.com',
-  'https://www.ycuve.com'
+  'https://www.ycuve.com',
+  'https://bokjakso.com',
+  'https://www.bokjakso.com'
 ]);
 
 function setCors(req, res) {
