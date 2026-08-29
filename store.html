@@ -388,12 +388,30 @@
       border-radius:4px;
       overflow:hidden;
       background:var(--paper);
+      padding:0;
+      cursor:pointer;
+      opacity:.72;
+      transition:border-color .2s ease, opacity .2s ease, transform .2s ease;
+    }
+    .detail-thumb:hover,
+    .detail-thumb.is-active{
+      border-color:rgba(31,26,23,.44);
+      opacity:1;
+      transform:translateY(-1px);
     }
     .detail-thumb img,
     .detail-main-image img{
       width:100%;
       height:100%;
       object-fit:cover;
+    }
+    .detail-thumb img{
+      pointer-events:none;
+      transform:var(--thumb-transform, none);
+    }
+    .detail-main-image img{
+      transform:var(--detail-image-transform, none);
+      transition:transform .2s ease;
     }
     .detail-main-image{
       aspect-ratio:1/1;
@@ -741,10 +759,10 @@
       </div>
       <div class="detail-grid">
         <div class="detail-gallery">
-          <div class="detail-thumbs" aria-hidden="true">
-            <div class="detail-thumb"><img data-detail-thumb src="" alt=""></div>
-            <div class="detail-thumb"><img data-detail-thumb src="" alt=""></div>
-            <div class="detail-thumb"><img data-detail-thumb src="" alt=""></div>
+          <div class="detail-thumbs">
+            <button class="detail-thumb" type="button" data-detail-thumb data-transform="none" style="--thumb-transform:none" aria-label="정면 이미지 보기"><img src="" alt=""></button>
+            <button class="detail-thumb" type="button" data-detail-thumb data-transform="scale(1.08) rotate(-4deg)" style="--thumb-transform:scale(1.08) rotate(-4deg)" aria-label="왼쪽 방향 이미지 보기"><img src="" alt=""></button>
+            <button class="detail-thumb" type="button" data-detail-thumb data-transform="scale(1.08) rotate(4deg)" style="--thumb-transform:scale(1.08) rotate(4deg)" aria-label="오른쪽 방향 이미지 보기"><img src="" alt=""></button>
           </div>
           <div class="detail-main-image">
             <img data-detail-image src="" alt="">
@@ -842,10 +860,13 @@
 
       detailImage.src = image.src;
       detailImage.alt = image.alt || title;
-      detailThumbs.forEach(thumb => {
-        thumb.src = image.src;
-        thumb.alt = '';
+      detailThumbs.forEach((thumb, index) => {
+        const thumbImage = thumb.querySelector('img');
+        thumbImage.src = image.src;
+        thumbImage.alt = '';
+        thumb.classList.toggle('is-active', index === 0);
       });
+      detailImage.style.setProperty('--detail-image-transform', 'none');
       detailTitle.textContent = title;
       detailCopy.textContent = copy;
       detailPrice.textContent = price;
@@ -870,6 +891,14 @@
           event.preventDefault();
           openProductDetail(card);
         }
+      });
+    });
+
+    detailThumbs.forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        detailThumbs.forEach(item => item.classList.remove('is-active'));
+        thumb.classList.add('is-active');
+        detailImage.style.setProperty('--detail-image-transform', thumb.dataset.transform || 'none');
       });
     });
 
