@@ -77,6 +77,7 @@
     .home-link:hover{color:var(--text)}
     .store-brand{
       justify-self:center;
+      grid-column:2;
       text-align:center;
       font-size:28px;
       line-height:1;
@@ -85,6 +86,7 @@
     }
     .store-action{
       justify-self:end;
+      grid-column:3;
       min-height:36px;
       display:inline-flex;
       align-items:center;
@@ -523,7 +525,7 @@
         justify-self:center;
         font-size:27px;
       }
-      .home-link,.store-action{
+      .store-action{
         font-size:12px;
       }
       .store-action{
@@ -610,9 +612,8 @@
 <body>
   <header class="store-top">
     <div class="wrap store-top-inner">
-      <a class="home-link" href="/">홈</a>
       <a class="store-brand" href="/store.html">복작소</a>
-      <a class="store-action" href="/" data-section-target="#contact">문의</a>
+      <a class="store-action" href="/store-contact.html">문의</a>
     </div>
   </header>
 
@@ -635,7 +636,7 @@
           <h2 class="product-title">작품 목판 키링</h2>
           <p class="product-copy">작품 문양을 나무 위에 담은 따뜻한 키링</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -647,7 +648,7 @@
           <h2 class="product-title">맞춤 낙관 키링</h2>
           <p class="product-copy">이름과 마음을 새겨 간직하는 작은 낙관</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -659,7 +660,7 @@
           <h2 class="product-title">전통 문방 소품</h2>
           <p class="product-copy">책상과 서재에 조용히 놓이는 작은 물건들</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -671,7 +672,7 @@
           <h2 class="product-title">낙관 목걸이</h2>
           <p class="product-copy">작은 낙관을 가까이 두는 장식 소품</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -683,7 +684,7 @@
           <h2 class="product-title">책갈피 소품</h2>
           <p class="product-copy">글과 책 사이에 놓이는 작은 표식</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -695,7 +696,7 @@
           <h2 class="product-title">문양 키링</h2>
           <p class="product-copy">작품의 선과 문양을 담은 키링</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -707,7 +708,7 @@
           <h2 class="product-title">선물 세트</h2>
           <p class="product-copy">작은 물건을 함께 담은 구성</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
 
@@ -719,7 +720,7 @@
           <h2 class="product-title">준비중</h2>
           <p class="product-copy">새로운 소품을 준비하고 있습니다</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
         </div>
       </article>
     </section>
@@ -788,7 +789,7 @@
           </div>
           <div class="detail-actions">
             <button class="detail-button" type="button" data-detail-back>목록으로</button>
-            <a class="detail-button primary" href="/" data-section-target="#contact">문의하기</a>
+            <a class="detail-button primary" href="/store-contact.html" data-detail-inquiry>문의하기</a>
           </div>
         </div>
       </div>
@@ -838,7 +839,7 @@
               <h2 class="product-title">${escapeHtml(product.title || '복작소 상품')}</h2>
               <p class="product-copy">${escapeHtml(product.description || '상품 정보를 준비하고 있습니다.')}</p>
               <div class="product-price">${escapeHtml(product.price_text || '가격 준비중')}</div>
-              <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+              <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
             </div>
           </article>
         `;
@@ -930,6 +931,8 @@
       detailTitle.textContent = title;
       detailCopy.textContent = copy;
       detailPrice.textContent = price;
+      const detailInquiry = detailView.querySelector('[data-detail-inquiry]');
+      if(detailInquiry) detailInquiry.href = `/store-contact.html?product=${encodeURIComponent(title)}`;
       detailView.hidden = false;
       document.body.style.overflow = 'hidden';
       detailClose.focus();

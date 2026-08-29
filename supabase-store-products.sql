@@ -39,3 +39,26 @@ create trigger store_products_updated_at
 before update on public.store_products
 for each row
 execute function public.set_store_products_updated_at();
+
+create table if not exists public.store_inquiries (
+  id uuid primary key default gen_random_uuid(),
+  name text not null default '',
+  contact text not null default '',
+  product_name text not null default '',
+  message text not null default '',
+  status text not null default 'new',
+  created_at timestamptz not null default now()
+);
+
+alter table public.store_inquiries enable row level security;
+
+drop policy if exists "store inquiries are service role only" on public.store_inquiries;
+create policy "store inquiries are service role only"
+on public.store_inquiries
+for all
+to service_role
+using (true)
+with check (true);
+
+create index if not exists store_inquiries_created_at_idx
+on public.store_inquiries (created_at desc);
