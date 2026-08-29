@@ -312,11 +312,20 @@
       flex-wrap:wrap;
     }
     .footer-brand{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
       font-size:18px;
       line-height:1;
       font-weight:900;
       letter-spacing:-.04em;
       color:var(--text);
+    }
+    .footer-brand img{
+      width:18px;
+      height:18px;
+      border-radius:4px;
+      object-fit:cover;
     }
     .footer-note{
       margin:8px 0 0;
@@ -775,7 +784,7 @@
   <footer class="store-footer">
     <div class="wrap footer-inner">
       <div>
-        <div class="footer-brand">복작소</div>
+        <div class="footer-brand"><img src="/favicon-32x32.png" alt="" aria-hidden="true">복작소</div>
         <p class="footer-note">판매 정보는 준비되는 대로 순차적으로 안내합니다.</p>
       </div>
       <div class="business-info" aria-label="사업자 정보">
