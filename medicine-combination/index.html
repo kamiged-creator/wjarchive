@@ -113,11 +113,23 @@
   .readBtn{display:inline-flex;align-items:center;gap:7px;border:1px solid #355565;background:#112631;color:#e9f7fb;border-radius:11px;padding:9px 12px;font-weight:800;font-size:13px;margin-top:10px}
   .readBtn:hover{background:#163341}
   .readBtn.playing{background:#0f6d79;border-color:#0f6d79;color:#fff}
+  .pharmacyBox{background:#121a23;border:1px solid var(--line);border-radius:20px;padding:20px;margin:24px 0}
+  .pharmacyBox h2{margin:0 0 8px;font-size:22px}.pharmacyBox>p{margin:0 0 15px;color:var(--muted);font-size:14px;line-height:1.6}
+  .locationBtn{width:100%;border:0;border-radius:14px;background:#0f6d79;color:#fff;padding:15px 18px;font-weight:900;font-size:16px}
+  .locationBtn:disabled{opacity:.65;cursor:wait}
+  .pharmacyStatus{margin-top:13px;color:#b8c6d0;font-size:13px;line-height:1.55}
+  .pharmacyList{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+  .pharmacyCard{border:1px solid #2b3945;border-radius:15px;padding:15px;background:#0d151d}
+  .pharmacyTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.pharmacyTop h3{font-size:17px;margin:0}
+  .distance{white-space:nowrap;border-radius:999px;background:#133b42;color:#9ee9e4;padding:5px 9px;font-size:12px;font-weight:900}
+  .pharmacyCard p{color:#aebcc7;font-size:13px;line-height:1.55;margin:9px 0}.pharmacyCard .phone{color:#dce8ef}
+  .pharmacyActions{display:flex;gap:7px;margin-top:12px}.pharmacyActions a{flex:1;text-align:center;text-decoration:none;border-radius:10px;padding:9px 7px;font-size:13px;font-weight:800}
+  .callBtn{background:#153e65;color:#fff}.mapBtn{background:#19352c;color:#bff1d7;border:1px solid #2d5d4d}
   @media(max-width:780px){
     .hero{padding-top:20px}.hero h1{margin-top:36px}.grid{grid-template-columns:1fr}.results{max-height:none}.detail{position:static;min-height:0;padding:20px}
     .search button{padding:0 18px}.summary{font-size:14px}.detail h2{font-size:24px}.keyrow{flex-direction:column}.keyrow button{padding:11px}
     .drugInputs{grid-template-columns:1fr}.drugInputs button{padding:13px}.mixDrugGrid{grid-template-columns:1fr}
-    #multiDrugInputs{grid-template-columns:1fr}.multiActions .primary{margin-left:0;width:100%}
+    #multiDrugInputs{grid-template-columns:1fr}.multiActions .primary{margin-left:0;width:100%}.pharmacyList{grid-template-columns:1fr}
   }
 
   input::placeholder{color:#6f8190}
@@ -170,6 +182,14 @@
     </div>
   </details>
 
+  <section class="pharmacyBox">
+    <h2>📍 내 주변 약국 찾기</h2>
+    <p>현재 위치를 한 번만 확인해 반경 3km 안의 약국을 가까운 순서로 보여줘. 위치는 서버나 브라우저에 저장하지 않아.</p>
+    <button id="findPharmacy" type="button" class="locationBtn">내 주변 약국 찾기</button>
+    <div id="pharmacyStatus" class="pharmacyStatus" aria-live="polite"></div>
+    <div id="pharmacyList" class="pharmacyList"></div>
+  </section>
+
   <div id="messages"></div>
   <div id="summary"></div>
 
@@ -181,7 +201,7 @@
   </div>
 </main>
 
-<footer>Data: MFDS · DailyMed/NLM · openFDA<br>사이트에 표시되는 정보는 원문·최신 라벨과 함께 확인하세요.</footer>
+<footer>Data: MFDS · HIRA · DailyMed/NLM · openFDA<br>사이트에 표시되는 정보는 원문·최신 정보와 함께 확인하세요.</footer>
 
 <script>
 let region = 'all';
@@ -213,6 +233,11 @@ function clean(v){
 }
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));}
 function showMessage(type,text){ messages.innerHTML = `<div class="${type}">${esc(text)}</div>`; }
+function normalizedServiceKey(value){
+  const key=String(value||'').trim();
+  if(!key) return '';
+  try{return key.includes('%')?decodeURIComponent(key):key;}catch{return key;}
+}
 
 async function searchDrug(){
   const term=q.value.trim();
@@ -245,7 +270,7 @@ async function searchDrug(){
 }
 
 async function searchKorea(term){
-  const key=(krKey.value||localStorage.getItem('druglens_kr_key')||'').trim();
+  const key=normalizedServiceKey(krKey.value||localStorage.getItem('druglens_kr_key')||'');
   if(!key) throw new Error('한국 검색: 식약처 API 키를 먼저 넣어줘.');
   const url=new URL('https://apis.data.go.kr/1471000/DrbEasyDrugInfoService/getDrbEasyDrugList');
   url.searchParams.set('serviceKey',key);
@@ -267,6 +292,99 @@ async function searchKorea(term){
       '상호작용':clean(x.intrcQesitm),'부작용':clean(x.seQesitm),'보관법':clean(x.depositMethodQesitm)
     }
   }));
+}
+
+const pharmacyBtn=$('#findPharmacy');
+const pharmacyStatus=$('#pharmacyStatus');
+const pharmacyList=$('#pharmacyList');
+
+pharmacyBtn.addEventListener('click',()=>{
+  const key=normalizedServiceKey(krKey.value||localStorage.getItem('druglens_kr_key')||'');
+  if(!key){
+    pharmacyStatus.textContent='먼저 위의 한국 식약처 API 설정에 공공데이터 인증키를 저장해줘.';
+    return;
+  }
+  if(!navigator.geolocation){
+    pharmacyStatus.textContent='이 브라우저에서는 현재 위치 확인을 지원하지 않아.';
+    return;
+  }
+  pharmacyBtn.disabled=true;
+  pharmacyBtn.textContent='현재 위치 확인 중…';
+  pharmacyStatus.textContent='위치 권한 요청이 뜨면 “허용”을 눌러줘.';
+  pharmacyList.innerHTML='';
+  navigator.geolocation.getCurrentPosition(
+    pos=>loadNearbyPharmacies(pos.coords.latitude,pos.coords.longitude,key),
+    err=>{
+      pharmacyBtn.disabled=false; pharmacyBtn.textContent='내 주변 약국 찾기';
+      pharmacyStatus.textContent=err.code===1?'위치 권한이 거부됐어. 브라우저의 사이트 설정에서 위치를 허용해줘.':'현재 위치를 확인하지 못했어. 잠시 후 다시 시도해줘.';
+    },
+    {enableHighAccuracy:true,timeout:12000,maximumAge:60000}
+  );
+});
+
+async function loadNearbyPharmacies(lat,lon,key){
+  pharmacyStatus.textContent='주변 약국을 찾는 중…';
+  try{
+    const url=new URL('https://apis.data.go.kr/B551182/pharmacyInfoService/getParmacyBasisList');
+    url.searchParams.set('ServiceKey',key);
+    url.searchParams.set('xPos',String(lon));
+    url.searchParams.set('yPos',String(lat));
+    url.searchParams.set('radius','3000');
+    url.searchParams.set('pageNo','1');
+    url.searchParams.set('numOfRows','30');
+    const res=await fetch(url);
+    const text=await res.text();
+    if(!res.ok) throw new Error(`약국 API 오류 (${res.status})`);
+    const xml=new DOMParser().parseFromString(text,'application/xml');
+    if(xml.querySelector('parsererror')) throw new Error('약국 정보를 읽지 못했어.');
+    const resultCode=xml.querySelector('resultCode')?.textContent?.trim();
+    const resultMsg=xml.querySelector('resultMsg')?.textContent?.trim();
+    if(resultCode && resultCode!=='00') throw new Error(resultMsg||`약국 API 오류 (${resultCode})`);
+    const rows=[...xml.querySelectorAll('item')].map(item=>{
+      const value=(...names)=>names.map(n=>item.querySelector(n)?.textContent?.trim()).find(Boolean)||'';
+      const x=Number(value('XPos','xPos')),y=Number(value('YPos','yPos'));
+      return {
+        name:value('yadmNm','YADMNM')||'약국',addr:value('addr','ADDR'),phone:value('telno','TELNO'),
+        lon:x,lat:y,distance:Number.isFinite(x)&&Number.isFinite(y)?haversine(lat,lon,y,x):null
+      };
+    }).sort((a,b)=>(a.distance??Infinity)-(b.distance??Infinity));
+    renderPharmacies(rows);
+  }catch(err){
+    pharmacyStatus.textContent=err?.message||'주변 약국을 불러오지 못했어.';
+    pharmacyList.innerHTML='';
+  }finally{
+    pharmacyBtn.disabled=false; pharmacyBtn.textContent='내 주변 약국 다시 찾기';
+  }
+}
+
+function haversine(lat1,lon1,lat2,lon2){
+  const r=6371000,toRad=n=>n*Math.PI/180;
+  const dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return 2*r*Math.asin(Math.sqrt(a));
+}
+
+function distanceLabel(m){
+  if(!Number.isFinite(m)) return '거리 확인';
+  return m<1000?`${Math.round(m)}m`:`${(m/1000).toFixed(1)}km`;
+}
+
+function renderPharmacies(rows){
+  if(!rows.length){pharmacyStatus.textContent='반경 3km 안에서 약국을 찾지 못했어.';return;}
+  pharmacyStatus.textContent=`가까운 약국 ${rows.length}곳을 찾았어. 영업시간은 전화로 확인해줘.`;
+  pharmacyList.innerHTML=rows.map(p=>{
+    const mapQuery=encodeURIComponent(`${p.name} ${p.addr}`.trim());
+    const phone=p.phone.replace(/[^0-9+]/g,'');
+    return `<article class="pharmacyCard">
+      <div class="pharmacyTop"><h3>${esc(p.name)}</h3><span class="distance">${distanceLabel(p.distance)}</span></div>
+      <p>${esc(p.addr||'주소 정보 없음')}</p>
+      ${p.phone?`<p class="phone">☎ ${esc(p.phone)}</p>`:''}
+      <div class="pharmacyActions">
+        ${phone?`<a class="callBtn" href="tel:${esc(phone)}">전화하기</a>`:''}
+        <a class="mapBtn" href="https://map.naver.com/p/search/${mapQuery}" target="_blank" rel="noreferrer">지도에서 보기</a>
+      </div>
+    </article>`;
+  }).join('');
 }
 
 async function searchOpenFDA(term){
