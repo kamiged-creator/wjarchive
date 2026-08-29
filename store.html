@@ -170,6 +170,7 @@
       overflow:hidden;
       border-radius:4px;
       background:var(--accent-soft);
+      cursor:pointer;
     }
     .product-media img{
       width:100%;
@@ -296,6 +297,144 @@
     .footer-links a:hover{
       color:var(--text);
     }
+    .detail-view[hidden]{
+      display:none;
+    }
+    .detail-view{
+      position:fixed;
+      inset:0;
+      z-index:60;
+      overflow:auto;
+      background:rgba(246,241,234,.98);
+      padding:22px 0 48px;
+    }
+    .detail-shell{
+      max-width:1080px;
+      margin:0 auto;
+      padding:0 24px;
+    }
+    .detail-top{
+      min-height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:18px;
+      border-bottom:1px solid var(--line);
+      color:rgba(31,26,23,.7);
+      font-size:14px;
+      font-weight:800;
+    }
+    .detail-close{
+      width:38px;
+      height:38px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,253,249,.82);
+      color:var(--text);
+      cursor:pointer;
+    }
+    .detail-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);
+      gap:42px;
+      padding:36px 0 0;
+    }
+    .detail-gallery{
+      display:grid;
+      grid-template-columns:72px minmax(0,1fr);
+      gap:16px;
+      align-items:start;
+    }
+    .detail-thumbs{
+      display:grid;
+      gap:10px;
+    }
+    .detail-thumb{
+      aspect-ratio:1/1;
+      border:1px solid var(--line);
+      border-radius:4px;
+      overflow:hidden;
+      background:var(--paper);
+    }
+    .detail-thumb img,
+    .detail-main-image img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .detail-main-image{
+      aspect-ratio:1/1;
+      border-radius:4px;
+      overflow:hidden;
+      background:var(--accent-soft);
+      box-shadow:var(--shadow);
+    }
+    .detail-info{
+      padding-top:2px;
+    }
+    .detail-name{
+      margin:0;
+      font-size:28px;
+      line-height:1.32;
+      letter-spacing:-.045em;
+    }
+    .detail-desc{
+      margin:12px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.7;
+    }
+    .detail-price{
+      margin:20px 0 0;
+      padding-bottom:20px;
+      border-bottom:1px solid var(--line);
+      color:var(--text);
+      font-size:26px;
+      font-weight:900;
+      letter-spacing:-.04em;
+    }
+    .detail-list{
+      display:grid;
+      gap:14px;
+      margin:22px 0;
+      padding:0 0 22px;
+      border-bottom:1px solid var(--line);
+      color:rgba(31,26,23,.76);
+      font-size:14px;
+      line-height:1.6;
+    }
+    .detail-row{
+      display:grid;
+      grid-template-columns:72px 1fr;
+      gap:12px;
+    }
+    .detail-row strong{
+      color:var(--text);
+    }
+    .detail-actions{
+      display:grid;
+      grid-template-columns:1fr 1.35fr;
+      gap:10px;
+      margin-top:18px;
+    }
+    .detail-button{
+      min-height:48px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(31,26,23,.32);
+      border-radius:2px;
+      background:rgba(255,253,249,.72);
+      color:var(--text);
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .detail-button.primary{
+      border-color:var(--text);
+      background:var(--text);
+      color:#fffdf9;
+    }
 
     @media (max-width: 860px){
       .products{
@@ -315,6 +454,10 @@
       }
       .product-body{padding:22px 0 0}
       .inquiry-btn{width:100%;padding:0 14px}
+      .detail-grid{
+        grid-template-columns:1fr;
+        gap:28px;
+      }
     }
 
     @media (max-width: 680px){
@@ -379,6 +522,30 @@
       }
       .business-info span{
         white-space:normal;
+      }
+      .detail-view{
+        padding-top:calc(10px + env(safe-area-inset-top, 0px));
+      }
+      .detail-shell{
+        padding:0 18px;
+      }
+      .detail-gallery{
+        grid-template-columns:1fr;
+      }
+      .detail-thumbs{
+        display:none;
+      }
+      .detail-main-image{
+        aspect-ratio:1/1.08;
+      }
+      .detail-name{
+        font-size:24px;
+      }
+      .detail-price{
+        font-size:23px;
+      }
+      .detail-actions{
+        grid-template-columns:1fr;
       }
     }
   </style>
@@ -525,7 +692,108 @@
     </div>
   </footer>
 
+  <section class="detail-view" id="product-detail" hidden aria-label="상품 상세">
+    <div class="detail-shell">
+      <div class="detail-top">
+        <span>복작소 상품 상세</span>
+        <button class="detail-close" type="button" aria-label="닫기">X</button>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-gallery">
+          <div class="detail-thumbs" aria-hidden="true">
+            <div class="detail-thumb"><img data-detail-thumb src="" alt=""></div>
+            <div class="detail-thumb"><img data-detail-thumb src="" alt=""></div>
+            <div class="detail-thumb"><img data-detail-thumb src="" alt=""></div>
+          </div>
+          <div class="detail-main-image">
+            <img data-detail-image src="" alt="">
+          </div>
+        </div>
+        <div class="detail-info">
+          <h2 class="detail-name" data-detail-title></h2>
+          <p class="detail-desc" data-detail-copy></p>
+          <div class="detail-price" data-detail-price></div>
+          <div class="detail-list">
+            <div class="detail-row">
+              <strong>상태</strong>
+              <span>판매 준비중</span>
+            </div>
+            <div class="detail-row">
+              <strong>배송</strong>
+              <span>상품 준비 후 안내</span>
+            </div>
+            <div class="detail-row">
+              <strong>문의</strong>
+              <span>수량, 제작 방식, 선물 포장 상담 가능</span>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="detail-button" type="button" data-detail-back>목록으로</button>
+            <a class="detail-button primary" href="/" data-section-target="#contact">문의하기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <script>
+    const detailView = document.getElementById('product-detail');
+    const detailClose = detailView.querySelector('.detail-close');
+    const detailBack = detailView.querySelector('[data-detail-back]');
+    const detailImage = detailView.querySelector('[data-detail-image]');
+    const detailThumbs = detailView.querySelectorAll('[data-detail-thumb]');
+    const detailTitle = detailView.querySelector('[data-detail-title]');
+    const detailCopy = detailView.querySelector('[data-detail-copy]');
+    const detailPrice = detailView.querySelector('[data-detail-price]');
+
+    function openProductDetail(card){
+      const image = card.querySelector('.product-media img');
+      const title = card.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
+      const copy = card.querySelector('.product-copy')?.textContent?.trim() || '상품 정보를 준비하고 있습니다.';
+      const price = card.querySelector('.product-price')?.textContent?.trim() || '가격 준비중';
+
+      detailImage.src = image.src;
+      detailImage.alt = image.alt || title;
+      detailThumbs.forEach(thumb => {
+        thumb.src = image.src;
+        thumb.alt = '';
+      });
+      detailTitle.textContent = title;
+      detailCopy.textContent = copy;
+      detailPrice.textContent = price;
+      detailView.hidden = false;
+      document.body.style.overflow = 'hidden';
+      detailClose.focus();
+    }
+
+    function closeProductDetail(){
+      detailView.hidden = true;
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.product-card').forEach(card => {
+      const media = card.querySelector('.product-media');
+      media.setAttribute('tabindex', '0');
+      media.setAttribute('role', 'button');
+      media.setAttribute('aria-label', `${card.querySelector('.product-title')?.textContent?.trim() || '상품'} 상세 보기`);
+      media.addEventListener('click', () => openProductDetail(card));
+      media.addEventListener('keydown', event => {
+        if(event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          openProductDetail(card);
+        }
+      });
+    });
+
+    detailClose.addEventListener('click', closeProductDetail);
+    detailBack.addEventListener('click', closeProductDetail);
+    detailView.addEventListener('click', event => {
+      if(event.target === detailView) closeProductDetail();
+    });
+    window.addEventListener('keydown', event => {
+      if(event.key === 'Escape' && !detailView.hidden) closeProductDetail();
+    });
+
     document.querySelectorAll('[data-section-target]').forEach(link => {
       link.addEventListener('click', event => {
         const target = link.getAttribute('data-section-target');
