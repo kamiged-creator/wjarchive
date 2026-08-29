@@ -60,12 +60,12 @@
       -webkit-backdrop-filter:blur(14px);
     }
     .store-top-inner{
-      min-height:72px;
+      min-height:60px;
       display:grid;
       grid-template-columns:1fr auto 1fr;
       align-items:center;
       gap:18px;
-      padding:16px 0;
+      padding:10px 0;
     }
     .home-link{
       justify-self:start;
@@ -78,11 +78,21 @@
     .store-brand{
       justify-self:center;
       grid-column:2;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
       text-align:center;
       font-size:28px;
       line-height:1;
       font-weight:900;
       letter-spacing:-.06em;
+    }
+    .store-brand img{
+      width:22px;
+      height:22px;
+      border-radius:5px;
+      object-fit:cover;
     }
     .store-action{
       justify-self:end;
@@ -553,6 +563,10 @@
         justify-self:center;
         font-size:27px;
       }
+      .store-brand img{
+        width:21px;
+        height:21px;
+      }
       .store-action{
         font-size:12px;
       }
@@ -652,7 +666,7 @@
 <body>
   <header class="store-top">
     <div class="wrap store-top-inner">
-      <a class="store-brand" href="/store.html">복작소</a>
+      <a class="store-brand" href="/store.html"><img src="/favicon-32x32.png" alt="" aria-hidden="true">복작소</a>
       <a class="store-action" href="/store-contact.html">문의</a>
     </div>
   </header>
