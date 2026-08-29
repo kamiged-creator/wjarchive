@@ -159,6 +159,9 @@
       border-radius:8px;
       transition:border-color .28s ease, background .28s ease, transform .28s ease;
     }
+    .product-card.is-hidden{
+      display:none;
+    }
     .product-card:hover{
       border-color:rgba(31,26,23,.10);
       background:rgba(255,253,249,.44);
@@ -225,6 +228,36 @@
     .inquiry-btn:hover{
       background:rgba(231,214,196,.34);
       border-color:rgba(31,26,23,.54);
+    }
+    .pagination{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      padding:0 0 54px;
+    }
+    .pagination[hidden]{
+      display:none;
+    }
+    .page-button{
+      min-width:34px;
+      height:34px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,253,249,.72);
+      color:rgba(31,26,23,.72);
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      transition:background .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .page-button:hover,
+    .page-button.is-active{
+      border-color:rgba(31,26,23,.34);
+      background:var(--text);
+      color:#fffdf9;
     }
     .seal-mark{
       display:flex;
@@ -505,6 +538,9 @@
         display:block;
         background:rgba(139,104,71,.18);
       }
+      .product-card.is-page-first::before{
+        display:none;
+      }
       .product-title{font-size:23px}
       .product-copy{font-size:14px}
       .product-media{aspect-ratio:1/1.24}
@@ -546,6 +582,9 @@
       }
       .detail-actions{
         grid-template-columns:1fr;
+      }
+      .pagination{
+        padding-bottom:44px;
       }
     }
   </style>
@@ -667,6 +706,8 @@
       </article>
     </section>
 
+    <nav class="pagination" aria-label="상품 페이지" hidden></nav>
+
     <div class="seal-mark" aria-hidden="true">
       <div class="seal-box">印</div>
     </div>
@@ -745,6 +786,53 @@
     const detailTitle = detailView.querySelector('[data-detail-title]');
     const detailCopy = detailView.querySelector('[data-detail-copy]');
     const detailPrice = detailView.querySelector('[data-detail-price]');
+    const productCards = Array.from(document.querySelectorAll('.product-card'));
+    const pagination = document.querySelector('.pagination');
+    const productsPerPage = 8;
+    let currentPage = 1;
+
+    function showProductPage(page){
+      const totalPages = Math.max(1, Math.ceil(productCards.length / productsPerPage));
+      currentPage = Math.min(Math.max(page, 1), totalPages);
+      const start = (currentPage - 1) * productsPerPage;
+      const end = start + productsPerPage;
+
+      productCards.forEach((card, index) => {
+        const isVisible = index >= start && index < end;
+        card.classList.toggle('is-hidden', !isVisible);
+        card.classList.toggle('is-page-first', index === start);
+      });
+
+      pagination.querySelectorAll('.page-button').forEach(button => {
+        const isActive = Number(button.dataset.page) === currentPage;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-current', isActive ? 'page' : 'false');
+      });
+    }
+
+    function renderPagination(){
+      const totalPages = Math.ceil(productCards.length / productsPerPage);
+      if(totalPages <= 1){
+        pagination.hidden = true;
+        return;
+      }
+
+      pagination.hidden = false;
+      pagination.innerHTML = '';
+      for(let page = 1; page <= totalPages; page += 1){
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'page-button';
+        button.dataset.page = String(page);
+        button.textContent = String(page);
+        button.setAttribute('aria-label', `${page}페이지 보기`);
+        button.addEventListener('click', () => {
+          showProductPage(page);
+          document.querySelector('.products').scrollIntoView({ behavior:'smooth', block:'start' });
+        });
+        pagination.appendChild(button);
+      }
+    }
 
     function openProductDetail(card){
       const image = card.querySelector('.product-media img');
@@ -771,7 +859,7 @@
       document.body.style.overflow = '';
     }
 
-    document.querySelectorAll('.product-card').forEach(card => {
+    productCards.forEach(card => {
       const media = card.querySelector('.product-media');
       media.setAttribute('tabindex', '0');
       media.setAttribute('role', 'button');
@@ -784,6 +872,9 @@
         }
       });
     });
+
+    renderPagination();
+    showProductPage(1);
 
     detailClose.addEventListener('click', closeProductDetail);
     detailBack.addEventListener('click', closeProductDetail);
