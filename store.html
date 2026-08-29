@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google" content="notranslate" />
-  <title>스토어 준비중 | 이원주 작품 포트폴리오</title>
-  <meta name="description" content="이원주 작가의 스토어는 준비중입니다." />
+  <title>복작소 스토어 | 이원주 작품 포트폴리오</title>
+  <meta name="description" content="이원주 작가의 작품에서 태어난 키링과 소품을 소개하는 복작소 스토어입니다." />
   <meta name="theme-color" content="#fbf8f4" />
   <meta name="application-name" content="복작소" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -18,8 +18,8 @@
   <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192x192.png" />
   <link rel="manifest" href="/site.webmanifest" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="스토어 준비중 | 이원주 작품 포트폴리오" />
-  <meta property="og:description" content="작품 키링과 소품을 준비하고 있습니다." />
+  <meta property="og:title" content="복작소 스토어 | 이원주 작품 포트폴리오" />
+  <meta property="og:description" content="작품에서 태어난 키링과 소품을 차분하게 소개합니다." />
   <style>
     :root{
       --bg:#f6f1ea;
@@ -29,8 +29,8 @@
       --line:rgba(31,26,23,.12);
       --accent:#8b6847;
       --accent-soft:#e7d6c4;
+      --seal:#b6493c;
       --shadow:0 20px 48px rgba(31,26,23,.08);
-      --radius:24px;
       --max:1180px;
     }
 
@@ -41,241 +41,341 @@
       min-height:100vh;
       background:var(--bg);
       color:var(--text);
-      font-family:Arial, "Noto Sans KR", sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",Arial,sans-serif;
       word-break:keep-all;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
     }
+    img{display:block;max-width:100%}
     a{text-decoration:none;color:inherit}
-    button,input,textarea,select{font:inherit}
+    button{font:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
 
-    .topbar{
-      position:sticky;top:0;z-index:20;
+    .store-top{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:rgba(251,248,244,.94);
       backdrop-filter:blur(14px);
       -webkit-backdrop-filter:blur(14px);
-      background:rgba(251,248,244,.92);
-      border-bottom:none;
-      box-shadow:none;
-      margin:0;
-      transition:transform .28s ease, opacity .28s ease;
-      will-change:transform;
     }
-    .topbar-inner{
-      min-height:72px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 0 14px;
-    }
-    .brand{display:flex;flex-direction:column;gap:2px;padding-top:0;flex:0 0 auto}
-    .brand-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .brand-title{
-      display:inline-flex;
+    .store-top-inner{
+      min-height:72px;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
       align-items:center;
-      width:max-content;
-      min-height:34px;
-      margin:-5px -8px -4px;
-      padding:5px 8px 4px;
-      font-size:23px;
-      font-weight:900;
-      letter-spacing:-.04em;
+      gap:18px;
+      padding:16px 0;
+    }
+    .home-link{
+      justify-self:start;
+      color:rgba(31,26,23,.72);
+      font-size:14px;
+      font-weight:700;
+      transition:color .2s ease;
+    }
+    .home-link:hover{color:var(--text)}
+    .store-brand{
+      justify-self:center;
+      text-align:center;
+      font-size:28px;
       line-height:1;
-      user-select:none;
-      -webkit-user-select:none;
+      font-weight:900;
+      letter-spacing:-.06em;
     }
-    .brand-sub{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-    .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
-    .nav a{position:relative;padding:6px 12px;border-radius:999px;color:rgba(31,26,23,.74);font-size:14px;font-weight:650;background:transparent;transition:all .2s ease}
-    .nav a:hover,.nav a.is-active{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
-
-    .top-tools{display:grid;gap:8px;flex:1 1 auto;min-width:0}
-    .top-nav-row{display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;flex-wrap:nowrap}
-    .news-mini{
-      display:inline-flex;align-items:center;justify-content:center;
-      min-height:34px;padding:0 12px;border-radius:12px;
-      position:relative; top:0;
-      border:1px solid rgba(139,104,71,.18);
-      background:rgba(231,214,196,.42);
-      color:#6b5746;font-size:13px;font-weight:700;
-      box-shadow:none;
-    }
-    .news-mini:hover{
-      background:rgba(231,214,196,.62);
-      border-color:rgba(139,104,71,.28);
-      color:var(--text);
-    }
-    .news-link-label{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-    .new-badge{
+    .store-action{
+      justify-self:end;
+      min-height:36px;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-height:18px;
-      padding:0 7px;
+      padding:0 14px;
+      border:1px solid var(--line);
       border-radius:999px;
-      background:rgba(139,104,71,.14);
-      color:#7a5638;
-      font-size:10px;
-      font-weight:900;
-      line-height:1;
-      letter-spacing:.04em;
+      background:rgba(255,253,249,.72);
+      color:rgba(31,26,23,.74);
+      font-size:13px;
+      font-weight:800;
+      box-shadow:none;
     }
-    .news-mobile{display:none !important}
 
     main{
-      min-height:calc(100vh - 72px);
-      display:grid;
-      place-items:center;
-      padding:70px 0 86px;
       background:
-        radial-gradient(circle at 20% 10%, rgba(255,253,249,.9), transparent 38%),
-        linear-gradient(135deg, rgba(139,104,71,.10), rgba(255,253,249,.55) 52%, rgba(255,253,249,.82));
+        radial-gradient(circle at 18% 0%, rgba(255,253,249,.96), transparent 30%),
+        linear-gradient(180deg,#fbf8f4 0%,#f6f1ea 100%);
     }
-    .ready{
-      width:min(720px,100%);
+    .intro{
+      padding:72px 0 54px;
       text-align:center;
-      padding:54px 32px;
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      background:rgba(255,253,249,.76);
-      box-shadow:var(--shadow);
     }
-    .eyebrow{
+    .intro-kicker{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      min-height:34px;
+      min-height:32px;
       padding:0 12px;
       border:1px solid var(--line);
       border-radius:999px;
-      background:rgba(255,255,255,.62);
+      background:rgba(255,255,255,.54);
       color:var(--muted);
-      font-size:13px;
-      font-weight:700;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
     }
     h1{
-      margin:18px 0 14px;
-      font-size:clamp(38px,7vw,64px);
-      line-height:1.05;
-      letter-spacing:-.045em;
+      margin:18px auto 0;
+      max-width:760px;
+      font-size:clamp(36px,7vw,66px);
+      line-height:1.08;
+      letter-spacing:-.055em;
     }
-    .lead{
-      margin:0 auto;
-      max-width:520px;
+    .intro-line{
+      width:52px;
+      height:1px;
+      margin:30px auto 0;
+      background:rgba(139,104,71,.28);
+    }
+    .intro-copy{
+      margin:28px auto 0;
+      max-width:620px;
       color:var(--muted);
       font-size:18px;
-      line-height:1.72;
+      line-height:1.78;
     }
-    .actions{
+
+    .products{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:32px;
+      padding:26px 0 92px;
+    }
+    .product-card{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      padding:14px;
+      border:1px solid transparent;
+      border-radius:8px;
+      transition:border-color .28s ease, background .28s ease, transform .28s ease;
+    }
+    .product-card:hover{
+      border-color:rgba(31,26,23,.10);
+      background:rgba(255,253,249,.44);
+      transform:translateY(-2px);
+    }
+    .product-media{
+      position:relative;
+      aspect-ratio:4/5;
+      overflow:hidden;
+      border-radius:4px;
+      background:var(--accent-soft);
+    }
+    .product-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform .7s ease;
+    }
+    .product-card:hover .product-media img{transform:scale(1.035)}
+    .product-body{
+      display:flex;
+      flex:1;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      padding:24px 10px 8px;
+    }
+    .product-title{
+      margin:0;
+      font-size:24px;
+      line-height:1.28;
+      letter-spacing:-.035em;
+    }
+    .product-copy{
+      min-height:52px;
+      margin:10px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.62;
+    }
+    .product-price{
+      margin:18px 0 18px;
+      color:rgba(31,26,23,.66);
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+    }
+    .inquiry-btn{
+      width:100%;
+      min-height:46px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(31,26,23,.34);
+      border-radius:2px;
+      background:transparent;
+      color:var(--text);
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      transition:background .2s ease, border-color .2s ease;
+    }
+    .inquiry-btn:hover{
+      background:rgba(231,214,196,.34);
+      border-color:rgba(31,26,23,.54);
+    }
+    .seal-mark{
       display:flex;
       justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:28px;
+      padding:8px 0 76px;
     }
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      min-height:48px;padding:0 18px;border-radius:999px;font-weight:700;border:1px solid var(--line);
-      background:var(--paper);box-shadow:var(--shadow);cursor:pointer;color:var(--text);
+    .seal-box{
+      width:34px;
+      height:34px;
+      display:grid;
+      place-items:center;
+      border-radius:4px;
+      background:var(--seal);
+      color:#fff8ed;
+      font-size:20px;
+      font-weight:900;
+      line-height:1;
+      box-shadow:0 10px 24px rgba(182,73,60,.14);
     }
-    .btn.primary{background:var(--text);color:#fff;border-color:transparent}
+
+    @media (max-width: 860px){
+      .products{
+        max-width:560px;
+        grid-template-columns:1fr;
+        gap:54px;
+        margin:0 auto;
+        padding-top:10px;
+      }
+      .product-card{
+        padding:0;
+      }
+      .product-card:hover{
+        transform:none;
+        background:transparent;
+        border-color:transparent;
+      }
+      .product-card + .product-card::before{
+        content:"";
+        width:44px;
+        height:1px;
+        margin:-12px auto 26px;
+        display:block;
+        background:rgba(139,104,71,.18);
+      }
+      .product-body{padding:22px 0 0}
+      .inquiry-btn{width:auto;min-width:120px;padding:0 22px}
+    }
 
     @media (max-width: 680px){
       .wrap{padding:0 18px}
-      .topbar-inner{
-        align-items:flex-start;
-        flex-direction:column;
-        gap:12px;
-        padding:calc(26px + env(safe-area-inset-top, 0px)) 0 12px;
+      .store-top-inner{
+        min-height:68px;
+        grid-template-columns:auto 1fr auto;
+        gap:10px;
+        padding:calc(16px + env(safe-area-inset-top, 0px)) 0 12px;
       }
-      .brand{width:100%}
-      .brand-top{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        width:100%;
+      .store-brand{
+        justify-self:center;
+        font-size:27px;
       }
-      .top-tools{width:100%}
-      .top-nav-row{width:100%;flex-wrap:wrap;gap:8px}
-      .nav{
-        width:100%;
-        justify-content:flex-start;
-        column-gap:10px;
-        row-gap:8px;
-        margin-top:2px;
-      }
-      .nav a{
-        position:relative;
-        display:inline-flex;
-        align-items:center;
-        padding-left:7px;
-        padding-right:7px;
-      }
-      .nav a + a::before{
-        content:"";
-        position:absolute;
-        left:-5px;
-        top:50%;
-        width:1px;
-        height:12px;
-        border-radius:999px;
-        background:rgba(31,26,23,.18);
-        transform:translateY(-50%);
-        pointer-events:none;
-      }
-      .news-mini{
-        min-height:32px;
-        padding:0 10px;
-        border-radius:10px;
+      .home-link,.store-action{
         font-size:12px;
-        top:4px;
       }
-      .news-mobile{display:inline-flex !important}
-      .news-desktop-link{display:none !important}
-      main{display:block;min-height:auto;padding:42px 0 64px}
-      .ready{padding:40px 22px;border-radius:22px}
-      .lead{font-size:16px}
-      .btn{width:100%}
+      .store-action{
+        min-height:34px;
+        padding:0 10px;
+      }
+      .intro{
+        padding:54px 0 42px;
+      }
+      h1{
+        max-width:330px;
+        font-size:34px;
+        letter-spacing:-.045em;
+      }
+      .intro-copy{
+        max-width:320px;
+        font-size:16px;
+        line-height:1.72;
+      }
+      .products{
+        gap:58px;
+        padding-bottom:72px;
+      }
+      .product-title{font-size:23px}
+      .product-copy{font-size:14px}
+      .product-media{aspect-ratio:1/1.24}
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="wrap topbar-inner">
-      <div class="brand">
-        <div class="brand-top">
-          <a class="brand-title" href="/">이원주</a>
-          <a class="news-mini news-mobile" href="/" data-section-target="#news"><span class="news-link-label">소식 <span class="new-badge">NEW</span></span></a>
-        </div>
-        <div class="brand-sub">Seal · Calligraphy</div>
-      </div>
-      <div class="top-tools">
-        <div class="top-nav-row">
-          <nav class="nav" aria-label="주요 메뉴">
-            <a href="/" data-section-target="#about">작가 소개</a>
-            <a href="/" data-section-target="#works">작품</a>
-            <a class="is-active" href="/store.html" aria-current="page">스토어</a>
-            <a href="/" data-section-target="#note">작가 노트</a>
-            <a href="/" data-section-target="#contact">문의</a>
-            <a class="news-desktop-link" href="/" data-section-target="#news"><span class="news-link-label">소식 <span class="new-badge">NEW</span></span></a>
-          </nav>
-        </div>
-      </div>
+  <header class="store-top">
+    <div class="wrap store-top-inner">
+      <a class="home-link" href="/">홈</a>
+      <a class="store-brand" href="/store.html">복작소</a>
+      <a class="store-action" href="/" data-section-target="#contact">문의</a>
     </div>
   </header>
 
   <main>
-    <div class="wrap">
-      <section class="ready" aria-labelledby="storeTitle">
-        <span class="eyebrow">Bokjakso Store</span>
-        <h1 id="storeTitle">스토어 준비중</h1>
-        <p class="lead">작품 키링과 소품을 정리하고 있습니다. 준비가 끝나면 이 페이지에서 바로 안내하겠습니다.</p>
-        <div class="actions">
-          <a class="btn primary" href="/">홈으로 이동</a>
-          <a class="btn" href="/" data-section-target="#contact">문의하기</a>
+    <section class="intro">
+      <div class="wrap">
+        <span class="intro-kicker">Bokjakso Store</span>
+        <h1>손끝으로 전하는 고요한 물건들</h1>
+        <div class="intro-line" aria-hidden="true"></div>
+        <p class="intro-copy">작품에서 나온 문양과 낙관을 작게 담아, 일상 가까이에 둘 수 있는 키링과 소품으로 준비하고 있습니다.</p>
+      </div>
+    </section>
+
+    <section class="wrap products" aria-label="복작소 상품">
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="나무 목판 키링" loading="lazy">
         </div>
-      </section>
+        <div class="product-body">
+          <h2 class="product-title">작품 목판 키링</h2>
+          <p class="product-copy">작품 문양을 나무 위에 담은 따뜻한 키링</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="석재 낙관 키링" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">맞춤 낙관 키링</h2>
+          <p class="product-copy">이름과 마음을 새겨 간직하는 작은 낙관</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+
+      <article class="product-card">
+        <div class="product-media">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOVVlcmPS_Idc1xCw4f3BdT23xwJ5FSTlGg0IeTVkFaEAvMkTmhoArdhTx3QO4E97hQ0tL6O_CsTh8eNrmj8m8QMqTOUkpi4LUnzmq09nOLPgsxx4grm5RHOvpx8seENQoivY6Hkbr0fi8MRgYWqU-t2QKH-QATHOK8YXdJ54AyQdI8mqCE3STvvo_ZW_9k2oS4MOxClRIcjf82rSghukkKGqDMmiIH8virQdFM4o4uMfR8it4J3RH" alt="문방 소품" loading="lazy">
+        </div>
+        <div class="product-body">
+          <h2 class="product-title">전통 문방 소품</h2>
+          <p class="product-copy">책상과 서재에 조용히 놓이는 작은 물건들</p>
+          <div class="product-price">가격 준비중</div>
+          <a class="inquiry-btn" href="/" data-section-target="#contact">문의하기</a>
+        </div>
+      </article>
+    </section>
+
+    <div class="seal-mark" aria-hidden="true">
+      <div class="seal-box">印</div>
     </div>
   </main>
+
   <script>
     document.querySelectorAll('[data-section-target]').forEach(link => {
       link.addEventListener('click', event => {
