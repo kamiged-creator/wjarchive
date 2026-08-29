@@ -228,7 +228,7 @@
     .seal-mark{
       display:flex;
       justify-content:center;
-      padding:8px 0 76px;
+      padding:8px 0 52px;
     }
     .seal-box{
       width:34px;
@@ -242,6 +242,59 @@
       font-weight:900;
       line-height:1;
       box-shadow:0 10px 24px rgba(182,73,60,.14);
+    }
+    .store-footer{
+      border-top:1px solid var(--line);
+      background:rgba(255,253,249,.64);
+      color:rgba(31,26,23,.62);
+      padding:34px 0 40px;
+    }
+    .footer-inner{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:24px;
+      flex-wrap:wrap;
+    }
+    .footer-brand{
+      font-size:18px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:-.04em;
+      color:var(--text);
+    }
+    .footer-note{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+    .business-info{
+      max-width:780px;
+      display:flex;
+      justify-content:flex-end;
+      gap:6px 16px;
+      flex-wrap:wrap;
+      font-size:12px;
+      line-height:1.8;
+      text-align:right;
+    }
+    .business-info span{
+      white-space:nowrap;
+    }
+    .footer-links{
+      width:100%;
+      display:flex;
+      justify-content:flex-end;
+      gap:12px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .footer-links a{
+      color:rgba(31,26,23,.66);
+    }
+    .footer-links a:hover{
+      color:var(--text);
     }
 
     @media (max-width: 860px){
@@ -312,6 +365,21 @@
       .product-title{font-size:23px}
       .product-copy{font-size:14px}
       .product-media{aspect-ratio:1/1.24}
+      .store-footer{
+        padding:28px 0 34px;
+      }
+      .footer-inner{
+        display:grid;
+        gap:18px;
+      }
+      .business-info,
+      .footer-links{
+        justify-content:flex-start;
+        text-align:left;
+      }
+      .business-info span{
+        white-space:normal;
+      }
     }
   </style>
 </head>
@@ -436,6 +504,28 @@
       <div class="seal-box">印</div>
     </div>
   </main>
+
+  <footer class="store-footer">
+    <div class="wrap footer-inner">
+      <div>
+        <div class="footer-brand">복작소</div>
+        <p class="footer-note">판매 정보는 준비되는 대로 순차적으로 안내합니다.</p>
+      </div>
+      <div class="business-info" aria-label="사업자 정보">
+        <span>상호 복작소</span>
+        <span>대표 이원주</span>
+        <span>사업자등록번호 준비중</span>
+        <span>통신판매업 신고번호 준비중</span>
+        <span>주소 준비중</span>
+        <span>전화번호 준비중</span>
+        <span>이메일 준비중</span>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy.html">개인정보처리방침</a>
+        <span>이용약관 준비중</span>
+      </div>
+    </div>
+  </footer>
 
   <script>
     document.querySelectorAll('[data-section-target]').forEach(link => {
