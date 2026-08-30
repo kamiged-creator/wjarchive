@@ -493,6 +493,35 @@
     .detail-row strong{
       color:var(--text);
     }
+    .quantity-picker{
+      display:inline-flex;
+      align-items:center;
+      width:max-content;
+      min-height:38px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:rgba(255,253,249,.72);
+    }
+    .quantity-button{
+      width:38px;
+      min-height:38px;
+      display:grid;
+      place-items:center;
+      border:0;
+      background:transparent;
+      color:var(--text);
+      font-size:18px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .quantity-value{
+      min-width:42px;
+      padding:0 8px;
+      text-align:center;
+      color:var(--text);
+      font-weight:900;
+    }
     .detail-actions{
       display:grid;
       grid-template-columns:1fr 1.35fr;
@@ -834,7 +863,11 @@
             </div>
             <div class="detail-row">
               <strong>수량</strong>
-              <span>1개부터 문의 가능</span>
+              <span class="quantity-picker" aria-label="문의 수량 선택">
+                <button class="quantity-button" type="button" data-quantity-minus aria-label="수량 줄이기">-</button>
+                <span class="quantity-value" data-detail-quantity>1</span>
+                <button class="quantity-button" type="button" data-quantity-plus aria-label="수량 늘리기">+</button>
+              </span>
             </div>
             <div class="detail-row">
               <strong>문의</strong>
@@ -859,6 +892,9 @@
     const detailTitle = detailView.querySelector('[data-detail-title]');
     const detailCopy = detailView.querySelector('[data-detail-copy]');
     const detailPrice = detailView.querySelector('[data-detail-price]');
+    const detailQuantity = detailView.querySelector('[data-detail-quantity]');
+    const quantityMinus = detailView.querySelector('[data-quantity-minus]');
+    const quantityPlus = detailView.querySelector('[data-quantity-plus]');
     const productsEl = document.querySelector('.products');
     let productCards = Array.from(document.querySelectorAll('.product-card'));
     const pagination = document.querySelector('.pagination');
@@ -866,6 +902,7 @@
     const productsPerPage = 8;
     let currentPage = 1;
     let activeCategory = 'all';
+    let selectedQuantity = 1;
 
     function escapeHtml(value){
       return String(value || '').replace(/[&<>"']/g, char => ({
@@ -964,6 +1001,16 @@
       }
     }
 
+    function updateDetailQuantity(title = detailTitle.textContent.trim()){
+      selectedQuantity = Math.max(1, Math.min(99, selectedQuantity));
+      if(detailQuantity) detailQuantity.textContent = selectedQuantity;
+      const detailInquiry = detailView.querySelector('[data-detail-inquiry]');
+      if(detailInquiry){
+        const params = new URLSearchParams({ product:title, quantity:`${selectedQuantity}개` });
+        detailInquiry.href = `/store-contact.html?${params.toString()}`;
+      }
+    }
+
     function openProductDetail(card){
       const image = card.querySelector('.product-media img');
       const title = card.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
@@ -990,8 +1037,8 @@
       detailTitle.textContent = title;
       detailCopy.textContent = copy;
       detailPrice.textContent = price;
-      const detailInquiry = detailView.querySelector('[data-detail-inquiry]');
-      if(detailInquiry) detailInquiry.href = `/store-contact.html?product=${encodeURIComponent(title)}`;
+      selectedQuantity = 1;
+      updateDetailQuantity(title);
       detailView.hidden = false;
       document.body.style.overflow = 'hidden';
       detailClose.focus();
@@ -1035,6 +1082,16 @@
         if(thumbImage?.src) detailImage.src = thumbImage.src;
         detailImage.style.setProperty('--detail-image-transform', thumb.dataset.transform || 'none');
       });
+    });
+
+    if(quantityMinus) quantityMinus.addEventListener('click', () => {
+      selectedQuantity -= 1;
+      updateDetailQuantity();
+    });
+
+    if(quantityPlus) quantityPlus.addEventListener('click', () => {
+      selectedQuantity += 1;
+      updateDetailQuantity();
     });
 
     bindProductCards();

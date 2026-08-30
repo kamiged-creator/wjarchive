@@ -90,7 +90,7 @@
         </label>
         <label>
           <span class="label">수량</span>
-          <input class="field" id="quantityInput" inputmode="numeric" placeholder="예: 1개, 10개">
+          <input class="field" id="quantityInput" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="1">
         </label>
         <label>
           <span class="label">문의 내용</span>
@@ -122,10 +122,12 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const product = params.get('product') || '';
+    const quantity = params.get('quantity') || '';
     const form = document.getElementById('contactForm');
     const submitBtn = document.getElementById('submitBtn');
     const status = document.getElementById('formStatus');
     if(product) document.getElementById('productInput').value = product;
+    if(quantity) document.getElementById('quantityInput').value = quantity.replace(/[^0-9]/g, '') || quantity;
 
     function setStatus(message, type=''){
       status.textContent = message;
