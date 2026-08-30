@@ -722,7 +722,7 @@
           <h2 class="product-title">작품 목판 키링</h2>
           <p class="product-copy">작품 문양을 나무 위에 담은 따뜻한 키링</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -734,7 +734,7 @@
           <h2 class="product-title">맞춤 낙관 키링</h2>
           <p class="product-copy">이름과 마음을 새겨 간직하는 작은 낙관</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -746,7 +746,7 @@
           <h2 class="product-title">전통 문방 소품</h2>
           <p class="product-copy">책상과 서재에 조용히 놓이는 작은 물건들</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -758,7 +758,7 @@
           <h2 class="product-title">낙관 목걸이</h2>
           <p class="product-copy">작은 낙관을 가까이 두는 장식 소품</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -770,7 +770,7 @@
           <h2 class="product-title">책갈피 소품</h2>
           <p class="product-copy">글과 책 사이에 놓이는 작은 표식</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -782,7 +782,7 @@
           <h2 class="product-title">문양 키링</h2>
           <p class="product-copy">작품의 선과 문양을 담은 키링</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -794,7 +794,7 @@
           <h2 class="product-title">선물 세트</h2>
           <p class="product-copy">작은 물건을 함께 담은 구성</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
 
@@ -806,7 +806,7 @@
           <h2 class="product-title">준비중</h2>
           <p class="product-copy">새로운 소품을 준비하고 있습니다</p>
           <div class="product-price">가격 준비중</div>
-          <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+          <a class="inquiry-btn" href="#product-detail">상품페이지</a>
         </div>
       </article>
     </section>
@@ -944,7 +944,7 @@
               <h2 class="product-title">${escapeHtml(product.title || '복작소 상품')}</h2>
               <p class="product-copy">${escapeHtml(product.description || '상품 정보를 준비하고 있습니다.')}</p>
               <div class="product-price">${escapeHtml(product.price_text || '가격 준비중')}</div>
-              <a class="inquiry-btn" href="${inquiryUrl(product.title || '복작소 상품')}">문의하기</a>
+              <a class="inquiry-btn" href="#product-detail">상품페이지</a>
             </div>
           </article>
         `;
@@ -1075,7 +1075,14 @@
         });
         const inquiry = card.querySelector('.inquiry-btn');
         const title = card.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
-        if(inquiry) inquiry.href = inquiryUrl(title);
+        if(inquiry){
+          inquiry.href = '#product-detail';
+          inquiry.setAttribute('aria-label', `${title} 상세 보기`);
+          inquiry.addEventListener('click', event => {
+            event.preventDefault();
+            openProductDetail(card);
+          });
+        }
       });
     }
 
