@@ -560,7 +560,7 @@
     }
     .related-grid{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,200px));
+      grid-template-columns:repeat(5,minmax(0,180px));
       gap:16px;
       justify-content:start;
     }
@@ -1083,7 +1083,7 @@
       const visibleCards = productCards.filter(item => !item.classList.contains('is-hidden'));
       const source = visibleCards.length > 1 ? visibleCards : productCards;
       const others = source.filter(item => item !== card);
-      return [...others, ...productCards.filter(item => item !== card && !others.includes(item))].slice(0, 4);
+      return [...others, ...productCards.filter(item => item !== card && !others.includes(item))].slice(0, 5);
     }
 
     function renderRelatedProducts(card){
