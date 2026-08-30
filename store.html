@@ -533,6 +533,64 @@
       background:var(--text);
       color:#fffdf9;
     }
+    .detail-story{
+      margin:42px 0 0;
+      padding:28px 0 0;
+      border-top:1px solid var(--line);
+    }
+    .detail-section-title{
+      margin:0 0 14px;
+      color:var(--text);
+      font-size:18px;
+      line-height:1.35;
+      font-weight:900;
+      letter-spacing:-.035em;
+    }
+    .detail-story-text{
+      max-width:760px;
+      margin:0;
+      color:rgba(31,26,23,.72);
+      font-size:15px;
+      line-height:1.85;
+    }
+    .detail-related{
+      margin:34px 0 0;
+      padding:28px 0 0;
+      border-top:1px solid var(--line);
+    }
+    .related-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:16px;
+    }
+    .related-card{
+      display:grid;
+      gap:10px;
+      border:0;
+      background:transparent;
+      padding:0;
+      color:var(--text);
+      text-align:left;
+      cursor:pointer;
+    }
+    .related-card img{
+      width:100%;
+      aspect-ratio:1/1;
+      object-fit:cover;
+      border-radius:4px;
+      background:var(--accent-soft);
+      transition:opacity .2s ease, transform .2s ease;
+    }
+    .related-card:hover img{
+      opacity:.86;
+      transform:translateY(-1px);
+    }
+    .related-card span{
+      font-size:13px;
+      line-height:1.35;
+      font-weight:850;
+      letter-spacing:-.025em;
+    }
 
     @media (max-width: 860px){
       .products{
@@ -555,6 +613,9 @@
       .detail-grid{
         grid-template-columns:1fr;
         gap:28px;
+      }
+      .related-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
       }
     }
 
@@ -662,6 +723,16 @@
       .detail-actions{
         grid-template-columns:1fr;
       }
+      .detail-story{
+        margin-top:32px;
+      }
+      .detail-story-text{
+        font-size:14px;
+        line-height:1.78;
+      }
+      .related-grid{
+        gap:14px;
+      }
       .pagination{
         padding-bottom:44px;
       }
@@ -694,7 +765,7 @@
     </nav>
 
     <section class="wrap products" aria-label="복작소 상품">
-      <article class="product-card" data-category="keyring">
+      <article class="product-card" data-category="keyring" data-story="작품의 선을 작게 옮겨 나무 위에 새긴 키링입니다. 손에 닿는 물건 안에 복을 바라는 마음과 따뜻한 질감을 함께 담았습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="나무 목판 키링" loading="lazy">
         </div>
@@ -706,7 +777,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="custom">
+      <article class="product-card" data-category="custom" data-story="이름과 마음을 낙관의 형태로 새겨 간직하는 주문 제작 소품입니다. 작은 도장 하나가 선물 받는 사람의 기운과 시간을 조용히 품도록 구성합니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="석재 낙관 키링" loading="lazy">
         </div>
@@ -718,7 +789,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="desk">
+      <article class="product-card" data-category="desk" data-story="책상과 서재에 놓이는 문방 소품으로, 매일 보는 공간에 차분한 결을 더합니다. 먹과 종이, 나무의 감각을 떠올리며 오래 두고 볼 수 있는 분위기를 담았습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOVVlcmPS_Idc1xCw4f3BdT23xwJ5FSTlGg0IeTVkFaEAvMkTmhoArdhTx3QO4E97hQ0tL6O_CsTh8eNrmj8m8QMqTOUkpi4LUnzmq09nOLPgsxx4grm5RHOvpx8seENQoivY6Hkbr0fi8MRgYWqU-t2QKH-QATHOK8YXdJ54AyQdI8mqCE3STvvo_ZW_9k2oS4MOxClRIcjf82rSghukkKGqDMmiIH8virQdFM4o4uMfR8it4J3RH" alt="문방 소품" loading="lazy">
         </div>
@@ -730,7 +801,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="custom">
+      <article class="product-card" data-category="custom" data-story="낙관을 가까이 지니는 장식 소품입니다. 작은 형태 안에 이름, 복, 기억의 의미를 담아 일상에서 조용한 표식처럼 머물게 합니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -742,7 +813,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="desk">
+      <article class="product-card" data-category="desk" data-story="책과 글 사이에 놓이는 작은 표식입니다. 지나간 문장을 다시 찾듯, 마음에 남는 순간을 오래 붙잡아두는 물건으로 준비했습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -754,7 +825,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="keyring">
+      <article class="product-card" data-category="keyring" data-story="작품 속 문양과 선을 일상의 키링으로 옮긴 구성입니다. 복잡한 선을 덜어내고 남은 형태가 손끝에서 작게 빛나도록 다듬었습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOVVlcmPS_Idc1xCw4f3BdT23xwJ5FSTlGg0IeTVkFaEAvMkTmhoArdhTx3QO4E97hQ0tL6O_CsTh8eNrmj8m8QMqTOUkpi4LUnzmq09nOLPgsxx4grm5RHOvpx8seENQoivY6Hkbr0fi8MRgYWqU-t2QKH-QATHOK8YXdJ54AyQdI8mqCE3STvvo_ZW_9k2oS4MOxClRIcjf82rSghukkKGqDMmiIH8virQdFM4o4uMfR8it4J3RH" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -766,7 +837,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="etc">
+      <article class="product-card" data-category="etc" data-story="작은 소품들을 함께 담아 선물하기 좋은 구성으로 준비합니다. 하나의 물건보다 여러 조각의 분위기가 모였을 때 생기는 복작한 즐거움을 생각했습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -778,7 +849,7 @@
         </div>
       </article>
 
-      <article class="product-card" data-category="etc">
+      <article class="product-card" data-category="etc" data-story="새로운 물건을 준비 중입니다. 복작소의 결에 맞는 형태와 쓰임을 천천히 살펴, 오래 곁에 둘 수 있는 소품으로 이어가겠습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_VkFhI-K4A3oVErMcNBhXwNulFqswimZopuXvxLaB0JtktAO_fpVQglSy3Ia_SeyuNw0LLkoZXmEGg_N2bFtcZ5Zw-f33SZiyAvLMAjAbCFBxYQRyjMYfJGiXRkAFG2bSRdVKTxgP09RgvENYe6_L_MFHcJ1y3DZGJLaCzpqIyFnB2bMXdosoUIfZcA9IMMQ5ktECDJv9veJjfI2uH39jCai75EAG1vfAFZwKkfYAOSjEol-zpD3t" alt="복작소 준비 상품" loading="lazy">
         </div>
@@ -863,6 +934,14 @@
           </div>
         </div>
       </div>
+      <section class="detail-story" aria-label="작품 설명">
+        <h3 class="detail-section-title">작품 설명</h3>
+        <p class="detail-story-text" data-detail-story></p>
+      </section>
+      <section class="detail-related" aria-label="다른 상품">
+        <h3 class="detail-section-title">다른 상품</h3>
+        <div class="related-grid" data-detail-related></div>
+      </section>
     </div>
   </section>
 
@@ -876,6 +955,8 @@
     const detailCopy = detailView.querySelector('[data-detail-copy]');
     const detailPrice = detailView.querySelector('[data-detail-price]');
     const detailQuantity = detailView.querySelector('[data-detail-quantity]');
+    const detailStory = detailView.querySelector('[data-detail-story]');
+    const detailRelated = detailView.querySelector('[data-detail-related]');
     const productsEl = document.querySelector('.products');
     let productCards = Array.from(document.querySelectorAll('.product-card'));
     const pagination = document.querySelector('.pagination');
@@ -910,7 +991,7 @@
         const imageUrl = productImage(product);
         const detailImages = Array.isArray(product.detail_image_urls) ? product.detail_image_urls : [];
         return `
-          <article class="product-card" data-category="${escapeHtml(product.category || 'etc')}" data-detail-images="${escapeHtml(JSON.stringify(detailImages))}" data-status="${escapeHtml(product.status || 'preparing')}">
+          <article class="product-card" data-category="${escapeHtml(product.category || 'etc')}" data-detail-images="${escapeHtml(JSON.stringify(detailImages))}" data-status="${escapeHtml(product.status || 'preparing')}" data-story="${escapeHtml(product.story || product.artwork_description || product.description || '작품의 결을 담아 복작소의 작은 물건으로 준비하고 있습니다.')}">
             <div class="product-media">
               <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.title || '복작소 상품')}" loading="lazy">
             </div>
@@ -996,11 +1077,39 @@
       }
     }
 
+    function relatedCardsFor(card){
+      const visibleCards = productCards.filter(item => !item.classList.contains('is-hidden'));
+      const source = visibleCards.length > 1 ? visibleCards : productCards;
+      const others = source.filter(item => item !== card);
+      return [...others, ...productCards.filter(item => item !== card && !others.includes(item))].slice(0, 4);
+    }
+
+    function renderRelatedProducts(card){
+      if(!detailRelated) return;
+      detailRelated.innerHTML = relatedCardsFor(card).map((item, index) => {
+        const image = item.querySelector('.product-media img');
+        const title = item.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
+        return `
+          <button class="related-card" type="button" data-related-index="${index}">
+            <img src="${escapeHtml(image?.src || '')}" alt="">
+            <span>${escapeHtml(title)}</span>
+          </button>
+        `;
+      }).join('');
+      detailRelated.querySelectorAll('.related-card').forEach((button, index) => {
+        const nextCard = relatedCardsFor(card)[index];
+        button.addEventListener('click', () => {
+          if(nextCard) openProductDetail(nextCard);
+        });
+      });
+    }
+
     function openProductDetail(card){
       const image = card.querySelector('.product-media img');
       const title = card.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
       const copy = card.querySelector('.product-copy')?.textContent?.trim() || '상품 정보를 준비하고 있습니다.';
       const price = card.querySelector('.product-price')?.textContent?.trim() || '가격 준비중';
+      const story = card.dataset.story || '작품의 결을 담아 복작소의 작은 물건으로 준비하고 있습니다.';
       let detailImages = [];
 
       try{
@@ -1022,6 +1131,8 @@
       detailTitle.textContent = title;
       detailCopy.textContent = copy;
       detailPrice.textContent = price;
+      if(detailStory) detailStory.textContent = story;
+      renderRelatedProducts(card);
       selectedQuantity = 1;
       if(detailQuantity) detailQuantity.value = selectedQuantity;
       updateDetailQuantity(title);

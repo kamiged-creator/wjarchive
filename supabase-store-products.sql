@@ -2,6 +2,7 @@ create table if not exists public.store_products (
   id uuid primary key default gen_random_uuid(),
   title text not null default '새 상품',
   description text not null default '',
+  story text not null default '',
   price_text text not null default '가격 준비중',
   category text not null default 'keyring',
   status text not null default 'preparing',
@@ -15,6 +16,9 @@ create table if not exists public.store_products (
 
 alter table public.store_products
 add column if not exists category text not null default 'keyring';
+
+alter table public.store_products
+add column if not exists story text not null default '';
 
 alter table public.store_products enable row level security;
 

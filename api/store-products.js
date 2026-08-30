@@ -99,6 +99,7 @@ function toProductPayload(body) {
   return {
     title: String(body.title || '').trim() || '새 상품',
     description: String(body.description || '').trim(),
+    story: String(body.story || '').trim(),
     price_text: String(body.price_text || '').trim() || '가격 준비중',
     category: String(body.category || 'keyring').trim(),
     status: String(body.status || 'preparing').trim(),

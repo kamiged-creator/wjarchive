@@ -101,7 +101,8 @@
           <label><span class="label">상품 종류</span><select class="field" id="categoryInput"><option value="keyring">키링</option><option value="desk">문방소품</option><option value="custom">주문제작</option><option value="etc">기타</option></select></label>
           <label><span class="label">상태</span><select class="field" id="statusInput"><option value="preparing">판매 준비중</option><option value="selling">판매중</option><option value="soldout">품절</option></select></label>
           <label><span class="label">정렬 숫자</span><input class="field" id="sortInput" type="number" value="10"></label>
-          <label class="span-2"><span class="label">설명</span><textarea class="field" id="descInput" placeholder="상품 설명"></textarea></label>
+          <label class="span-2"><span class="label">상품 설명</span><textarea class="field" id="descInput" placeholder="상품 설명"></textarea></label>
+          <label class="span-2"><span class="label">작품 설명</span><textarea class="field" id="storyInput" placeholder="작품의 의미와 배경 설명"></textarea></label>
           <label class="span-2"><span class="label">대표 이미지 URL</span><input class="field image-url" id="mainImageInput" type="url" placeholder="https://ik.imagekit.io/..."></label>
           <label><span class="label">상세 이미지 1</span><input class="field image-url" id="detailImage1" type="url"></label>
           <label><span class="label">상세 이미지 2</span><input class="field image-url" id="detailImage2" type="url"></label>
@@ -198,6 +199,7 @@
       $('#statusInput').value = product.status || 'preparing';
       $('#sortInput').value = Number(product.sort_order || 10);
       $('#descInput').value = product.description || '';
+      $('#storyInput').value = product.story || '';
       $('#mainImageInput').value = product.main_image_url || '';
       const detail = Array.isArray(product.detail_image_urls) ? product.detail_image_urls : [];
       $('#detailImage1').value = detail[0] || '';
@@ -216,6 +218,7 @@
         status: $('#statusInput').value,
         sort_order: Number($('#sortInput').value || 10),
         description: $('#descInput').value,
+        story: $('#storyInput').value,
         main_image_url: $('#mainImageInput').value,
         detail_image_urls: productImagesFromForm(),
         is_visible: $('#visibleInput').value === 'true'
