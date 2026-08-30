@@ -89,6 +89,10 @@
           <input class="field" id="productInput" placeholder="문의하실 상품명을 입력해주세요 (선택)">
         </label>
         <label>
+          <span class="label">수량</span>
+          <input class="field" id="quantityInput" inputmode="numeric" placeholder="예: 1개, 10개">
+        </label>
+        <label>
           <span class="label">문의 내용</span>
           <textarea class="field" id="messageInput" required placeholder="문의하실 내용을 자세히 적어주세요"></textarea>
         </label>
@@ -134,6 +138,7 @@
         name: document.getElementById('nameInput').value.trim(),
         contact: document.getElementById('contactInput').value.trim(),
         product_name: document.getElementById('productInput').value.trim(),
+        quantity: document.getElementById('quantityInput').value.trim(),
         message: document.getElementById('messageInput').value.trim()
       };
       if(!payload.name || !payload.contact || !payload.message){

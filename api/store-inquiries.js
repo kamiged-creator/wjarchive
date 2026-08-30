@@ -54,6 +54,7 @@ function inquiryPayload(body) {
     name: clean(body.name),
     contact: clean(body.contact),
     product_name: clean(body.product_name),
+    quantity: clean(body.quantity),
     message: clean(body.message),
     status: 'new'
   };

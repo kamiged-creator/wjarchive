@@ -49,10 +49,14 @@ create table if not exists public.store_inquiries (
   name text not null default '',
   contact text not null default '',
   product_name text not null default '',
+  quantity text not null default '',
   message text not null default '',
   status text not null default 'new',
   created_at timestamptz not null default now()
 );
+
+alter table public.store_inquiries
+add column if not exists quantity text not null default '';
 
 alter table public.store_inquiries enable row level security;
 
