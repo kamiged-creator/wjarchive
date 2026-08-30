@@ -23,7 +23,8 @@
     .wrap{max-width:var(--max);margin:0 auto;padding:0 48px}
     .top{background:#fffdf9;border-bottom:1px solid var(--line)}
     .top-inner{min-height:80px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
-    .brand{font-size:42px;line-height:1;font-weight:800;letter-spacing:-.06em}
+    .brand{display:inline-flex;align-items:center;gap:8px;font-size:24px;line-height:1;font-weight:800;letter-spacing:-.06em}
+    .brand img{width:21px;height:21px;border-radius:5px;object-fit:cover}
     .nav{display:flex;align-items:center;justify-content:center;gap:24px;color:var(--muted);font-size:16px}
     .nav a{padding:6px 0}
     .nav .active{color:#000;border-bottom:2px solid #000;font-weight:800}
@@ -47,22 +48,23 @@
     .status.ok{color:var(--ok)} .status.bad{color:var(--bad)}
     .footer{border-top:1px solid var(--line);background:#f5f3ee;color:var(--muted);padding:32px 0}
     .footer-inner{display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px}
-    .footer-brand{font-size:24px;line-height:1.1;font-weight:700;letter-spacing:-.04em;color:#000}
+    .footer-brand{display:inline-flex;align-items:center;gap:7px;font-size:18px;line-height:1;font-weight:900;letter-spacing:-.04em;color:#000}
+    .footer-brand img{width:18px;height:18px;border-radius:4px;object-fit:cover}
     .footer-note{margin:14px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
     .footer-links{display:flex;justify-content:flex-end;gap:18px;font-size:14px;text-decoration:underline}
     .business-info{display:none}
-    @media(max-width:760px){.wrap{padding:0 16px}.top-inner{min-height:72px;display:flex;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) 0 12px}.brand{font-size:30px}.nav{display:none}.top-action{min-height:38px;padding:0 14px;font-size:13px}main{padding:46px 16px 88px}.hero{margin-bottom:34px}h1{font-size:30px}.copy{font-size:16px}.panel{padding:24px 20px;border-radius:12px}.form-grid{gap:18px}.privacy-note{margin-top:24px;font-size:13px}.actions{margin-top:26px}.footer{padding:30px 0}.footer-inner{display:grid;gap:22px}.footer-links{justify-content:flex-start;flex-wrap:wrap}}
+    @media(max-width:760px){.wrap{padding:0 16px}.top-inner{min-height:72px;display:flex;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) 0 12px}.brand{font-size:24px}.brand img{width:20px;height:20px}.nav{display:none}.top-action{min-height:38px;padding:0 14px;font-size:13px}main{padding:46px 16px 88px}.hero{margin-bottom:34px}h1{font-size:30px}.copy{font-size:16px}.panel{padding:24px 20px;border-radius:12px}.form-grid{gap:18px}.privacy-note{margin-top:24px;font-size:13px}.actions{margin-top:26px}.footer{padding:30px 0}.footer-inner{display:grid;gap:22px}.footer-links{justify-content:flex-start;flex-wrap:wrap}}
   </style>
 </head>
 <body>
   <header class="top">
     <div class="wrap top-inner">
-      <a class="brand" href="/store.html">Bokjakso</a>
+      <a class="brand" href="/store.html"><img src="/favicon-32x32.png" alt="" aria-hidden="true">복작소</a>
       <nav class="nav" aria-label="스토어 메뉴">
         <a href="/store.html">Store</a>
-        <a class="active" href="/store-contact.html" aria-current="page">Inquire</a>
+        <a class="active" href="/store-contact.html" aria-current="page">문의</a>
       </nav>
-      <a class="top-action" href="/store-contact.html">Inquire</a>
+      <a class="top-action" href="/store-contact.html">문의</a>
     </div>
   </header>
 
@@ -102,8 +104,8 @@
   <footer class="footer">
     <div class="wrap footer-inner">
       <div>
-        <div class="footer-brand">Bokjakso</div>
-        <p class="footer-note">© 2024 Bokjakso. All rights reserved.</p>
+        <div class="footer-brand"><img src="/favicon-32x32.png" alt="" aria-hidden="true">복작소</div>
+        <p class="footer-note">© 2026 Bokjakso. All rights reserved.</p>
       </div>
       <div class="footer-links">
         <a href="/store.html">Store</a>
