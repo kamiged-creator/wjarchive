@@ -497,30 +497,37 @@
       display:inline-flex;
       align-items:center;
       width:max-content;
-      min-height:38px;
+      min-height:34px;
       overflow:hidden;
       border:1px solid var(--line);
       border-radius:999px;
       background:rgba(255,253,249,.72);
     }
     .quantity-button{
-      width:38px;
-      min-height:38px;
+      width:34px;
+      min-height:34px;
       display:grid;
       place-items:center;
       border:0;
       background:transparent;
-      color:var(--text);
-      font-size:18px;
-      font-weight:900;
+      color:rgba(31,26,23,.58);
+      font-size:16px;
+      font-weight:700;
+      line-height:1;
       cursor:pointer;
+      transition:background .18s ease,color .18s ease;
+    }
+    .quantity-button:hover{
+      background:rgba(139,104,71,.08);
+      color:var(--text);
     }
     .quantity-value{
-      min-width:42px;
-      padding:0 8px;
+      min-width:36px;
+      padding:0 6px;
       text-align:center;
       color:var(--text);
-      font-weight:900;
+      font-size:14px;
+      font-weight:800;
     }
     .detail-actions{
       display:grid;
