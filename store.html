@@ -918,6 +918,11 @@
       return product.main_image_url || product.detail_image_urls?.[0] || '';
     }
 
+    function inquiryUrl(title, quantity = '1개'){
+      const params = new URLSearchParams({ product:title || '복작소 상품', quantity });
+      return `/store-contact.html?${params.toString()}`;
+    }
+
     function renderProductsFromDb(products){
       if(!Array.isArray(products) || !products.length) return;
       productsEl.innerHTML = products.map(product => {
@@ -932,7 +937,7 @@
               <h2 class="product-title">${escapeHtml(product.title || '복작소 상품')}</h2>
               <p class="product-copy">${escapeHtml(product.description || '상품 정보를 준비하고 있습니다.')}</p>
               <div class="product-price">${escapeHtml(product.price_text || '가격 준비중')}</div>
-              <a class="inquiry-btn" href="/store-contact.html">문의하기</a>
+              <a class="inquiry-btn" href="${inquiryUrl(product.title || '복작소 상품')}">문의하기</a>
             </div>
           </article>
         `;
@@ -1006,8 +1011,7 @@
       if(detailQuantity) detailQuantity.textContent = selectedQuantity;
       const detailInquiry = detailView.querySelector('[data-detail-inquiry]');
       if(detailInquiry){
-        const params = new URLSearchParams({ product:title, quantity:`${selectedQuantity}개` });
-        detailInquiry.href = `/store-contact.html?${params.toString()}`;
+        detailInquiry.href = inquiryUrl(title, `${selectedQuantity}개`);
       }
     }
 
@@ -1062,6 +1066,9 @@
             openProductDetail(card);
           }
         });
+        const inquiry = card.querySelector('.inquiry-btn');
+        const title = card.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
+        if(inquiry) inquiry.href = inquiryUrl(title);
       });
     }
 
