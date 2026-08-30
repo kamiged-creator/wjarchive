@@ -384,9 +384,28 @@
       justify-content:space-between;
       gap:18px;
       border-bottom:1px solid var(--line);
-      color:rgba(31,26,23,.7);
-      font-size:14px;
-      font-weight:800;
+    }
+    .detail-top-title,
+    .detail-section-title{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin:0;
+      color:var(--text);
+      font-size:18px;
+      line-height:1.35;
+      font-weight:900;
+      letter-spacing:-.035em;
+    }
+    .detail-top-title::before,
+    .detail-section-title::before{
+      content:"";
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:rgba(181,52,39,.82);
+      box-shadow:0 0 0 3px rgba(181,52,39,.08);
+      flex:0 0 auto;
     }
     .detail-close{
       width:38px;
@@ -542,14 +561,7 @@
       padding:28px 0 0;
       border-top:1px solid var(--line);
     }
-    .detail-section-title{
-      margin:0 0 14px;
-      color:var(--text);
-      font-size:18px;
-      line-height:1.35;
-      font-weight:900;
-      letter-spacing:-.035em;
-    }
+    .detail-section-title{margin:0 0 14px}
     .detail-story-text{
       max-width:760px;
       margin:0;
@@ -726,6 +738,15 @@
       .detail-price{
         font-size:23px;
       }
+      .detail-top-title,
+      .detail-section-title{
+        font-size:16px;
+      }
+      .detail-top-title::before,
+      .detail-section-title::before{
+        width:6px;
+        height:6px;
+      }
       .detail-actions{
         grid-template-columns:1fr;
       }
@@ -898,7 +919,7 @@
   <section class="detail-view" id="product-detail" hidden aria-label="상품 상세">
     <div class="detail-shell">
       <div class="detail-top">
-        <span>복작소 상품 상세</span>
+        <span class="detail-top-title">복작소 상품 상세</span>
         <button class="detail-close" type="button" aria-label="닫기">X</button>
       </div>
       <div class="detail-grid">
