@@ -1083,12 +1083,23 @@
       const visibleCards = productCards.filter(item => !item.classList.contains('is-hidden'));
       const source = visibleCards.length > 1 ? visibleCards : productCards;
       const others = source.filter(item => item !== card);
-      return [...others, ...productCards.filter(item => item !== card && !others.includes(item))].slice(0, 5);
+      const candidates = [...others, ...productCards.filter(item => item !== card && !others.includes(item))];
+      return shuffleCards(candidates).slice(0, 5);
+    }
+
+    function shuffleCards(cards){
+      const shuffled = [...cards];
+      for(let index = shuffled.length - 1; index > 0; index -= 1){
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+      }
+      return shuffled;
     }
 
     function renderRelatedProducts(card){
       if(!detailRelated) return;
-      detailRelated.innerHTML = relatedCardsFor(card).map((item, index) => {
+      const relatedCards = relatedCardsFor(card);
+      detailRelated.innerHTML = relatedCards.map((item, index) => {
         const image = item.querySelector('.product-media img');
         const title = item.querySelector('.product-title')?.textContent?.trim() || '복작소 상품';
         return `
@@ -1099,7 +1110,7 @@
         `;
       }).join('');
       detailRelated.querySelectorAll('.related-card').forEach((button, index) => {
-        const nextCard = relatedCardsFor(card)[index];
+        const nextCard = relatedCards[index];
         button.addEventListener('click', () => {
           if(nextCard) openProductDetail(nextCard);
         });
