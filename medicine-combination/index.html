@@ -306,7 +306,7 @@ async function searchDrug(){
   const term=q.value.trim();
   if(term.length<2){showMessage('error','약 이름을 2글자 이상 입력해줘.');return;}
   $('#searchBtn').disabled=true; $('#searchBtn').textContent='검색중…';
-  messages.innerHTML=''; summary.innerHTML=''; results.innerHTML='<div class="loader">공식 데이터를 검색하고 있어…</div>'; 
+  messages.innerHTML=''; summary.innerHTML=''; results.innerHTML='<div class="loader">공식 데이터를 검색하고 있어…</div>';
   detail.innerHTML='<div class="empty"><div class="pill">🔎</div><b>검색 중</b><p>잠시만 기다려줘.</p></div>';
 
   const jobs=[];
