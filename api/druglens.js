@@ -32,8 +32,15 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const key = normalizeKey(body.key);
-    if (!key || key.length > 500) return res.status(400).json({ error: '공공데이터 인증키를 확인해 주세요.' });
+
+    // 공개 페이지에서 인증키를 받지 않는다. Vercel 환경변수에만 보관한다.
+    const key = normalizeKey(process.env.MFDS_SERVICE_KEY || process.env.DATA_GO_KR_SERVICE_KEY || '');
+    if (!key) {
+      return res.status(503).json({
+        error: '서버 인증키가 설정되지 않았습니다.',
+        code: 'SERVICE_KEY_NOT_CONFIGURED'
+      });
+    }
 
     let url;
     if (body.type === 'drug') {
