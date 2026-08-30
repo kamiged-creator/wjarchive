@@ -37,6 +37,7 @@
     .form-grid{display:grid;gap:15px}
     .label{display:block;margin:0 0 7px;color:#000;font-size:13px;line-height:1.2;font-weight:800}
     .field{width:100%;min-height:42px;border:1px solid var(--line);border-radius:8px;background:#fffdf9;color:var(--text);padding:9px 14px;font-size:14px;transition:border-color .18s ease,box-shadow .18s ease}
+    .prefill-field{background:#fbf5ed;border-color:rgba(139,104,71,.26)}
     .field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
     textarea.field{min-height:108px;resize:vertical;line-height:1.65}
     .privacy-note{margin:20px auto 0;max-width:500px;color:var(--muted);font-size:12px;line-height:1.65;text-align:center}
@@ -86,11 +87,11 @@
         </label>
         <label>
           <span class="label">상품명</span>
-          <input class="field" id="productInput" placeholder="문의하실 상품명을 입력해주세요 (선택)">
+          <input class="field prefill-field" id="productInput" placeholder="문의하실 상품명을 입력해주세요 (선택)">
         </label>
         <label>
           <span class="label">수량</span>
-          <input class="field" id="quantityInput" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="1">
+          <input class="field prefill-field" id="quantityInput" type="number" min="1" max="99" step="1" inputmode="numeric" placeholder="1">
         </label>
         <label>
           <span class="label">문의 내용</span>
