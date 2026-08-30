@@ -560,8 +560,9 @@
     }
     .related-grid{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(4,minmax(0,200px));
       gap:16px;
+      justify-content:start;
     }
     .related-card{
       display:grid;
@@ -586,7 +587,7 @@
       transform:translateY(-1px);
     }
     .related-card span{
-      font-size:13px;
+      font-size:12px;
       line-height:1.35;
       font-weight:850;
       letter-spacing:-.025em;
@@ -616,6 +617,7 @@
       }
       .related-grid{
         grid-template-columns:repeat(2,minmax(0,1fr));
+        justify-content:stretch;
       }
     }
 
