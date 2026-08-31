@@ -870,6 +870,7 @@
         position:absolute;
         inset:0;
         min-height:0;
+        justify-content:flex-start;
         padding:52px 28px 28px;
         text-align:left;
         background:linear-gradient(90deg,rgba(251,248,244,.94) 0%,rgba(251,248,244,.62) 50%,rgba(251,248,244,0) 82%);
@@ -947,23 +948,57 @@
         height:18px;
       }
       .hero-copy{
-        padding:44px 22px 26px;
+        padding:70px 22px 24px;
+      }
+      .hero-store,
+      .hero-media{
+        min-height:0;
+        height:clamp(500px,68svh,560px);
       }
       .hero-eyebrow{
-        margin-bottom:16px;
-        font-size:10px;
+        position:relative;
+        margin-bottom:30px;
+        color:#9a5a2d;
+        font-size:15px;
+        font-weight:500;
+        letter-spacing:0;
+        text-transform:none;
+      }
+      .hero-eyebrow::after{
+        content:"";
+        display:block;
+        width:42px;
+        height:1px;
+        margin-top:16px;
+        background:#9a5a2d;
       }
       .hero-copy p{
-        max-width:270px;
-        font-size:14px;
+        max-width:220px;
+        margin-top:20px;
+        color:rgba(31,26,23,.68);
+        font-size:17px;
+        line-height:1.7;
       }
       .hero-actions{
-        margin-top:22px;
+        margin-top:26px;
+      }
+      .hero-button{
+        min-height:38px;
+        padding:0 16px;
+        border-radius:4px;
+        font-size:13px;
+        font-weight:600;
+      }
+      .hero-button.secondary{
+        display:none;
       }
       h1{
-        max-width:310px;
-        font-size:30px;
-        letter-spacing:-.045em;
+        max-width:270px;
+        font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+        font-size:35px;
+        font-weight:500;
+        line-height:1.38;
+        letter-spacing:0;
       }
       .hero-pager{
         display:none;
@@ -1119,11 +1154,11 @@
   <main>
     <section class="hero-store" aria-label="복작소 스토어 소개">
       <div class="hero-copy">
-        <p class="hero-eyebrow">SMALL DETAILS, DEEPER MEANING</p>
-        <h1>손에 담는<br>작은 예술, 복작소</h1>
-        <p>나무에 새긴 이야기와 일상을 특별하게 하는 키링을 차분히 준비하고 있습니다.</p>
+        <p class="hero-eyebrow">손에 담는 작은 예술</p>
+        <h1>일상을 빛내는<br>작은 디테일, 복작소</h1>
+        <p>나무에 새긴 이야기,<br>일상을 특별하게 하는 키링</p>
         <div class="hero-actions">
-          <a class="hero-button" href="#products">상품 보기</a>
+          <a class="hero-button" href="#products">신상품 보기&nbsp; →</a>
           <a class="hero-button secondary" href="/store-contact.html">문의하기</a>
         </div>
         <div class="hero-pager" aria-hidden="true"><strong>01</strong><span></span><em>02</em><em>03</em></div>
