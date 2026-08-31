@@ -1471,7 +1471,8 @@
       const source = visibleCards.length > 1 ? visibleCards : productCards;
       const others = source.filter(item => item !== card);
       const candidates = [...others, ...productCards.filter(item => item !== card && !others.includes(item))];
-      return shuffleCards(candidates).slice(0, 5);
+      const limit = window.matchMedia('(max-width: 680px)').matches ? 4 : 5;
+      return shuffleCards(candidates).slice(0, limit);
     }
 
     function shuffleCards(cards){
