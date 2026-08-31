@@ -1029,9 +1029,22 @@
         grid-template-columns:1fr;
       }
       .detail-thumbs{
+        display:flex;
+        order:2;
+        gap:8px;
+        overflow-x:auto;
+        padding:2px 0 0;
+        scrollbar-width:none;
+      }
+      .detail-thumbs::-webkit-scrollbar{
         display:none;
       }
+      .detail-thumb{
+        width:58px;
+        flex:0 0 58px;
+      }
       .detail-main-image{
+        order:1;
         aspect-ratio:1/1.08;
       }
       .detail-name{
