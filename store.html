@@ -248,6 +248,26 @@
       object-fit:cover;
       object-position:center;
     }
+    @media (min-width: 861px){
+      .hero-store{
+        min-height:0;
+        display:block;
+        height:clamp(500px,48vw,720px);
+      }
+      .hero-copy{
+        display:none;
+      }
+      .hero-media{
+        min-height:0;
+        height:100%;
+      }
+      .hero-media::before{
+        display:none;
+      }
+      .hero-media img{
+        object-position:center;
+      }
+    }
     .service-strip{
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
@@ -1167,6 +1187,7 @@
       <div class="hero-media">
         <picture>
           <source media="(max-width: 680px)" srcset="assets/store-mobile-hero.webp" type="image/webp">
+          <source media="(min-width: 861px)" srcset="assets/store-desktop-hero.webp" type="image/webp">
           <img src="assets/keyring-promo.jpg" alt="가방에 달린 복작소 작품 키링">
         </picture>
       </div>
