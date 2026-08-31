@@ -229,6 +229,11 @@
       min-height:520px;
       overflow:hidden;
     }
+    .hero-media picture{
+      display:block;
+      width:100%;
+      height:100%;
+    }
     .hero-media::before{
       content:"";
       position:absolute;
@@ -858,21 +863,26 @@
         display:none;
       }
       .hero-store{
-        min-height:auto;
-        grid-template-columns:1fr;
+        min-height:calc(100svh - 58px);
+        display:block;
       }
       .hero-copy{
-        min-height:360px;
+        position:absolute;
+        inset:0;
+        min-height:0;
         padding:52px 28px 28px;
         text-align:left;
+        background:linear-gradient(90deg,rgba(251,248,244,.94) 0%,rgba(251,248,244,.62) 50%,rgba(251,248,244,0) 82%);
       }
       .hero-media{
-        min-height:220px;
-        order:-1;
+        min-height:calc(100svh - 58px);
       }
       .hero-media::before{
         width:100%;
-        background:linear-gradient(180deg,rgba(251,248,244,0) 45%,#fbf8f4 100%);
+        background:linear-gradient(180deg,rgba(251,248,244,.04) 0%,rgba(251,248,244,0) 58%,#fbf8f4 100%);
+      }
+      .hero-media img{
+        object-position:center center;
       }
       .service-strip{
         grid-template-columns:repeat(4,minmax(0,1fr));
@@ -937,8 +947,7 @@
         height:18px;
       }
       .hero-copy{
-        min-height:320px;
-        padding:40px 22px 26px;
+        padding:44px 22px 26px;
       }
       .hero-eyebrow{
         margin-bottom:16px;
@@ -957,7 +966,7 @@
         letter-spacing:-.045em;
       }
       .hero-pager{
-        margin-top:34px;
+        display:none;
       }
       .service-strip{
         grid-template-columns:repeat(4,minmax(0,1fr));
@@ -1120,7 +1129,10 @@
         <div class="hero-pager" aria-hidden="true"><strong>01</strong><span></span><em>02</em><em>03</em></div>
       </div>
       <div class="hero-media">
-        <img src="assets/keyring-promo.jpg" alt="가방에 달린 복작소 작품 키링">
+        <picture>
+          <source media="(max-width: 680px)" srcset="assets/store-mobile-hero.webp" type="image/webp">
+          <img src="assets/keyring-promo.jpg" alt="가방에 달린 복작소 작품 키링">
+        </picture>
       </div>
     </section>
 
