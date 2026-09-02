@@ -17,6 +17,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192x192.png" />
   <link rel="manifest" href="/site.webmanifest" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="복작소 스토어" />
   <meta property="og:description" content="작품에서 태어난 키링과 소품을 차분하게 소개합니다." />
@@ -283,7 +284,9 @@
       gap:8px;
       border-right:1px solid var(--line);
       text-align:center;
+      transition:background .2s ease;
     }
+    .service-item:hover{background:rgba(139,104,71,.055)}
     .service-item:last-child{border-right:0}
     .service-symbol{
       color:var(--text);
@@ -328,6 +331,7 @@
       flex-wrap:wrap;
       padding:0 0 18px;
     }
+    .category-filter[hidden]{display:none}
     .category-button{
       min-height:36px;
       display:inline-flex;
@@ -356,6 +360,21 @@
       gap:22px;
       padding:0 0 82px;
     }
+    .home-products > .product-card:nth-child(n+5){display:none!important}
+    .story-banner{position:relative;min-height:360px;display:flex;align-items:center;margin-top:4px;overflow:hidden;border-radius:10px;background:#2e241d;color:#fff}
+    .story-banner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .story-banner::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(25,19,15,.84),rgba(25,19,15,.38) 54%,rgba(25,19,15,.04))}
+    .story-copy{position:relative;z-index:1;max-width:430px;padding:52px}
+    .story-kicker{margin:0 0 14px;color:#ead7c2;font-size:12px;font-weight:800;letter-spacing:.08em}
+    .story-copy h2{margin:0;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(27px,3vw,40px);line-height:1.42;font-weight:500;letter-spacing:-.035em}
+    .story-copy p{margin:18px 0 0;color:rgba(255,255,255,.78);font-size:14px;line-height:1.75}
+    .story-link{display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.58);font-size:13px;font-weight:800}
+    .new-products{padding-bottom:34px}
+    .guide-links{display:grid;grid-template-columns:repeat(4,1fr);margin-top:40px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,253,249,.62)}
+    .guide-link{min-height:82px;display:flex;align-items:center;justify-content:center;gap:11px;border-right:1px solid var(--line);font-size:13px;font-weight:850}
+    .guide-link:last-child{border-right:0}.guide-link i{font-size:20px;color:var(--accent)}
+    .favorite-button{position:absolute;top:11px;right:11px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:rgba(255,255,255,.82);color:#2a211b;font-size:18px;cursor:pointer;box-shadow:0 4px 16px rgba(31,26,23,.08)}
+    .favorite-button.is-active{color:var(--seal)}
     .product-card{
       display:flex;
       flex-direction:column;
@@ -878,8 +897,7 @@
     }
 
     @media (max-width: 860px){
-      .store-nav,
-      .header-tools{
+      .store-nav{
         display:none;
       }
       .hero-store{
@@ -926,11 +944,13 @@
       }
       .products{
       max-width:680px;
-      grid-template-columns:repeat(2,minmax(0,1fr));
+      grid-template-columns:repeat(3,minmax(0,1fr));
         gap:16px;
         margin:0 auto;
         padding-top:10px;
       }
+      .story-banner{min-height:320px}
+      .story-copy{padding:38px}
       .product-card{
         padding:0;
       }
@@ -1031,6 +1051,7 @@
       .service-item{
         min-height:78px;
       }
+      .service-item span:last-child{display:none}
       .category-filter{
         justify-content:flex-start;
         overflow-x:auto;
@@ -1048,6 +1069,16 @@
         gap:14px;
         padding-bottom:72px;
       }
+      .story-banner{min-height:300px;margin:0;border-radius:8px}
+      .story-banner::after{background:linear-gradient(90deg,rgba(25,19,15,.86),rgba(25,19,15,.25))}
+      .story-banner img{object-position:66% center}
+      .story-copy{max-width:255px;padding:28px 24px}
+      .story-copy h2{font-size:23px}
+      .story-copy p{font-size:12px}
+      .guide-links{grid-template-columns:repeat(2,1fr);margin-top:24px}
+      .guide-link{min-height:64px}
+      .guide-link:nth-child(2){border-right:0}
+      .guide-link:nth-child(-n+2){border-bottom:1px solid var(--line)}
       .product-title{font-size:14px}
       .product-copy{display:none}
       .product-media{aspect-ratio:1/1.08}
@@ -1160,15 +1191,15 @@
       <a class="store-brand" href="/store.html"><img src="/favicon-32x32.png" alt="" aria-hidden="true">복작소</a>
       <nav class="store-nav" aria-label="스토어 메뉴">
         <a class="is-active" href="/store.html">홈</a>
-        <a href="#products">키링</a>
-        <a href="#products">신상품</a>
+        <a href="/store-products.html?category=keyring">키링</a>
+        <a href="#new-products">신상품</a>
         <a href="#products">베스트</a>
         <a href="/store-contact.html">문의</a>
       </nav>
       <div class="header-tools" aria-label="스토어 도구">
-        <button class="icon-button" type="button" aria-label="검색">⌕</button>
-        <a class="icon-button" href="/store-contact.html" aria-label="문의">?</a>
-        <button class="icon-button" type="button" aria-label="장바구니">□</button>
+        <a class="icon-button" href="/store-products.html" aria-label="상품 검색"><i class="bi bi-search" aria-hidden="true"></i></a>
+        <button class="icon-button" type="button" aria-label="장바구니 준비중"><i class="bi bi-bag" aria-hidden="true"></i></button>
+        <a class="icon-button" href="/store-guide.html" aria-label="메뉴"><i class="bi bi-list" aria-hidden="true"></i></a>
       </div>
     </div>
   </header>
@@ -1180,14 +1211,14 @@
         <h1>일상을 빛내는<br>작은 디테일, 복작소</h1>
         <p>나무에 새긴 이야기,<br>일상을 특별하게 하는 키링</p>
         <div class="hero-actions">
-          <a class="hero-button" href="#products">신상품 보기&nbsp; →</a>
+          <a class="hero-button" href="#new-products">신상품 보기&nbsp; →</a>
           <a class="hero-button secondary" href="/store-contact.html">문의하기</a>
         </div>
         <div class="hero-pager" aria-hidden="true"><strong>01</strong><span></span><em>02</em><em>03</em></div>
       </div>
       <div class="hero-media">
         <picture>
-          <source media="(max-width: 680px)" srcset="assets/store-desktop-hero-corrected.webp" type="image/webp">
+          <source media="(max-width: 680px)" srcset="assets/store-mobile-hero.webp" type="image/webp">
           <source media="(min-width: 861px)" srcset="assets/store-desktop-hero-corrected.webp" type="image/webp">
           <img src="assets/keyring-promo.jpg" alt="가방에 달린 복작소 작품 키링">
         </picture>
@@ -1195,18 +1226,18 @@
     </section>
 
     <section class="service-strip wrap" aria-label="구매 안내">
-      <div class="service-item"><span class="service-symbol">▱</span><strong>무료배송</strong><span>5만원 이상 구매 시</span></div>
-      <div class="service-item"><span class="service-symbol">◇</span><strong>선물 포장 서비스</strong><span>정성스러운 포장</span></div>
-      <div class="service-item"><span class="service-symbol">○</span><strong>안전한 결제</strong><span>결제 기능 준비중</span></div>
-      <div class="service-item"><span class="service-symbol">☏</span><strong>고객센터</strong><span>문의 확인 후 답변</span></div>
+      <a class="service-item" href="/store-guide.html#shipping"><span class="service-symbol"><i class="bi bi-truck" aria-hidden="true"></i></span><strong>무료배송</strong><span>5만원 이상 구매 시</span></a>
+      <a class="service-item" href="/store-guide.html#gift"><span class="service-symbol"><i class="bi bi-gift" aria-hidden="true"></i></span><strong>선물포장</strong><span>정성스러운 포장</span></a>
+      <a class="service-item" href="/store-guide.html#payment"><span class="service-symbol"><i class="bi bi-shield-lock" aria-hidden="true"></i></span><strong>안전결제</strong><span>결제 기능 준비중</span></a>
+      <a class="service-item" href="/store-guide.html#support"><span class="service-symbol"><i class="bi bi-headset" aria-hidden="true"></i></span><strong>고객센터</strong><span>문의 확인 후 답변</span></a>
     </section>
 
     <section class="wrap store-section" id="products">
       <div class="section-head">
         <h2>베스트 상품</h2>
-        <a href="#products">전체 보기</a>
+        <a href="/store-products.html">전체 보기&nbsp; ›</a>
       </div>
-      <nav class="category-filter" aria-label="상품 종류">
+      <nav class="category-filter" aria-label="상품 종류" hidden>
         <button class="category-button is-active" type="button" data-category-filter="all">전체</button>
         <button class="category-button" type="button" data-category-filter="keyring">키링</button>
         <button class="category-button" type="button" data-category-filter="desk">문방소품</button>
@@ -1214,7 +1245,7 @@
         <button class="category-button" type="button" data-category-filter="etc">기타</button>
       </nav>
 
-      <div class="products" aria-label="복작소 상품">
+      <div class="products home-products" aria-label="복작소 베스트 상품">
       <article class="product-card" data-category="keyring" data-story="작품의 선을 작게 옮겨 나무 위에 새긴 키링입니다. 손에 닿는 물건 안에 복을 바라는 마음과 따뜻한 질감을 함께 담았습니다.">
         <div class="product-media">
           <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3cVlEZs05CzKTUVS5pYWTv2wFq094O0quk6KzZr9AHYdhNOcdDt6uPqPCj6CDhGr-o6N7lfH_e2WC7HRu1rDrAtyfzG_KZrXV2-EqjbiuDx-2Y_XxvjJvOH7I8SsfIaNe4jMU1iFkvmtsJ3cRwwVMPoay_eLtEwnpOl3s_ZwYoq6Gq-YntiRGfjMUU8jioysUy_P4E6__Q8gg8i091Qe9LH4Gwn2TSgFbczPZ5d1tkRe5hSkRri1q" alt="나무 목판 키링" loading="lazy">
@@ -1313,6 +1344,30 @@
       </div>
     </section>
 
+    <section class="wrap" aria-label="복작소 이야기">
+      <div class="story-banner">
+        <img src="assets/store-craft-story.webp" alt="작은 낙관을 손으로 새기는 복작소 작업 과정" loading="lazy">
+        <div class="story-copy">
+          <p class="story-kicker">복작소 이야기</p>
+          <h2>오랜 시간 정성으로<br>완성되는 작은 작품</h2>
+          <p>좋은 재료와 전통의 방식으로<br>하나하나 마음을 담아 만듭니다.</p>
+          <a class="story-link" href="/store-guide.html#story">자세히 보기 <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap store-section" id="new-products">
+      <div class="section-head"><h2>신상품</h2><a href="/store-products.html?sort=new">전체 보기&nbsp; ›</a></div>
+      <div class="products new-products" data-new-products aria-label="복작소 신상품"></div>
+    </section>
+
+    <nav class="guide-links" aria-label="이용 안내 바로가기">
+      <a class="guide-link" href="/store-guide.html#shipping"><i class="bi bi-truck" aria-hidden="true"></i>배송안내&nbsp; ›</a>
+      <a class="guide-link" href="/store-guide.html#returns"><i class="bi bi-box-seam" aria-hidden="true"></i>교환·반품&nbsp; ›</a>
+      <a class="guide-link" href="/store-guide.html"><i class="bi bi-file-text" aria-hidden="true"></i>이용안내&nbsp; ›</a>
+      <a class="guide-link" href="/store-guide.html#support"><i class="bi bi-question-circle" aria-hidden="true"></i>자주 묻는 질문&nbsp; ›</a>
+    </nav>
+
     <nav class="pagination" aria-label="상품 페이지" hidden></nav>
 
     <div class="seal-mark" aria-hidden="true">
@@ -1322,9 +1377,9 @@
 
   <nav class="mobile-bottom-nav" aria-label="모바일 스토어 메뉴">
     <a href="/store.html" aria-current="page">홈</a>
-    <a href="#products">카테고리</a>
+    <a href="/store-products.html">카테고리</a>
     <a href="/store-contact.html">문의</a>
-    <a href="#products">상품</a>
+    <a href="/store-guide.html">안내</a>
   </nav>
 
   <footer class="store-footer">
@@ -1457,10 +1512,11 @@
     const detailStory = detailView.querySelector('[data-detail-story]');
     const detailRelated = detailView.querySelector('[data-detail-related]');
     const productsEl = document.querySelector('.products');
-    let productCards = Array.from(document.querySelectorAll('.product-card'));
+    const newProductsEl = document.querySelector('[data-new-products]');
+    let productCards = Array.from(productsEl.querySelectorAll('.product-card'));
     const pagination = document.querySelector('.pagination');
     const categoryButtons = document.querySelectorAll('[data-category-filter]');
-    const productsPerPage = 8;
+    const productsPerPage = 99;
     let currentPage = 1;
     let activeCategory = 'all';
     let selectedQuantity = 1;
@@ -1477,6 +1533,50 @@
 
     function productImage(product){
       return product.main_image_url || product.detail_image_urls?.[0] || '';
+    }
+
+    function addCardControls(cards){
+      cards.forEach(card => {
+        const media = card.querySelector('.product-media');
+        if(!media || media.querySelector('.favorite-button')) return;
+        const image = media.querySelector('img');
+        if(image){
+          image.addEventListener('error', () => {
+            if(!image.src.endsWith('/assets/keyring-promo.jpg')) image.src = '/assets/keyring-promo.jpg';
+          }, { once:true });
+        }
+        const favorite = document.createElement('button');
+        favorite.type = 'button';
+        favorite.className = 'favorite-button';
+        favorite.setAttribute('aria-label','찜하기');
+        favorite.innerHTML = '<i class="bi bi-heart" aria-hidden="true"></i>';
+        favorite.addEventListener('click', event => {
+          event.stopPropagation();
+          const active = favorite.classList.toggle('is-active');
+          favorite.innerHTML = `<i class="bi bi-heart${active ? '-fill' : ''}" aria-hidden="true"></i>`;
+          favorite.setAttribute('aria-label', active ? '찜 해제' : '찜하기');
+        });
+        media.appendChild(favorite);
+      });
+    }
+
+    function syncHomeCollections(){
+      if(!newProductsEl) return;
+      const sourceCards = Array.from(productsEl.querySelectorAll('.product-card'));
+      const slice = sourceCards.slice(4,8);
+      const newest = slice.length ? slice : sourceCards.slice(0,4);
+      newProductsEl.innerHTML = newest.map(card => card.outerHTML).join('');
+      const newCards = Array.from(newProductsEl.querySelectorAll('.product-card'));
+      addCardControls(sourceCards);
+      addCardControls(newCards);
+      bindProductCards(newCards);
+    }
+
+    function openRequestedProduct(){
+      const requested = new URLSearchParams(window.location.search).get('product');
+      if(!requested) return;
+      const match = productCards.find(card => card.querySelector('.product-title')?.textContent?.trim() === requested);
+      if(match) openProductDetail(match);
     }
 
     function inquiryUrl(title, quantity = '1개'){
@@ -1503,8 +1603,10 @@
           </article>
         `;
       }).join('');
-      productCards = Array.from(document.querySelectorAll('.product-card'));
+      productCards = Array.from(productsEl.querySelectorAll('.product-card'));
       bindProductCards();
+      syncHomeCollections();
+      openRequestedProduct();
       bindSectionTargets();
       renderPagination();
       showProductPage(1);
@@ -1657,8 +1759,10 @@
       document.body.style.overflow = '';
     }
 
-    function bindProductCards(){
-      productCards.forEach(card => {
+    function bindProductCards(cards = productCards){
+      cards.forEach(card => {
+        if(card.dataset.detailBound) return;
+        card.dataset.detailBound = 'true';
         const media = card.querySelector('.product-media');
         media.setAttribute('tabindex', '0');
         media.setAttribute('role', 'button');
@@ -1707,6 +1811,8 @@
     });
 
     bindProductCards();
+    syncHomeCollections();
+    openRequestedProduct();
     renderPagination();
     showProductPage(1);
 
