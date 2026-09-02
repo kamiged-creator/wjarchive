@@ -897,9 +897,8 @@
     }
 
     @media (max-width: 860px){
-      .store-nav{
-        display:none;
-      }
+      .store-nav{display:none}
+      .header-tools{display:flex}
       .hero-store{
         min-height:calc(100svh - 58px);
         display:block;
@@ -944,7 +943,7 @@
       }
       .products{
       max-width:680px;
-      grid-template-columns:repeat(3,minmax(0,1fr));
+      grid-template-columns:repeat(2,minmax(0,1fr));
         gap:16px;
         margin:0 auto;
         padding-top:10px;
@@ -1198,8 +1197,8 @@
       </nav>
       <div class="header-tools" aria-label="스토어 도구">
         <a class="icon-button" href="/store-products.html" aria-label="상품 검색"><i class="bi bi-search" aria-hidden="true"></i></a>
+        <a class="icon-button" href="/store-contact.html" aria-label="문의"><i class="bi bi-chat-dots" aria-hidden="true"></i></a>
         <button class="icon-button" type="button" aria-label="장바구니 준비중"><i class="bi bi-bag" aria-hidden="true"></i></button>
-        <a class="icon-button" href="/store-guide.html" aria-label="메뉴"><i class="bi bi-list" aria-hidden="true"></i></a>
       </div>
     </div>
   </header>
@@ -1538,13 +1537,14 @@
     function addCardControls(cards){
       cards.forEach(card => {
         const media = card.querySelector('.product-media');
-        if(!media || media.querySelector('.favorite-button')) return;
-        const image = media.querySelector('img');
-        if(image){
+        const image = media?.querySelector('img');
+        if(image && !image.dataset.fallbackBound){
+          image.dataset.fallbackBound = 'true';
           image.addEventListener('error', () => {
             if(!image.src.endsWith('/assets/keyring-promo.jpg')) image.src = '/assets/keyring-promo.jpg';
-          }, { once:true });
+          }, {once:true});
         }
+        if(!media || media.querySelector('.favorite-button')) return;
         const favorite = document.createElement('button');
         favorite.type = 'button';
         favorite.className = 'favorite-button';
