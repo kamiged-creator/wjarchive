@@ -256,7 +256,38 @@
         height:clamp(500px,48vw,720px);
       }
       .hero-copy{
-        display:none;
+        position:absolute;
+        inset:0 auto 0 0;
+        width:46%;
+        display:flex;
+        padding:72px 40px 54px max(72px,calc((100vw - var(--max)) / 2 + 24px));
+        background:transparent;
+      }
+      .hero-eyebrow{
+        margin-bottom:24px;
+        color:#9a5a2d;
+        font-size:16px;
+        font-weight:500;
+        letter-spacing:0;
+        text-transform:none;
+      }
+      .hero-copy h1{
+        font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+        color:#171412;
+        font-size:clamp(36px,3.2vw,52px);
+        font-weight:500;
+        line-height:1.4;
+        letter-spacing:-.035em;
+      }
+      .hero-copy p{
+        color:rgba(31,26,23,.72);
+        font-size:16px;
+      }
+      .hero-button{
+        min-height:54px;
+        padding:0 25px;
+        font-size:15px;
+        font-weight:600;
       }
       .hero-media{
         min-height:0;
@@ -1229,9 +1260,9 @@
       </div>
       <div class="hero-media">
         <picture>
-          <source media="(max-width: 680px)" srcset="assets/store-mobile-hero.webp" type="image/webp">
-          <source media="(min-width: 861px)" srcset="assets/store-desktop-hero-corrected.webp" type="image/webp">
-          <img src="assets/keyring-promo.jpg" alt="가방에 달린 복작소 작품 키링">
+          <source media="(max-width: 680px)" srcset="assets/store-mobile-hero-clean.webp" type="image/webp">
+          <source media="(min-width: 681px)" srcset="assets/store-desktop-hero-clean.webp" type="image/webp">
+          <img src="assets/store-desktop-hero-clean.webp" alt="가방에 달린 복작소 작품 키링">
         </picture>
       </div>
     </section>
