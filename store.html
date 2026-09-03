@@ -414,8 +414,6 @@
     .guide-link{position:relative;min-height:82px;display:flex;align-items:center;justify-content:center;gap:11px;font-size:13px;font-weight:850}
     .guide-link::after{content:"";position:absolute;top:50%;right:0;width:1px;height:36px;background:var(--line);transform:translateY(-50%)}
     .guide-link:last-child::after{display:none}.guide-link i{font-size:20px;color:var(--accent)}
-    .favorite-button{position:absolute;top:11px;right:11px;z-index:2;width:34px;height:34px;display:grid;place-items:center;border:0;background:transparent;color:#fff;font-size:22px;cursor:pointer;text-shadow:0 1px 5px rgba(31,26,23,.28)}
-    .favorite-button.is-active{color:var(--seal)}
     .product-card{
       display:flex;
       flex-direction:column;
@@ -1587,19 +1585,6 @@
             if(!image.src.endsWith('/assets/keyring-promo.jpg')) image.src = '/assets/keyring-promo.jpg';
           }, {once:true});
         }
-        if(!media || media.querySelector('.favorite-button')) return;
-        const favorite = document.createElement('button');
-        favorite.type = 'button';
-        favorite.className = 'favorite-button';
-        favorite.setAttribute('aria-label','찜하기');
-        favorite.innerHTML = '<i class="bi bi-heart" aria-hidden="true"></i>';
-        favorite.addEventListener('click', event => {
-          event.stopPropagation();
-          const active = favorite.classList.toggle('is-active');
-          favorite.innerHTML = `<i class="bi bi-heart${active ? '-fill' : ''}" aria-hidden="true"></i>`;
-          favorite.setAttribute('aria-label', active ? '찜 해제' : '찜하기');
-        });
-        media.appendChild(favorite);
       });
     }
 
