@@ -97,21 +97,7 @@
         width: calc(60% + (100vw - 100%) / 2);
       }
     }
-    .product-detail-view[hidden] { display: none; }
-    .product-detail-view { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: rgba(246,241,234,.985); padding: 28px 18px; }
-    .product-detail-shell { max-width: 980px; margin: 0 auto; }
-    .product-detail-top { display: flex; align-items: center; justify-content: space-between; min-height: 56px; border-bottom: 1px solid #d6d3d1; }
-    .product-detail-close { width: 40px; height: 40px; border: 1px solid #d6d3d1; border-radius: 999px; background: white; }
-    .product-detail-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 42px; padding-top: 36px; }
-    .product-detail-image { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: #ebe3d5; }
-    .product-detail-name { font-family: 'Noto Serif KR', serif; font-size: 30px; font-weight: 700; margin: 0; }
-    .product-detail-copy { color: #78716c; line-height: 1.8; margin-top: 14px; }
-    .product-detail-price { font-size: 25px; font-weight: 800; margin-top: 22px; padding-bottom: 22px; border-bottom: 1px solid #d6d3d1; }
-    .product-detail-note { color: #57534e; font-size: 14px; line-height: 1.8; margin: 22px 0; }
-    .product-detail-actions { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; }
-    .product-detail-actions a, .product-detail-actions button { min-height: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid #292524; border-radius: 4px; font-weight: 700; }
-    .product-detail-actions a { background: #292524; color: white; }
-    @media (max-width: 680px) { .product-detail-grid { grid-template-columns: 1fr; gap: 24px; padding-top: 22px; } .product-detail-name { font-size: 24px; } }
+    .detail-view[hidden]{display:none}.detail-view{--line:rgba(41,37,36,.14);--ink:#1c1917;--paper:#fffdf9;--sand:#ebe3d5;position:fixed;inset:0;z-index:80;overflow:auto;background:rgba(246,241,234,.985);padding:22px 0 48px}.detail-shell{max-width:1080px;margin:0 auto;padding:0 24px}.detail-top{min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}.detail-top-title,.detail-section-title{display:inline-flex;align-items:center;gap:8px;margin:0;color:var(--ink);font-size:18px;line-height:1.35;font-weight:900;letter-spacing:-.035em}.detail-top-title::before,.detail-section-title::before{content:"";width:2px;height:16px;border-radius:2px;background:rgba(181,52,39,.52);flex:0 0 auto}.detail-close{width:38px;height:38px;border:1px solid var(--line);border-radius:999px;background:rgba(255,253,249,.82);color:var(--ink);cursor:pointer}.detail-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:42px;padding:36px 0 0}.detail-gallery{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;align-items:start}.detail-thumbs{display:grid;gap:10px}.detail-thumb{aspect-ratio:1/1;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--paper);padding:0;cursor:pointer;opacity:.72;transition:.2s}.detail-thumb:hover,.detail-thumb.is-active{border-color:rgba(31,26,23,.44);opacity:1;transform:translateY(-1px)}.detail-thumb img,.detail-main-image img{width:100%;height:100%;object-fit:cover}.detail-thumb img{pointer-events:none}.detail-main-image{aspect-ratio:1/1;border-radius:4px;overflow:hidden;background:var(--sand);box-shadow:0 20px 48px rgba(31,26,23,.08)}.detail-info{padding-top:2px}.detail-name{margin:0;font-family:"Noto Serif KR",serif;font-size:28px;line-height:1.32;letter-spacing:-.045em}.detail-desc{margin:12px 0 0;color:#78716c;font-size:15px;line-height:1.7}.detail-price{margin:20px 0 0;padding-bottom:20px;border-bottom:1px solid var(--line);font-size:26px;font-weight:900;letter-spacing:-.04em}.option-group{display:grid;gap:10px;margin:18px 0 0}.option-label{font-size:13px;font-weight:900}.option-buttons{display:flex;gap:8px;flex-wrap:wrap}.option-chip{min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:4px;background:rgba(255,253,249,.76);font-size:12px;font-weight:900}.option-chip.is-active{border-color:var(--ink);background:var(--ink);color:#fffdf9}.detail-list{display:grid;gap:14px;margin:22px 0;padding:0 0 22px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.6}.detail-row{display:grid;grid-template-columns:72px 1fr;gap:12px}.quantity-picker{width:56px;height:36px;border:1px solid rgba(31,26,23,.18);background:#fffdf9;text-align:center;font-weight:900}.detail-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:10px;margin-top:18px}.detail-button{min-height:48px;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(31,26,23,.32);border-radius:2px;background:rgba(255,253,249,.72);font-size:14px;font-weight:900}.detail-button.primary{border-color:var(--ink);background:var(--ink);color:#fffdf9}.payment-methods{margin-top:12px;padding:12px 0 2px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;font-weight:800}.payment-method{display:inline-flex;align-items:center;gap:5px}.detail-accordion{display:grid;margin:20px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.detail-accordion details+details{border-top:1px solid var(--line)}.detail-accordion summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:900;list-style:none}.detail-accordion summary::after{content:"+"}.detail-accordion details[open] summary::after{content:"-"}.detail-accordion p{margin:0 0 16px;color:#78716c;font-size:13px;line-height:1.7}.detail-story,.detail-related{margin:34px 0 0;padding:28px 0 0;border-top:1px solid var(--line)}.detail-story-text{max-width:760px;margin:0;color:#57534e;font-size:15px;line-height:1.85}.related-grid{display:grid;grid-template-columns:repeat(5,minmax(0,180px));gap:18px;justify-content:space-between}.related-card{display:grid;gap:10px;border:0;background:transparent;padding:0;text-align:left}.related-card img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px}.related-card span{font-size:12px;font-weight:850}.detail-mobile-footer{display:none}@media(max-width:900px){.detail-grid{grid-template-columns:1fr}.related-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.detail-shell{padding:0 18px}.detail-gallery{grid-template-columns:1fr}.detail-thumbs{display:flex;order:2;overflow-x:auto}.detail-thumb{width:58px;flex:0 0 58px}.detail-main-image{order:1}.detail-name{font-size:24px}.detail-mobile-footer{display:block;margin:34px -18px -48px;padding:34px 18px 88px}}
   </style>
 </head>
 <body class="hanji-subtle-pattern min-h-screen text-stone-900 antialiased flex flex-col">
@@ -674,21 +660,7 @@
 </div>
 </footer>
 <!-- END: MainFooter -->
-<section class="product-detail-view" id="product-detail" hidden aria-label="상품 상세">
-<div class="product-detail-shell">
-<div class="product-detail-top"><strong>복작소 상품 상세</strong><button class="product-detail-close" type="button" aria-label="상세화면 닫기">×</button></div>
-<div class="product-detail-grid">
-<img class="product-detail-image" data-detail-image alt="">
-<div>
-<h2 class="product-detail-name" data-detail-name></h2>
-<p class="product-detail-copy" data-detail-copy></p>
-<div class="product-detail-price" data-detail-price></div>
-<p class="product-detail-note">복작소의 손길로 정성스럽게 준비하는 작품입니다. 소재와 제작 기간, 맞춤 각인은 문의 페이지에서 안내해 드립니다.</p>
-<div class="product-detail-actions"><button type="button" data-detail-back>목록으로</button><a data-detail-inquiry href="/store-contact.html">상품 문의하기</a></div>
-</div>
-</div>
-</div>
-</section>
+<section class="detail-view" id="product-detail" hidden aria-label="상품 상세"><div class="detail-shell"><div class="detail-top"><span class="detail-top-title">복작소 상품 상세</span><button class="detail-close" type="button" aria-label="닫기">X</button></div><div class="detail-grid"><div class="detail-gallery"><div class="detail-thumbs"><button class="detail-thumb is-active" type="button" data-detail-thumb aria-label="정면 이미지 보기"><img src="" alt=""></button><button class="detail-thumb" type="button" data-detail-thumb aria-label="두 번째 이미지 보기"><img src="" alt=""></button><button class="detail-thumb" type="button" data-detail-thumb aria-label="세 번째 이미지 보기"><img src="" alt=""></button></div><div class="detail-main-image"><img data-detail-image src="" alt=""></div></div><div class="detail-info"><h2 class="detail-name" data-detail-title></h2><p class="detail-desc" data-detail-copy></p><div class="detail-price" data-detail-price></div><div class="option-group"><span class="option-label">옵션 선택</span><div class="option-buttons"><button class="option-chip is-active" type="button">기본형</button><button class="option-chip" type="button">이니셜 각인</button><button class="option-chip" type="button">선물 포장</button></div></div><div class="detail-list"><div class="detail-row"><strong>상태</strong><span>판매 준비중</span></div><div class="detail-row"><strong>배송</strong><span>상품 준비 후 안내</span></div><div class="detail-row"><strong>수량</strong><input class="quantity-picker" data-detail-quantity type="number" min="1" max="99" value="1"></div><div class="detail-row"><strong>문의</strong><span>수량, 제작 방식, 선물 포장 상담 가능</span></div></div><div class="detail-actions"><button class="detail-button" data-detail-back type="button">목록으로</button><a class="detail-button primary" data-detail-inquiry href="/store-contact.html">문의하기</a></div><a class="detail-button" href="#" style="margin-top:10px;width:100%;gap:7px" aria-label="카카오톡 문의">카카오톡 문의</a><div class="payment-methods" aria-label="결제 수단"><span class="payment-method">카드결제</span><span class="payment-method">간편결제</span><span class="payment-method">계좌이체</span><span class="payment-method">안전결제</span></div><div class="detail-accordion"><details><summary>소재</summary><p>나무, 석재, 금속 부자재 등 상품별 소재를 준비 중입니다.</p></details><details><summary>제작 기간</summary><p>주문 제작 상품은 상담 후 일정에 맞춰 안내드립니다.</p></details><details><summary>배송 안내</summary><p>포장과 발송 방식은 상품 준비가 완료되면 안내드립니다.</p></details></div></div></div><section class="detail-story"><h3 class="detail-section-title">작품 설명</h3><p class="detail-story-text" data-detail-story></p></section><section class="detail-related"><h3 class="detail-section-title">다른 상품</h3><div class="related-grid" data-detail-related></div></section><footer class="detail-mobile-footer"><div class="text-center"><strong>손끝으로 전하는 따뜻한 온기, 복작소</strong><p>세상에 하나뿐인 나만의 정갈한 이야기를 새깁니다.</p></div></footer></div></section>
 <!-- 실시간 이미지 업로드 및 미리보기 교체 스크립트 -->
 <script>
   (function () {
@@ -739,26 +711,41 @@
     if (!detail) return;
     const cards = Array.from(document.querySelectorAll('article.product-card-hover'));
     const links = cards.map(card => card.querySelector('a[href*="product="]'));
-    const field = name => detail.querySelector(`[data-detail-${name}]`);
-    function openCard(card) {
+    const image = detail.querySelector('[data-detail-image]');
+    const thumbs = Array.from(detail.querySelectorAll('[data-detail-thumb]'));
+    const title = detail.querySelector('[data-detail-title]');
+    const copy = detail.querySelector('[data-detail-copy]');
+    const price = detail.querySelector('[data-detail-price]');
+    const story = detail.querySelector('[data-detail-story]');
+    const quantity = detail.querySelector('[data-detail-quantity]');
+    const inquiry = detail.querySelector('[data-detail-inquiry]');
+    const related = detail.querySelector('[data-detail-related]');
+    function dataFromCard(card) {
       const name = card.querySelector('h3')?.textContent.trim() || '복작소 상품';
-      const copy = card.querySelector('p')?.textContent.trim() || '';
-      const price = card.querySelector('.font-bold.text-stone-900')?.textContent.trim() || '가격 문의';
-      const image = card.querySelector('img');
-      field('name').textContent = name;
-      field('copy').textContent = copy;
-      field('price').textContent = price;
-      field('image').src = image?.src || '';
-      field('image').alt = name;
-      field('inquiry').href = `/store-contact.html?${new URLSearchParams({ product: name })}`;
+      return { name, copy: card.querySelector('p')?.textContent.trim() || '', price: card.querySelector('.font-bold.text-stone-900')?.textContent.trim() || '가격 문의', image: card.querySelector('img')?.src || '' };
+    }
+    function openCard(card) {
+      const data = dataFromCard(card);
+      title.textContent = data.name; copy.textContent = data.copy; price.textContent = data.price;
+      story.textContent = `${data.copy} 복작소의 손길과 정성을 담아 완성하는 작은 작품입니다.`;
+      image.src = data.image; image.alt = data.name; quantity.value = 1;
+      thumbs.forEach((thumb, i) => { const img = thumb.querySelector('img'); img.src = data.image; img.alt = `${data.name} 이미지 ${i + 1}`; thumb.classList.toggle('is-active', i === 0); });
+      inquiry.href = `/store-contact.html?${new URLSearchParams({ product: data.name, quantity: '1개' })}`;
+      const others = cards.filter(item => item !== card).slice(0, 5);
+      related.innerHTML = '';
+      others.forEach(item => { const d = dataFromCard(item); const button = document.createElement('button'); button.className = 'related-card'; button.type = 'button'; button.innerHTML = `<img src="${d.image}" alt=""><span>${d.name}</span>`; button.addEventListener('click', () => openCard(item)); related.appendChild(button); });
       detail.hidden = false;
       document.body.style.overflow = 'hidden';
+      detail.querySelector('.detail-close').focus();
     }
     function closeDetail() { detail.hidden = true; document.body.style.overflow = ''; history.replaceState(null, '', location.pathname); }
     links.forEach((link, index) => link?.addEventListener('click', event => { event.preventDefault(); openCard(cards[index]); }));
     cards.forEach(card => card.querySelector('h3')?.addEventListener('click', () => openCard(card)));
-    detail.querySelector('.product-detail-close').addEventListener('click', closeDetail);
-    field('back').addEventListener('click', closeDetail);
+    thumbs.forEach(thumb => thumb.addEventListener('click', () => { thumbs.forEach(item => item.classList.remove('is-active')); thumb.classList.add('is-active'); image.src = thumb.querySelector('img').src; }));
+    detail.querySelectorAll('.option-chip').forEach(chip => chip.addEventListener('click', () => { detail.querySelectorAll('.option-chip').forEach(item => item.classList.remove('is-active')); chip.classList.add('is-active'); }));
+    quantity.addEventListener('input', () => { const count = Math.max(1, Math.min(99, Number(quantity.value) || 1)); quantity.value = count; inquiry.href = `/store-contact.html?${new URLSearchParams({ product: title.textContent, quantity: `${count}개` })}`; });
+    detail.querySelector('.detail-close').addEventListener('click', closeDetail);
+    detail.querySelector('[data-detail-back]').addEventListener('click', closeDetail);
     addEventListener('keydown', event => { if (event.key === 'Escape' && !detail.hidden) closeDetail(); });
     const requested = new URLSearchParams(location.search).get('product');
     if (requested) {
