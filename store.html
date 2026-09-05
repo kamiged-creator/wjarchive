@@ -125,7 +125,9 @@
     .catalog-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 22px; }
     .catalog-grid .is-catalog-hidden { display: none; }
     @media (max-width: 639px) {
-      #story-banner-image { object-position: left center; }
+      #story-banner-bg { opacity: 1; }
+      #story-banner-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,18,16,.48) 0%, rgba(20,18,16,.24) 58%, rgba(20,18,16,.08) 100%); pointer-events: none; }
+      #story-banner-image { object-position: left center; opacity: .42; transform: scale(1.08) translateX(3%); transform-origin: center; }
       #story-section h2 { color: #d6d3d1; margin-top: 12px; }
       #story-section .story-mobile-extra { display: none; }
       [data-purpose="utility-actions"] { gap: 8px; }
