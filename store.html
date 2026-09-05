@@ -111,6 +111,7 @@
     .footer-social-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(87,83,78,.28); border-radius: 50%; color: #57534e; background: rgba(255,255,255,.26); }
     .footer-social-icon svg { width: 16px; height: 16px; }
     .footer-social-icon.naver { border-radius: 6px; font: 900 14px/1 Arial,sans-serif; }
+    .section-view-all { white-space: nowrap; flex-shrink: 0; }
     @media (max-width: 639px) {
       #story-banner-image { object-position: left center; }
       [data-purpose="usp-highlights"] .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
@@ -121,6 +122,7 @@
       [data-purpose="best-sellers-grid"] > .grid,
       [data-purpose="new-products-grid"] > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
       [data-purpose="new-products-grid"] > .grid > article:nth-child(n+3) { display: none; }
+      [data-purpose="new-products-grid"].is-show-all > .grid > article:nth-child(n+3) { display: flex; }
       [data-purpose="best-sellers-grid"] article .p-4,
       [data-purpose="new-products-grid"] article .p-4 { padding: 12px; }
     }
@@ -327,7 +329,7 @@
 <h2 class="font-traditional text-2xl sm:text-3xl font-bold text-stone-900 mt-1">베스트 상품</h2>
 <p class="text-xs sm:text-sm text-stone-500 mt-1">복작소에서 꾸준히 가장 깊은 사랑을 받는 시그니처 수제 소품입니다.</p>
 </div>
-<a class="text-xs sm:text-sm text-stone-600 hover:text-stone-900 font-medium flex items-center group" href="#">
+<a class="section-view-all text-xs sm:text-sm text-stone-600 hover:text-stone-900 font-medium flex items-center group" href="#" data-view-all aria-expanded="false">
           전체 보기
           <span class="ml-1 text-stone-400 group-hover:translate-x-0.5 transition-transform">›</span>
 </a>
@@ -495,7 +497,7 @@
 <h2 class="font-traditional text-2xl sm:text-3xl font-bold text-stone-900 mt-1">신상품</h2>
 <p class="text-xs sm:text-sm text-stone-500 mt-1">새로운 계절의 결을 담아 정갈하게 깎아 만든 신작들입니다.</p>
 </div>
-<a class="text-xs sm:text-sm text-stone-600 hover:text-stone-900 font-medium flex items-center group" href="#">
+<a class="section-view-all text-xs sm:text-sm text-stone-600 hover:text-stone-900 font-medium flex items-center group" href="#" data-view-all aria-expanded="false">
           전체 보기
           <span class="ml-1 text-stone-400 group-hover:translate-x-0.5 transition-transform">›</span>
 </a>
@@ -796,6 +798,16 @@
       const match = cards.find(card => card.querySelector('h3')?.textContent.trim() === requested || card.querySelector('img')?.alt === requested);
       if (match) openCard(match);
     }
+    document.querySelectorAll('[data-view-all]').forEach(link => {
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        const section = link.closest('[data-purpose$="-grid"]');
+        if (!section) return;
+        section.classList.add('is-show-all');
+        link.setAttribute('aria-expanded', 'true');
+        link.firstChild.textContent = '전체 상품 ';
+      });
+    });
   })();
 </script>
 
