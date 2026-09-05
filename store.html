@@ -123,7 +123,20 @@
       [data-purpose="best-sellers-grid"] article .p-4,
       [data-purpose="new-products-grid"] article .p-4 { padding: 12px; }
     }
-    @media (max-width: 680px) { .detail-mobile-footer { margin: 34px -18px 0; padding: 34px 18px 88px; } }
+    @media (max-width: 680px) {
+      .detail-view { padding-bottom: 0; }
+      .detail-related .detail-section-title { display: flex; margin-bottom: 18px; }
+      .related-grid { gap: 16px 12px; }
+      .related-grid > .related-card:nth-child(n+5) { display: none; }
+      .detail-thumb:nth-child(1) img { object-position: left center; }
+      .detail-thumb:nth-child(2) img { object-position: center center; }
+      .detail-thumb:nth-child(3) img { object-position: right center; }
+      .related-card:nth-child(4n+1) img { object-position: left center; }
+      .related-card:nth-child(4n+2) img { object-position: center top; }
+      .related-card:nth-child(4n+3) img { object-position: right center; }
+      .related-card:nth-child(4n+4) img { object-position: center bottom; }
+      .detail-mobile-footer { margin: 34px -18px 0; padding: 34px 18px; }
+    }
   </style>
 </head>
 <body class="hanji-subtle-pattern min-h-screen text-stone-900 antialiased flex flex-col">
