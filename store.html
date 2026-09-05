@@ -125,6 +125,10 @@
     .catalog-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 22px; }
     .catalog-grid .is-catalog-hidden { display: none; }
     @media (max-width: 639px) {
+      #hero-section > .max-w-6xl { min-height: 460px; }
+      #hero-section .hero-content { padding-top: 40px; padding-bottom: 40px; }
+      #hero-section .hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      #hero-section .hero-actions a { min-width: 0; padding: 11px 6px; font-size: 12px; line-height: 1.35; text-align: center; }
       #story-banner-bg { opacity: 1; }
       #story-banner-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,18,16,.48) 0%, rgba(20,18,16,.24) 58%, rgba(20,18,16,.08) 100%); pointer-events: none; }
       #story-banner-image { object-position: left center; opacity: .42; transform: scale(1.08) translateX(3%); transform-origin: center; }
@@ -254,7 +258,7 @@
 <input accept="image/*" class="hidden" id="hero-image-uploader" type="file">
 </div>
 <!-- Hero Content Copy -->
-<div class="relative z-10 py-16 md:py-24 max-w-xl">
+<div class="hero-content relative z-10 py-16 md:py-24 max-w-xl">
 <div class="inline-flex items-center space-x-2 bg-stone-900/5 backdrop-blur-sm border border-stone-900/10 px-3 py-1 rounded-full text-xs text-stone-700 font-medium mb-5">
 <span class="w-1.5 h-1.5 rounded-full bg-red-700"></span>
 <span class="">손에 담는 작은 예술</span>
@@ -268,7 +272,7 @@
             소중한 분과 나 자신만을 위해 정성으로 완성되는 1:1 맞춤 수제 키링
           </p>
 <!-- Action Buttons -->
-<div class="flex flex-wrap items-center gap-3">
+<div class="hero-actions flex flex-wrap items-center gap-3">
 <a class="inline-flex items-center justify-center px-6 py-3.5 bg-stone-900 text-stone-100 text-sm font-medium rounded hover:bg-stone-800 transition-all shadow-md group" href="#new-section">
 <span class="">신상품 보러가기</span>
 <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
