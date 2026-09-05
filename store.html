@@ -111,6 +111,18 @@
     .footer-social-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(87,83,78,.28); border-radius: 50%; color: #57534e; background: rgba(255,255,255,.26); }
     .footer-social-icon svg { width: 16px; height: 16px; }
     .footer-social-icon.naver { border-radius: 6px; font: 900 14px/1 Arial,sans-serif; }
+    @media (max-width: 639px) {
+      [data-purpose="usp-highlights"] .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+      [data-purpose="usp-highlights"] .grid > div { padding: 0 2px; border-top: 0; }
+      [data-purpose="usp-highlights"] .grid > div > div { width: 34px; height: 34px; margin-bottom: 6px; }
+      [data-purpose="usp-highlights"] h3 { font-size: 11px; line-height: 1.3; word-break: keep-all; }
+      [data-purpose="usp-highlights"] p { display: none; }
+      [data-purpose="best-sellers-grid"] > .grid,
+      [data-purpose="new-products-grid"] > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      [data-purpose="new-products-grid"] > .grid > article:nth-child(n+3) { display: none; }
+      [data-purpose="best-sellers-grid"] article .p-4,
+      [data-purpose="new-products-grid"] article .p-4 { padding: 12px; }
+    }
     @media (max-width: 680px) { .detail-mobile-footer { margin: 34px -18px 0; padding: 34px 18px 88px; } }
   </style>
 </head>
