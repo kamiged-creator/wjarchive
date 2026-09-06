@@ -87,6 +87,7 @@
     .cart-count[hidden] { display:none; }
     .detail-button.cart-add { border-color:#991b1b; background:#991b1b; color:#fff; }
     .detail-info .payment-methods { display:none; }
+    .detail-price::after { content:attr(data-shipping); float:right; margin-top:7px; color:#991b1b; font-family:"Noto Sans KR",sans-serif; font-size:13px; font-weight:800; }
 
     /* 이미지 업로더 플로팅 버튼 스타일 */
     .image-changer-btn {
@@ -813,6 +814,7 @@
     const quantity = detail.querySelector('[data-detail-quantity]');
     const inquiry = detail.querySelector('[data-detail-inquiry]');
     const related = detail.querySelector('[data-detail-related]');
+    let currentCard = null;
     const cartKey = 'bokjakso-cart';
     const detailActions = detail.querySelector('.detail-actions');
     const addCartButton = document.createElement('button');
@@ -828,11 +830,13 @@
     }
     function dataFromCard(card) {
       const name = card.querySelector('h3')?.textContent.trim() || '복작소 상품';
-      return { name, copy: card.querySelector('p')?.textContent.trim() || '', price: card.querySelector('.font-bold.text-stone-900')?.textContent.trim() || '가격 문의', image: card.querySelector('img')?.src || '' };
+      return { name, copy: card.querySelector('p')?.textContent.trim() || '', price: card.querySelector('.font-bold.text-stone-900')?.textContent.trim() || '가격 문의', image: card.querySelector('img')?.src || '', shippingFree: card.textContent.includes('무료배송') };
     }
     function openCard(card) {
       const data = dataFromCard(card);
+      currentCard = card;
       title.textContent = data.name; copy.textContent = data.copy; price.textContent = data.price;
+      price.dataset.shipping = data.shippingFree ? '무료배송' : '배송비 3,000원';
       story.textContent = `${data.copy} 복작소의 손길과 정성을 담아 완성하는 작은 작품입니다.`;
       image.src = data.image; image.alt = data.name; quantity.value = 1;
       thumbs.forEach((thumb, i) => { const img = thumb.querySelector('img'); img.src = data.image; img.alt = `${data.name} 이미지 ${i + 1}`; thumb.classList.toggle('is-active', i === 0); });
@@ -857,7 +861,7 @@
       const items = readCart();
       const existing = items.find(item => item.id === id);
       if (existing) existing.quantity = Math.min(99, (Number(existing.quantity) || 1) + count);
-      else items.push({ id, name: title.textContent, option, quantity: count, price: price.textContent, image: image.src, link: `/store.html?${new URLSearchParams({ product: title.textContent })}#product-detail` });
+      else items.push({ id, name: title.textContent, option, quantity: count, price: price.textContent, image: image.src, shippingFree: currentCard ? dataFromCard(currentCard).shippingFree : false, link: `/store.html?${new URLSearchParams({ product: title.textContent })}#product-detail` });
       localStorage.setItem(cartKey, JSON.stringify(items));
       syncCartCount();
       const original = '장바구니 담기'; addCartButton.textContent = '장바구니에 담았습니다';
@@ -927,6 +931,7 @@
         description: card.querySelector('p')?.textContent.trim() || '',
         price: card.querySelector('.font-bold.text-stone-900')?.textContent.trim() || '가격 문의',
         image: card.querySelector('img')?.getAttribute('src') || '',
+        shippingFree: card.textContent.includes('무료배송'),
         link
       };
     }
