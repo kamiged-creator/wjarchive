@@ -315,6 +315,12 @@
         setStatus('#formStatus', error.message || '삭제 실패', 'bad');
       }
     }
+    function optimizedImageKitUrl(url, width){
+      const clean = String(url || '').trim();
+      if(!clean || !clean.includes('ik.imagekit.io')) return clean;
+      const separator = clean.includes('?') ? '&' : '?';
+      return `${clean}${separator}tr=w-${width},q-82,f-webp`;
+    }
     async function uploadImage(){
       const file = $('#uploadInput').files?.[0];
       if(!file){
@@ -343,9 +349,11 @@
         const result = await uploadResponse.json().catch(() => ({}));
         if(!uploadResponse.ok) throw new Error(result.message || '업로드 실패');
         const emptyInput = ['#mainImageInput','#detailImage1','#detailImage2','#detailImage3'].map($).find(input => !input.value.trim());
-        (emptyInput || $('#mainImageInput')).value = result.url || '';
+        const targetInput = emptyInput || $('#mainImageInput');
+        const targetWidth = targetInput.id === 'mainImageInput' ? 900 : 1600;
+        targetInput.value = optimizedImageKitUrl(result.url, targetWidth);
         renderPreview();
-        setStatus('#formStatus', 'ImageKit 업로드 완료. 저장 버튼을 눌러 상품에 반영하세요.', 'ok');
+        setStatus('#formStatus', 'WebP 자동 최적화 완료. 저장 버튼을 눌러 상품에 반영하세요.', 'ok');
       }catch(error){
         setStatus('#formStatus', error.message || '업로드 실패', 'bad');
       }finally{
