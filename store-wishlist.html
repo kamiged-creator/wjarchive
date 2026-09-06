@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>관심 상품 | 복작소</title>
+  <meta name="description" content="복작소에서 마음에 담아둔 관심 상품을 확인하세요.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--paper:#faf7f2;--ink:#1c1917;--muted:#78716c;--line:#e7e0d7;--red:#b91c1c}
+    *{box-sizing:border-box}body{margin:0;background-color:var(--paper);background-image:radial-gradient(#e8e0d2 .75px,transparent .75px);background-size:24px 24px;color:var(--ink);font-family:"Noto Sans KR",sans-serif;word-break:keep-all}a{color:inherit;text-decoration:none}button{font:inherit}
+    .header{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(120,113,108,.16)}.header-inner{max-width:1152px;height:82px;margin:auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px}.seal{width:34px;height:34px;border:2px solid #991b1b;border-radius:5px;display:grid;place-items:center;color:#991b1b;font:700 18px "Noto Serif KR",serif}.brand-name{font:900 24px/1 "Noto Serif KR",serif}.brand-en{display:block;margin-top:5px;color:var(--muted);font-size:9px;letter-spacing:.16em}.header-actions{display:flex;align-items:center;gap:12px}.icon-link{width:38px;height:38px;border-radius:50%;display:grid;place-items:center}.icon-link:hover{background:#eee8df}.icon-link svg{width:22px;height:22px}.icon-link.heart{color:var(--red)}
+    main{max-width:1152px;min-height:calc(100vh - 260px);margin:auto;padding:54px 24px 80px}.eyebrow{margin:0 0 8px;color:var(--red);font-size:13px;font-weight:900;letter-spacing:.12em}.title-row{display:flex;align-items:end;justify-content:space-between;gap:20px;padding-bottom:24px;border-bottom:1px solid var(--line)}h1{margin:0;font:900 34px/1.25 "Noto Serif KR",serif}.count{color:var(--muted);font-size:14px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin-top:32px}.card{position:relative;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(41,37,36,.05)}.card-image{display:block;aspect-ratio:1/1;overflow:hidden;background:#eee7dc}.card-image img{width:100%;height:100%;object-fit:cover;transition:transform .35s}.card:hover img{transform:scale(1.025)}.remove{position:absolute;top:10px;right:10px;width:38px;height:38px;border:0;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.9);color:var(--red);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}.remove svg{width:21px;height:21px;fill:currentColor}.card-body{padding:18px}.card h2{margin:0;font:800 18px/1.45 "Noto Serif KR",serif}.desc{height:44px;margin:8px 0;color:var(--muted);font-size:13px;line-height:1.65;overflow:hidden}.price{margin:14px 0 18px;font-size:19px;font-weight:900}.detail-link{min-height:46px;display:flex;align-items:center;justify-content:center;border-radius:5px;background:#f5f5f4;font-size:14px;font-weight:800}.detail-link:hover{background:#292524;color:white}.empty{margin-top:32px;padding:90px 24px;text-align:center;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.7)}.empty .empty-heart{color:#a8a29e}.empty svg{width:42px;height:42px}.empty h2{margin:18px 0 8px;font:800 22px "Noto Serif KR",serif}.empty p{margin:0 0 24px;color:var(--muted);font-size:14px}.shop-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 24px;border-radius:4px;background:#292524;color:white;font-weight:800;font-size:14px}
+    footer{border-top:1px solid var(--line);background:#eee6d9}.footer-inner{max-width:1152px;margin:auto;padding:32px 24px;color:#706b66;font-size:12px;line-height:1.8}.footer-title{margin-bottom:8px;color:#292524;font:800 16px "Noto Serif KR",serif}
+    @media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.header-inner{height:74px;padding:0 18px}.brand-name{font-size:22px}main{padding:38px 18px 64px}h1{font-size:28px}.card-body{padding:14px}.card h2{font-size:16px}.price{font-size:18px}.desc{font-size:12px}.remove{width:36px;height:36px}}
+    @media(max-width:420px){.brand-en{display:none}.header-actions{gap:4px}.seal{width:31px;height:31px}.grid{gap:10px}.card-body{padding:12px 11px}.detail-link{min-height:43px}.title-row{align-items:center}}
+  </style>
+</head>
+<body>
+  <header class="header"><div class="header-inner">
+    <a class="brand" href="/store.html"><span class="seal">福</span><span><span class="brand-name">복작소</span><span class="brand-en">BOKJAKSO CRAFT</span></span></a>
+    <nav class="header-actions" aria-label="빠른 메뉴">
+      <a class="icon-link" href="/store.html#all-products-view" aria-label="전체 상품 보기"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m21 21-5.2-5.2m0 0A7.5 7.5 0 1 0 5.2 5.2a7.5 7.5 0 0 0 10.6 10.6Z" stroke-width="1.8" stroke-linecap="round"/></svg></a>
+      <a class="icon-link heart" href="/store-wishlist.html" aria-label="관심 상품"><svg fill="currentColor" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 8.25c0-2.49-2.1-4.5-4.69-4.5-1.93 0-3.59 1.13-4.31 2.73-.72-1.6-2.38-2.73-4.31-2.73C5.1 3.75 3 5.76 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg></a>
+      <a class="icon-link" href="/store.html" aria-label="스토어 홈"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21H5a2 2 0 0 1-2-2v-8.5Z" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 21v-7h6v7" stroke-width="1.8"/></svg></a>
+    </nav>
+  </div></header>
+  <main>
+    <p class="eyebrow">MY WISHLIST</p>
+    <div class="title-row"><h1>관심 상품</h1><span class="count" data-count>0개의 작품</span></div>
+    <div class="grid" data-wishlist-grid></div>
+    <section class="empty" data-empty hidden><div class="empty-heart"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 8.25c0-2.49-2.1-4.5-4.69-4.5-1.93 0-3.59 1.13-4.31 2.73-.72-1.6-2.38-2.73-4.31-2.73C5.1 3.75 3 5.76 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" stroke-width="1.5"/></svg></div><h2>담아둔 작품이 없습니다</h2><p>마음에 드는 작품의 하트를 눌러 모아보세요.</p><a class="shop-link" href="/store.html">작품 둘러보기</a></section>
+  </main>
+  <footer><div class="footer-inner"><div class="footer-title">복작소</div><div>상호: 복작소 | 대표: 김복작 | 대표번호: 070-8065-0210 | 이메일: contact@bokjakso.kr</div><div>© 2026 BOKJAKSO Craft Studio. All rights reserved.</div></div></footer>
+  <script>
+    (function(){
+      const key='bokjakso-wishlist';
+      const grid=document.querySelector('[data-wishlist-grid]');
+      const empty=document.querySelector('[data-empty]');
+      const count=document.querySelector('[data-count]');
+      function read(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(error){return[]}}
+      function escapeHtml(value){return String(value||'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]))}
+      function render(){
+        const items=read(); count.textContent=`${items.length}개의 작품`; empty.hidden=items.length!==0; grid.hidden=items.length===0;
+        grid.innerHTML=items.map(item=>`<article class="card" data-id="${escapeHtml(item.id)}"><a class="card-image" href="${escapeHtml(item.link)}"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}"></a><button class="remove" type="button" aria-label="${escapeHtml(item.name)} 관심 상품에서 삭제"><svg viewBox="0 0 24 24"><path d="M21 8.25c0-2.49-2.1-4.5-4.69-4.5-1.93 0-3.59 1.13-4.31 2.73-.72-1.6-2.38-2.73-4.31-2.73C5.1 3.75 3 5.76 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg></button><div class="card-body"><h2>${escapeHtml(item.name)}</h2><p class="desc">${escapeHtml(item.description)}</p><div class="price">${escapeHtml(item.price)}</div><a class="detail-link" href="${escapeHtml(item.link)}">상세보기</a></div></article>`).join('');
+      }
+      grid.addEventListener('click',event=>{const button=event.target.closest('.remove');if(!button)return;const id=button.closest('[data-id]').dataset.id;localStorage.setItem(key,JSON.stringify(read().filter(item=>item.id!==id)));render()});
+      window.addEventListener('storage',render); render();
+    })();
+  </script>
+</body>
+</html>
