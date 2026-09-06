@@ -20,6 +20,18 @@ add column if not exists category text not null default 'keyring';
 alter table public.store_products
 add column if not exists story text not null default '';
 
+alter table public.store_products
+add column if not exists badges jsonb not null default '[]'::jsonb;
+
+alter table public.store_products
+add column if not exists best_rank integer;
+
+alter table public.store_products
+add column if not exists shipping_label text not null default '';
+
+alter table public.store_products
+add column if not exists custom_badge text not null default '';
+
 alter table public.store_products enable row level security;
 
 drop policy if exists "store products are publicly readable" on public.store_products;

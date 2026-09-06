@@ -105,6 +105,10 @@ function toProductPayload(body) {
     status: String(body.status || 'preparing').trim(),
     main_image_url: String(body.main_image_url || '').trim(),
     detail_image_urls: detailImages.map(value => String(value || '').trim()).filter(Boolean),
+    badges: Array.isArray(body.badges) ? body.badges.map(value => String(value || '').trim()).filter(Boolean) : [],
+    best_rank: Number(body.best_rank) >= 1 && Number(body.best_rank) <= 10 ? Number(body.best_rank) : null,
+    shipping_label: String(body.shipping_label || '').trim(),
+    custom_badge: String(body.custom_badge || '').trim().slice(0, 18),
     sort_order: Number.isFinite(Number(body.sort_order)) ? Number(body.sort_order) : 10,
     is_visible: body.is_visible !== false
   };

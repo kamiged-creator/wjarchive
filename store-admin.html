@@ -51,6 +51,7 @@
     .preview img{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line);border-radius:4px;background:#eee}
     .upload-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .badge-options{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}.badge-check{position:relative}.badge-check input{position:absolute;opacity:0;pointer-events:none}.badge-check span{min-height:38px;display:inline-flex;align-items:center;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer}.badge-check input:checked+span{border-color:#8b1e1e;background:#8b1e1e;color:#fff}.field-note{display:block;margin-top:6px;color:var(--muted);font-size:12px}
     .admin-shell{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:start}.side{padding:14px;position:sticky;top:94px}.side button{width:100%;min-height:44px;border:0;border-radius:5px;background:transparent;text-align:left;padding:0 13px;font-weight:600;color:var(--muted);cursor:pointer}.side button.is-active{background:var(--text);color:#fff}.tab[hidden]{display:none}.dashboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.metric{padding:22px}.metric strong{display:block;margin-top:9px;font-size:30px;font-weight:700}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.settings-card{padding:22px}.banner-preview{position:relative;overflow:hidden;border-radius:7px;background:#ddd;aspect-ratio:16/7;margin-top:12px}.banner-preview.story{aspect-ratio:16/6;background:#292524}.banner-preview img{width:100%;height:100%;object-fit:cover}.banner-preview .copy{position:absolute;inset:0;display:flex;align-items:center;padding:8%;background:linear-gradient(90deg,rgba(237,229,216,.95),rgba(237,229,216,.2));font-family:"Noto Serif KR",serif;font-weight:600;font-size:22px;white-space:pre-line}.banner-preview.story .copy{color:white;background:rgba(0,0,0,.45)}.image-upload{display:grid;grid-template-columns:1fr auto;gap:8px}.coming{padding:38px;text-align:center}.notice{padding:14px;border-radius:6px;background:#fff8dd;color:#71551c;font-size:14px;line-height:1.7;margin-bottom:18px}
     @media(max-width:860px){.admin-shell{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.side button{min-width:max-content}.grid,.settings-grid,.dashboard-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.top-inner{align-items:flex-start;flex-direction:column;padding:16px 0}.preview{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
@@ -120,6 +121,10 @@
           <label><span class="label">상품 종류</span><select class="field" id="categoryInput"><option value="keyring">키링</option><option value="desk">문방소품</option><option value="custom">주문제작</option><option value="etc">기타</option></select></label>
           <label><span class="label">상태</span><select class="field" id="statusInput"><option value="preparing">판매 준비중</option><option value="selling">판매중</option><option value="soldout">품절</option></select></label>
           <label><span class="label">정렬 숫자</span><input class="field" id="sortInput" type="number" value="10"></label>
+          <div class="span-2"><span class="label">상품 배지 (여러 개 선택 가능)</span><div class="badge-options" id="badgeOptions"><label class="badge-check"><input type="checkbox" value="handmade"><span>수제제작</span></label><label class="badge-check"><input type="checkbox" value="engraving"><span>각인가능</span></label><label class="badge-check"><input type="checkbox" value="new"><span>NEW</span></label><label class="badge-check"><input type="checkbox" value="limited"><span>한정수량</span></label></div></div>
+          <label><span class="label">BEST 순위</span><select class="field" id="bestRankInput"><option value="">선택 안 함</option><option value="1">BEST 1위</option><option value="2">BEST 2위</option><option value="3">BEST 3위</option><option value="4">BEST 4위</option><option value="5">BEST 5위</option><option value="6">BEST 6위</option><option value="7">BEST 7위</option><option value="8">BEST 8위</option><option value="9">BEST 9위</option><option value="10">BEST 10위</option></select></label>
+          <label><span class="label">배송 표시</span><select class="field" id="shippingLabelInput"><option value="">기본 배송비</option><option value="무료배송">무료배송</option><option value="조건부 무료배송">조건부 무료배송</option></select></label>
+          <label class="span-2"><span class="label">직접 입력 배지</span><input class="field" id="customBadgeInput" maxlength="18" placeholder="예: 예약제작"><span class="field-note">필요할 때만 입력하며 상품 카드에 짧게 표시됩니다.</span></label>
           <label class="span-2"><span class="label">상품 설명</span><textarea class="field" id="descInput" placeholder="상품 설명"></textarea></label>
           <label class="span-2"><span class="label">작품 설명</span><textarea class="field" id="storyInput" placeholder="작품의 의미와 배경 설명"></textarea></label>
           <label class="span-2"><span class="label">대표 이미지 URL</span><input class="field image-url" id="mainImageInput" type="url" placeholder="https://ik.imagekit.io/..."></label>
@@ -246,6 +251,11 @@
       $('#categoryInput').value = product.category || 'keyring';
       $('#statusInput').value = product.status || 'preparing';
       $('#sortInput').value = Number(product.sort_order || 10);
+      const badges = Array.isArray(product.badges) ? product.badges : [];
+      document.querySelectorAll('#badgeOptions input').forEach(input => { input.checked = badges.includes(input.value); });
+      $('#bestRankInput').value = product.best_rank ? String(product.best_rank) : '';
+      $('#shippingLabelInput').value = product.shipping_label || '';
+      $('#customBadgeInput').value = product.custom_badge || '';
       $('#descInput').value = product.description || '';
       $('#storyInput').value = product.story || '';
       $('#mainImageInput').value = product.main_image_url || '';
@@ -265,6 +275,10 @@
         category: $('#categoryInput').value,
         status: $('#statusInput').value,
         sort_order: Number($('#sortInput').value || 10),
+        badges: Array.from(document.querySelectorAll('#badgeOptions input:checked')).map(input => input.value),
+        best_rank: $('#bestRankInput').value ? Number($('#bestRankInput').value) : null,
+        shipping_label: $('#shippingLabelInput').value,
+        custom_badge: $('#customBadgeInput').value,
         description: $('#descInput').value,
         story: $('#storyInput').value,
         main_image_url: $('#mainImageInput').value,
@@ -291,7 +305,7 @@
           <img src="${product.main_image_url || product.detail_image_urls?.[0] || ''}" alt="">
           <span>
             <span class="item-title">${product.title || '새 상품'}</span>
-            <span class="item-meta">${categoryText(product.category)} · ${product.price_text || '가격 준비중'} · 정렬 ${product.sort_order || 10}</span>
+            <span class="item-meta">${categoryText(product.category)} · ${product.price_text || '가격 준비중'} · ${product.best_rank ? `BEST ${product.best_rank}위 · ` : ''}${product.shipping_label || '기본배송'} · 정렬 ${product.sort_order || 10}</span>
           </span>
           <span class="badge">${statusText(product.status)}</span>
         </button>
