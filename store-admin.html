@@ -48,7 +48,8 @@
     .preview img{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--line);border-radius:4px;background:#eee}
     .upload-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-    @media(max-width:860px){.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.top-inner{align-items:flex-start;flex-direction:column;padding:16px 0}.preview{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .admin-shell{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:start}.side{padding:14px;position:sticky;top:94px}.side button{width:100%;min-height:44px;border:0;border-radius:5px;background:transparent;text-align:left;padding:0 13px;font-weight:850;color:var(--muted);cursor:pointer}.side button.is-active{background:var(--text);color:#fff}.tab[hidden]{display:none}.dashboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.metric{padding:22px}.metric strong{display:block;margin-top:9px;font-size:30px}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.settings-card{padding:22px}.banner-preview{position:relative;overflow:hidden;border-radius:7px;background:#ddd;aspect-ratio:16/7;margin-top:12px}.banner-preview.story{aspect-ratio:16/6;background:#292524}.banner-preview img{width:100%;height:100%;object-fit:cover}.banner-preview .copy{position:absolute;inset:0;display:flex;align-items:center;padding:8%;background:linear-gradient(90deg,rgba(237,229,216,.95),rgba(237,229,216,.2));font-weight:900;font-size:22px;white-space:pre-line}.banner-preview.story .copy{color:white;background:rgba(0,0,0,.45)}.image-upload{display:grid;grid-template-columns:1fr auto;gap:8px}.coming{padding:38px;text-align:center}.notice{padding:14px;border-radius:6px;background:#fff8dd;color:#71551c;font-size:13px;line-height:1.6;margin-bottom:18px}
+    @media(max-width:860px){.admin-shell{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.side button{min-width:max-content}.grid,.settings-grid,.dashboard-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.top-inner{align-items:flex-start;flex-direction:column;padding:16px 0}.preview{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -74,7 +75,22 @@
       <div class="status" id="loginStatus"></div>
     </section>
 
-    <section class="grid hidden" id="adminApp">
+    <section class="admin-shell hidden" id="adminApp">
+      <nav class="panel side" aria-label="관리 메뉴">
+        <button class="is-active" type="button" data-tab="dashboard">대시보드</button>
+        <button type="button" data-tab="products">상품 관리</button>
+        <button type="button" data-tab="main">메인 화면 관리</button>
+        <button type="button" data-tab="inquiries">문의 관리</button>
+        <button type="button" data-tab="settings">스토어 설정</button>
+        <button type="button" data-tab="orders">주문 관리</button>
+      </nav>
+      <div>
+      <section class="tab" data-tab-panel="dashboard">
+        <div class="section-head"><div><h1 class="section-title">운영 현황</h1><p class="hint">스토어의 주요 상태를 빠르게 확인합니다.</p></div></div>
+        <div class="dashboard-grid"><div class="panel metric"><span class="hint">등록 상품</span><strong id="metricProducts">-</strong></div><div class="panel metric"><span class="hint">판매 중</span><strong id="metricSelling">-</strong></div><div class="panel metric"><span class="hint">새 문의</span><strong id="metricInquiries">-</strong></div></div>
+      </section>
+      <section class="tab" data-tab-panel="products" hidden>
+      <div class="grid">
       <div class="panel list-panel">
         <div class="section-head">
           <div>
@@ -123,6 +139,32 @@
         </div>
         <div class="status" id="formStatus"></div>
       </form>
+      </div>
+      </section>
+      <section class="tab" data-tab-panel="main" hidden>
+        <div class="section-head"><div><h1 class="section-title">메인 화면 관리</h1><p class="hint">PC와 모바일 이미지를 따로 올리고 문구와 버튼을 변경합니다.</p></div><button class="btn primary" type="button" id="saveMainBtn">메인 화면 저장</button></div>
+        <div class="notice">이미지는 업로드 후 자동으로 WebP 최적화 주소가 들어갑니다. 저장하면 스토어 방문자에게 반영됩니다.</div>
+        <form id="mainForm" class="settings-grid">
+          <div class="panel settings-card"><h2 class="section-title">상단 배너</h2>
+            <label><span class="label">PC 이미지</span><div class="image-upload"><input class="field" id="heroPc" type="text"><button class="btn upload-setting" type="button" data-target="heroPc" data-width="1800">이미지 올리기</button></div></label>
+            <label><span class="label">모바일 이미지</span><div class="image-upload"><input class="field" id="heroMobile" type="text"><button class="btn upload-setting" type="button" data-target="heroMobile" data-width="900">이미지 올리기</button></div></label>
+            <label><span class="label">작은 문구</span><input class="field" id="heroLabel"></label><label><span class="label">큰 제목</span><textarea class="field" id="heroTitle"></textarea></label><label><span class="label">설명</span><textarea class="field" id="heroDescription"></textarea></label>
+            <div class="form-grid"><label><span class="label">첫 버튼 글씨</span><input class="field" id="heroPrimaryText"></label><label><span class="label">첫 버튼 연결</span><input class="field" id="heroPrimaryUrl"></label><label><span class="label">둘째 버튼 글씨</span><input class="field" id="heroSecondaryText"></label><label><span class="label">둘째 버튼 연결</span><input class="field" id="heroSecondaryUrl"></label></div>
+            <div class="banner-preview"><img id="heroAdminPreview" alt="상단 배너 미리보기"><div class="copy" id="heroCopyPreview"></div></div>
+          </div>
+          <div class="panel settings-card"><h2 class="section-title">중간 장인 배너</h2>
+            <label><span class="label">PC 이미지</span><div class="image-upload"><input class="field" id="storyPc" type="text"><button class="btn upload-setting" type="button" data-target="storyPc" data-width="1800">이미지 올리기</button></div></label>
+            <label><span class="label">모바일 이미지</span><div class="image-upload"><input class="field" id="storyMobile" type="text"><button class="btn upload-setting" type="button" data-target="storyMobile" data-width="900">이미지 올리기</button></div></label>
+            <label><span class="label">작은 문구</span><input class="field" id="storyLabel"></label><label><span class="label">PC 큰 제목</span><textarea class="field" id="storyTitle"></textarea></label><label><span class="label">모바일 큰 제목</span><textarea class="field" id="storyMobileTitle"></textarea></label><label><span class="label">설명</span><textarea class="field" id="storyDescription"></textarea></label>
+            <div class="form-grid"><label><span class="label">버튼 글씨</span><input class="field" id="storyButtonText"></label><label><span class="label">버튼 연결</span><input class="field" id="storyButtonUrl"></label></div><label><span class="label">누적 제작 문구</span><input class="field" id="storyStatText"></label>
+            <div class="banner-preview story"><img id="storyAdminPreview" alt="중간 배너 미리보기"><div class="copy" id="storyCopyPreview"></div></div>
+          </div>
+        </form><input id="settingFile" type="file" accept="image/*" hidden><div class="status" id="mainStatus"></div>
+      </section>
+      <section class="tab" data-tab-panel="inquiries" hidden><div class="panel coming"><h1 class="section-title">문의 관리</h1><p class="hint">접수된 문의를 관리자에서 읽고 처리 상태를 바꾸는 기능을 다음 연결 단계에서 활성화합니다.</p></div></section>
+      <section class="tab" data-tab-panel="settings" hidden><div class="panel settings-card"><h1 class="section-title">스토어 설정</h1><div class="form-grid"><label><span class="label">기본 배송비</span><input class="field" id="shippingFee"></label><label><span class="label">무료배송 기준</span><input class="field" id="freeShippingThreshold"></label></div><div class="toolbar"><button class="btn primary" type="button" id="saveStoreBtn">설정 저장</button></div><div class="status" id="storeStatus"></div></div></section>
+      <section class="tab" data-tab-panel="orders" hidden><div class="panel coming"><h1 class="section-title">주문 관리</h1><p class="hint">카드 결제 연동 후 주문 내역과 결제 상태를 이곳에서 관리합니다.</p></div></section>
+      </div>
     </section>
   </main>
 
@@ -131,6 +173,7 @@
       loginEndpoint: '/api/crop-auth',
       imagekitAuthEndpoint: '/api/imagekit-auth',
       productsEndpoint: '/api/store-products',
+      settingsEndpoint: '/api/store-settings',
       tokenStorageKey: 'bokjaksoStoreAdminToken'
     };
     const imageKitConfig = {
@@ -140,6 +183,7 @@
     };
     const $ = selector => document.querySelector(selector);
     let products = [];
+    let storeSettings = {};
 
     function getToken(){ return sessionStorage.getItem(authConfig.tokenStorageKey) || ''; }
     function tokenIsFresh(token){
@@ -157,6 +201,7 @@
       $('#adminApp').classList.remove('hidden');
       $('#logoutBtn').classList.remove('hidden');
       loadProducts();
+      loadSettings();
     }
     function closeApp(){
       sessionStorage.removeItem(authConfig.tokenStorageKey);
@@ -259,6 +304,8 @@
         const result = await response.json().catch(() => ({}));
         if(!response.ok) throw new Error(result.message || '상품을 불러오지 못했습니다.');
         products = result.products || [];
+        $('#metricProducts').textContent = products.length;
+        $('#metricSelling').textContent = products.filter(item => item.status === 'selling').length;
         renderList($('#productId').value);
         setStatus('#listStatus', products.length ? `${products.length}개 상품` : '아직 등록된 상품이 없습니다.', 'ok');
       }catch(error){
@@ -361,6 +408,15 @@
       }
     }
 
+    const settingMap={heroPc:'hero_pc_image',heroMobile:'hero_mobile_image',heroLabel:'hero_label',heroTitle:'hero_title',heroDescription:'hero_description',heroPrimaryText:'hero_primary_text',heroPrimaryUrl:'hero_primary_url',heroSecondaryText:'hero_secondary_text',heroSecondaryUrl:'hero_secondary_url',storyPc:'story_pc_image',storyMobile:'story_mobile_image',storyLabel:'story_label',storyTitle:'story_title',storyMobileTitle:'story_mobile_title',storyDescription:'story_description',storyButtonText:'story_button_text',storyButtonUrl:'story_button_url',storyStatText:'story_stat_text',shippingFee:'shipping_fee',freeShippingThreshold:'free_shipping_threshold'};
+    function previewSettings(){ $('#heroAdminPreview').src=$('#heroPc').value; $('#storyAdminPreview').src=$('#storyPc').value; $('#heroCopyPreview').textContent=$('#heroTitle').value; $('#storyCopyPreview').textContent=$('#storyTitle').value; }
+    function fillSettings(settings){ storeSettings=settings||{}; Object.entries(settingMap).forEach(([id,key])=>{if($('#'+id)) $('#'+id).value=storeSettings[key]||'';}); previewSettings(); }
+    function settingsPayload(){ const data={...storeSettings}; Object.entries(settingMap).forEach(([id,key])=>{if($('#'+id)) data[key]=$('#'+id).value;}); return data; }
+    async function loadSettings(){ try{const response=await fetch(authConfig.settingsEndpoint,{cache:'no-store'});const data=await response.json();if(!response.ok)throw new Error(data.message);fillSettings(data.settings);setStatus('#mainStatus',data.usingDefaults?'기본 화면을 불러왔습니다. 처음 저장 전에는 설정용 표를 준비해야 합니다.':'현재 스토어 설정을 불러왔습니다.','ok');}catch(error){setStatus('#mainStatus',error.message||'설정 불러오기 실패','bad');} }
+    async function saveSettings(statusSelector){ if(!tokenIsFresh(getToken())){closeApp();return;} setStatus(statusSelector,'저장 중...'); try{const response=await fetch(authConfig.settingsEndpoint,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${getToken()}`},body:JSON.stringify(settingsPayload())});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||'저장 실패');fillSettings(data.settings);setStatus(statusSelector,'저장되었습니다. 스토어 새로고침 후 확인할 수 있습니다.','ok');}catch(error){setStatus(statusSelector,error.message||'저장 실패','bad');} }
+    let settingUploadTarget='';
+    async function uploadSettingImage(){const file=$('#settingFile').files?.[0];if(!file||!settingUploadTarget)return;const button=document.querySelector(`[data-target="${settingUploadTarget}"]`);button.disabled=true;setStatus('#mainStatus','이미지 업로드 중...');try{const authResponse=await fetch(authConfig.imagekitAuthEndpoint,{cache:'no-store',headers:{Authorization:`Bearer ${getToken()}`}});const auth=await authResponse.json();if(!authResponse.ok)throw new Error(auth.message||'업로드 인증 실패');const form=new FormData();form.append('file',file,file.name);form.append('fileName',file.name);form.append('publicKey',imageKitConfig.publicKey);form.append('signature',auth.signature);form.append('expire',auth.expire);form.append('token',auth.token);form.append('folder','/bokjakso-store/banners');form.append('useUniqueFileName','true');const response=await fetch(imageKitConfig.uploadEndpoint,{method:'POST',body:form});const result=await response.json();if(!response.ok)throw new Error(result.message||'업로드 실패');const width=button.dataset.width||1800;$('#'+settingUploadTarget).value=optimizedImageKitUrl(result.url,width);previewSettings();setStatus('#mainStatus','이미지를 올렸습니다. 메인 화면 저장을 눌러 반영해 주세요.','ok');}catch(error){setStatus('#mainStatus',error.message||'업로드 실패','bad');}finally{button.disabled=false;$('#settingFile').value='';}}
+
     $('#loginBtn').addEventListener('click', login);
     $('#adminPassword').addEventListener('keydown', event => { if(event.key === 'Enter') login(); });
     $('#logoutBtn').addEventListener('click', closeApp);
@@ -369,6 +425,9 @@
     $('#deleteBtn').addEventListener('click', deleteProduct);
     $('#uploadBtn').addEventListener('click', uploadImage);
     document.querySelectorAll('.image-url').forEach(input => input.addEventListener('input', renderPreview));
+    document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-tab]').forEach(el=>el.classList.toggle('is-active',el===button));document.querySelectorAll('[data-tab-panel]').forEach(panel=>panel.hidden=panel.dataset.tabPanel!==button.dataset.tab);}));
+    document.querySelectorAll('.upload-setting').forEach(button=>button.addEventListener('click',()=>{settingUploadTarget=button.dataset.target;$('#settingFile').click();}));
+    $('#settingFile').addEventListener('change',uploadSettingImage); $('#mainForm').addEventListener('input',previewSettings); $('#saveMainBtn').addEventListener('click',()=>saveSettings('#mainStatus')); $('#saveStoreBtn').addEventListener('click',()=>saveSettings('#storeStatus'));
     if(tokenIsFresh(getToken())) openApp();
   </script>
 </body>
