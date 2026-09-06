@@ -1,6 +1,12 @@
 const crypto = require('crypto');
 
 const defaults = {
+  announcement_visible: 'true',
+  announcement_text: '신규 고객 첫 주문 시 맞춤 복주머니 포장 패키지 증정',
+  announcement_guide_text: '주문 제작 가이드',
+  announcement_guide_url: '#order-guide',
+  announcement_support_text: '고객센터 070-8065-0210',
+  announcement_support_url: '#faq',
   hero_pc_image: 'assets/store-desktop-hero-clean.webp',
   hero_mobile_image: 'assets/store-mobile-hero-clean.webp',
   hero_label: '손에 담는 작은 예술',

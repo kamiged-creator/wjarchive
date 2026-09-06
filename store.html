@@ -195,16 +195,16 @@
 </head>
 <body class="hanji-subtle-pattern min-h-screen text-stone-900 antialiased flex flex-col">
 <!-- BEGIN: TopAnnouncementBar -->
-<aside class="bg-stone-900 text-stone-300 text-xs py-2 px-4 border-b border-stone-800" data-purpose="announcement-banner">
+<aside class="bg-stone-900 text-stone-300 text-xs py-2 px-4 border-b border-stone-800" data-purpose="announcement-banner" id="announcement-bar">
 <div class="max-w-6xl mx-auto flex justify-between items-center text-[12px] tracking-tight">
 <div class="flex items-center space-x-2">
 <span class="inline-block w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
-<p class="font-normal text-stone-300">신규 고객 첫 주문 시 맞춤 복주머니 포장 패키지 증정</p>
+<p class="font-normal text-stone-300" id="announcement-text">신규 고객 첫 주문 시 맞춤 복주머니 포장 패키지 증정</p>
 </div>
 <div class="hidden sm:flex items-center space-x-6 text-stone-400">
-<a class="hover:text-stone-100 transition-colors" href="#order-guide">주문 제작 가이드</a>
+<a class="hover:text-stone-100 transition-colors" href="#order-guide" id="announcement-guide">주문 제작 가이드</a>
 <span class="text-stone-700">|</span>
-<a class="hover:text-stone-100 transition-colors" href="#faq">고객센터 070-8065-0210</a>
+<a class="hover:text-stone-100 transition-colors" href="#faq" id="announcement-support">고객센터 070-8065-0210</a>
 </div>
 </div>
 </aside>
@@ -986,5 +986,8 @@
 </script>
 <script>
 (async function(){try{const r=await fetch('/api/store-settings',{cache:'no-store'});if(!r.ok)return;const {settings:s}=await r.json();if(!s)return;const text=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.textContent=v};const lines=(id,v)=>{const e=document.getElementById(id);if(!e||!v)return;e.textContent='';String(v).split('\n').forEach((part,i)=>{if(i)e.appendChild(document.createElement('br'));e.appendChild(document.createTextNode(part))})};if(s.hero_pc_image)document.getElementById('hero-banner-image').src=s.hero_pc_image;if(s.hero_mobile_image)document.getElementById('hero-mobile-source').srcset=s.hero_mobile_image;if(s.story_pc_image)document.getElementById('story-banner-image').src=s.story_pc_image;if(s.story_mobile_image)document.getElementById('story-mobile-source').srcset=s.story_mobile_image;text('hero-label',s.hero_label);lines('hero-title',s.hero_title);lines('hero-description',s.hero_description);text('hero-primary-text',s.hero_primary_text);text('hero-secondary-link',s.hero_secondary_text);if(s.hero_primary_url)document.getElementById('hero-primary-link').href=s.hero_primary_url;if(s.hero_secondary_url)document.getElementById('hero-secondary-link').href=s.hero_secondary_url;text('story-label',s.story_label);lines('story-title-desktop',s.story_title);lines('story-title-mobile',s.story_mobile_title);lines('story-description',s.story_description);text('story-stat-text',s.story_stat_text);text('story-btn-text',s.story_button_text);if(s.story_button_url)document.getElementById('story-button-link').href=s.story_button_url}catch(e){}})();
+</script>
+<script>
+(async function(){try{const r=await fetch('/api/store-settings',{cache:'no-store'});if(!r.ok)return;const {settings:s}=await r.json();if(!s)return;const set=(id,value)=>{const el=document.getElementById(id);if(el&&value)el.textContent=value};const bar=document.getElementById('announcement-bar');if(bar)bar.hidden=s.announcement_visible==='false';set('announcement-text',s.announcement_text);set('announcement-guide',s.announcement_guide_text);set('announcement-support',s.announcement_support_text);if(s.announcement_guide_url)document.getElementById('announcement-guide').href=s.announcement_guide_url;if(s.announcement_support_url)document.getElementById('announcement-support').href=s.announcement_support_url}catch(e){}})();
 </script>
 </body></html>
