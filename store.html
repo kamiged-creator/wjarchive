@@ -83,6 +83,10 @@
     .wishlist-header-link { position: relative; display: inline-flex; }
     .wishlist-count { position:absolute; top:0; right:0; width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:#b91c1c; color:#fff; font-size:10px; font-weight:800; transform:translate(18%,-8%); }
     .wishlist-count[hidden] { display:none; }
+    .cart-count { position:absolute; top:0; right:0; min-width:16px; height:16px; padding:0 3px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:#b91c1c; color:#fff; font-size:10px; font-weight:800; transform:translate(18%,-8%); }
+    .cart-count[hidden] { display:none; }
+    .detail-button.cart-add { border-color:#991b1b; background:#991b1b; color:#fff; }
+    .detail-info .payment-methods { display:none; }
 
     /* 이미지 업로더 플로팅 버튼 스타일 */
     .image-changer-btn {
@@ -236,12 +240,12 @@
 <span class="wishlist-count" data-wishlist-count hidden>0</span>
 </a>
 <!-- Shopping Bag -->
-<button class="relative p-1.5 hover:text-stone-950 hover:bg-stone-200/50 rounded-full transition-colors" title="장바구니">
+<a href="/store-cart.html" class="relative p-1.5 hover:text-stone-950 hover:bg-stone-200/50 rounded-full transition-colors" title="장바구니" aria-label="장바구니 보기">
 <svg class="w-5 h-5 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 <path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" stroke-linecap="round" stroke-linejoin="round"></path>
 </svg>
-<span class="absolute top-0.5 right-0 bg-red-700 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">2</span>
-</button>
+<span class="cart-count" data-cart-count hidden>0</span>
+</a>
 </div>
 </div>
 </header>
@@ -809,6 +813,19 @@
     const quantity = detail.querySelector('[data-detail-quantity]');
     const inquiry = detail.querySelector('[data-detail-inquiry]');
     const related = detail.querySelector('[data-detail-related]');
+    const cartKey = 'bokjakso-cart';
+    const detailActions = detail.querySelector('.detail-actions');
+    const addCartButton = document.createElement('button');
+    addCartButton.className = 'detail-button cart-add';
+    addCartButton.type = 'button';
+    addCartButton.textContent = '장바구니 담기';
+    detailActions?.appendChild(addCartButton);
+    if (inquiry && detailActions) { inquiry.textContent = '상품 문의하기'; inquiry.style.cssText = 'margin-top:10px;width:100%'; detailActions.after(inquiry); }
+    function readCart() { try { return JSON.parse(localStorage.getItem(cartKey) || '[]'); } catch (error) { return []; } }
+    function syncCartCount() {
+      const count = readCart().reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+      document.querySelectorAll('[data-cart-count]').forEach(badge => { badge.textContent = count > 99 ? '99+' : String(count); badge.hidden = count === 0; });
+    }
     function dataFromCard(card) {
       const name = card.querySelector('h3')?.textContent.trim() || '복작소 상품';
       return { name, copy: card.querySelector('p')?.textContent.trim() || '', price: card.querySelector('.font-bold.text-stone-900')?.textContent.trim() || '가격 문의', image: card.querySelector('img')?.src || '' };
@@ -833,6 +850,21 @@
     thumbs.forEach(thumb => thumb.addEventListener('click', () => { thumbs.forEach(item => item.classList.remove('is-active')); thumb.classList.add('is-active'); image.src = thumb.querySelector('img').src; }));
     detail.querySelectorAll('.option-chip').forEach(chip => chip.addEventListener('click', () => { detail.querySelectorAll('.option-chip').forEach(item => item.classList.remove('is-active')); chip.classList.add('is-active'); }));
     quantity.addEventListener('input', () => { const count = Math.max(1, Math.min(99, Number(quantity.value) || 1)); quantity.value = count; inquiry.href = `/store-contact.html?${new URLSearchParams({ product: title.textContent, quantity: `${count}개` })}`; });
+    addCartButton.addEventListener('click', () => {
+      const option = detail.querySelector('.option-chip.is-active')?.textContent.trim() || '기본형';
+      const count = Math.max(1, Math.min(99, Number(quantity.value) || 1));
+      const id = `${title.textContent}::${option}`;
+      const items = readCart();
+      const existing = items.find(item => item.id === id);
+      if (existing) existing.quantity = Math.min(99, (Number(existing.quantity) || 1) + count);
+      else items.push({ id, name: title.textContent, option, quantity: count, price: price.textContent, image: image.src, link: `/store.html?${new URLSearchParams({ product: title.textContent })}#product-detail` });
+      localStorage.setItem(cartKey, JSON.stringify(items));
+      syncCartCount();
+      const original = '장바구니 담기'; addCartButton.textContent = '장바구니에 담았습니다';
+      setTimeout(() => { addCartButton.textContent = original; }, 1400);
+    });
+    window.addEventListener('storage', syncCartCount);
+    syncCartCount();
     detail.querySelector('.detail-close').addEventListener('click', closeDetail);
     detail.querySelector('[data-detail-back]').addEventListener('click', closeDetail);
     addEventListener('keydown', event => { if (event.key === 'Escape' && !detail.hidden) closeDetail(); });
