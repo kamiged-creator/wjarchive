@@ -91,10 +91,12 @@
 
     /* 이미지 업로더 플로팅 버튼 스타일 */
     .image-changer-btn {
+      display: none !important;
       opacity: 0.78;
       transition: all 0.2s ease;
       backdrop-filter: blur(6px);
     }
+    body.store-admin-preview .image-changer-btn { display: inline-flex !important; }
     .image-changer-btn:hover {
       opacity: 1;
       transform: scale(1.03);
@@ -975,6 +977,13 @@
   })();
 </script>
 
+<script>
+(function(){
+  const token=sessionStorage.getItem('bokjaksoStoreAdminToken')||'';
+  const expire=Number(token.split(':')[0]);
+  if(Number.isFinite(expire)&&expire>Math.floor(Date.now()/1000)+15){document.body.classList.add('store-admin-preview');}
+})();
+</script>
 <script>
 (async function(){try{const r=await fetch('/api/store-settings',{cache:'no-store'});if(!r.ok)return;const {settings:s}=await r.json();if(!s)return;const text=(id,v)=>{const e=document.getElementById(id);if(e&&v)e.textContent=v};const lines=(id,v)=>{const e=document.getElementById(id);if(!e||!v)return;e.textContent='';String(v).split('\n').forEach((part,i)=>{if(i)e.appendChild(document.createElement('br'));e.appendChild(document.createTextNode(part))})};if(s.hero_pc_image)document.getElementById('hero-banner-image').src=s.hero_pc_image;if(s.hero_mobile_image)document.getElementById('hero-mobile-source').srcset=s.hero_mobile_image;if(s.story_pc_image)document.getElementById('story-banner-image').src=s.story_pc_image;if(s.story_mobile_image)document.getElementById('story-mobile-source').srcset=s.story_mobile_image;text('hero-label',s.hero_label);lines('hero-title',s.hero_title);lines('hero-description',s.hero_description);text('hero-primary-text',s.hero_primary_text);text('hero-secondary-link',s.hero_secondary_text);if(s.hero_primary_url)document.getElementById('hero-primary-link').href=s.hero_primary_url;if(s.hero_secondary_url)document.getElementById('hero-secondary-link').href=s.hero_secondary_url;text('story-label',s.story_label);lines('story-title-desktop',s.story_title);lines('story-title-mobile',s.story_mobile_title);lines('story-description',s.story_description);text('story-stat-text',s.story_stat_text);text('story-btn-text',s.story_button_text);if(s.story_button_url)document.getElementById('story-button-link').href=s.story_button_url}catch(e){}})();
 </script>
