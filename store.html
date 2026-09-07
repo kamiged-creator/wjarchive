@@ -85,6 +85,11 @@
     .wishlist-count[hidden] { display:none; }
     .cart-count { position:absolute; top:0; right:0; min-width:16px; height:16px; padding:0 3px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:#b91c1c; color:#fff; font-size:10px; font-weight:800; transform:translate(18%,-8%); }
     .cart-count[hidden] { display:none; }
+    .detail-top-actions { display:flex; align-items:center; gap:9px; }
+    .detail-cart-link { position:relative; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; border:1px solid rgba(41,37,36,.14); border-radius:999px; background:rgba(255,253,249,.82); color:#1c1917; transition:.2s; }
+    .detail-cart-link:hover { border-color:rgba(41,37,36,.34); background:#fffdf9; }
+    .detail-cart-link svg { width:20px; height:20px; stroke-width:1.8; }
+    .detail-cart-link .cart-count { top:-2px; right:-2px; transform:none; }
     .detail-button.cart-add { border-color:#991b1b; background:#991b1b; color:#fff; }
     .detail-info .payment-methods { display:none; }
     .detail-price::after { content:attr(data-shipping); float:right; margin-top:7px; color:#991b1b; font-family:"Noto Sans KR",sans-serif; font-size:13px; font-weight:800; }
@@ -809,6 +814,20 @@
   (function () {
     const detail = document.getElementById('product-detail');
     if (!detail) return;
+    const detailTop = detail.querySelector('.detail-top');
+    const detailClose = detail.querySelector('.detail-close');
+    if (detailTop && detailClose) {
+      const topActions = document.createElement('div');
+      topActions.className = 'detail-top-actions';
+      const cartLink = document.createElement('a');
+      cartLink.className = 'detail-cart-link';
+      cartLink.href = '/store-cart.html';
+      cartLink.title = '장바구니 보기';
+      cartLink.setAttribute('aria-label', '장바구니 보기');
+      cartLink.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.36-1.99 1.26 12c.07.66-.45 1.24-1.12 1.24H4.25a1.13 1.13 0 0 1-1.12-1.24l1.26-12A1.13 1.13 0 0 1 5.51 7.5h12.98c.58 0 1.06.44 1.12 1.01Z"/></svg><span class="cart-count" data-cart-count hidden>0</span>';
+      topActions.append(cartLink, detailClose);
+      detailTop.appendChild(topActions);
+    }
     const cards = Array.from(document.querySelectorAll('article.product-card-hover'));
     const links = cards.map(card => card.querySelector('a[href*="product="]'));
     const image = detail.querySelector('[data-detail-image]');
