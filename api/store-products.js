@@ -43,7 +43,7 @@ function getEnv() {
   return {
     supabaseUrl: process.env.SUPABASE_URL || 'https://vefeplfczeztbplowjmj.supabase.co',
     serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    password: normalizePassword(process.env.CROP_ACCESS_PASSWORD)
+    password: normalizePassword(process.env.STORE_ADMIN_PASSWORD || process.env.CROP_ACCESS_PASSWORD)
   };
 }
 
@@ -78,7 +78,7 @@ async function supabaseRequest(path, options = {}) {
 function requireAdmin(req) {
   const { password } = getEnv();
   if (!password) {
-    const error = new Error('CROP_ACCESS_PASSWORD is not configured.');
+    const error = new Error('STORE_ADMIN_PASSWORD is not configured.');
     error.statusCode = 500;
     throw error;
   }

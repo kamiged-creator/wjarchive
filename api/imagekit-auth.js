@@ -48,21 +48,24 @@ module.exports = function handler(req, res) {
   }
 
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
-  const accessPassword = normalizePassword(process.env.CROP_ACCESS_PASSWORD);
+  const accessPasswords = [
+    normalizePassword(process.env.CROP_ACCESS_PASSWORD),
+    normalizePassword(process.env.STORE_ADMIN_PASSWORD)
+  ].filter(Boolean);
 
   if (!privateKey) {
     res.status(500).json({ message: 'IMAGEKIT_PRIVATE_KEY is not configured.' });
     return;
   }
-  if (!accessPassword) {
-    res.status(500).json({ message: 'CROP_ACCESS_PASSWORD is not configured.' });
+  if (!accessPasswords.length) {
+    res.status(500).json({ message: '관리자 비밀번호가 설정되지 않았습니다.' });
     return;
   }
 
   const authHeader = req.headers.authorization || '';
   const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  if (!verifyAccessToken(accessToken, accessPassword)) {
-    res.status(401).json({ message: '크롭 도구 비밀번호를 먼저 입력해주세요.' });
+  if (!accessPasswords.some(secret => verifyAccessToken(accessToken, secret))) {
+    res.status(401).json({ message: '관리자 로그인이 필요합니다.' });
     return;
   }
 
