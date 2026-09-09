@@ -7,14 +7,16 @@
 <title>DrugLens | 한국·미국 의약품 통합검색</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;700&family=Material+Symbols+Rounded:FILL@0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <style>
 :root{
   --bg:#051424;--bg-soft:#0a1c2e;--panel:#0e1e30;--panel-soft:#0c1826;
   --line:rgba(255,255,255,.07);--line-soft:rgba(255,255,255,.04);
   --mint:#47eaed;--mint-strong:#7ef4f5;--mint-ink:#003738;--mint-wash:rgba(71,234,237,.1);
-  --text:#eef4f8;--muted:#8fa0ae;--muted-soft:#657685;
+  --text:#eef4f8;--muted:#9bacba;--muted-soft:#76899a;
   --red-bg:#2a1219;--red-line:#5c2530;--red-ink:#ffb8bc;
   --amber-bg:#241a0a;--amber-line:#5a4419;--amber-ink:#ffe6a3;
   --green-bg:#0e2119;--green-line:#245038;--green-ink:#a9efbd;
@@ -24,7 +26,7 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto Sans KR",sans-serif;color-scheme:dark;background-image:linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px);background-size:44px 44px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretendard Variable',"Noto Sans KR",sans-serif;color-scheme:dark;background-image:linear-gradient(#ffffff02 1px,transparent 1px),linear-gradient(90deg,#ffffff02 1px,transparent 1px);background-size:48px 48px}
 .material-symbols-rounded{font-variation-settings:'FILL' 1,'wght' 600}
 .mobileBar{display:none}
 .desktopSidebar{position:fixed;inset:0 auto 0 0;width:264px;background:var(--panel);border-right:1px solid var(--line);padding:24px 14px;display:flex;flex-direction:column;z-index:30;transition:width .22s ease,padding .22s ease}
@@ -35,7 +37,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 .desktopBrand b{display:block;color:var(--mint);font-size:21px;white-space:nowrap;letter-spacing:-.01em}
 .desktopBrand small{display:block;margin-top:3px;color:var(--muted);font:500 10px JetBrains Mono;letter-spacing:.08em;white-space:nowrap}
 .sidebarToggle{position:absolute;right:-14px;top:76px;width:28px;height:36px;border:1px solid var(--line);border-radius:0 10px 10px 0;background:var(--panel);color:var(--mint);display:grid;place-items:center;z-index:31;box-shadow:4px 0 14px #0006}
-.desktopNew{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 8px 24px;padding:13px 12px;border-radius:var(--r-sm);background:var(--mint);color:var(--mint-ink);text-decoration:none;font-weight:800;white-space:nowrap}
+.desktopNew{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 8px 24px;padding:13px 12px;border-radius:var(--r-sm);background:var(--mint);color:var(--mint-ink);text-decoration:none;font-weight:700;white-space:nowrap}
 .desktopNav{display:flex;flex-direction:column;gap:3px}
 .desktopNav a{display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:var(--r-sm);color:var(--muted);text-decoration:none;font:500 12px JetBrains Mono;letter-spacing:.05em;white-space:nowrap}
 .desktopNav a:hover{color:var(--text);background:#ffffff08}
@@ -56,13 +58,14 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 .sidebar-collapsed .sidebarToggle .material-symbols-rounded{transform:rotate(180deg)}
 .hero{padding:96px 32px 56px;background:radial-gradient(circle at 82% 10%,#00ced11f,transparent 34%),linear-gradient(150deg,var(--bg),#0a1a2b);border-bottom:1px solid var(--line-soft)}
 .wrap{width:min(1180px,100%);margin:auto}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--mint);font:700 11px JetBrains Mono;letter-spacing:.14em;margin:0 0 16px}
-.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px var(--mint-wash)}
-.hero h1{margin:0 0 32px;max-width:900px;font-size:clamp(34px,4vw,56px);line-height:1.14;letter-spacing:-.03em;font-weight:800}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--muted-soft);font:600 10px JetBrains Mono;letter-spacing:.12em;margin:0 0 14px}
+.eyebrow::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--mint)}
+.hero h1{margin:0 0 32px;max-width:900px;font-size:clamp(34px,4vw,56px);line-height:1.24;letter-spacing:-.022em;font-weight:730}
 .hero h1 em{font-style:normal;color:var(--mint)}
-.search{display:flex;max-width:760px;padding:6px;border:1px solid var(--line);border-radius:var(--r-lg);background:#04101d;box-shadow:var(--shadow-panel)}
+.search{display:flex;max-width:760px;padding:6px;border:1.5px solid rgba(255,255,255,.16);border-radius:var(--r-lg);background:#071726;box-shadow:0 20px 44px -28px rgba(0,0,0,.7);transition:border-color .15s ease}
+.search:focus-within{border-color:var(--mint);box-shadow:0 20px 44px -28px rgba(0,0,0,.7),0 0 0 3px var(--mint-wash)}
 .search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#fff;padding:19px 20px;font-size:17px}
-.search button{border:0;border-radius:12px;background:var(--mint);color:var(--mint-ink);padding:0 34px;font-weight:800;letter-spacing:-.01em}
+.search button{border:0;border-radius:12px;background:var(--mint);color:var(--mint-ink);padding:0 34px;font-weight:700;letter-spacing:-.01em}
 .tabs{display:flex;gap:8px;margin-top:16px}
 .tabs button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:9px 18px;font:600 12px JetBrains Mono}
 .tabs button.active{background:var(--mint);color:var(--mint-ink);border-color:var(--mint)}
@@ -78,9 +81,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 .multiRow input:focus{outline:0;border-color:var(--mint)}
 .num{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--mint-wash);color:var(--mint);font-weight:800;font-size:13px}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.actions button{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:var(--r-sm);padding:13px 18px;font-weight:700;white-space:nowrap}
-.actions button:hover{background:#ffffff08}
-.actions .primary{border:0;background:var(--mint);color:var(--mint-ink);padding:13px 22px;flex:1;min-width:200px}
+.actions button{border:1px solid var(--line-soft);background:transparent;color:var(--muted);border-radius:var(--r-sm);padding:12px 16px;font-weight:600;font-size:13.5px;white-space:nowrap}
+.actions button:hover{background:#ffffff08;color:var(--text)}
+.actions .primary{border:0;background:var(--mint);color:var(--mint-ink);padding:13px 22px;font-weight:700;font-size:14.5px;flex:1;min-width:200px}
 #mixResult:not(:empty){margin-top:22px}
 .message{margin:0 0 20px}
 .warning,.error,.notice{border-radius:var(--r-sm);padding:14px 16px;font-size:13px;line-height:1.6}
@@ -92,7 +95,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 .summary b{font-size:15px}
 .summary span{color:var(--muted);font-size:13px}
 .grid{display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;align-items:start}
-.results{display:flex;flex-direction:column;gap:8px;max-height:740px;overflow:auto;padding-right:2px}
+.results{display:flex;flex-direction:column;gap:10px;max-height:740px;overflow:auto;padding-right:2px}
 .card{width:100%;text-align:left;border:1px solid transparent;background:var(--panel-soft);color:var(--text);border-radius:var(--r-md);padding:15px;display:flex;gap:13px;transition:border-color .15s ease,transform .15s ease}
 .card:hover{border-color:var(--line)}
 .card.selected{border-color:var(--mint);background:var(--mint-wash)}
@@ -103,29 +106,31 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 .card h3{font-size:15px;margin:4px 0;font-weight:700}
 .card p,.card small{margin:0;color:var(--muted);font-size:12px}
 .detail{min-height:480px;background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:32px;box-shadow:var(--shadow-panel)}
+.detail:has(.empty){min-height:0}
 .detailHead{display:flex;gap:9px;align-items:center;color:var(--muted-soft);font-size:12px}
 .badge{color:#fff;border-radius:999px;padding:5px 10px;font-weight:700;font-size:11px}
-.detail h2{font-size:26px;color:var(--mint-strong);margin:16px 0 8px;font-weight:800}
+.detail h2{font-size:26px;color:var(--mint-strong);margin:16px 0 8px;font-weight:700}
 .meta{color:var(--muted);margin:5px 0;font-size:13.5px}
 .drugimg{max-width:220px;max-height:120px;object-fit:contain;margin:16px 0;border-radius:12px}
-.info{background:var(--panel-soft);border:1px solid var(--line-soft);border-radius:var(--r-sm);margin-top:10px;padding:0 16px}
+.info{background:var(--panel-soft);border:0;border-radius:var(--r-sm);margin-top:10px;padding:0 16px}
 .info summary{padding:14px 0;font-weight:700;cursor:pointer;font-size:13.5px}
 .info p{white-space:pre-wrap;line-height:1.75;color:var(--muted);margin:0 0 16px;font-size:13.5px}
 .official{display:inline-block;margin-top:16px;background:var(--mint-wash);color:var(--mint-strong);text-decoration:none;padding:12px 16px;border-radius:var(--r-sm);font-weight:700;border:1px solid rgba(71,234,237,.3)}
-.empty{text-align:center;color:var(--muted);padding:90px 20px}
+.empty{text-align:center;color:var(--muted);padding:60px 20px}
 .empty b{display:block;color:var(--text);font-size:19px;margin:12px 0 4px}
+.empty small{display:block;margin-top:10px;color:var(--muted-soft);font:500 12px JetBrains Mono}
 .loader{text-align:center;color:var(--muted);padding:28px}
 .overall{border-radius:var(--r-md);padding:18px;margin-top:0}
 .overall.red{background:var(--red-bg);border:1px solid var(--red-line)}
 .overall.yellow{background:var(--amber-bg);border:1px solid var(--amber-line)}
 .overall.green{background:var(--green-bg);border:1px solid var(--green-line)}
 .overall strong{display:block;font-size:17px;margin-bottom:5px}
-.riskGauge{margin-top:14px;background:var(--panel-soft);border:1px solid var(--line-soft);border-radius:var(--r-sm);padding:16px}
+.riskGauge{margin-top:14px;background:var(--panel-soft);border:0;border-radius:var(--r-sm);padding:16px}
 .riskHead{display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px}
 .riskTrack{height:10px;border-radius:999px;background:linear-gradient(90deg,#27b36a,#d5b442 52%,#b82d42);position:relative}
 .riskMarker{position:absolute;top:-5px;width:20px;height:20px;border-radius:50%;background:#f3f7fa;border:4px solid var(--bg);transform:translateX(-50%)}
-.pairList{display:grid;gap:10px;margin-top:14px}
-.pair{background:var(--panel-soft);border:1px solid var(--line-soft);border-radius:var(--r-sm);padding:14px}
+.pairList{display:grid;gap:12px;margin-top:14px}
+.pair{background:var(--panel-soft);border:0;border-radius:var(--r-sm);padding:14px}
 .pairTop{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .traffic{white-space:nowrap;border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:800}
 .traffic.red{background:#5a1a25;color:#ffd8df}
@@ -134,12 +139,12 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 .pair p{color:var(--muted);font-size:13px;line-height:1.65;margin:8px 0 0}
 .pharmacyPanel{margin-top:28px}
 .pharmacyQuickActions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
-.locationBtn,.hoursBtn{width:100%;min-height:50px;border-radius:var(--r-sm);padding:13px 14px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;text-decoration:none}
+.locationBtn,.hoursBtn{width:100%;min-height:50px;border-radius:var(--r-sm);padding:13px 14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;text-decoration:none}
 .locationBtn{border:0;background:var(--mint);color:var(--mint-ink)}
-.hoursBtn{border:1px solid var(--line);background:transparent;color:var(--mint-strong)}
+.hoursBtn{border:1px solid var(--line-soft);background:transparent;color:var(--mint-strong)}
 .hoursBtn:hover{background:#ffffff08}
-.pharmacyStatus{margin-top:14px;color:var(--muted);font-size:13px}
-.pharmacyMapWrap{display:none;margin-top:16px;border:1px solid var(--line-soft);border-radius:var(--r-md);overflow:hidden}
+.pharmacyStatus{margin-top:16px;color:var(--muted);font-size:13px}
+.pharmacyMapWrap{display:none;margin-top:20px;border:1px solid var(--line-soft);border-radius:var(--r-md);overflow:hidden}
 .pharmacyMapWrap.show{display:block}
 .mapTitle{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--line-soft);background:var(--panel-soft);color:#dffdfa;font-size:13px;font-weight:700}
 .mapTitle small{color:var(--muted-soft);font-weight:500}
@@ -167,6 +172,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
   .mobileBar .desktopLogo{width:34px;height:34px;flex:0 0 34px;border-radius:9px}
   .mobileBar b{color:var(--mint);font-size:16px}
   .mobileBar small{display:block;color:var(--muted-soft);font:500 10px JetBrains Mono;letter-spacing:.06em}
+  .brDesktop{display:none}
   .hero{padding:36px 20px 40px}
   .content{padding:28px 16px 40px}
   .grid{grid-template-columns:1fr}
@@ -200,7 +206,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
 <div class="page">
 <header class="hero" id="overview"><div class="wrap">
   <p class="eyebrow">MFDS · DAILYMED · OPENFDA</p>
-  <h1>약 이름 하나로<br><em>한국과 미국 공식정보</em>를 같이 확인</h1>
+  <h1>약 이름 하나로 <br class="brDesktop"><em>한국과 미국 공식정보</em>를 같이 확인</h1>
   <form class="search" id="searchForm"><input id="q" placeholder="예: 타이레놀, 아스피린, Lipitor" autocomplete="off"><button id="searchBtn">검색</button></form>
   <div class="tabs" id="tabs"><button type="button" data-region="all" class="active">통합</button><button type="button" data-region="kr">KR 한국</button><button type="button" data-region="us">US 미국</button></div>
 </div></header>
@@ -213,7 +219,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Noto San
     <div id="mixResult"></div>
   </section>
   <div id="messages" class="message"></div>
-  <section class="resultsArea"><div id="summary"></div><div class="grid"><section class="results" id="results"></section><aside class="detail" id="detail"><div class="empty"><span class="material-symbols-rounded" style="font-size:58px;color:#47eaed">medication</span><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p></div></aside></div></section>
+  <section class="resultsArea"><div id="summary"></div><div class="grid"><section class="results" id="results"></section><aside class="detail" id="detail"><div class="empty"><span class="material-symbols-rounded" style="font-size:38px;color:#47eaed">medication</span><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p><small>예: 타이레놀, 아스피린, Lipitor</small></div></aside></div></section>
   <section class="panel pharmacyPanel" id="pharmacies">
     <h2><span class="material-symbols-rounded">location_on</span>내 주변 약국 찾기</h2>
     <p>현재 위치를 한 번만 확인해 반경 3km 안의 약국을 가까운 순서로 찾아줘. 위치는 저장하지 않아.</p>
