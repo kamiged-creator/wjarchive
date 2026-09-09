@@ -28,10 +28,17 @@
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretendard Variable',"Noto Sans KR",sans-serif;color-scheme:dark;background-image:linear-gradient(#ffffff02 1px,transparent 1px),linear-gradient(90deg,#ffffff02 1px,transparent 1px);background-size:48px 48px}
 .material-symbols-rounded{font-variation-settings:'FILL' 1,'wght' 600}
-.mobileBar{display:none}
-.desktopSidebar{position:fixed;inset:0 auto 0 0;width:264px;background:var(--panel);border-right:1px solid var(--line);padding:24px 14px;display:flex;flex-direction:column;z-index:30;transition:width .22s ease,padding .22s ease}
-.desktopTopbar{position:fixed;left:264px;right:0;top:0;height:64px;background:#051424ee;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:25;backdrop-filter:blur(16px);transition:left .22s ease}
-.page,.footer{margin-left:264px;transition:margin-left .22s ease}
+.desktopSidebar{display:none;position:fixed;inset:0 auto 0 0;width:264px;background:var(--panel);border-right:1px solid var(--line);padding:24px 14px;flex-direction:column;z-index:30}
+.desktopTopbar{display:none;position:fixed;left:264px;right:0;top:0;height:64px;background:#051424ee;border-bottom:1px solid var(--line-soft);align-items:center;justify-content:space-between;padding:0 32px;z-index:25;backdrop-filter:blur(16px)}
+.page,.footer{margin-left:0}
+.topNav{position:sticky;top:0;z-index:40;background:#051424ee;backdrop-filter:blur(16px);border-bottom:1px solid var(--line-soft)}
+.topNavInner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding:14px 32px}
+.topNavBrand{display:flex;align-items:center;gap:8px;color:var(--mint);font-weight:700;font-size:17px;text-decoration:none;white-space:nowrap}
+.topNavBrand .material-symbols-rounded{font-size:20px}
+.topNavLinks{display:flex;align-items:center;justify-content:center;gap:2px;flex:1;min-width:0}
+.topNavLinks a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 14px;border-radius:var(--r-sm);white-space:nowrap}
+.topNavLinks a:hover{color:var(--text);background:#ffffff08}
+.topNavAction{border:1px solid var(--mint);color:var(--mint);background:var(--mint-wash);border-radius:var(--r-sm);padding:9px 16px;font-weight:700;font-size:13.5px;text-decoration:none;white-space:nowrap}
 .desktopBrand{display:flex;align-items:center;gap:12px;padding:2px 10px 26px;min-height:48px}
 .desktopLogo{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:11px;background:var(--mint-wash);color:var(--mint)}
 .desktopBrand b{display:block;color:var(--mint);font-size:21px;white-space:nowrap;letter-spacing:-.01em}
@@ -50,7 +57,6 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretenda
 .desktopTopAction{display:flex;align-items:center;gap:7px;border:1px solid var(--mint);color:var(--mint);background:var(--mint-wash);border-radius:var(--r-sm);padding:9px 15px;font:600 11px JetBrains Mono;text-decoration:none}
 .sidebar-collapsed .desktopSidebar{width:76px;padding-left:10px;padding-right:10px}
 .sidebar-collapsed .desktopTopbar{left:76px}
-.sidebar-collapsed .page,.sidebar-collapsed .footer{margin-left:76px}
 .sidebar-collapsed .desktopBrand{padding-left:6px;padding-right:6px}
 .sidebar-collapsed .desktopBrand>div,.sidebar-collapsed .desktopNew .label,.sidebar-collapsed .desktopNav .label,.sidebar-collapsed .desktopDisclaimer{display:none}
 .sidebar-collapsed .desktopNew{margin-left:4px;margin-right:4px;padding:13px 0}
@@ -95,7 +101,9 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretenda
 .summary b{font-size:15px}
 .summary span{color:var(--muted);font-size:13px}
 .grid{display:grid;grid-template-columns:400px minmax(0,1fr);gap:24px;align-items:start}
-.results{display:flex;flex-direction:column;gap:10px;max-height:740px;overflow:auto;padding-right:2px}
+.resultsPanel,.detailPanel{background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:32px;box-shadow:var(--shadow-panel)}
+.paneTitle{margin:0 0 16px;font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.01em}
+.results{display:flex;flex-direction:column;gap:10px;max-height:700px;overflow:auto;padding-right:2px}
 .card{width:100%;text-align:left;border:1px solid transparent;background:var(--panel-soft);color:var(--text);border-radius:var(--r-md);padding:15px;display:flex;gap:13px;transition:border-color .15s ease,transform .15s ease}
 .card:hover{border-color:var(--line)}
 .card.selected{border-color:var(--mint);background:var(--mint-wash)}
@@ -105,8 +113,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretenda
 .source{font-size:10.5px;color:var(--muted-soft);letter-spacing:.03em}
 .card h3{font-size:15px;margin:4px 0;font-weight:700}
 .card p,.card small{margin:0;color:var(--muted);font-size:12px}
-.detail{min-height:480px;background:var(--panel);border:1px solid var(--line-soft);border-radius:var(--r-lg);padding:32px;box-shadow:var(--shadow-panel)}
-.detail:has(.empty){min-height:0}
+.detailPanel{min-height:480px}
+.detailPanel:has(.empty){min-height:0}
 .detailHead{display:flex;gap:9px;align-items:center;color:var(--muted-soft);font-size:12px}
 .badge{color:#fff;border-radius:999px;padding:5px 10px;font-weight:700;font-size:11px}
 .detail h2{font-size:26px;color:var(--mint-strong);margin:16px 0 8px;font-weight:700}
@@ -166,20 +174,20 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretenda
 .pinBtn{border:1px solid var(--line);color:var(--text);background:transparent}
 .footer{text-align:center;padding:36px 24px;color:var(--muted-soft);font:12px/1.7 JetBrains Mono;border-top:1px solid var(--line-soft);background:var(--bg)}
 @media(max-width:1099px){
-  .desktopSidebar,.desktopTopbar{display:none}
-  .page,.footer,.sidebar-collapsed .page,.sidebar-collapsed .footer{margin-left:0}
-  .mobileBar{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line-soft);background:#051424ee;backdrop-filter:blur(12px)}
-  .mobileBar .desktopLogo{width:34px;height:34px;flex:0 0 34px;border-radius:9px}
-  .mobileBar b{color:var(--mint);font-size:16px}
-  .mobileBar small{display:block;color:var(--muted-soft);font:500 10px JetBrains Mono;letter-spacing:.06em}
   .brDesktop{display:none}
+  .topNavInner{padding:12px 20px;gap:8px 12px}
+  .topNavBrand{font-size:15px}
+  .topNavBrandText{display:none}
+  .topNavLinks{order:3;flex:0 0 100%;justify-content:space-between}
+  .topNavLinks a{flex:1;text-align:center;padding:8px 6px;font-size:13px}
+  .topNavAction{padding:8px 12px;font-size:12.5px}
   .hero{padding:36px 20px 40px}
   .content{padding:28px 16px 40px}
   .grid{grid-template-columns:1fr}
   .results{max-height:none}
   .multiInputs{grid-template-columns:1fr}
   .hero h1{font-size:32px}
-  .panel,.detail{padding:22px}
+  .panel,.resultsPanel,.detailPanel{padding:22px}
   .pharmacyMap{height:280px}
 }
 @media(max-width:560px){
@@ -202,7 +210,17 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretenda
   <div class="desktopDisclaimer"><b>MEDICAL INFORMATION</b>공개 의약품 정보를 정리하는 도구이며 진단이나 처방을 대신하지 않습니다.</div>
 </aside>
 <div class="desktopTopbar"><div><strong>Drug interaction workspace</strong> <small>· MFDS / DailyMed / openFDA</small></div><a class="desktopTopAction" href="#interaction"><span class="material-symbols-rounded">warning</span>NEW ANALYSIS</a></div>
-<div class="mobileBar"><span class="desktopLogo material-symbols-rounded">science</span><div><b>DrugLens</b><small>CLINICAL INTELLIGENCE</small></div></div>
+<header class="topNav">
+  <div class="topNavInner">
+    <a class="topNavBrand" href="#overview"><span class="material-symbols-rounded" aria-hidden="true">science</span><span class="topNavBrandText">DrugLens</span></a>
+    <nav class="topNavLinks" aria-label="주요 메뉴">
+      <a href="#overview">약 검색</a>
+      <a href="#interaction">상호작용</a>
+      <a href="#pharmacies">주변 약국</a>
+    </nav>
+    <a class="topNavAction" href="#interaction">새 분석</a>
+  </div>
+</header>
 <div class="page">
 <header class="hero" id="overview"><div class="wrap">
   <p class="eyebrow">MFDS · DAILYMED · OPENFDA</p>
@@ -219,7 +237,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,'Pretenda
     <div id="mixResult"></div>
   </section>
   <div id="messages" class="message"></div>
-  <section class="resultsArea"><div id="summary"></div><div class="grid"><section class="results" id="results"></section><aside class="detail" id="detail"><div class="empty"><span class="material-symbols-rounded" style="font-size:38px;color:#47eaed">medication</span><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p><small>예: 타이레놀, 아스피린, Lipitor</small></div></aside></div></section>
+  <section class="resultsArea"><div id="summary"></div><div class="grid">
+    <div class="resultsPanel"><h2 class="paneTitle">검색 결과</h2><section class="results" id="results"></section></div>
+    <div class="detailPanel"><h2 class="paneTitle">약 상세정보</h2><aside class="detail" id="detail"><div class="empty"><span class="material-symbols-rounded" style="font-size:38px;color:#47eaed">medication</span><b>약을 검색해봐</b><p>검색 결과를 누르면 공식 정보를 여기서 볼 수 있어.</p><small>예: 타이레놀, 아스피린, Lipitor</small></div></aside></div>
+  </div></section>
   <section class="panel pharmacyPanel" id="pharmacies">
     <h2><span class="material-symbols-rounded">location_on</span>내 주변 약국 찾기</h2>
     <p>현재 위치를 한 번만 확인해 반경 3km 안의 약국을 가까운 순서로 찾아줘. 위치는 저장하지 않아.</p>
