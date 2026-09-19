@@ -1205,11 +1205,6 @@
       background:rgba(255,255,255,.92);color:#111;
       font-size:26px;line-height:1;cursor:pointer;
       box-shadow:0 8px 22px rgba(0,0,0,.2);
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .18s ease;
-    }
-    .site-popup-frame.show-nav .site-popup-nav{
       opacity:1;
       pointer-events:auto;
     }
@@ -1596,7 +1591,6 @@
       if(popup){
         popup.classList.add('open');
         popup.setAttribute('aria-hidden','false');
-        qs('.site-popup-frame')?.classList.remove('show-nav');
       }
     }
 
@@ -1936,23 +1930,6 @@
         else closeViewer();
       }
     });
-
-    let popupNavHideTimer = null;
-    const popupFrame = qs('.site-popup-frame');
-    function showPopupNavTemporarily(){
-      if(!popupFrame || popupState.images.length <= 1) return;
-      popupFrame.classList.add('show-nav');
-      if(popupNavHideTimer) clearTimeout(popupNavHideTimer);
-      popupNavHideTimer = setTimeout(() => popupFrame.classList.remove('show-nav'), 1800);
-    }
-    popupFrame?.addEventListener('mouseenter', () => {
-      if(popupState.images.length > 1) popupFrame.classList.add('show-nav');
-    });
-    popupFrame?.addEventListener('mouseleave', () => {
-      popupFrame.classList.remove('show-nav');
-    });
-    qs('#sitePopupImage')?.addEventListener('touchstart', showPopupNavTemporarily, {passive:true});
-    qs('#sitePopupImage')?.addEventListener('click', showPopupNavTemporarily);
 
     qs('#sitePopupClose')?.addEventListener('click', closeSitePopup);
     qs('#sitePopupPrev')?.addEventListener('click', () => {
