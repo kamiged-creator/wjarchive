@@ -1161,6 +1161,74 @@
         background-color:#05070a;
       }
     }
+
+    /* Homepage popup */
+    .site-popup{
+      position:fixed;inset:0;z-index:120;
+      display:none;align-items:center;justify-content:center;
+      padding:22px;background:rgba(0,0,0,.58);
+      backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+    }
+    .site-popup.open{display:flex}
+    .site-popup-dialog{
+      position:relative;
+      width:min(92vw,760px);
+      max-height:92vh;
+      display:flex;flex-direction:column;align-items:center;
+    }
+    .site-popup-frame{
+      position:relative;
+      width:100%;
+      max-height:84vh;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .site-popup-image{
+      display:block;
+      max-width:100%;
+      max-height:84vh;
+      width:auto;height:auto;
+      object-fit:contain;
+      border-radius:10px;
+      box-shadow:0 24px 70px rgba(0,0,0,.35);
+      background:#fff;
+    }
+    .site-popup-close{
+      position:absolute;top:-14px;right:-14px;z-index:2;
+      width:42px;height:42px;border:0;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:#fff;color:#111;font-size:25px;line-height:1;
+      box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;
+    }
+    .site-popup-nav{
+      position:absolute;top:50%;transform:translateY(-50%);
+      width:44px;height:44px;border:0;border-radius:50%;
+      background:rgba(255,255,255,.92);color:#111;
+      font-size:26px;line-height:1;cursor:pointer;
+      box-shadow:0 8px 22px rgba(0,0,0,.2);
+    }
+    .site-popup-prev{left:-58px}
+    .site-popup-next{right:-58px}
+    .site-popup-footer{
+      margin-top:10px;
+      min-height:26px;
+      display:flex;align-items:center;justify-content:center;
+      gap:8px;color:#fff;font-size:13px;
+      text-shadow:0 1px 3px rgba(0,0,0,.5);
+    }
+    .site-popup-dot{
+      width:7px;height:7px;border-radius:50%;
+      background:rgba(255,255,255,.45);
+    }
+    .site-popup-dot.active{background:#fff}
+    @media (max-width:860px){
+      .site-popup{padding:16px}
+      .site-popup-dialog{width:min(94vw,680px)}
+      .site-popup-close{top:8px;right:8px;width:38px;height:38px}
+      .site-popup-prev{left:8px}
+      .site-popup-next{right:8px}
+      .site-popup-nav{width:40px;height:40px;background:rgba(255,255,255,.85)}
+    }
+
 </style>
 </head>
 <body id="top" class="is-loading">
@@ -1361,6 +1429,18 @@
     </div>
   </div>
 
+  <div class="site-popup" id="sitePopup" aria-hidden="true">
+    <div class="site-popup-dialog" role="dialog" aria-modal="true" aria-label="알림 팝업">
+      <div class="site-popup-frame">
+        <button class="site-popup-close" id="sitePopupClose" type="button" aria-label="팝업 닫기">×</button>
+        <button class="site-popup-nav site-popup-prev" id="sitePopupPrev" type="button" aria-label="이전 팝업">‹</button>
+        <img class="site-popup-image" id="sitePopupImage" alt="팝업 이미지">
+        <button class="site-popup-nav site-popup-next" id="sitePopupNext" type="button" aria-label="다음 팝업">›</button>
+      </div>
+      <div class="site-popup-footer" id="sitePopupFooter"></div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const sampleWorks = [
@@ -1467,6 +1547,51 @@
     function normalizeArtworkImageUrl(url){
       return String(url || '').trim();
     }
+
+    const popupState = { images:[], index:0 };
+
+    function closeSitePopup(){
+      const popup = qs('#sitePopup');
+      if(!popup) return;
+      popup.classList.remove('open');
+      popup.setAttribute('aria-hidden','true');
+    }
+
+    function updateSitePopup(){
+      const image = qs('#sitePopupImage');
+      const footer = qs('#sitePopupFooter');
+      const prev = qs('#sitePopupPrev');
+      const next = qs('#sitePopupNext');
+      const total = popupState.images.length;
+      if(!image || !footer || !total) return;
+
+      popupState.index = (popupState.index + total) % total;
+      image.src = browserSafeImageUrl(popupState.images[popupState.index]);
+      image.alt = `팝업 이미지 ${popupState.index + 1}`;
+      prev.style.display = total > 1 ? 'flex' : 'none';
+      next.style.display = total > 1 ? 'flex' : 'none';
+      footer.innerHTML = total > 1
+        ? popupState.images.map((_, i) => `<span class="site-popup-dot ${i === popupState.index ? 'active' : ''}"></span>`).join('') + `<span>${popupState.index + 1} / ${total}</span>`
+        : '';
+    }
+
+    function openSitePopup(settings){
+      const value = settings && typeof settings === 'object' ? settings : {};
+      const images = Array.isArray(value.images)
+        ? value.images.map(url => String(url || '').trim()).filter(Boolean)
+        : [];
+      if(value.enabled !== true || !images.length) return;
+
+      popupState.images = images;
+      popupState.index = 0;
+      updateSitePopup();
+      const popup = qs('#sitePopup');
+      if(popup){
+        popup.classList.add('open');
+        popup.setAttribute('aria-hidden','false');
+      }
+    }
+
     function getWorks(){
       if(Array.isArray(state.dbWorks)){
         return state.dbWorks.map((work, index) => ({...work, _sourceType:'db', _sourceIndex:index}))
@@ -1653,6 +1778,9 @@
               if(value.body) merged.noteBody = value.body;
               if(value.noteBody) merged.noteBody = value.noteBody;
             }
+            if(row.key === 'popup'){
+              openSitePopup(value);
+            }
           });
           applyAboutContentToPage(merged);
         }
@@ -1795,10 +1923,38 @@
     qs('#imageZoom').addEventListener('click', e => { if(e.target.id === 'imageZoom') closeImageZoom(); });
     window.addEventListener('keydown', e => {
       if(e.key === 'Escape'){
-        if(qs('#imageZoom')?.classList.contains('open')) closeImageZoom();
+        if(qs('#sitePopup')?.classList.contains('open')) closeSitePopup();
+        else if(qs('#imageZoom')?.classList.contains('open')) closeImageZoom();
         else closeViewer();
       }
     });
+
+    qs('#sitePopupClose')?.addEventListener('click', closeSitePopup);
+    qs('#sitePopupPrev')?.addEventListener('click', () => {
+      if(!popupState.images.length) return;
+      popupState.index -= 1;
+      updateSitePopup();
+    });
+    qs('#sitePopupNext')?.addEventListener('click', () => {
+      if(!popupState.images.length) return;
+      popupState.index += 1;
+      updateSitePopup();
+    });
+    qs('#sitePopup')?.addEventListener('click', e => {
+      if(e.target?.id === 'sitePopup') closeSitePopup();
+    });
+    let popupTouchStartX = 0;
+    qs('#sitePopupImage')?.addEventListener('touchstart', e => {
+      popupTouchStartX = e.changedTouches?.[0]?.clientX || 0;
+    }, {passive:true});
+    qs('#sitePopupImage')?.addEventListener('touchend', e => {
+      if(popupState.images.length <= 1) return;
+      const endX = e.changedTouches?.[0]?.clientX || 0;
+      const diff = endX - popupTouchStartX;
+      if(Math.abs(diff) < 45) return;
+      popupState.index += diff < 0 ? 1 : -1;
+      updateSitePopup();
+    }, {passive:true});
 
     bindAutoHideTopbar();
     bindCategoryFilters();
