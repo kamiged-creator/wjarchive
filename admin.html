@@ -1158,6 +1158,18 @@
         background-color:#05070a;
       }
     }
+
+    /* Popup manager */
+    .popup-admin-toggle{display:flex;align-items:center;gap:10px;font-weight:800}
+    .popup-admin-toggle input{width:20px;height:20px;accent-color:var(--accent)}
+    .popup-url-list{display:grid;gap:10px}
+    .popup-url-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .popup-url-row .btn{min-width:72px}
+    @media (max-width:740px){
+      .popup-url-row{grid-template-columns:1fr}
+      .popup-url-row .btn{width:100%}
+    }
+
 </style>
 </head>
 <body id="top" class="is-loading">
@@ -1554,6 +1566,23 @@
 
             
             
+            <div class="admin-card" id="popupAdminCard">
+              <h3>팝업 관리</h3>
+              <p>ImageKit 이미지 주소를 넣고 저장하면 홈페이지 팝업에 반영됩니다. 처음에는 1칸만 보이고, 필요할 때 + 팝업 추가로 늘릴 수 있습니다.</p>
+              <div class="stack" style="margin-top:14px">
+                <label class="popup-admin-toggle">
+                  <input id="popupEnabled" type="checkbox">
+                  팝업 띄우기
+                </label>
+                <div class="popup-url-list" id="popupUrlList"></div>
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn" type="button" id="addPopupUrlBtn">+ 팝업 추가</button>
+                  <button class="btn primary" type="button" id="savePopupBtn">저장</button>
+                </div>
+                <div class="status" id="popupStatus">팝업을 사용할 때만 체크하고 ImageKit 주소를 넣은 뒤 저장하세요.</div>
+              </div>
+            </div>
+
             <div class="admin-card">
               <h3>6. 작품 등록 추가</h3>
               <p>메인 페이지는 그대로 두고, 관리자 페이지 안에만 작품 등록 입력 영역을 추가했습니다.</p>
@@ -3724,6 +3753,10 @@
     loadEditableTextContent();
     loadAboutContent();
 
+    if(qs('#popupUrlList') && !qs('#popupUrlList .popup-url-input')) renderPopupUrlInputs(['']);
+    qs('#addPopupUrlBtn')?.addEventListener('click', addPopupUrlInput);
+    qs('#savePopupBtn')?.addEventListener('click', savePopupSettings);
+
     qs('#saveAboutContentBtn')?.addEventListener('click', () => applyAboutContent(true));
     qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
     qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
@@ -3846,7 +3879,7 @@
       const {data, error} = await supabaseClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['hero', 'about', 'note']);
+        .in('key', ['hero', 'about', 'note', 'popup']);
       if(error){
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
@@ -3881,9 +3914,91 @@
           if(value.body) merged.noteBody = value.body;
           if(value.noteBody) merged.noteBody = value.noteBody;
         }
+        if(row.key === 'popup'){
+          if(qs('#popupEnabled')) qs('#popupEnabled').checked = value.enabled === true;
+          renderPopupUrlInputs(Array.isArray(value.images) ? value.images : ['']);
+        }
       });
 
       applyAboutContentToPage(merged);
+    }
+
+
+    function getPopupUrlValues(){
+      return qsa('#popupUrlList .popup-url-input')
+        .map(input => String(input.value || '').trim())
+        .filter(Boolean);
+    }
+
+    function renderPopupUrlInputs(urls){
+      const list = qs('#popupUrlList');
+      if(!list) return;
+      const items = Array.isArray(urls) && urls.length ? urls : [''];
+      list.innerHTML = '';
+      items.forEach((url, index) => {
+        const row = document.createElement('div');
+        row.className = 'popup-url-row';
+        row.innerHTML = `
+          <input class="field popup-url-input" type="url" inputmode="url" placeholder="https://ik.imagekit.io/..." value="${escapeHtml(url || '')}">
+          <button class="btn subtle popup-url-remove" type="button">삭제</button>
+        `;
+        row.querySelector('.popup-url-remove')?.addEventListener('click', () => {
+          const rows = qsa('#popupUrlList .popup-url-row');
+          if(rows.length <= 1){
+            const input = row.querySelector('.popup-url-input');
+            if(input) input.value = '';
+            return;
+          }
+          row.remove();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function addPopupUrlInput(){
+      const urls = qsa('#popupUrlList .popup-url-input').map(input => input.value || '');
+      urls.push('');
+      renderPopupUrlInputs(urls);
+      const inputs = qsa('#popupUrlList .popup-url-input');
+      inputs[inputs.length - 1]?.focus();
+    }
+
+    async function savePopupSettings(){
+      const status = qs('#popupStatus');
+      const enabled = !!qs('#popupEnabled')?.checked;
+      const images = getPopupUrlValues();
+
+      if(enabled && !images.length){
+        if(status){
+          status.textContent = '팝업을 띄우려면 이미지 주소를 1개 이상 입력하세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+      if(!supabaseReady()){
+        if(status){
+          status.textContent = 'Supabase 연결이 없어 저장할 수 없습니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const {error} = await supabaseClient.from('site_settings').upsert([{
+        key:'popup',
+        value:{enabled, images}
+      }], {onConflict:'key'});
+
+      if(status){
+        if(error){
+          status.textContent = '팝업 저장 실패: ' + error.message;
+          status.className = 'status bad';
+        }else{
+          status.textContent = enabled
+            ? `팝업 ON · ${images.length}장 저장되었습니다.`
+            : '팝업 OFF로 저장되었습니다.';
+          status.className = 'status ok';
+        }
+      }
     }
 
     function mapDbWork(row){
