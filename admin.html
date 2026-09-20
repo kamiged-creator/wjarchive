@@ -1331,6 +1331,40 @@
     .book-image-address-edit{display:none;padding:10px 12px 12px;border-top:1px solid var(--line)}
     .book-image-address.is-open .book-image-address-edit{display:block}
     .book-image-address .book-image-toggle{min-height:34px;padding:0 12px;box-shadow:none}
+    #adminApp .book-open,
+    #adminApp .book-image-toggle{
+      background:#26303b;
+      color:#fff;
+      border-color:rgba(255,255,255,.14);
+    }
+    #adminApp .book-admin-row.is-open .book-open,
+    #adminApp .book-image-address.is-open .book-image-toggle{
+      background:#f0ad62;
+      color:#2a1a0d;
+      border-color:#f0ad62;
+    }
+    #adminApp .book-close{
+      background:#6f2d35;
+      color:#fff;
+      border-color:#8a3b45;
+    }
+    #adminOverlay.admin-dark #adminApp .book-open,
+    #adminOverlay.admin-dark #adminApp .book-image-toggle{
+      background:#26303b;
+      color:#fff;
+      border-color:rgba(255,255,255,.16);
+    }
+    #adminOverlay.admin-dark #adminApp .book-admin-row.is-open .book-open,
+    #adminOverlay.admin-dark #adminApp .book-image-address.is-open .book-image-toggle{
+      background:#f0ad62;
+      color:#2a1a0d;
+      border-color:#f0ad62;
+    }
+    #adminOverlay.admin-dark #adminApp .book-close{
+      background:#6f2d35;
+      color:#fff;
+      border-color:#8a3b45;
+    }
     .book-admin-actions{display:flex;gap:8px;flex-wrap:wrap}
     .book-admin-actions .btn{flex:1;min-width:110px}
     .book-top-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
