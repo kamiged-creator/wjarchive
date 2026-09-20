@@ -118,7 +118,8 @@
     const pagination=document.getElementById('bookPagination');
     const adminFooterLink=document.getElementById('adminFooterLink');
     const ADMIN_TOKEN_KEY='wjarchiveAdminAccessToken';
-    const PAGE_SIZE=6;
+    const DESKTOP_PAGE_SIZE=6;
+    const MOBILE_PAGE_SIZE=4;
     let allBookCards=[];
     let currentPage=1;
     document.getElementById('year').textContent=new Date().getFullYear();
@@ -181,6 +182,10 @@
       `;
     }
 
+    function getPageSize(){
+      return window.matchMedia('(max-width:560px)').matches ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE;
+    }
+
     function renderPagination(totalPages){
       pagination.innerHTML='';
       pagination.classList.toggle('show',totalPages>1);
@@ -199,17 +204,19 @@
     }
 
     function renderPage(){
-      const totalPages=Math.max(1,Math.ceil(allBookCards.length/PAGE_SIZE));
+      const pageSize=getPageSize();
+      const totalPages=Math.max(1,Math.ceil(allBookCards.length/pageSize));
       if(currentPage>totalPages) currentPage=totalPages;
       if(currentPage<1) currentPage=1;
 
-      const start=(currentPage-1)*PAGE_SIZE;
-      grid.innerHTML=allBookCards.slice(start,start+PAGE_SIZE).join('');
+      const start=(currentPage-1)*pageSize;
+      grid.innerHTML=allBookCards.slice(start,start+pageSize).join('');
       renderPagination(totalPages);
     }
 
     function goToPage(page,push=false){
-      const totalPages=Math.max(1,Math.ceil(allBookCards.length/PAGE_SIZE));
+      const pageSize=getPageSize();
+      const totalPages=Math.max(1,Math.ceil(allBookCards.length/pageSize));
       const next=Math.min(Math.max(1,Number(page)||1),totalPages);
       currentPage=next;
       renderPage();
