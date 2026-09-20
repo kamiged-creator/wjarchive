@@ -398,6 +398,64 @@
     .admin-card p{margin:0;color:var(--muted);font-size:14px}
     /* 관리자 화면 정리: 이미지 작업은 crop.html로 분리하고 나머지는 접기식으로 표시 */
     #adminApp .admin-grid{grid-template-columns:1fr}
+    #adminApp .admin-themebar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:18px;
+      background:#fffdf9;color:#1f1a17
+    }
+    #adminApp .admin-themebar strong{font-size:15px}
+    #adminApp .admin-theme-switch{display:flex;gap:8px;flex-wrap:wrap}
+    #adminApp .admin-theme-switch .btn{min-height:40px;padding:0 14px;box-shadow:none}
+    #adminApp .admin-theme-switch .is-active{background:#1f1a17;color:#fff;border-color:#1f1a17}
+    #adminOverlay.admin-dark{background:rgba(4,6,9,.88)}
+    #adminOverlay.admin-dark #adminApp{--text:#f5f7fb;--muted:#b8c0cc;--line:rgba(255,255,255,.13);--paper:#15191f}
+    #adminOverlay.admin-dark .admin-panel{background:#0f1318;border-color:rgba(255,255,255,.12);color:#f5f7fb}
+    #adminOverlay.admin-dark .admin-card,
+    #adminOverlay.admin-dark .admin-themebar,
+    #adminOverlay.admin-dark .popup-url-row,
+    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.12);color:#f5f7fb}
+    #adminOverlay.admin-dark #adminApp .admin-crop-shortcut{background:linear-gradient(180deg,#171c23,#13171c)}
+    #adminOverlay.admin-dark .field,
+    #adminOverlay.admin-dark .field-sm,
+    #adminOverlay.admin-dark .editor-area,
+    #adminOverlay.admin-dark textarea,
+    #adminOverlay.admin-dark select,
+    #adminOverlay.admin-dark input[type="text"],
+    #adminOverlay.admin-dark input[type="url"],
+    #adminOverlay.admin-dark input[type="number"],
+    #adminOverlay.admin-dark input[type="password"]{
+      background:#0d1116!important;color:#f7f9fc!important;border-color:rgba(255,255,255,.17)!important;
+      caret-color:#fff
+    }
+    #adminOverlay.admin-dark input::placeholder,
+    #adminOverlay.admin-dark textarea::placeholder{color:#7f8a98!important}
+    #adminOverlay.admin-dark .label,
+    #adminOverlay.admin-dark .mini-note,
+    #adminOverlay.admin-dark .image-size-note,
+    #adminOverlay.admin-dark .image-size-status,
+    #adminOverlay.admin-dark .status,
+    #adminOverlay.admin-dark .admin-card p,
+    #adminOverlay.admin-dark .book-admin-sub,
+    #adminOverlay.admin-dark .popup-url-state{color:#b8c0cc!important}
+    #adminOverlay.admin-dark .btn{background:#20262e;color:#f6f8fb;border-color:rgba(255,255,255,.14)}
+    #adminOverlay.admin-dark .btn.primary{background:#f3eee8;color:#171412;border-color:#f3eee8}
+    #adminOverlay.admin-dark .btn.danger{background:#5a2227;color:#fff;border-color:#7b343b}
+    #adminOverlay.admin-dark .admin-theme-switch .is-active{background:#f3eee8;color:#171412;border-color:#f3eee8}
+    #adminOverlay.admin-dark .book-cover-preview{background:#0a0d11;border-color:rgba(255,255,255,.12)}
+    #adminOverlay.admin-dark .popup-url-edit,
+    #adminOverlay.admin-dark .book-admin-edit,
+    #adminOverlay.admin-dark .admin-fold-card.open>h3{border-color:rgba(255,255,255,.12)}
+    #adminOverlay.admin-light .admin-panel{background:#fffdf9;color:#1f1a17}
+    #adminOverlay.admin-light .admin-card{color:#1f1a17}
+    #adminOverlay.admin-light .label{color:#5f564f}
+    #adminOverlay.admin-light .admin-card p,
+    #adminOverlay.admin-light .mini-note,
+    #adminOverlay.admin-light .status{color:#625a53}
+    #adminOverlay.admin-light .field,
+    #adminOverlay.admin-light .field-sm,
+    #adminOverlay.admin-light .editor-area,
+    #adminOverlay.admin-light textarea,
+    #adminOverlay.admin-light select{color:#1f1a17;background:#fff}
     #adminApp .legacy-image-work-card,
     #adminApp .legacy-image-result-card{display:none!important}
     #adminApp .admin-crop-shortcut{
@@ -4808,6 +4866,29 @@
     const grid=app?.querySelector('.admin-grid');
     const stack=grid?.querySelector(':scope > .stack');
     if(!grid||!stack||stack.dataset.compactAdminReady==='1') return;
+
+    const panel=app.querySelector('.admin-panel');
+    if(panel && !panel.querySelector('.admin-themebar')){
+      const themebar=document.createElement('div');
+      themebar.className='admin-themebar';
+      themebar.innerHTML='<strong>화면 모드</strong><div class="admin-theme-switch"><button class="btn admin-theme-light" type="button">라이트</button><button class="btn admin-theme-dark" type="button">다크</button></div>';
+      panel.prepend(themebar);
+
+      const overlay=document.getElementById('adminOverlay');
+      const lightBtn=themebar.querySelector('.admin-theme-light');
+      const darkBtn=themebar.querySelector('.admin-theme-dark');
+      const applyTheme=(theme)=>{
+        const mode=theme==='dark'?'dark':'light';
+        overlay?.classList.toggle('admin-dark',mode==='dark');
+        overlay?.classList.toggle('admin-light',mode==='light');
+        lightBtn?.classList.toggle('is-active',mode==='light');
+        darkBtn?.classList.toggle('is-active',mode==='dark');
+        localStorage.setItem('wjarchiveAdminTheme',mode);
+      };
+      lightBtn?.addEventListener('click',()=>applyTheme('light'));
+      darkBtn?.addEventListener('click',()=>applyTheme('dark'));
+      applyTheme(localStorage.getItem('wjarchiveAdminTheme') || 'light');
+    }
     stack.dataset.compactAdminReady='1';
 
     const directCards=[...stack.children].filter(el=>el.classList?.contains('admin-card'));
