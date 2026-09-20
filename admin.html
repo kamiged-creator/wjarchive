@@ -466,6 +466,8 @@
     #adminApp .admin-crop-shortcut-copy{min-width:0}
     #adminApp .admin-crop-shortcut strong{display:block;font-size:16px;margin-bottom:3px}
     #adminApp .admin-crop-shortcut span{display:block;color:var(--muted);font-size:12px}
+    #adminApp .admin-quick-links{display:flex;gap:8px;flex:0 0 auto}
+    #adminApp .admin-quick-links .btn{min-width:78px}
     #adminApp .admin-fold-card{padding:0;overflow:hidden}
     #adminApp .admin-fold-card>h3{
       position:relative;margin:0;padding:16px 48px 16px 16px;cursor:pointer;
@@ -481,7 +483,8 @@
     #adminApp .admin-fold-body{padding:16px}
     @media(max-width:680px){
       #adminApp .admin-crop-shortcut{align-items:flex-start;flex-direction:column}
-      #adminApp .admin-crop-shortcut .btn{width:100%}
+      #adminApp .admin-quick-links{width:100%;display:grid;grid-template-columns:1fr 1fr}
+      #adminApp .admin-quick-links .btn{width:100%;min-width:0}
     }
     .label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
     .editor-area{
@@ -4918,7 +4921,7 @@
 
     const cropCard=document.createElement('div');
     cropCard.className='admin-card admin-crop-shortcut';
-    cropCard.innerHTML='<div class="admin-crop-shortcut-copy"><strong>이미지 작업</strong><span>사진 자르기·변환은 전용 크롭 페이지에서 작업합니다.</span></div><a class="btn" href="/crop.html">크롭 페이지 열기</a>';
+    cropCard.innerHTML='<div class="admin-crop-shortcut-copy"><strong>이미지 작업</strong><span>사진 자르기·변환은 전용 크롭 페이지에서 작업합니다.</span></div><div class="admin-quick-links"><a class="btn" href="/crop.html">크롭</a><a class="btn" href="/store-admin.html">스토어</a></div>';
     stack.prepend(cropCard);
 
     const labels=new Map([
