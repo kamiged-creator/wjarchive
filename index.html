@@ -1632,6 +1632,9 @@
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
     const state = { currentCategory:'전체', currentPage:1, worksPerPage:9, dbWorks:null };
+    function getWorksPerPage(){
+      return window.matchMedia('(max-width: 680px)').matches ? 10 : state.worksPerPage;
+    }
     qs('#year').textContent = new Date().getFullYear();
 
     function escapeHtml(str){
@@ -1744,10 +1747,11 @@
       const visibleWorks = state.currentCategory === '전체'
         ? works.filter(work => String(work.category || '').trim() !== '기타')
         : works.filter(work => work.category === state.currentCategory);
-      const totalPages = Math.max(1, Math.ceil(visibleWorks.length / state.worksPerPage));
+      const worksPerPage = getWorksPerPage();
+      const totalPages = Math.max(1, Math.ceil(visibleWorks.length / worksPerPage));
       if(state.currentPage > totalPages) state.currentPage = totalPages;
-      const startIndex = (state.currentPage - 1) * state.worksPerPage;
-      const pageWorks = visibleWorks.slice(startIndex, startIndex + state.worksPerPage);
+      const startIndex = (state.currentPage - 1) * worksPerPage;
+      const pageWorks = visibleWorks.slice(startIndex, startIndex + worksPerPage);
       grid.innerHTML = pageWorks.map((work) => {
         const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
         const thumb = getGalleryImageUrl(work.thumb || work.large || '');
