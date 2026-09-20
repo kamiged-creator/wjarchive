@@ -1638,7 +1638,7 @@
                   <button class="btn" type="button" id="addBookBtn">+ 책 추가</button>
                   <button class="btn primary" type="button" id="saveBooksBtn">책 소개 저장</button>
                 </div>
-                <div class="status" id="bookStatus">책 제목 · 짧은 소개 · 본문 · 출간/구매 안내만 입력하면 됩니다.</div>
+                <div class="status" id="bookStatus">아직 공개 전이면 준비중을 체크하세요. 책 제목 · 짧은 소개 · 본문 · 출간/구매 안내만 입력하면 됩니다.</div>
               </div>
             </div>
 
@@ -4014,7 +4014,7 @@
     };
 
     function emptyBook(){
-      return {title:'', intro:'', body:'', status:'', image:''};
+      return {title:'', intro:'', body:'', status:'', image:'', preparing:true};
     }
 
     function getBookItemsFromForm(){
@@ -4023,7 +4023,8 @@
         intro:String(row.querySelector('.book-intro')?.value || '').trim(),
         body:String(row.querySelector('.book-body')?.value || '').trim(),
         status:String(row.querySelector('.book-status')?.value || '').trim(),
-        image:String(row.querySelector('.book-image-url')?.value || '').trim()
+        image:String(row.querySelector('.book-image-url')?.value || '').trim(),
+        preparing:!!row.querySelector('.book-preparing')?.checked
       }));
     }
 
