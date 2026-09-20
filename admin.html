@@ -595,10 +595,11 @@
       justify-content:flex-end;
       align-items:center;
       gap:8px;
-      flex-wrap:wrap;
+      flex-wrap:nowrap;
       margin-top:14px;
-      padding-top:10px;
-      border-top:1px solid var(--line);
+      padding:0;
+      border-top:0;
+      background:transparent;
     }
     .admin-bottom-actions .btn{
       width:auto;
@@ -609,6 +610,10 @@
       box-shadow:none;
       font-size:13px;
       font-weight:750;
+    }
+    @media(max-width:420px){
+      .admin-bottom-actions{justify-content:flex-end;gap:6px}
+      .admin-bottom-actions .btn{min-height:36px;padding:0 11px;font-size:12px}
     }
 
 
