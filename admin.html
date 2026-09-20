@@ -4180,7 +4180,7 @@
         const num=row.querySelector('.book-number');
         const sub=row.querySelector('.book-admin-sub');
         const title=row.querySelector('.book-title')?.value.trim();
-        if(num) num.textContent=`책 ${index+1}`;
+        if(num) num.textContent=`책 ${index+2}`;
         if(sub) sub.textContent=title || '제목 미입력';
       });
     }
@@ -4188,14 +4188,21 @@
     function renderBookAdminItems(items, openIndex=-1){
       const list=qs('#bookAdminList');
       if(!list) return;
-      const books=Array.isArray(items)&&items.length ? items : [emptyBook()];
-      list.innerHTML='';
+      const books=Array.isArray(items) ? items : [];
+      list.innerHTML=`
+        <div class="book-admin-row book-admin-sample">
+          <div class="book-admin-head">
+            <div><strong class="book-number">책 1</strong><span class="book-admin-sub">샘플</span></div>
+            <span class="badge">샘플</span>
+          </div>
+        </div>
+      `;
       books.forEach((book,index)=>{
         const row=document.createElement('div');
         row.className='book-admin-row'+(index===openIndex?' is-open':'');
         row.innerHTML=`
           <div class="book-admin-head">
-            <div><strong class="book-number">책 ${index+1}</strong><span class="book-admin-sub">${escapeHtml(book.title || '제목 미입력')}</span></div>
+            <div><strong class="book-number">책 ${index+2}</strong><span class="book-admin-sub">${escapeHtml(book.title || '제목 미입력')}</span></div>
             <button class="btn subtle book-open" type="button" aria-expanded="${index===openIndex?'true':'false'}">${index===openIndex?'닫기':'열기'}</button>
           </div>
           <div class="book-admin-edit">
@@ -4241,11 +4248,6 @@
         row.querySelector('.book-close')?.addEventListener('click',()=>{row.classList.remove('is-open');openBtn.textContent='열기';openBtn.setAttribute('aria-expanded','false');});
         row.querySelector('.book-title')?.addEventListener('input',refreshBookHeadings);
         row.querySelector('.book-delete')?.addEventListener('click',()=>{
-          const rows=qsa('#bookAdminList .book-admin-row');
-          if(rows.length===1){
-            renderBookAdminItems([emptyBook()],0);
-            return;
-          }
           row.remove();
           refreshBookHeadings();
         });
@@ -4330,7 +4332,7 @@
         status.className='status bad';
         return;
       }
-      renderBookAdminItems(items.length?items:[emptyBook()]);
+      renderBookAdminItems(items);
       status.textContent=`책 소개 ${items.length}권이 저장되었습니다.`;
       status.className='status ok';
     }
