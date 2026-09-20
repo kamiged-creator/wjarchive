@@ -1621,6 +1621,23 @@
 
     const popupState = { images:[], index:0 };
 
+    function positionSitePopupClose(){
+      const close = qs('#sitePopupClose');
+      const image = qs('#sitePopupImage');
+      const frame = qs('.site-popup-frame');
+      if(!close || !image || !frame) return;
+
+      if(window.innerWidth <= 860){
+        close.style.right = '';
+        return;
+      }
+
+      const frameRect = frame.getBoundingClientRect();
+      const imageRect = image.getBoundingClientRect();
+      const imageRightInset = Math.max(0, frameRect.right - imageRect.right);
+      close.style.right = `${Math.round(imageRightInset)}px`;
+    }
+
     function closeSitePopup(){
       const popup = qs('#sitePopup');
       if(!popup) return;
@@ -1639,6 +1656,7 @@
       popupState.index = (popupState.index + total) % total;
       image.src = browserSafeImageUrl(popupState.images[popupState.index]);
       image.alt = `팝업 이미지 ${popupState.index + 1}`;
+      window.requestAnimationFrame(positionSitePopupClose);
       prev.style.display = total > 1 ? 'flex' : 'none';
       next.style.display = total > 1 ? 'flex' : 'none';
       footer.innerHTML = total > 1
@@ -2037,6 +2055,8 @@
     });
 
     qs('#sitePopupClose')?.addEventListener('click', closeSitePopup);
+    qs('#sitePopupImage')?.addEventListener('load', positionSitePopupClose);
+    window.addEventListener('resize', positionSitePopupClose);
     qs('#sitePopupPrev')?.addEventListener('click', () => {
       if(!popupState.images.length) return;
       popupState.index -= 1;
