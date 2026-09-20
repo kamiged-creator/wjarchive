@@ -2092,6 +2092,8 @@
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
 
+    let bookSampleHidden = false;
+
     const state = {
       files: [],
       results: [],
@@ -4187,8 +4189,6 @@
       applyAboutContentToPage(merged);
     }
 
-
-    let bookSampleHidden = false;
 
     function emptyBook(){
       return {title:'', intro:'', body:'', status:'', image:'', preparing:true};
