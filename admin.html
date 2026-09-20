@@ -1208,9 +1208,29 @@
     .popup-url-row.is-open .popup-url-edit{display:grid;gap:9px;padding-top:12px}
     .popup-url-actions{display:flex;gap:8px}
     .popup-url-actions .btn{flex:1}
+
+    /* Book introduction manager */
+    .book-admin-list{display:grid;gap:10px}
+    .book-admin-row{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.56);overflow:hidden}
+    .book-admin-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;min-height:54px}
+    .book-admin-head strong{font-size:15px}
+    .book-admin-sub{font-size:12px;color:var(--muted);margin-left:7px}
+    .book-admin-edit{display:none;padding:14px;border-top:1px solid var(--line)}
+    .book-admin-row.is-open .book-admin-edit{display:grid;gap:12px}
+    .book-cover-preview{width:100%;max-width:220px;aspect-ratio:3/4;border:1px solid var(--line);border-radius:14px;background:#f4efe8;overflow:hidden;display:none}
+    .book-cover-preview.has-image{display:block}
+    .book-cover-preview img{width:100%;height:100%;object-fit:cover;display:block}
+    .book-upload-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .book-upload-row input[type=file]{max-width:100%;font-size:13px}
+    .book-admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .book-admin-actions .btn{flex:1;min-width:110px}
+
     @media (max-width:740px){
       .popup-url-head{min-height:52px}
       .popup-url-actions{display:grid;grid-template-columns:1fr 1fr}
+      .book-admin-head{min-height:52px}
+      .book-admin-actions{display:grid;grid-template-columns:1fr 1fr}
+      .book-admin-actions .btn{min-width:0}
     }
 
 </style>
@@ -1609,6 +1629,19 @@
 
             
             
+            <div class="admin-card" id="bookAdminCard">
+              <h3>책 소개 관리</h3>
+              <p>책 표지와 꼭 필요한 소개 내용만 관리합니다. 책이 늘어나면 + 책 추가로 등록하세요.</p>
+              <div class="stack" style="margin-top:14px">
+                <div class="book-admin-list" id="bookAdminList"></div>
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn" type="button" id="addBookBtn">+ 책 추가</button>
+                  <button class="btn primary" type="button" id="saveBooksBtn">책 소개 저장</button>
+                </div>
+                <div class="status" id="bookStatus">책 제목 · 짧은 소개 · 본문 · 출간/구매 안내만 입력하면 됩니다.</div>
+              </div>
+            </div>
+
             <div class="admin-card" id="popupAdminCard">
               <h3>팝업 관리</h3>
               <p>등록된 주소는 평소 숨겨두고 순번만 표시합니다. 수정하거나 새로 넣을 때만 열어서 입력한 뒤 저장하세요.</p>
@@ -3797,6 +3830,9 @@
     loadAboutContent();
 
     if(qs('#popupUrlList') && !qs('#popupUrlList .popup-url-input')) renderPopupUrlInputs(['']);
+    if(qs('#bookAdminList') && !qs('#bookAdminList .book-admin-row')) renderBookAdminItems([]);
+    qs('#addBookBtn')?.addEventListener('click', addBookItem);
+    qs('#saveBooksBtn')?.addEventListener('click', saveBooks);
     qs('#addPopupUrlBtn')?.addEventListener('click', addPopupUrlInput);
     qs('#savePopupBtn')?.addEventListener('click', savePopupSettings);
 
@@ -3922,7 +3958,7 @@
       const {data, error} = await supabaseClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['hero', 'about', 'note', 'popup']);
+        .in('key', ['hero', 'about', 'note', 'popup', 'books']);
       if(error){
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
@@ -3961,11 +3997,184 @@
           if(qs('#popupEnabled')) qs('#popupEnabled').checked = value.enabled === true;
           renderPopupUrlInputs(Array.isArray(value.images) ? value.images : ['']);
         }
+        if(row.key === 'books'){
+          renderBookAdminItems(Array.isArray(value.items) ? value.items : []);
+        }
       });
 
       applyAboutContentToPage(merged);
     }
 
+
+    const bookImageKitConfig = {
+      publicKey:'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
+      authEndpoint:'/api/imagekit-auth',
+      uploadEndpoint:'https://upload.imagekit.io/api/v1/files/upload',
+      folder:'/wjarchive/books'
+    };
+
+    function emptyBook(){
+      return {title:'', intro:'', body:'', status:'', image:''};
+    }
+
+    function getBookItemsFromForm(){
+      return qsa('#bookAdminList .book-admin-row').map(row => ({
+        title:String(row.querySelector('.book-title')?.value || '').trim(),
+        intro:String(row.querySelector('.book-intro')?.value || '').trim(),
+        body:String(row.querySelector('.book-body')?.value || '').trim(),
+        status:String(row.querySelector('.book-status')?.value || '').trim(),
+        image:String(row.querySelector('.book-image-url')?.value || '').trim()
+      }));
+    }
+
+    function closeBookRows(){
+      qsa('#bookAdminList .book-admin-row').forEach(row => {
+        row.classList.remove('is-open');
+        const btn=row.querySelector('.book-open');
+        if(btn){btn.textContent='열기';btn.setAttribute('aria-expanded','false');}
+      });
+    }
+
+    function refreshBookHeadings(){
+      qsa('#bookAdminList .book-admin-row').forEach((row,index)=>{
+        const num=row.querySelector('.book-number');
+        const sub=row.querySelector('.book-admin-sub');
+        const title=row.querySelector('.book-title')?.value.trim();
+        if(num) num.textContent=`책 ${index+1}`;
+        if(sub) sub.textContent=title || '제목 미입력';
+      });
+    }
+
+    function renderBookAdminItems(items, openIndex=-1){
+      const list=qs('#bookAdminList');
+      if(!list) return;
+      const books=Array.isArray(items)&&items.length ? items : [emptyBook()];
+      list.innerHTML='';
+      books.forEach((book,index)=>{
+        const row=document.createElement('div');
+        row.className='book-admin-row'+(index===openIndex?' is-open':'');
+        row.innerHTML=`
+          <div class="book-admin-head">
+            <div><strong class="book-number">책 ${index+1}</strong><span class="book-admin-sub">${escapeHtml(book.title || '제목 미입력')}</span></div>
+            <button class="btn subtle book-open" type="button" aria-expanded="${index===openIndex?'true':'false'}">${index===openIndex?'닫기':'열기'}</button>
+          </div>
+          <div class="book-admin-edit">
+            <input class="book-image-url" type="hidden" value="${escapeHtml(book.image || '')}">
+            <div class="book-cover-preview ${book.image?'has-image':''}"><img alt="책 표지 미리보기" src="${escapeHtml(book.image || '')}"></div>
+            <div>
+              <label class="label">책 표지 이미지</label>
+              <div class="book-upload-row">
+                <input class="book-file" type="file" accept="image/*">
+                <button class="btn book-upload" type="button">이미지 올리기</button>
+              </div>
+            </div>
+            <div><label class="label">책 제목</label><input class="field book-title" type="text" value="${escapeHtml(book.title || '')}" placeholder="책 제목"></div>
+            <div><label class="label">짧은 소개</label><textarea class="editor-area book-intro" placeholder="이미지 아래에 보일 짧은 소개">${escapeHtml(book.intro || '')}</textarea></div>
+            <div><label class="label">책 설명 본문</label><textarea class="editor-area book-body" placeholder="책에 대한 설명">${escapeHtml(book.body || '')}</textarea></div>
+            <div><label class="label">출간 · 구매 안내</label><input class="field book-status" type="text" value="${escapeHtml(book.status || '')}" placeholder="예: 출간 준비중 / 구매 문의"></div>
+            <div class="book-admin-actions">
+              <button class="btn subtle book-close" type="button">닫기</button>
+              <button class="btn danger book-delete" type="button">책 삭제</button>
+            </div>
+          </div>
+        `;
+
+        const openBtn=row.querySelector('.book-open');
+        const toggle=()=>{
+          const willOpen=!row.classList.contains('is-open');
+          closeBookRows();
+          if(willOpen){
+            row.classList.add('is-open');
+            openBtn.textContent='닫기';
+            openBtn.setAttribute('aria-expanded','true');
+          }
+        };
+        openBtn.addEventListener('click',toggle);
+        row.querySelector('.book-close')?.addEventListener('click',()=>{row.classList.remove('is-open');openBtn.textContent='열기';openBtn.setAttribute('aria-expanded','false');});
+        row.querySelector('.book-title')?.addEventListener('input',refreshBookHeadings);
+        row.querySelector('.book-delete')?.addEventListener('click',()=>{
+          const rows=qsa('#bookAdminList .book-admin-row');
+          if(rows.length===1){
+            renderBookAdminItems([emptyBook()],0);
+            return;
+          }
+          row.remove();
+          refreshBookHeadings();
+        });
+        row.querySelector('.book-upload')?.addEventListener('click',()=>uploadBookImage(row));
+        list.appendChild(row);
+      });
+      refreshBookHeadings();
+    }
+
+    async function uploadBookImage(row){
+      const file=row.querySelector('.book-file')?.files?.[0];
+      const status=qs('#bookStatus');
+      if(!file){
+        status.textContent='먼저 책 표지 이미지를 선택해 주세요.';
+        status.className='status bad';
+        return;
+      }
+      const btn=row.querySelector('.book-upload');
+      btn.disabled=true;
+      btn.textContent='업로드 중...';
+      try{
+        const authResponse=await fetch(bookImageKitConfig.authEndpoint,{cache:'no-store',headers:{Authorization:`Bearer ${getAdminAccessToken()}`}});
+        const auth=await authResponse.json().catch(()=>({}));
+        if(!authResponse.ok) throw new Error(auth.message || 'ImageKit 인증 실패');
+        const form=new FormData();
+        form.append('file',file,file.name);
+        form.append('fileName',file.name);
+        form.append('publicKey',bookImageKitConfig.publicKey);
+        form.append('signature',auth.signature);
+        form.append('expire',auth.expire);
+        form.append('token',auth.token);
+        form.append('folder',bookImageKitConfig.folder);
+        form.append('useUniqueFileName','true');
+        const uploadResponse=await fetch(bookImageKitConfig.uploadEndpoint,{method:'POST',body:form});
+        const result=await uploadResponse.json().catch(()=>({}));
+        if(!uploadResponse.ok) throw new Error(result.message || '이미지 업로드 실패');
+        const optimized=`${result.url}?tr=w-1200,q-86,f-webp`;
+        row.querySelector('.book-image-url').value=optimized;
+        const preview=row.querySelector('.book-cover-preview');
+        const img=preview.querySelector('img');
+        img.src=optimized;
+        preview.classList.add('has-image');
+        status.textContent='책 표지 이미지가 올라갔습니다. 책 소개 저장을 눌러 반영하세요.';
+        status.className='status ok';
+      }catch(error){
+        status.textContent=error.message || '이미지 업로드 실패';
+        status.className='status bad';
+      }finally{
+        btn.disabled=false;
+        btn.textContent='이미지 올리기';
+      }
+    }
+
+    function addBookItem(){
+      const current=getBookItemsFromForm();
+      current.push(emptyBook());
+      renderBookAdminItems(current,current.length-1);
+    }
+
+    async function saveBooks(){
+      const status=qs('#bookStatus');
+      const items=getBookItemsFromForm().filter(book => book.title || book.intro || book.body || book.status || book.image);
+      if(!supabaseReady()){
+        status.textContent='Supabase 연결이 없어 저장할 수 없습니다.';
+        status.className='status bad';
+        return;
+      }
+      const {error}=await supabaseClient.from('site_settings').upsert([{key:'books',value:{items}}],{onConflict:'key'});
+      if(error){
+        status.textContent='책 소개 저장 실패: '+error.message;
+        status.className='status bad';
+        return;
+      }
+      renderBookAdminItems(items.length?items:[emptyBook()]);
+      status.textContent=`책 소개 ${items.length}권이 저장되었습니다.`;
+      status.className='status ok';
+    }
 
     function getPopupUrlValues(){
       return qsa('#popupUrlList .popup-url-input')
@@ -4581,6 +4790,7 @@
       ['4. 사이트 문구 편집','사이트 문구'],
       ['5. 메인 / 작가소개 편집','메인 · 작가소개'],
       ['팝업 관리','팝업 관리'],
+      ['책 소개 관리','책 소개 관리'],
       ['6. 작품 등록 추가','작품 관리']
     ]);
 
