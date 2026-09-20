@@ -38,18 +38,25 @@
     .status{display:inline-flex;padding:7px 10px;border-radius:999px;background:rgba(139,104,71,.09);color:#725538;font-size:11px;font-weight:800}
     .more{font-size:12px;color:#5f554d;font-weight:750}
     .empty{grid-column:1/-1;padding:60px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:24px;background:rgba(255,253,249,.62)}
-    .pagination{display:none;align-items:center;justify-content:center;gap:8px;margin:-38px 0 54px}
+    .pagination{display:none;align-items:center;justify-content:center;gap:8px;margin:-20px 0 28px}
     .pagination.show{display:flex}
     .page-btn{min-width:34px;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--muted);font:inherit;font-size:12px;font-weight:800;cursor:pointer}
     .page-btn:hover{border-color:rgba(139,104,71,.35);color:var(--text)}
     .page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
-    footer{padding:28px 0 44px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .archive-end{margin:0 0 28px;padding:30px 20px 28px;text-align:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .archive-end .kicker{font-size:11px;font-weight:850;letter-spacing:.16em;color:var(--accent)}
+    .archive-end p{margin:9px 0 14px;color:var(--muted);font-size:14px;line-height:1.7}
+    .archive-links{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;font-weight:750;color:#5f554d}
+    .archive-links span{opacity:.35}
+    .archive-links a{transition:color .18s ease}
+    .archive-links a:hover{color:var(--accent)}
+    footer{padding:22px 0 34px;border-top:0;font-size:12px;color:var(--muted)}
     .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
     @media(max-width:820px){.books{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:560px){
       .wrap{padding:0 14px}.topin{height:58px}.hero{padding:30px 0 20px}
       h1{font-size:34px}
-      .books{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:20px 0 52px}
+      .books{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:20px 0 30px}
       .book-card{border-radius:16px}
       .cover{aspect-ratio:auto;height:180px}
       .copy{padding:10px 10px 11px}
@@ -59,8 +66,11 @@
       .meta{margin-top:5px;gap:5px}
       .status{padding:4px 7px;font-size:9px}
       .more{font-size:10px}
-      .pagination{margin:-30px 0 42px;gap:6px}
+      .pagination{margin:-12px 0 24px;gap:6px}
       .page-btn{min-width:30px;height:30px;padding:0 8px;font-size:11px}
+      .archive-end{margin-bottom:22px;padding:24px 12px 22px}
+      .archive-end p{font-size:12px;margin:7px 0 12px}
+      .archive-links{font-size:11px;gap:8px}
     }
   </style>
 </head>
@@ -80,6 +90,17 @@
     </section>
     <section class="books" id="bookGrid" aria-live="polite"></section>
     <nav class="pagination" id="bookPagination" aria-label="책 목록 페이지"></nav>
+    <section class="archive-end" aria-label="책 아카이브 안내">
+      <div class="kicker">BOOK ARCHIVE</div>
+      <p>작품과 글의 기록은 계속 이어집니다.</p>
+      <div class="archive-links">
+        <a href="/#works">작품 보기</a>
+        <span>·</span>
+        <a href="/#about">작가 소개</a>
+        <span>·</span>
+        <a href="/">홈으로</a>
+      </div>
+    </section>
   </main>
 
   <footer>
