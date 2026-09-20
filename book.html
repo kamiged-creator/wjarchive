@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>책 소개 | 이원주</title>
+  <meta name="description" content="이원주의 책과 작업 이야기를 소개합니다.">
+  <link rel="icon" href="/favicon-32x32.png">
+  <style>
+    :root{--bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#6e655d;--line:rgba(31,26,23,.12);--accent:#8b6847;--max:980px}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;word-break:keep-all}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+    .top{position:sticky;top:0;z-index:10;background:rgba(246,241,234,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .topin{height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{font-weight:900;font-size:20px;letter-spacing:-.03em}
+    .back{font-size:13px;color:var(--muted);font-weight:750}
+    .hero{padding:68px 0 42px;border-bottom:1px solid var(--line)}
+    .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:800;text-transform:uppercase}
+    h1{margin:10px 0 12px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(38px,7vw,62px);font-weight:500;letter-spacing:-.055em}
+    .hero p{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
+    .books{display:grid;gap:34px;padding:40px 0 72px}
+    .book{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:38px;align-items:start;padding:28px;border:1px solid var(--line);border-radius:28px;background:var(--paper)}
+    .cover{aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#eee6dc;border:1px solid var(--line)}
+    .cover img{width:100%;height:100%;object-fit:cover;display:block}
+    .copy{padding:12px 0}
+    .number{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.08em}
+    .copy h2{margin:10px 0 12px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(28px,4vw,40px);font-weight:600;letter-spacing:-.045em}
+    .intro{margin:0 0 22px;font-size:17px;line-height:1.75;color:#443b34;font-weight:650}
+    .body{font-size:15px;color:var(--muted);line-height:1.95;white-space:pre-line}
+    .status{display:inline-flex;margin-top:24px;padding:9px 13px;border-radius:999px;background:rgba(139,104,71,.09);color:#725538;font-size:13px;font-weight:800}
+    .empty{padding:76px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:24px;background:rgba(255,253,249,.62)}
+    footer{padding:28px 0 44px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    @media(max-width:720px){
+      .wrap{padding:0 18px}.topin{height:58px}.hero{padding:44px 0 30px}
+      .books{padding:26px 0 56px;gap:22px}
+      .book{grid-template-columns:1fr;gap:20px;padding:16px;border-radius:22px}
+      .cover{width:min(100%,420px);margin:0 auto}
+      .copy{padding:4px 4px 10px}.intro{font-size:16px;margin-bottom:18px}.body{font-size:14px;line-height:1.85}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap topin">
+      <a class="brand" href="/">이원주</a>
+      <a class="back" href="/">← 홈페이지</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Book · Story</div>
+      <h1>책 소개</h1>
+      <p>작품과 글에 담긴 이야기를 책으로 이어갑니다.</p>
+    </section>
+    <section class="books" id="bookList" aria-live="polite">
+      <div class="empty">책 소개를 불러오는 중입니다.</div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot"><span>© <span id="year"></span> Lee Wonju.</span><a href="/admin.html">관리자</a></div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL='https://vefeplfczeztbplowjmj.supabase.co';
+    const SUPABASE_ANON_KEY='sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
+    const client=(window.supabase&&SUPABASE_URL&&SUPABASE_ANON_KEY)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+    const list=document.getElementById('bookList');
+    document.getElementById('year').textContent=new Date().getFullYear();
+
+    function esc(value){
+      return String(value??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+    function render(items){
+      const books=(Array.isArray(items)?items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
+      if(!books.length){
+        list.innerHTML='<div class="empty">등록된 책 소개가 없습니다.<br>새 책 이야기를 준비하고 있습니다.</div>';
+        return;
+      }
+      list.innerHTML=books.map((book,index)=>`
+        <article class="book">
+          <div class="cover">${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}</div>
+          <div class="copy">
+            <div class="number">BOOK ${String(index+1).padStart(2,'0')}</div>
+            <h2>${esc(book.title||'제목 미정')}</h2>
+            ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
+            ${book.body?'<div class="body">'+esc(book.body)+'</div>':''}
+            ${book.status?'<div class="status">'+esc(book.status)+'</div>':''}
+          </div>
+        </article>
+      `).join('');
+    }
+    async function load(){
+      if(!client){render([]);return;}
+      const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
+      if(error){console.warn(error);render([]);return;}
+      let value=data?.value||{};
+      if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
+      render(value.items||[]);
+    }
+    load();
+  </script>
+</body>
+</html>
