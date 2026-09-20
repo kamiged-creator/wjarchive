@@ -122,13 +122,15 @@
         list.innerHTML='<div class="empty">책 정보를 찾을 수 없습니다.</div>';
         return;
       }
-      document.title=(book.title||'책 소개')+' | 이원주';
+      const title=book.title||'제목 미정';
+      document.title=title+' | 이원주';
+      const heroTitle=document.getElementById('bookHeroTitle');
+      if(heroTitle) heroTitle.textContent=title;
       list.innerHTML=`
         <article class="book">
           <div class="cover">${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}</div>
           <div class="copy">
             <div class="number">${esc(label)}</div>
-            <h2>${esc(book.title||'제목 미정')}</h2>
             ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
             ${book.body?'<div class="body">'+esc(book.body)+'</div>':''}
             ${book.preparing?'<div class="status">준비중입니다</div>':(book.status?'<div class="status">'+esc(book.status)+'</div>':'')}
