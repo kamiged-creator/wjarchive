@@ -4197,11 +4197,46 @@
       list.innerHTML=`
         <div class="book-admin-row book-admin-sample">
           <div class="book-admin-head">
-            <div><strong class="book-number">책 1</strong><span class="book-admin-sub">샘플</span></div>
-            <span class="badge">샘플</span>
+            <div><strong class="book-number">책 1</strong><span class="book-admin-sub">책 제목 샘플</span></div>
+            <button class="btn subtle book-open sample-book-open" type="button" aria-expanded="false">열기</button>
+          </div>
+          <div class="book-admin-edit">
+            <div class="mini-note" style="margin:0 0 4px">이 샘플을 보고 같은 순서로 입력하면 됩니다.</div>
+            <label class="book-preparing-label">
+              <input type="checkbox" checked disabled>
+              준비중
+            </label>
+            <div class="book-cover-preview has-image" style="display:block">
+              <img alt="책 표지 샘플" src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop">
+            </div>
+            <div class="book-image-address is-open">
+              <div class="book-image-address-head">
+                <div><span class="book-image-address-title">책 표지 이미지</span><span class="book-image-address-state">예시 주소</span></div>
+              </div>
+              <div class="book-image-address-edit" style="display:block">
+                <input class="field" type="url" readonly value="https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop">
+              </div>
+            </div>
+            <div><label class="label">책 제목</label><input class="field" type="text" readonly value="책 제목 샘플"></div>
+            <div><label class="label">짧은 소개</label><textarea class="editor-area" readonly>작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.</textarea></div>
+            <div><label class="label">책 설명 본문</label><textarea class="editor-area" readonly>이 페이지가 실제 책 소개가 어떻게 보이는지 확인할 수 있도록 만든 샘플입니다.</textarea></div>
+            <div><label class="label">출간 · 구매 안내</label><input class="field" type="text" readonly value="출간 준비중"></div>
           </div>
         </div>
       `;
+
+      const sampleRow=list.querySelector('.book-admin-sample');
+      const sampleOpen=sampleRow?.querySelector('.sample-book-open');
+      sampleOpen?.addEventListener('click',()=>{
+        const willOpen=!sampleRow.classList.contains('is-open');
+        closeBookRows();
+        if(willOpen){
+          sampleRow.classList.add('is-open');
+          sampleOpen.textContent='닫기';
+          sampleOpen.setAttribute('aria-expanded','true');
+        }
+      });
+
       books.forEach((book,index)=>{
         const row=document.createElement('div');
         const isDraft=book.__draft===true;
