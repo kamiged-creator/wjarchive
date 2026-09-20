@@ -396,6 +396,34 @@
     .admin-card{background:#fffdf9;border:1px solid var(--line);border-radius:22px;padding:16px}
     .admin-card h3{margin:0 0 10px;font-size:17px}
     .admin-card p{margin:0;color:var(--muted);font-size:14px}
+    /* 관리자 화면 정리: 이미지 작업은 crop.html로 분리하고 나머지는 접기식으로 표시 */
+    #adminApp .admin-grid{grid-template-columns:1fr}
+    #adminApp .legacy-image-work-card,
+    #adminApp .legacy-image-result-card{display:none!important}
+    #adminApp .admin-crop-shortcut{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      padding:14px 16px;background:linear-gradient(180deg,#fffdf9,#fbf7f1)
+    }
+    #adminApp .admin-crop-shortcut-copy{min-width:0}
+    #adminApp .admin-crop-shortcut strong{display:block;font-size:16px;margin-bottom:3px}
+    #adminApp .admin-crop-shortcut span{display:block;color:var(--muted);font-size:12px}
+    #adminApp .admin-fold-card{padding:0;overflow:hidden}
+    #adminApp .admin-fold-card>h3{
+      position:relative;margin:0;padding:16px 48px 16px 16px;cursor:pointer;
+      user-select:none;outline:none
+    }
+    #adminApp .admin-fold-card>h3::after{
+      content:'＋';position:absolute;right:18px;top:50%;transform:translateY(-50%);
+      color:var(--muted);font-size:18px;font-weight:700
+    }
+    #adminApp .admin-fold-card.open>h3::after{content:'−'}
+    #adminApp .admin-fold-card.open>h3{border-bottom:1px solid var(--line)}
+    #adminApp .admin-fold-card>h3:focus-visible{box-shadow:inset 0 0 0 2px rgba(139,104,71,.35)}
+    #adminApp .admin-fold-body{padding:16px}
+    @media(max-width:680px){
+      #adminApp .admin-crop-shortcut{align-items:flex-start;flex-direction:column}
+      #adminApp .admin-crop-shortcut .btn{width:100%}
+    }
     .label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
     .editor-area{
       width:100%; min-height:130px; resize:vertical; border:1px solid var(--line); border-radius:16px;
@@ -1374,14 +1402,14 @@
   <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
     <div id="passwordGate" class="password-wrap">
       <h2>관리자 모드</h2>
-      <p>비밀번호를 입력하면 이미지 변환 도구가 열립니다.</p>
+      <p>비밀번호를 입력하면 관리자 기능이 열립니다.</p>
       <label class="label" for="adminPassword">비밀번호</label>
       <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
       <div class="hero-actions" style="margin-top:14px">
         <button class="btn primary" type="button" id="loginBtn">들어가기</button>
         <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
       </div>
-      <div class="status" id="loginStatus">crop.html과 같은 관리자 비밀번호를 입력하면 관리자 모드가 열립니다.</div>
+      <div class="status" id="loginStatus">관리자 비밀번호를 입력하면 사이트 관리 기능이 열립니다.</div>
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
@@ -4442,6 +4470,92 @@
 
   <button class="to-top-badge" id="toTopBadge" type="button" aria-label="맨 위로" title="맨 위로">⌃</button>
 
+
+
+<script>
+(function(){
+  function setupCompactAdmin(){
+    const app=document.getElementById('adminApp');
+    const grid=app?.querySelector('.admin-grid');
+    const stack=grid?.querySelector(':scope > .stack');
+    if(!grid||!stack||stack.dataset.compactAdminReady==='1') return;
+    stack.dataset.compactAdminReady='1';
+
+    const directCards=[...stack.children].filter(el=>el.classList?.contains('admin-card'));
+    const hiddenTitles=new Set([
+      '1. 사진 올리기',
+      '2. 출력 설정',
+      '3. 일괄 다운로드',
+      '7. GitHub 업로드 용량 추정'
+    ]);
+    directCards.forEach(card=>{
+      const h=card.querySelector(':scope > h3');
+      if(h&&hiddenTitles.has(h.textContent.trim())) card.classList.add('legacy-image-work-card');
+    });
+
+    [...grid.children].forEach(el=>{
+      if(!el.classList?.contains('admin-card')) return;
+      const heading=el.querySelector('h3');
+      if(heading&&heading.textContent.trim()==='결과 미리보기'){
+        el.classList.add('legacy-image-result-card');
+      }
+    });
+
+    const cropCard=document.createElement('div');
+    cropCard.className='admin-card admin-crop-shortcut';
+    cropCard.innerHTML='<div class="admin-crop-shortcut-copy"><strong>이미지 작업</strong><span>사진 자르기·변환은 전용 크롭 페이지에서 작업합니다.</span></div><a class="btn" href="/crop.html">크롭 페이지 열기</a>';
+    stack.prepend(cropCard);
+
+    const labels=new Map([
+      ['4. 사이트 문구 편집','사이트 문구'],
+      ['5. 메인 / 작가소개 편집','메인 · 작가소개'],
+      ['팝업 관리','팝업 관리'],
+      ['6. 작품 등록 추가','작품 관리']
+    ]);
+
+    directCards.forEach(card=>{
+      const h=card.querySelector(':scope > h3');
+      if(!h) return;
+      const original=h.textContent.trim();
+      if(!labels.has(original)) return;
+
+      h.textContent=labels.get(original);
+      card.classList.add('admin-fold-card');
+      h.setAttribute('role','button');
+      h.setAttribute('tabindex','0');
+      h.setAttribute('aria-expanded','false');
+
+      const body=document.createElement('div');
+      body.className='admin-fold-body';
+      while(h.nextSibling) body.appendChild(h.nextSibling);
+      body.hidden=true;
+      card.appendChild(body);
+
+      const toggle=()=>{
+        const shouldOpen=!card.classList.contains('open');
+        stack.querySelectorAll('.admin-fold-card.open').forEach(other=>{
+          if(other===card) return;
+          other.classList.remove('open');
+          const oh=other.querySelector(':scope > h3');
+          const ob=other.querySelector(':scope > .admin-fold-body');
+          oh?.setAttribute('aria-expanded','false');
+          if(ob) ob.hidden=true;
+        });
+        card.classList.toggle('open',shouldOpen);
+        h.setAttribute('aria-expanded',shouldOpen?'true':'false');
+        body.hidden=!shouldOpen;
+      };
+      h.addEventListener('click',toggle);
+      h.addEventListener('keydown',e=>{
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}
+      });
+    });
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setupCompactAdmin);
+  else setupCompactAdmin();
+})();
+</script>
 
 </body>
 </html>
