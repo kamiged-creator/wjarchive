@@ -1224,6 +1224,9 @@
     .book-upload-row input[type=file]{max-width:100%;font-size:13px}
     .book-admin-actions{display:flex;gap:8px;flex-wrap:wrap}
     .book-admin-actions .btn{flex:1;min-width:110px}
+    .book-top-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .book-preparing-label{display:flex;align-items:center;gap:8px;font-weight:800}
+    .book-preparing-label input{width:20px;height:20px;accent-color:var(--accent)}
 
     @media (max-width:740px){
       .popup-url-head{min-height:52px}
@@ -4061,6 +4064,13 @@
           </div>
           <div class="book-admin-edit">
             <input class="book-image-url" type="hidden" value="${escapeHtml(book.image || '')}">
+            <div class="book-top-actions">
+              <label class="book-preparing-label">
+                <input class="book-preparing" type="checkbox" ${book.preparing === true || (typeof book.preparing === 'undefined' && !book.image) ? 'checked' : ''}>
+                준비중
+              </label>
+              <button class="btn subtle book-preview-btn" type="button">미리보기</button>
+            </div>
             <div class="book-cover-preview ${book.image?'has-image':''}"><img alt="책 표지 미리보기" src="${escapeHtml(book.image || '')}"></div>
             <div>
               <label class="label">책 표지 이미지</label>
@@ -4102,6 +4112,41 @@
           row.remove();
           refreshBookHeadings();
         });
+        const fileInput=row.querySelector('.book-file');
+        const previewBtn=row.querySelector('.book-preview-btn');
+        const previewBox=row.querySelector('.book-cover-preview');
+        const previewImg=previewBox?.querySelector('img');
+
+        fileInput?.addEventListener('change',()=>{
+          const file=fileInput.files?.[0];
+          if(file && previewImg && previewBox){
+            if(row.dataset.localPreviewUrl) URL.revokeObjectURL(row.dataset.localPreviewUrl);
+            const localUrl=URL.createObjectURL(file);
+            row.dataset.localPreviewUrl=localUrl;
+            previewImg.src=localUrl;
+            previewBox.classList.add('has-image');
+            previewBox.style.display='none';
+            if(previewBtn) previewBtn.textContent='미리보기';
+          }
+        });
+
+        previewBtn?.addEventListener('click',()=>{
+          if(!previewBox || !previewImg) return;
+          const hasSource=!!previewImg.getAttribute('src');
+          if(!hasSource){
+            const status=qs('#bookStatus');
+            if(status){
+              status.textContent='미리볼 이미지를 먼저 선택해 주세요.';
+              status.className='status bad';
+            }
+            return;
+          }
+          const isHidden=previewBox.style.display==='none' || !previewBox.classList.contains('has-image');
+          previewBox.classList.add('has-image');
+          previewBox.style.display=isHidden?'block':'none';
+          previewBtn.textContent=isHidden?'미리보기 닫기':'미리보기';
+        });
+
         row.querySelector('.book-upload')?.addEventListener('click',()=>uploadBookImage(row));
         list.appendChild(row);
       });
@@ -4141,6 +4186,9 @@
         const img=preview.querySelector('img');
         img.src=optimized;
         preview.classList.add('has-image');
+        preview.style.display='block';
+        const previewBtn=row.querySelector('.book-preview-btn');
+        if(previewBtn) previewBtn.textContent='미리보기 닫기';
         status.textContent='책 표지 이미지가 올라갔습니다. 책 소개 저장을 눌러 반영하세요.';
         status.className='status ok';
       }catch(error){
