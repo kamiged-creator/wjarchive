@@ -1383,6 +1383,44 @@
     }
 
 
+    /* Mobile compact admin: make the first-screen cards use the full available width */
+    @media (max-width:740px){
+      #adminOverlay.open #adminApp{
+        width:100% !important;
+        max-width:none !important;
+        min-width:0 !important;
+      }
+      #adminApp .admin-panel{
+        width:100% !important;
+        max-width:none !important;
+        min-width:0 !important;
+        box-sizing:border-box !important;
+        padding-left:10px !important;
+        padding-right:10px !important;
+      }
+      #adminApp .admin-grid,
+      #adminApp .admin-grid > .stack{
+        width:100% !important;
+        max-width:none !important;
+        min-width:0 !important;
+        box-sizing:border-box !important;
+      }
+      #adminApp .admin-grid > .stack > .admin-card{
+        width:100% !important;
+        max-width:none !important;
+        min-width:0 !important;
+        margin-left:0 !important;
+        margin-right:0 !important;
+        box-sizing:border-box !important;
+      }
+      #adminApp .admin-crop-shortcut,
+      #adminApp .admin-fold-card{
+        width:100% !important;
+        max-width:none !important;
+        box-sizing:border-box !important;
+      }
+    }
+
     /* Final mobile override: keep logout/close compact, inline, and transparent */
     @media (max-width:680px){
       #adminApp .admin-bottom-actions{
