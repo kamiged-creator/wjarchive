@@ -2131,6 +2131,41 @@
     const qsa = sel => [...document.querySelectorAll(sel)];
 
     let bookSampleHidden = false;
+    const defaultBookSampleItems = [
+      {
+        title:'책 제목 샘플',
+        intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
+        body:'이 페이지가 실제 책 소개가 어떻게 보이는지 확인할 수 있도록 만든 샘플입니다.',
+        image:'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다',
+        preparing:true
+      },
+      {
+        title:'빛이 머무는 자리',
+        intro:'빛과 여백, 손의 흔적을 따라 이어지는 작업 이야기를 담았습니다.',
+        body:'작품이 만들어지는 순간의 빛, 공간의 여백, 손끝에 남은 흔적을 천천히 따라가는 샘플 상세페이지입니다.',
+        image:'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다',
+        preparing:true
+      },
+      {
+        title:'마음의 결',
+        intro:'작품 속 선과 색에 스며든 감정과 시간을 차분히 기록한 책입니다.',
+        body:'한 작품을 오래 바라보며 발견한 감정과 시간의 결을 글과 이미지로 엮는 형식을 보여주는 샘플입니다.',
+        image:'https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다',
+        preparing:true
+      },
+      {
+        title:'작업의 시간',
+        intro:'작품이 태어나는 과정과 작가의 생각을 함께 엮은 기록입니다.',
+        body:'작업 전의 생각부터 완성까지 이어지는 과정을 한 권의 기록처럼 구성한 샘플 상세페이지입니다.',
+        image:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다',
+        preparing:true
+      }
+    ];
+    let bookSampleItems = defaultBookSampleItems.map(item=>({...item}));
 
     const state = {
       files: [],
@@ -4220,6 +4255,11 @@
         }
         if(row.key === 'books'){
           bookSampleHidden = value.sampleHidden === true;
+          const savedSamples=Array.isArray(value.sampleItems) ? value.sampleItems : [];
+          bookSampleItems=defaultBookSampleItems.map((fallback,index)=>({
+            ...fallback,
+            ...(savedSamples[index] || {})
+          }));
           renderBookAdminItems(Array.isArray(value.items) ? value.items : []);
         }
       });
@@ -4253,7 +4293,7 @@
     }
 
     function refreshBookHeadings(){
-      let savedIndex=bookSampleHidden ? 1 : 2;
+      let savedIndex=bookSampleHidden ? 1 : bookSampleItems.length + 1;
       qsa('#bookAdminList .book-admin-row:not(.book-admin-sample)').forEach(row=>{
         const num=row.querySelector('.book-number');
         const sub=row.querySelector('.book-admin-sub');
@@ -4272,52 +4312,114 @@
       const list=qs('#bookAdminList');
       if(!list) return;
       const books=Array.isArray(items) ? items : [];
-      list.innerHTML = bookSampleHidden ? '' : `
-        <div class="book-admin-row book-admin-sample">
+      const sampleHtml = bookSampleHidden ? '' : bookSampleItems.map((book,index)=>`
+        <div class="book-admin-row book-admin-sample" data-sample-index="${index}">
           <div class="book-admin-head">
-            <div><strong class="book-number">책 1</strong><span class="book-admin-sub">책 제목 샘플</span></div>
+            <div><strong class="book-number">책 ${index+1}</strong><span class="book-admin-sub">${escapeHtml(book.title || '책 제목')}</span></div>
             <button class="btn subtle book-open sample-book-open" type="button" aria-expanded="false">열기</button>
           </div>
           <div class="book-admin-edit">
-            <div class="mini-note" style="margin:0 0 4px">이 샘플을 보고 같은 순서로 입력하면 됩니다.</div>
+            <div class="mini-note" style="margin:0 0 4px">이 표지 주소 하나가 책 목록과 상세페이지에 같이 적용됩니다.</div>
             <label class="book-preparing-label">
-              <input type="checkbox" checked disabled>
+              <input type="checkbox" ${book.preparing!==false?'checked':''} disabled>
               준비중
             </label>
-            <div class="book-cover-preview has-image" style="display:block">
-              <img alt="책 표지 샘플" src="https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop">
+            <div class="book-cover-preview ${book.image?'has-image':''}" style="${book.image?'display:block':''}">
+              <img alt="책 표지 미리보기" src="${escapeHtml(book.image || '')}">
             </div>
             <div class="book-image-address is-open">
               <div class="book-image-address-head">
-                <div><span class="book-image-address-title">책 표지 이미지</span><span class="book-image-address-state">예시 주소</span></div>
+                <div><span class="book-image-address-title">책 표지 이미지</span><span class="book-image-address-state">${book.image?'등록됨':'미입력'}</span></div>
               </div>
               <div class="book-image-address-edit" style="display:block">
-                <input class="field" type="url" readonly value="https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop">
+                <input class="field sample-book-image-url" type="url" inputmode="url" value="${escapeHtml(book.image || '')}" placeholder="https://ik.imagekit.io/...">
               </div>
             </div>
-            <div><label class="label">책 제목</label><input class="field" type="text" readonly value="책 제목 샘플"></div>
-            <div><label class="label">짧은 소개</label><textarea class="editor-area" readonly>작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.</textarea></div>
-            <div><label class="label">책 설명 본문</label><textarea class="editor-area" readonly>이 페이지가 실제 책 소개가 어떻게 보이는지 확인할 수 있도록 만든 샘플입니다.</textarea></div>
-            <div><label class="label">출간 · 구매 안내</label><input class="field" type="text" readonly value="출간 준비중"></div>
+            <div><label class="label">책 제목</label><input class="field" type="text" readonly value="${escapeHtml(book.title || '')}"></div>
+            <div><label class="label">짧은 소개</label><textarea class="editor-area" readonly>${escapeHtml(book.intro || '')}</textarea></div>
+            <div><label class="label">책 설명 본문</label><textarea class="editor-area" readonly>${escapeHtml(book.body || '')}</textarea></div>
             <div class="book-admin-actions">
-              <button class="btn danger sample-book-delete" type="button">샘플 삭제</button>
+              <button class="btn primary sample-book-save" type="button">표지 저장</button>
+              <button class="btn subtle sample-book-close" type="button">닫기</button>
             </div>
           </div>
         </div>
-      `;
+      `).join('');
 
-      const sampleRow=list.querySelector('.book-admin-sample');
-      const sampleOpen=sampleRow?.querySelector('.sample-book-open');
-      sampleOpen?.addEventListener('click',()=>{
-        const willOpen=!sampleRow.classList.contains('is-open');
-        closeBookRows();
-        if(willOpen){
-          sampleRow.classList.add('is-open');
-          sampleOpen.textContent='닫기';
-          sampleOpen.setAttribute('aria-expanded','true');
-        }
+      list.innerHTML = sampleHtml;
+
+      qsa('#bookAdminList .book-admin-sample').forEach((sampleRow,index)=>{
+        const sampleOpen=sampleRow.querySelector('.sample-book-open');
+        const imageInput=sampleRow.querySelector('.sample-book-image-url');
+        const imageState=sampleRow.querySelector('.book-image-address-state');
+        const previewBox=sampleRow.querySelector('.book-cover-preview');
+        const previewImg=previewBox?.querySelector('img');
+
+        sampleOpen?.addEventListener('click',()=>{
+          const willOpen=!sampleRow.classList.contains('is-open');
+          closeBookRows();
+          if(willOpen){
+            sampleRow.classList.add('is-open');
+            sampleOpen.textContent='닫기';
+            sampleOpen.setAttribute('aria-expanded','true');
+          }
+        });
+
+        sampleRow.querySelector('.sample-book-close')?.addEventListener('click',()=>{
+          sampleRow.classList.remove('is-open');
+          if(sampleOpen){
+            sampleOpen.textContent='열기';
+            sampleOpen.setAttribute('aria-expanded','false');
+          }
+        });
+
+        imageInput?.addEventListener('input',()=>{
+          const url=String(imageInput.value || '').trim();
+          if(imageState) imageState.textContent=url?'변경 예정':'미입력';
+          if(previewImg) previewImg.src=url;
+          if(previewBox){
+            previewBox.classList.toggle('has-image',!!url);
+            previewBox.style.display=url?'block':'none';
+          }
+        });
+
+        sampleRow.querySelector('.sample-book-save')?.addEventListener('click',async()=>{
+          const status=qs('#bookStatus');
+          const url=String(imageInput?.value || '').trim();
+          if(!url){
+            if(status){
+              status.textContent='ImageKit 표지 주소를 입력해 주세요.';
+              status.className='status bad';
+            }
+            return;
+          }
+
+          const previous={...bookSampleItems[index]};
+          bookSampleItems[index]={...bookSampleItems[index],image:url};
+          const items=getBookItemsFromForm()
+            .filter(bookHasContent)
+            .map(cleanBookForSave);
+          const saveBtn=sampleRow.querySelector('.sample-book-save');
+          if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='저장 중...';}
+
+          try{
+            const {error}=await persistBooks(items);
+            if(error) throw error;
+            renderBookAdminItems(items);
+            if(status){
+              status.textContent=`책 ${index+1} 표지를 저장했습니다. 목록과 상세페이지에 같은 이미지가 적용됩니다.`;
+              status.className='status ok';
+            }
+          }catch(error){
+            bookSampleItems[index]=previous;
+            if(status){
+              status.textContent='표지 저장 실패: '+(error.message || '알 수 없는 오류');
+              status.className='status bad';
+            }
+            if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='표지 저장';}
+          }
+        });
       });
-      sampleRow?.querySelector('.sample-book-delete')?.addEventListener('click', deleteSampleBook);
 
       books.forEach((book,index)=>{
         const row=document.createElement('div');
@@ -4326,7 +4428,7 @@
         row.dataset.draft=isDraft?'true':'false';
         row.innerHTML=`
           <div class="book-admin-head">
-            <div><strong class="book-number">${isDraft?'새 책 입력':`책 ${index+(bookSampleHidden?1:2)}`}</strong><span class="book-admin-sub">${escapeHtml(book.title || (isDraft?'저장 전':'제목 미입력'))}</span></div>
+            <div><strong class="book-number">${isDraft?'새 책 입력':`책 ${index+(bookSampleHidden?1:bookSampleItems.length+1)}`}</strong><span class="book-admin-sub">${escapeHtml(book.title || (isDraft?'저장 전':'제목 미입력'))}</span></div>
             <button class="btn subtle book-open" type="button" aria-expanded="${index===openIndex?'true':'false'}">${index===openIndex?'닫기':'열기'}</button>
           </div>
           <div class="book-admin-edit">
@@ -4481,7 +4583,7 @@
       if(!supabaseReady()) return {error:new Error('Supabase 연결이 없어 저장할 수 없습니다.')};
       return await supabaseClient
         .from('site_settings')
-        .upsert([{key:'books',value:{items,sampleHidden:bookSampleHidden}}],{onConflict:'key'});
+        .upsert([{key:'books',value:{items,sampleHidden:bookSampleHidden,sampleItems:bookSampleItems}}],{onConflict:'key'});
     }
 
     async function deleteSampleBook(){
