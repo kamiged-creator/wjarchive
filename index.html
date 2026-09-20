@@ -110,6 +110,37 @@
     .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
     .nav a{position:relative;padding:6px 12px;border-radius:999px;color:rgba(31,26,23,.74);font-size:14px;font-weight:650;background:transparent;transition:all .2s ease}
     .nav a:hover{background:rgba(255,255,255,.55);border-color:var(--line);color:var(--text)}
+    .brand-mobile-actions{display:flex;align-items:center;gap:8px}
+    .mobile-extra-wrap{display:none;position:relative}
+    .mobile-extra-trigger{
+      width:36px;height:36px;border:1px solid var(--line);border-radius:12px;
+      background:rgba(255,255,255,.58);color:var(--text);cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;
+    }
+    .mobile-extra-trigger span{display:block;width:15px;height:1.5px;border-radius:999px;background:currentColor}
+    .mobile-extra-menu{
+      position:absolute;right:0;top:calc(100% + 8px);z-index:45;
+      width:158px;padding:8px;border:1px solid var(--line);border-radius:16px;
+      background:rgba(255,253,249,.98);box-shadow:0 16px 36px rgba(31,26,23,.14);
+      display:none;
+    }
+    .mobile-extra-wrap.open .mobile-extra-menu{display:grid;gap:4px}
+    .mobile-extra-item{
+      width:100%;border:0;border-radius:11px;background:transparent;color:var(--text);
+      padding:10px 11px;text-align:left;font-weight:750;cursor:pointer;
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+    }
+    .mobile-extra-item:hover{background:rgba(139,104,71,.08)}
+    .mobile-extra-item small{font-size:10px;color:var(--muted);font-weight:700}
+    .coming-soon-toast{
+      position:fixed;left:50%;bottom:28px;z-index:160;transform:translate(-50%,18px);
+      min-width:min(320px,calc(100vw - 36px));max-width:420px;padding:14px 18px;
+      border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(24,20,18,.94);
+      color:#fff;text-align:center;font-size:14px;font-weight:700;
+      box-shadow:0 16px 40px rgba(0,0,0,.28);opacity:0;visibility:hidden;
+      transition:opacity .2s ease,transform .2s ease,visibility .2s ease;
+    }
+    .coming-soon-toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
 
     .hero{padding:10px 0 22px; margin-top:0;}
     .hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:28px;align-items:center}
@@ -699,6 +730,8 @@
         top:4px;
       }
       .news-mobile{display:inline-flex !important}
+      .future-desktop-link{display:none !important}
+      .mobile-extra-wrap{display:block}
       .news-desktop-link{display:none !important}
       .accordion-btn{
         padding:16px 18px 8px;
@@ -1244,7 +1277,18 @@
       <div class="brand">
         <div class="brand-top">
           <div class="brand-title">이원주</div>
-          <a class="news-mini news-mobile" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
+          <div class="brand-mobile-actions">
+            <a class="news-mini news-mobile" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
+            <div class="mobile-extra-wrap" id="mobileExtraWrap">
+              <button class="mobile-extra-trigger" id="mobileExtraTrigger" type="button" aria-label="추가 메뉴 열기" aria-expanded="false">
+                <span></span><span></span><span></span>
+              </button>
+              <div class="mobile-extra-menu" id="mobileExtraMenu" aria-label="추가 메뉴">
+                <button class="mobile-extra-item" type="button" data-coming-soon="책 소개"><span>책 소개</span><small>준비중</small></button>
+                <button class="mobile-extra-item" type="button" data-coming-soon="스토어"><span>스토어</span><small>준비중</small></button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="brand-sub">Seal · Calligraphy</div>
       </div>
@@ -1254,6 +1298,8 @@
             <a href="#about">작가 소개</a>
             <a href="#works">작품</a>
             <a href="#note">작가 노트</a>
+            <a class="future-desktop-link" href="#" data-coming-soon="책 소개">책 소개</a>
+            <a class="future-desktop-link" href="#" data-coming-soon="스토어">스토어</a>
             <a href="#contact">문의</a>
             <a class="news-desktop-link" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
           </nav>
@@ -1906,6 +1952,42 @@
         }, 80);
       }
     }
+    function bindComingSoonMenu(){
+      const wrap = qs('#mobileExtraWrap');
+      const trigger = qs('#mobileExtraTrigger');
+      const toast = qs('#comingSoonToast');
+      let toastTimer = null;
+
+      const closeMenu = () => {
+        if(!wrap || !trigger) return;
+        wrap.classList.remove('open');
+        trigger.setAttribute('aria-expanded','false');
+      };
+
+      trigger?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = wrap.classList.toggle('open');
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      qsa('[data-coming-soon]').forEach(item => {
+        item.addEventListener('click', (event) => {
+          event.preventDefault();
+          const label = item.dataset.comingSoon || '해당 메뉴';
+          closeMenu();
+          if(!toast) return;
+          toast.textContent = label + '는 준비중입니다.';
+          toast.classList.add('show');
+          if(toastTimer) window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1800);
+        });
+      });
+
+      document.addEventListener('click', (event) => {
+        if(wrap && !wrap.contains(event.target)) closeMenu();
+      });
+    }
+
     function bindAccordions(){
       qsa('[data-accordion]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1966,6 +2048,7 @@
     bindAutoHideTopbar();
     bindCategoryFilters();
     bindCleanHashLinks();
+    bindComingSoonMenu();
     bindAccordions();
     if(document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', bindToTopBadge);
@@ -1977,6 +2060,8 @@
   </script>
 
 
+
+  <div class="coming-soon-toast" id="comingSoonToast" role="status" aria-live="polite">준비중입니다.</div>
 
   <button class="to-top-badge" id="toTopBadge" type="button" aria-label="맨 위로" title="맨 위로">⌃</button>
 
