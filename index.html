@@ -1668,10 +1668,10 @@
       const frameRect = frame.getBoundingClientRect();
       const imageRect = image.getBoundingClientRect();
       const imageRightInset = Math.max(0, frameRect.right - imageRect.right);
-      const imageBottomInset = Math.max(0, frameRect.bottom - imageRect.bottom);
+      const imageBottom = Math.max(0, imageRect.bottom - frameRect.top);
       close.style.right = `${Math.round(imageRightInset - 2)}px`;
-      close.style.top = 'auto';
-      close.style.bottom = `${Math.round(imageBottomInset + 4)}px`;
+      close.style.bottom = 'auto';
+      close.style.top = `${Math.round(imageBottom + 8)}px`;
     }
 
     function closeSitePopup(){
