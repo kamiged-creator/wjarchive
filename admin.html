@@ -403,12 +403,11 @@
       margin:0 0 12px;padding:4px 2px;background:transparent;color:#1f1a17;border:0
     }
     #adminApp .admin-themebar strong{display:none}
-    #adminApp .admin-theme-switch{display:flex;gap:6px}
-    #adminApp .admin-theme-switch .btn{
-      width:34px;height:34px;min-height:34px;padding:0;border-radius:999px;box-shadow:none;
-      font-size:16px;line-height:1
+    #adminApp .admin-theme-switch{display:flex}
+    #adminApp .admin-theme-toggle{
+      width:32px;height:32px;min-height:32px;padding:0;border-radius:10px;box-shadow:none;
+      display:inline-flex;align-items:center;justify-content:center;font-size:15px;line-height:1
     }
-    #adminApp .admin-theme-switch .is-active{background:#1f1a17;color:#fff;border-color:#1f1a17}
     #adminOverlay.admin-dark{background:rgba(4,6,9,.88)}
     #adminOverlay.admin-dark #adminApp{--text:#f5f7fb;--muted:#b8c0cc;--line:rgba(255,255,255,.13);--paper:#15191f}
     #adminOverlay.admin-dark .admin-panel{background:#0f1318;border-color:rgba(255,255,255,.12);color:#f5f7fb}
@@ -442,7 +441,7 @@
     #adminOverlay.admin-dark .btn{background:#20262e;color:#f6f8fb;border-color:rgba(255,255,255,.14)}
     #adminOverlay.admin-dark .btn.primary{background:#f3eee8;color:#171412;border-color:#f3eee8}
     #adminOverlay.admin-dark .btn.danger{background:#5a2227;color:#fff;border-color:#7b343b}
-    #adminOverlay.admin-dark .admin-theme-switch .is-active{background:#f3eee8;color:#171412;border-color:#f3eee8}
+    #adminOverlay.admin-dark .admin-theme-toggle{background:#171c23;color:#f3eee8;border-color:rgba(255,255,255,.20)}
     #adminOverlay.admin-dark .book-cover-preview{background:#0a0d11;border-color:rgba(255,255,255,.12)}
     #adminOverlay.admin-dark .popup-url-edit,
     #adminOverlay.admin-dark .book-admin-edit,
@@ -4873,22 +4872,26 @@
     if(panel && !panel.querySelector('.admin-themebar')){
       const themebar=document.createElement('div');
       themebar.className='admin-themebar';
-      themebar.innerHTML='<strong>화면 모드</strong><div class="admin-theme-switch" aria-label="화면 모드"><button class="btn admin-theme-light" type="button" aria-label="라이트 모드" title="라이트 모드">☀️</button><button class="btn admin-theme-dark" type="button" aria-label="다크 모드" title="다크 모드">🌙</button></div>';
+      themebar.innerHTML='<strong>화면 모드</strong><div class="admin-theme-switch" aria-label="화면 모드"><button class="btn admin-theme-toggle" type="button" aria-label="다크 모드로 전환" title="다크 모드로 전환">☀</button></div>';
       panel.prepend(themebar);
 
       const overlay=document.getElementById('adminOverlay');
-      const lightBtn=themebar.querySelector('.admin-theme-light');
-      const darkBtn=themebar.querySelector('.admin-theme-dark');
+      const toggleBtn=themebar.querySelector('.admin-theme-toggle');
       const applyTheme=(theme)=>{
         const mode=theme==='dark'?'dark':'light';
         overlay?.classList.toggle('admin-dark',mode==='dark');
         overlay?.classList.toggle('admin-light',mode==='light');
-        lightBtn?.classList.toggle('is-active',mode==='light');
-        darkBtn?.classList.toggle('is-active',mode==='dark');
+        if(toggleBtn){
+          toggleBtn.textContent=mode==='dark'?'☾':'☀';
+          toggleBtn.setAttribute('aria-label',mode==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
+          toggleBtn.setAttribute('title',mode==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
+        }
         localStorage.setItem('wjarchiveAdminTheme',mode);
       };
-      lightBtn?.addEventListener('click',()=>applyTheme('light'));
-      darkBtn?.addEventListener('click',()=>applyTheme('dark'));
+      toggleBtn?.addEventListener('click',()=>{
+        const current=overlay?.classList.contains('admin-dark')?'dark':'light';
+        applyTheme(current==='dark'?'light':'dark');
+      });
       applyTheme(localStorage.getItem('wjarchiveAdminTheme') || 'light');
     }
     stack.dataset.compactAdminReady='1';
