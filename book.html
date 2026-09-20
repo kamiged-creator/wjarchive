@@ -17,6 +17,7 @@
     .topin{height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}
     .brand{font-weight:900;font-size:20px;letter-spacing:-.03em}
     .back{font-size:13px;color:var(--muted);font-weight:750}
+    .toplinks{display:flex;align-items:center;gap:16px}
     .hero{padding:68px 0 42px;border-bottom:1px solid var(--line)}
     .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:800;text-transform:uppercase}
     h1{margin:10px 0 12px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(38px,7vw,62px);font-weight:500;letter-spacing:-.055em}
@@ -52,7 +53,10 @@
   <header class="top">
     <div class="wrap topin">
       <a class="brand" href="/">이원주</a>
-      <a class="back" href="/">← 홈페이지</a>
+      <div class="toplinks">
+        <a class="back" href="/books.html">← 책 목록</a>
+        <a class="back" href="/">홈페이지</a>
+      </div>
     </div>
   </header>
 
@@ -82,47 +86,85 @@
     function esc(value){
       return String(value??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
     }
-    function render(items,sampleHidden=false){
-      const books=(Array.isArray(items)?items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
-      const sample={
+    const samples=[
+      {
         title:'책 제목 샘플',
         intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
         body:'이 페이지가 실제 책 소개가 어떻게 보이는지 확인할 수 있도록 만든 샘플입니다.',
-        image:'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop'
-      };
-      const sampleHtml=sampleHidden?'':`
-        <article class="book">
-          <div class="cover"><img src="${esc(sample.image)}" alt="책 표지 샘플"></div>
-          <div class="copy">
-            <div class="number">BOOK 01 · SAMPLE</div>
-            <h2>${esc(sample.title)}</h2>
-            <p class="intro">${esc(sample.intro)}</p>
-            <div class="body">${esc(sample.body)}</div>
-            <div class="status">준비중입니다</div>
-          </div>
-        </article>
-      `;
-      const realHtml=books.map((book,index)=>`
+        image:'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다'
+      },
+      {
+        title:'빛이 머무는 자리',
+        intro:'빛과 여백, 손의 흔적을 따라 이어지는 작업 이야기를 담았습니다.',
+        body:'작품이 만들어지는 순간의 빛, 공간의 여백, 손끝에 남은 흔적을 천천히 따라가는 샘플 상세페이지입니다.',
+        image:'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다'
+      },
+      {
+        title:'마음의 결',
+        intro:'작품 속 선과 색에 스며든 감정과 시간을 차분히 기록한 책입니다.',
+        body:'한 작품을 오래 바라보며 발견한 감정과 시간의 결을 글과 이미지로 엮는 형식을 보여주는 샘플입니다.',
+        image:'https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다'
+      },
+      {
+        title:'작업의 시간',
+        intro:'작품이 태어나는 과정과 작가의 생각을 함께 엮은 기록입니다.',
+        body:'작업 전의 생각부터 완성까지 이어지는 과정을 한 권의 기록처럼 구성한 샘플 상세페이지입니다.',
+        image:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1200&auto=format&fit=crop',
+        status:'준비중입니다'
+      }
+    ];
+
+    function renderBook(book,label){
+      if(!book){
+        list.innerHTML='<div class="empty">책 정보를 찾을 수 없습니다.</div>';
+        return;
+      }
+      document.title=(book.title||'책 소개')+' | 이원주';
+      list.innerHTML=`
         <article class="book">
           <div class="cover">${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}</div>
           <div class="copy">
-            <div class="number">BOOK ${String(index+(sampleHidden?1:2)).padStart(2,'0')}</div>
+            <div class="number">${esc(label)}</div>
             <h2>${esc(book.title||'제목 미정')}</h2>
             ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
             ${book.body?'<div class="body">'+esc(book.body)+'</div>':''}
             ${book.preparing?'<div class="status">준비중입니다</div>':(book.status?'<div class="status">'+esc(book.status)+'</div>':'')}
           </div>
         </article>
-      `).join('');
-      list.innerHTML=sampleHtml+realHtml;
+      `;
     }
+
     async function load(){
-      if(!client){render([]);return;}
+      const params=new URLSearchParams(window.location.search);
+      const sampleIndex=Number(params.get('sample'));
+      const realIndex=Number(params.get('book'));
+
+      if(params.has('sample')){
+        const index=Number.isInteger(sampleIndex)&&sampleIndex>=0?sampleIndex:0;
+        renderBook(samples[index]||samples[0],'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE');
+        return;
+      }
+
+      if(!params.has('book')){
+        renderBook(samples[0],'BOOK 01 · SAMPLE');
+        return;
+      }
+
+      if(!client){
+        renderBook(null,'');
+        return;
+      }
+
       const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
-      if(error){console.warn(error);render([]);return;}
+      if(error){console.warn(error);renderBook(null,'');return;}
       let value=data?.value||{};
       if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
-      render(value.items||[], value.sampleHidden===true);
+      const books=(Array.isArray(value.items)?value.items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
+      const index=Number.isInteger(realIndex)&&realIndex>=0?realIndex:0;
+      renderBook(books[index], 'BOOK '+String(index+1).padStart(2,'0'));
     }
     load();
   </script>
