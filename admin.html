@@ -1191,11 +1191,26 @@
     .popup-admin-toggle{display:flex;align-items:center;gap:10px;font-weight:800}
     .popup-admin-toggle input{width:20px;height:20px;accent-color:var(--accent)}
     .popup-url-list{display:grid;gap:10px}
-    .popup-url-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-    .popup-url-row .btn{min-width:72px}
+    .popup-url-row{
+      border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.56);
+      overflow:hidden
+    }
+    .popup-url-head{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      min-height:54px;padding:10px 12px
+    }
+    .popup-url-number{font-weight:850;color:var(--text)}
+    .popup-url-state{font-size:12px;color:var(--muted);margin-left:6px;font-weight:650}
+    .popup-url-open{min-width:70px}
+    .popup-url-edit{
+      display:none;padding:0 12px 12px;border-top:1px solid var(--line)
+    }
+    .popup-url-row.is-open .popup-url-edit{display:grid;gap:9px;padding-top:12px}
+    .popup-url-actions{display:flex;gap:8px}
+    .popup-url-actions .btn{flex:1}
     @media (max-width:740px){
-      .popup-url-row{grid-template-columns:1fr}
-      .popup-url-row .btn{width:100%}
+      .popup-url-head{min-height:52px}
+      .popup-url-actions{display:grid;grid-template-columns:1fr 1fr}
     }
 
 </style>
@@ -1596,7 +1611,7 @@
             
             <div class="admin-card" id="popupAdminCard">
               <h3>팝업 관리</h3>
-              <p>ImageKit 이미지 주소를 넣고 저장하면 홈페이지 팝업에 반영됩니다. 처음에는 1칸만 보이고, 필요할 때 + 팝업 추가로 늘릴 수 있습니다.</p>
+              <p>등록된 주소는 평소 숨겨두고 순번만 표시합니다. 수정하거나 새로 넣을 때만 열어서 입력한 뒤 저장하세요.</p>
               <div class="stack" style="margin-top:14px">
                 <label class="popup-admin-toggle">
                   <input id="popupEnabled" type="checkbox">
@@ -1607,7 +1622,7 @@
                   <button class="btn" type="button" id="addPopupUrlBtn">+ 팝업 추가</button>
                   <button class="btn primary" type="button" id="savePopupBtn">저장</button>
                 </div>
-                <div class="status" id="popupStatus">팝업을 사용할 때만 체크하고 ImageKit 주소를 넣은 뒤 저장하세요.</div>
+                <div class="status" id="popupStatus">등록된 팝업은 순번으로 확인할 수 있습니다. 주소는 열기를 눌렀을 때만 보입니다.</div>
               </div>
             </div>
 
@@ -3958,27 +3973,84 @@
         .filter(Boolean);
     }
 
-    function renderPopupUrlInputs(urls){
+    function renumberPopupRows(){
+      qsa('#popupUrlList .popup-url-row').forEach((row, index) => {
+        const number = row.querySelector('.popup-url-number');
+        if(number) number.textContent = `팝업 ${index + 1}`;
+      });
+    }
+
+    function closePopupRows(){
+      qsa('#popupUrlList .popup-url-row').forEach(row => {
+        row.classList.remove('is-open');
+        const openBtn = row.querySelector('.popup-url-open');
+        if(openBtn){
+          openBtn.textContent = '열기';
+          openBtn.setAttribute('aria-expanded','false');
+        }
+      });
+    }
+
+    function renderPopupUrlInputs(urls, openIndex = -1){
       const list = qs('#popupUrlList');
       if(!list) return;
       const items = Array.isArray(urls) && urls.length ? urls : [''];
       list.innerHTML = '';
       items.forEach((url, index) => {
         const row = document.createElement('div');
-        row.className = 'popup-url-row';
+        row.className = 'popup-url-row' + (index === openIndex ? ' is-open' : '');
+        const hasUrl = !!String(url || '').trim();
         row.innerHTML = `
-          <input class="field popup-url-input" type="url" inputmode="url" placeholder="https://ik.imagekit.io/..." value="${escapeHtml(url || '')}">
-          <button class="btn subtle popup-url-remove" type="button">삭제</button>
+          <div class="popup-url-head">
+            <div><span class="popup-url-number">팝업 ${index + 1}</span><span class="popup-url-state">${hasUrl ? '등록됨' : '새 주소 입력'}</span></div>
+            <button class="btn subtle popup-url-open" type="button" aria-expanded="${index === openIndex ? 'true' : 'false'}">${index === openIndex ? '닫기' : '열기'}</button>
+          </div>
+          <div class="popup-url-edit">
+            <input class="field popup-url-input" type="url" inputmode="url" placeholder="https://ik.imagekit.io/..." value="${escapeHtml(url || '')}">
+            <div class="popup-url-actions">
+              <button class="btn subtle popup-url-close" type="button">닫기</button>
+              <button class="btn subtle popup-url-remove" type="button">삭제</button>
+            </div>
+          </div>
         `;
+
+        const toggle = () => {
+          const willOpen = !row.classList.contains('is-open');
+          closePopupRows();
+          if(willOpen){
+            row.classList.add('is-open');
+            const btn = row.querySelector('.popup-url-open');
+            if(btn){
+              btn.textContent = '닫기';
+              btn.setAttribute('aria-expanded','true');
+            }
+            row.querySelector('.popup-url-input')?.focus();
+          }
+        };
+
+        row.querySelector('.popup-url-open')?.addEventListener('click', toggle);
+        row.querySelector('.popup-url-close')?.addEventListener('click', () => {
+          row.classList.remove('is-open');
+          const btn = row.querySelector('.popup-url-open');
+          if(btn){
+            btn.textContent = '열기';
+            btn.setAttribute('aria-expanded','false');
+          }
+        });
         row.querySelector('.popup-url-remove')?.addEventListener('click', () => {
           const rows = qsa('#popupUrlList .popup-url-row');
           if(rows.length <= 1){
             const input = row.querySelector('.popup-url-input');
             if(input) input.value = '';
+            const state = row.querySelector('.popup-url-state');
+            if(state) state.textContent = '새 주소 입력';
+            row.classList.add('is-open');
             return;
           }
           row.remove();
+          renumberPopupRows();
         });
+
         list.appendChild(row);
       });
     }
@@ -3986,9 +4058,7 @@
     function addPopupUrlInput(){
       const urls = qsa('#popupUrlList .popup-url-input').map(input => input.value || '');
       urls.push('');
-      renderPopupUrlInputs(urls);
-      const inputs = qsa('#popupUrlList .popup-url-input');
-      inputs[inputs.length - 1]?.focus();
+      renderPopupUrlInputs(urls, urls.length - 1);
     }
 
     async function savePopupSettings(){
@@ -4025,6 +4095,7 @@
             ? `팝업 ON · ${images.length}장 저장되었습니다.`
             : '팝업 OFF로 저장되었습니다.';
           status.className = 'status ok';
+          renderPopupUrlInputs(images.length ? images : ['']);
         }
       }
     }
