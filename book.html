@@ -80,7 +80,7 @@
     function render(items){
       const books=(Array.isArray(items)?items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
       if(!books.length){
-        list.innerHTML='<div class="empty">등록된 책 소개가 없습니다.<br>새 책 이야기를 준비하고 있습니다.</div>';
+        list.innerHTML='<div class="empty">책 소개 준비중입니다.</div>';
         return;
       }
       list.innerHTML=books.map((book,index)=>`
@@ -91,7 +91,7 @@
             <h2>${esc(book.title||'제목 미정')}</h2>
             ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
             ${book.body?'<div class="body">'+esc(book.body)+'</div>':''}
-            ${book.status?'<div class="status">'+esc(book.status)+'</div>':''}
+            ${book.preparing?'<div class="status">준비중입니다</div>':(book.status?'<div class="status">'+esc(book.status)+'</div>':'')}
           </div>
         </article>
       `).join('');
