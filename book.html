@@ -62,8 +62,8 @@
 
   <main class="wrap">
     <section class="hero">
-      <div class="eyebrow">Book · Story</div>
-      <h1>책 소개</h1>
+      <div class="eyebrow">Book · Detail</div>
+      <h1 id="bookHeroTitle">책 제목</h1>
       <p>작품과 글에 담긴 이야기를 책으로 이어갑니다.</p>
     </section>
     <section class="books" id="bookList" aria-live="polite">
@@ -86,7 +86,7 @@
     function esc(value){
       return String(value??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
     }
-    const samples=[
+    const defaultSamples=[
       {
         title:'책 제목 샘플',
         intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
@@ -144,29 +144,42 @@
       const sampleIndex=Number(params.get('sample'));
       const realIndex=Number(params.get('book'));
 
+      let value={};
+      if(client){
+        const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
+        if(error) console.warn(error);
+        else{
+          value=data?.value||{};
+          if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
+        }
+      }
+
+      const savedSamples=Array.isArray(value.sampleItems)?value.sampleItems:[];
+      const samples=defaultSamples.map((fallback,index)=>({...fallback,...(savedSamples[index]||{})}));
+      const sampleHidden=value.sampleHidden===true;
+      const books=(Array.isArray(value.items)?value.items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
+
       if(params.has('sample')){
         const index=Number.isInteger(sampleIndex)&&sampleIndex>=0?sampleIndex:0;
+        if(sampleHidden){renderBook(null,'');return;}
         renderBook(samples[index]||samples[0],'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE');
         return;
       }
 
-      if(!params.has('book')){
+      if(params.has('book')){
+        const index=Number.isInteger(realIndex)&&realIndex>=0?realIndex:0;
+        const number=index+(sampleHidden?1:samples.length+1);
+        renderBook(books[index], 'BOOK '+String(number).padStart(2,'0'));
+        return;
+      }
+
+      if(!sampleHidden){
         renderBook(samples[0],'BOOK 01 · SAMPLE');
-        return;
-      }
-
-      if(!client){
+      }else if(books.length){
+        renderBook(books[0],'BOOK 01');
+      }else{
         renderBook(null,'');
-        return;
       }
-
-      const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
-      if(error){console.warn(error);renderBook(null,'');return;}
-      let value=data?.value||{};
-      if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
-      const books=(Array.isArray(value.items)?value.items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
-      const index=Number.isInteger(realIndex)&&realIndex>=0?realIndex:0;
-      renderBook(books[index], 'BOOK '+String(index+1).padStart(2,'0'));
     }
     load();
   </script>
