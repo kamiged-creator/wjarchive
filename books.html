@@ -83,7 +83,7 @@
   </main>
 
   <footer>
-    <div class="wrap foot"><span>© <span id="year"></span> Lee Wonju.</span><a href="/admin.html">관리자</a></div>
+    <div class="wrap foot"><span>© <span id="year"></span> Lee Wonju.</span><a id="adminFooterLink" href="/admin.html" style="display:none">관리자</a></div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -93,10 +93,26 @@
     const client=(window.supabase&&SUPABASE_URL&&SUPABASE_ANON_KEY)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
     const grid=document.getElementById('bookGrid');
     const pagination=document.getElementById('bookPagination');
+    const adminFooterLink=document.getElementById('adminFooterLink');
+    const ADMIN_TOKEN_KEY='wjarchiveAdminAccessToken';
     const PAGE_SIZE=6;
     let allBookCards=[];
     let currentPage=1;
     document.getElementById('year').textContent=new Date().getFullYear();
+
+    function adminTokenIsFresh(token){
+      const expire=Number(String(token||'').split(':')[0]);
+      return Number.isFinite(expire) && expire > Math.floor(Date.now()/1000)+15;
+    }
+
+    function updateAdminFooterVisibility(){
+      const token=sessionStorage.getItem(ADMIN_TOKEN_KEY)||'';
+      const loggedIn=adminTokenIsFresh(token);
+      if(!loggedIn && token) sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      if(adminFooterLink) adminFooterLink.style.display=loggedIn?'inline':'none';
+    }
+
+    updateAdminFooterVisibility();
 
     const defaultSamples=[
       {
