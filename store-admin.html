@@ -19,6 +19,12 @@
     .top{position:sticky;top:0;z-index:10;background:rgba(246,241,234,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
     .top-inner{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px}
     .top .wrap{padding-left:30px;padding-right:30px}
+    .top-left{display:flex;align-items:center;gap:10px;min-width:0}
+    .back-btn{
+      width:36px;height:36px;min-width:36px;padding:0;border:1px solid var(--line);border-radius:10px;
+      background:var(--paper);display:inline-flex;align-items:center;justify-content:center;
+      font-size:22px;line-height:1;font-weight:500;color:var(--text)
+    }
     .brand{font-family:"Noto Serif KR",serif;font-size:23px;font-weight:700;letter-spacing:-.035em}
     .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
@@ -63,7 +69,10 @@
 <body>
   <header class="top">
     <div class="wrap top-inner">
-      <a class="brand" href="/store.html">복작소 스토어 관리자</a>
+      <div class="top-left">
+        <a class="back-btn" href="/admin.html" aria-label="관리자 페이지로 돌아가기" title="뒤로가기">‹</a>
+        <a class="brand" href="/store.html">복작소 스토어 관리자</a>
+      </div>
       <div class="top-actions">
         <a class="btn store-view" href="/store.html">스토어 보기</a>
         <button class="btn danger hidden" type="button" id="logoutBtn">로그아웃</button>
