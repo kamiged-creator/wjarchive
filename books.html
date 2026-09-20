@@ -85,7 +85,7 @@
     const grid=document.getElementById('bookGrid');
     document.getElementById('year').textContent=new Date().getFullYear();
 
-    const samples=[
+    const defaultSamples=[
       {
         title:'책 제목 샘플',
         intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
@@ -129,23 +129,26 @@
       `;
     }
 
-    function render(realBooks=[]){
-      const sampleHtml=samples.map((book,index)=>cardHtml(book,'/book.html?sample='+index,'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE','준비중입니다')).join('');
+    function render(realBooks=[],sampleBooks=defaultSamples,sampleHidden=false){
+      const visibleSamples=sampleHidden?[]:(Array.isArray(sampleBooks)?sampleBooks:defaultSamples);
+      const sampleHtml=visibleSamples.map((book,index)=>cardHtml(book,'/book.html?sample='+index,'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE','준비중입니다')).join('');
       const realHtml=(Array.isArray(realBooks)?realBooks:[])
         .filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image))
-        .map((book,index)=>cardHtml(book,'/book.html?book='+index,'BOOK '+String(samples.length+index+1).padStart(2,'0'),book.preparing?'준비중입니다':(book.status||'상세보기')))
+        .map((book,index)=>cardHtml(book,'/book.html?book='+index,'BOOK '+String(visibleSamples.length+index+1).padStart(2,'0'),book.preparing?'준비중입니다':(book.status||'상세보기')))
         .join('');
       grid.innerHTML=sampleHtml+realHtml;
     }
 
     async function load(){
-      render([]);
+      render([],defaultSamples,false);
       if(!client) return;
       const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
       if(error){console.warn(error);return;}
       let value=data?.value||{};
       if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
-      render(value.items||[]);
+      const savedSamples=Array.isArray(value.sampleItems)?value.sampleItems:[];
+      const sampleBooks=defaultSamples.map((fallback,index)=>({...fallback,...(savedSamples[index]||{})}));
+      render(value.items||[],sampleBooks,value.sampleHidden===true);
     }
     load();
   </script>
