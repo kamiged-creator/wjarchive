@@ -79,34 +79,29 @@
     }
     function render(items){
       const books=(Array.isArray(items)?items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
-      if(!books.length){
-        const sample={
-          title:'책 제목 샘플',
-          intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
-          body:'이곳에는 책이 만들어진 이야기와 작품에 담긴 의미, 독자에게 전하고 싶은 내용을 간결하게 넣을 수 있습니다. 실제 책을 등록하면 이 샘플 내용은 자동으로 사라지고 관리자에서 저장한 내용이 표시됩니다.',
-          status:'출간 준비중',
-          image:'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop',
-          preparing:true
-        };
-        list.innerHTML=`
-          <article class="book">
-            <div class="cover"><img src="${esc(sample.image)}" alt="책 표지 샘플"></div>
-            <div class="copy">
-              <div class="number">BOOK 01 · SAMPLE</div>
-              <h2>${esc(sample.title)}</h2>
-              <p class="intro">${esc(sample.intro)}</p>
-              <div class="body">${esc(sample.body)}</div>
-              <div class="status">준비중입니다</div>
-            </div>
-          </article>
-        `;
-        return;
-      }
-      list.innerHTML=books.map((book,index)=>`
+      const sample={
+        title:'책 제목 샘플',
+        intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
+        body:'이 페이지가 실제 책 소개가 어떻게 보이는지 확인할 수 있도록 만든 샘플입니다.',
+        image:'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop'
+      };
+      const sampleHtml=`
+        <article class="book">
+          <div class="cover"><img src="${esc(sample.image)}" alt="책 표지 샘플"></div>
+          <div class="copy">
+            <div class="number">BOOK 01 · SAMPLE</div>
+            <h2>${esc(sample.title)}</h2>
+            <p class="intro">${esc(sample.intro)}</p>
+            <div class="body">${esc(sample.body)}</div>
+            <div class="status">준비중입니다</div>
+          </div>
+        </article>
+      `;
+      const realHtml=books.map((book,index)=>`
         <article class="book">
           <div class="cover">${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}</div>
           <div class="copy">
-            <div class="number">BOOK ${String(index+1).padStart(2,'0')}</div>
+            <div class="number">BOOK ${String(index+2).padStart(2,'0')}</div>
             <h2>${esc(book.title||'제목 미정')}</h2>
             ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
             ${book.body?'<div class="body">'+esc(book.body)+'</div>':''}
@@ -114,6 +109,7 @@
           </div>
         </article>
       `).join('');
+      list.innerHTML=sampleHtml+realHtml;
     }
     async function load(){
       if(!client){render([]);return;}
