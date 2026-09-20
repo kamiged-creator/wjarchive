@@ -399,13 +399,15 @@
     /* 관리자 화면 정리: 이미지 작업은 crop.html로 분리하고 나머지는 접기식으로 표시 */
     #adminApp .admin-grid{grid-template-columns:1fr}
     #adminApp .admin-themebar{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:18px;
-      background:#fffdf9;color:#1f1a17
+      display:flex;align-items:center;justify-content:flex-end;gap:8px;
+      margin:0 0 12px;padding:4px 2px;background:transparent;color:#1f1a17;border:0
     }
-    #adminApp .admin-themebar strong{font-size:15px}
-    #adminApp .admin-theme-switch{display:flex;gap:8px;flex-wrap:wrap}
-    #adminApp .admin-theme-switch .btn{min-height:40px;padding:0 14px;box-shadow:none}
+    #adminApp .admin-themebar strong{display:none}
+    #adminApp .admin-theme-switch{display:flex;gap:6px}
+    #adminApp .admin-theme-switch .btn{
+      width:34px;height:34px;min-height:34px;padding:0;border-radius:999px;box-shadow:none;
+      font-size:16px;line-height:1
+    }
     #adminApp .admin-theme-switch .is-active{background:#1f1a17;color:#fff;border-color:#1f1a17}
     #adminOverlay.admin-dark{background:rgba(4,6,9,.88)}
     #adminOverlay.admin-dark #adminApp{--text:#f5f7fb;--muted:#b8c0cc;--line:rgba(255,255,255,.13);--paper:#15191f}
@@ -4871,7 +4873,7 @@
     if(panel && !panel.querySelector('.admin-themebar')){
       const themebar=document.createElement('div');
       themebar.className='admin-themebar';
-      themebar.innerHTML='<strong>화면 모드</strong><div class="admin-theme-switch"><button class="btn admin-theme-light" type="button">라이트</button><button class="btn admin-theme-dark" type="button">다크</button></div>';
+      themebar.innerHTML='<strong>화면 모드</strong><div class="admin-theme-switch" aria-label="화면 모드"><button class="btn admin-theme-light" type="button" aria-label="라이트 모드" title="라이트 모드">☀️</button><button class="btn admin-theme-dark" type="button" aria-label="다크 모드" title="다크 모드">🌙</button></div>';
       panel.prepend(themebar);
 
       const overlay=document.getElementById('adminOverlay');
