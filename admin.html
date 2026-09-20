@@ -1324,8 +1324,13 @@
     .book-cover-preview{width:100%;max-width:220px;aspect-ratio:3/4;border:1px solid var(--line);border-radius:14px;background:#f4efe8;overflow:hidden;display:none}
     .book-cover-preview.has-image{display:block}
     .book-cover-preview img{width:100%;height:100%;object-fit:cover;display:block}
-    .book-upload-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .book-upload-row input[type=file]{max-width:100%;font-size:13px}
+    .book-image-address{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .book-image-address-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px}
+    .book-image-address-title{font-size:13px;font-weight:800}
+    .book-image-address-state{margin-left:7px;font-size:11px;color:var(--muted);font-weight:650}
+    .book-image-address-edit{display:none;padding:10px 12px 12px;border-top:1px solid var(--line)}
+    .book-image-address.is-open .book-image-address-edit{display:block}
+    .book-image-address .book-image-toggle{min-height:34px;padding:0 12px;box-shadow:none}
     .book-admin-actions{display:flex;gap:8px;flex-wrap:wrap}
     .book-admin-actions .btn{flex:1;min-width:110px}
     .book-top-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -1773,7 +1778,7 @@
             
             <div class="admin-card" id="bookAdminCard">
               <h3>책 소개 관리</h3>
-              <p>책 표지와 꼭 필요한 소개 내용만 관리합니다. 책이 늘어나면 + 책 추가로 등록하세요.</p>
+              <p>책 표지는 ImageKit 주소로 넣고, 꼭 필요한 소개 내용만 관리합니다. 책이 늘어나면 + 책 추가로 등록하세요.</p>
               <div class="stack" style="margin-top:14px">
                 <div class="book-admin-list" id="bookAdminList"></div>
                 <div class="hero-actions" style="margin-top:4px">
@@ -4147,13 +4152,6 @@
     }
 
 
-    const bookImageKitConfig = {
-      publicKey:'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
-      authEndpoint:'/api/imagekit-auth',
-      uploadEndpoint:'https://upload.imagekit.io/api/v1/files/upload',
-      folder:'/wjarchive/books'
-    };
-
     function emptyBook(){
       return {title:'', intro:'', body:'', status:'', image:'', preparing:true};
     }
@@ -4201,7 +4199,6 @@
             <button class="btn subtle book-open" type="button" aria-expanded="${index===openIndex?'true':'false'}">${index===openIndex?'닫기':'열기'}</button>
           </div>
           <div class="book-admin-edit">
-            <input class="book-image-url" type="hidden" value="${escapeHtml(book.image || '')}">
             <div class="book-top-actions">
               <label class="book-preparing-label">
                 <input class="book-preparing" type="checkbox" ${book.preparing === true || (typeof book.preparing === 'undefined' && !book.image) ? 'checked' : ''}>
@@ -4210,11 +4207,13 @@
               <button class="btn subtle book-preview-btn" type="button">미리보기</button>
             </div>
             <div class="book-cover-preview ${book.image?'has-image':''}"><img alt="책 표지 미리보기" src="${escapeHtml(book.image || '')}"></div>
-            <div>
-              <label class="label">책 표지 이미지</label>
-              <div class="book-upload-row">
-                <input class="book-file" type="file" accept="image/*">
-                <button class="btn book-upload" type="button">이미지 올리기</button>
+            <div class="book-image-address">
+              <div class="book-image-address-head">
+                <div><span class="book-image-address-title">책 표지 이미지</span><span class="book-image-address-state">${book.image?'등록됨':'미입력'}</span></div>
+                <button class="btn subtle book-image-toggle" type="button" aria-expanded="false">열기</button>
+              </div>
+              <div class="book-image-address-edit">
+                <input class="field book-image-url" type="url" inputmode="url" value="${escapeHtml(book.image || '')}" placeholder="https://ik.imagekit.io/...">
               </div>
             </div>
             <div><label class="label">책 제목</label><input class="field book-title" type="text" value="${escapeHtml(book.title || '')}" placeholder="책 제목"></div>
@@ -4250,92 +4249,65 @@
           row.remove();
           refreshBookHeadings();
         });
-        const fileInput=row.querySelector('.book-file');
         const previewBtn=row.querySelector('.book-preview-btn');
         const previewBox=row.querySelector('.book-cover-preview');
         const previewImg=previewBox?.querySelector('img');
+        const imageWrap=row.querySelector('.book-image-address');
+        const imageToggle=row.querySelector('.book-image-toggle');
+        const imageInput=row.querySelector('.book-image-url');
+        const imageState=row.querySelector('.book-image-address-state');
 
-        fileInput?.addEventListener('change',()=>{
-          const file=fileInput.files?.[0];
-          if(file && previewImg && previewBox){
-            if(row.dataset.localPreviewUrl) URL.revokeObjectURL(row.dataset.localPreviewUrl);
-            const localUrl=URL.createObjectURL(file);
-            row.dataset.localPreviewUrl=localUrl;
-            previewImg.src=localUrl;
-            previewBox.classList.add('has-image');
+        imageToggle?.addEventListener('click',()=>{
+          const willOpen=!imageWrap.classList.contains('is-open');
+          imageWrap.classList.toggle('is-open',willOpen);
+          imageToggle.textContent=willOpen?'닫기':'열기';
+          imageToggle.setAttribute('aria-expanded',willOpen?'true':'false');
+          if(willOpen) imageInput?.focus();
+        });
+
+        let imageCloseTimer=null;
+        imageInput?.addEventListener('input',()=>{
+          const url=String(imageInput.value||'').trim();
+          if(imageState) imageState.textContent=url?'등록됨':'미입력';
+          if(previewImg && previewBox){
+            previewImg.src=url;
+            previewBox.classList.toggle('has-image',!!url);
             previewBox.style.display='none';
             if(previewBtn) previewBtn.textContent='미리보기';
+          }
+          clearTimeout(imageCloseTimer);
+          if(url){
+            imageCloseTimer=setTimeout(()=>{
+              imageWrap?.classList.remove('is-open');
+              if(imageToggle){
+                imageToggle.textContent='열기';
+                imageToggle.setAttribute('aria-expanded','false');
+              }
+            },450);
           }
         });
 
         previewBtn?.addEventListener('click',()=>{
           if(!previewBox || !previewImg) return;
-          const hasSource=!!previewImg.getAttribute('src');
-          if(!hasSource){
+          const url=String(imageInput?.value||'').trim();
+          if(!url){
             const status=qs('#bookStatus');
             if(status){
-              status.textContent='미리볼 이미지를 먼저 선택해 주세요.';
+              status.textContent='미리볼 ImageKit 주소를 먼저 넣어 주세요.';
               status.className='status bad';
             }
             return;
           }
+          previewImg.src=url;
           const isHidden=previewBox.style.display==='none' || !previewBox.classList.contains('has-image');
           previewBox.classList.add('has-image');
           previewBox.style.display=isHidden?'block':'none';
           previewBtn.textContent=isHidden?'미리보기 닫기':'미리보기';
         });
 
-        row.querySelector('.book-upload')?.addEventListener('click',()=>uploadBookImage(row));
         list.appendChild(row);
       });
       refreshBookHeadings();
-    }
-
-    async function uploadBookImage(row){
-      const file=row.querySelector('.book-file')?.files?.[0];
-      const status=qs('#bookStatus');
-      if(!file){
-        status.textContent='먼저 책 표지 이미지를 선택해 주세요.';
-        status.className='status bad';
-        return;
-      }
-      const btn=row.querySelector('.book-upload');
-      btn.disabled=true;
-      btn.textContent='업로드 중...';
-      try{
-        const authResponse=await fetch(bookImageKitConfig.authEndpoint,{cache:'no-store',headers:{Authorization:`Bearer ${getAdminAccessToken()}`}});
-        const auth=await authResponse.json().catch(()=>({}));
-        if(!authResponse.ok) throw new Error(auth.message || 'ImageKit 인증 실패');
-        const form=new FormData();
-        form.append('file',file,file.name);
-        form.append('fileName',file.name);
-        form.append('publicKey',bookImageKitConfig.publicKey);
-        form.append('signature',auth.signature);
-        form.append('expire',auth.expire);
-        form.append('token',auth.token);
-        form.append('folder',bookImageKitConfig.folder);
-        form.append('useUniqueFileName','true');
-        const uploadResponse=await fetch(bookImageKitConfig.uploadEndpoint,{method:'POST',body:form});
-        const result=await uploadResponse.json().catch(()=>({}));
-        if(!uploadResponse.ok) throw new Error(result.message || '이미지 업로드 실패');
-        const optimized=`${result.url}?tr=w-1200,q-86,f-webp`;
-        row.querySelector('.book-image-url').value=optimized;
-        const preview=row.querySelector('.book-cover-preview');
-        const img=preview.querySelector('img');
-        img.src=optimized;
-        preview.classList.add('has-image');
-        preview.style.display='block';
-        const previewBtn=row.querySelector('.book-preview-btn');
-        if(previewBtn) previewBtn.textContent='미리보기 닫기';
-        status.textContent='책 표지 이미지가 올라갔습니다. 책 소개 저장을 눌러 반영하세요.';
-        status.className='status ok';
-      }catch(error){
-        status.textContent=error.message || '이미지 업로드 실패';
-        status.className='status bad';
-      }finally{
-        btn.disabled=false;
-        btn.textContent='이미지 올리기';
-      }
     }
 
     function addBookItem(){
