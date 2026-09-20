@@ -23,7 +23,8 @@
     h1{margin:10px 0 12px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(38px,7vw,62px);font-weight:500;letter-spacing:-.055em}
     .hero p{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
     .books{display:grid;gap:34px;padding:40px 0 72px}
-    .book{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:38px;align-items:start;padding:28px;border:1px solid var(--line);border-radius:28px;background:var(--paper)}
+    .book{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:38px;align-items:start;padding:28px;border:1px solid var(--line);border-radius:28px;background:var(--paper);transition:opacity .18s ease,transform .18s ease}
+    .books.is-switching .book{opacity:0;transform:translateY(8px)}
     .cover{aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#eee6dc;border:1px solid var(--line)}
     .cover img{width:100%;height:100%;object-fit:cover;display:block}
     .copy{padding:12px 0;display:flex;flex-direction:column}
@@ -90,6 +91,8 @@
     const SUPABASE_ANON_KEY='sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
     const client=(window.supabase&&SUPABASE_URL&&SUPABASE_ANON_KEY)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
     const list=document.getElementById('bookList');
+    let bookEntries=[];
+    let currentBookIndex=0;
     document.getElementById('year').textContent=new Date().getFullYear();
 
     function esc(value){
@@ -136,11 +139,11 @@
       const heroTitle=document.getElementById('bookHeroTitle');
       if(heroTitle) heroTitle.textContent=title;
 
-      const prevHtml=nav.prev
-        ? '<a class="prev" href="'+esc(nav.prev)+'">← 이전 책</a>'
+      const prevHtml=Number.isInteger(nav.prevIndex)
+        ? '<a class="prev book-step" data-book-index="'+nav.prevIndex+'" href="'+esc(nav.prevHref)+'">← 이전 책</a>'
         : '<span class="prev disabled">← 이전 책</span>';
-      const nextHtml=nav.next
-        ? '<a class="next" href="'+esc(nav.next)+'">다음 책 →</a>'
+      const nextHtml=Number.isInteger(nav.nextIndex)
+        ? '<a class="next book-step" data-book-index="'+nav.nextIndex+'" href="'+esc(nav.nextHref)+'">다음 책 →</a>'
         : '<span class="next disabled">다음 책 →</span>';
 
       list.innerHTML=`
@@ -161,11 +164,63 @@
       `;
     }
 
-    async function load(){
-      const params=new URLSearchParams(window.location.search);
-      const sampleIndex=Number(params.get('sample'));
-      const realIndex=Number(params.get('book'));
+    function renderEntry(index){
+      const entry=bookEntries[index];
+      if(!entry){renderBook(null,'');return;}
+      currentBookIndex=index;
+      renderBook(entry.book,entry.label,{
+        prevIndex:index>0?index-1:null,
+        prevHref:index>0?bookEntries[index-1].href:'',
+        nextIndex:index<bookEntries.length-1?index+1:null,
+        nextHref:index<bookEntries.length-1?bookEntries[index+1].href:''
+      });
+    }
 
+    function scrollToBookCard(){
+      const header=document.querySelector('.top');
+      const headerHeight=header?.getBoundingClientRect().height||0;
+      const y=list.getBoundingClientRect().top+window.scrollY-headerHeight-10;
+      window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+    }
+
+    function switchBook(index,{push=true,scroll=true}={}){
+      if(!Number.isInteger(index)||index<0||index>=bookEntries.length||index===currentBookIndex) return;
+      const target=bookEntries[index];
+      list.classList.add('is-switching');
+
+      window.setTimeout(()=>{
+        renderEntry(index);
+        if(push) history.pushState({bookIndex:index},'',target.href);
+        if(scroll) scrollToBookCard();
+        window.requestAnimationFrame(()=>{
+          window.requestAnimationFrame(()=>list.classList.remove('is-switching'));
+        });
+      },150);
+    }
+
+    function indexFromLocation(){
+      const params=new URLSearchParams(window.location.search);
+      if(params.has('sample')){
+        const sampleIndex=Number(params.get('sample'));
+        return bookEntries.findIndex(entry=>entry.kind==='sample'&&entry.sourceIndex===sampleIndex);
+      }
+      if(params.has('book')){
+        const realIndex=Number(params.get('book'));
+        return bookEntries.findIndex(entry=>entry.kind==='book'&&entry.sourceIndex===realIndex);
+      }
+      return 0;
+    }
+
+    list.addEventListener('click',event=>{
+      const link=event.target.closest('a.book-step');
+      if(!link||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey) return;
+      const index=Number(link.dataset.bookIndex);
+      if(!Number.isInteger(index)) return;
+      event.preventDefault();
+      switchBook(index,{push:true,scroll:true});
+    });
+
+    async function load(){
       let value={};
       if(client){
         const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
@@ -181,10 +236,10 @@
       const sampleHidden=value.sampleHidden===true;
       const books=(Array.isArray(value.items)?value.items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
 
-      const entries=[];
+      bookEntries=[];
       if(!sampleHidden){
         samples.forEach((book,index)=>{
-          entries.push({
+          bookEntries.push({
             book,
             href:'/book.html?sample='+index,
             label:'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE',
@@ -195,7 +250,7 @@
       }
       books.forEach((book,index)=>{
         const number=index+(sampleHidden?1:samples.length+1);
-        entries.push({
+        bookEntries.push({
           book,
           href:'/book.html?book='+index,
           label:'BOOK '+String(number).padStart(2,'0'),
@@ -204,29 +259,23 @@
         });
       });
 
-      if(!entries.length){
+      if(!bookEntries.length){
         renderBook(null,'');
         return;
       }
 
-      let currentIndex=0;
-      if(params.has('sample')){
-        if(sampleHidden){renderBook(null,'');return;}
-        const safeIndex=Number.isInteger(sampleIndex)&&sampleIndex>=0?sampleIndex:0;
-        currentIndex=Math.min(safeIndex,samples.length-1);
-      }else if(params.has('book')){
-        const safeIndex=Number.isInteger(realIndex)&&realIndex>=0?realIndex:0;
-        const found=entries.findIndex(entry=>entry.kind==='book'&&entry.sourceIndex===safeIndex);
-        if(found<0){renderBook(null,'');return;}
-        currentIndex=found;
-      }
-
-      const entry=entries[currentIndex];
-      renderBook(entry.book,entry.label,{
-        prev:entries[currentIndex-1]?.href||'',
-        next:entries[currentIndex+1]?.href||''
-      });
+      const requested=indexFromLocation();
+      currentBookIndex=requested>=0?requested:0;
+      renderEntry(currentBookIndex);
     }
+
+    window.addEventListener('popstate',()=>{
+      const index=indexFromLocation();
+      if(index>=0&&index!==currentBookIndex){
+        switchBook(index,{push:false,scroll:true});
+      }
+    });
+
     load();
   </script>
 </body>
