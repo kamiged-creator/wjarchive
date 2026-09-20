@@ -26,7 +26,14 @@
     .book{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:38px;align-items:start;padding:28px;border:1px solid var(--line);border-radius:28px;background:var(--paper)}
     .cover{aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#eee6dc;border:1px solid var(--line)}
     .cover img{width:100%;height:100%;object-fit:cover;display:block}
-    .copy{padding:12px 0}
+    .copy{padding:12px 0;display:flex;flex-direction:column}
+    .book-nav{margin-top:auto;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;font-size:12px;font-weight:750;color:var(--muted)}
+    .book-nav a{transition:color .18s ease}
+    .book-nav a:hover{color:var(--text)}
+    .book-nav .prev{text-align:left}
+    .book-nav .list-link{text-align:center;color:var(--accent)}
+    .book-nav .next{text-align:right}
+    .book-nav .disabled{opacity:.28;pointer-events:none}
     .number{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.08em}
     .copy h2{margin:10px 0 12px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(28px,4vw,40px);font-weight:600;letter-spacing:-.045em}
     .intro{margin:0 0 22px;font-size:17px;line-height:1.75;color:#443b34;font-weight:650}
@@ -38,7 +45,8 @@
     @media(min-width:721px){
       .hero{padding:32px 0 20px}
       .hero h1{font-size:38px;margin:6px 0 8px}
-      .books{padding-top:20px}
+      .books{padding:20px 0 34px}
+      .book{align-items:stretch}
     }
     @media(max-width:720px){
       .wrap{padding:0 18px}.topin{height:58px}.hero{padding:44px 0 30px}
@@ -46,6 +54,7 @@
       .book{grid-template-columns:1fr;gap:20px;padding:16px;border-radius:22px}
       .cover{width:min(100%,420px);margin:0 auto}
       .copy{padding:4px 4px 10px}.intro{font-size:16px;margin-bottom:18px}.body{font-size:14px;line-height:1.85}
+      .book-nav{margin-top:22px;padding-top:16px;gap:8px;font-size:11px}
     }
   </style>
 </head>
@@ -117,7 +126,7 @@
       }
     ];
 
-    function renderBook(book,label){
+    function renderBook(book,label,nav={}){
       if(!book){
         list.innerHTML='<div class="empty">책 정보를 찾을 수 없습니다.</div>';
         return;
@@ -126,6 +135,14 @@
       document.title=title+' | 이원주';
       const heroTitle=document.getElementById('bookHeroTitle');
       if(heroTitle) heroTitle.textContent=title;
+
+      const prevHtml=nav.prev
+        ? '<a class="prev" href="'+esc(nav.prev)+'">← 이전 책</a>'
+        : '<span class="prev disabled">← 이전 책</span>';
+      const nextHtml=nav.next
+        ? '<a class="next" href="'+esc(nav.next)+'">다음 책 →</a>'
+        : '<span class="next disabled">다음 책 →</span>';
+
       list.innerHTML=`
         <article class="book">
           <div class="cover">${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}</div>
@@ -134,6 +151,11 @@
             ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
             ${book.body?'<div class="body">'+esc(book.body)+'</div>':''}
             ${book.preparing?'<div class="status">준비중입니다</div>':(book.status?'<div class="status">'+esc(book.status)+'</div>':'')}
+            <nav class="book-nav" aria-label="책 이동">
+              ${prevHtml}
+              <a class="list-link" href="/books.html">책 목록</a>
+              ${nextHtml}
+            </nav>
           </div>
         </article>
       `;
@@ -159,27 +181,51 @@
       const sampleHidden=value.sampleHidden===true;
       const books=(Array.isArray(value.items)?value.items:[]).filter(b=>b&&(b.title||b.intro||b.body||b.status||b.image));
 
-      if(params.has('sample')){
-        const index=Number.isInteger(sampleIndex)&&sampleIndex>=0?sampleIndex:0;
-        if(sampleHidden){renderBook(null,'');return;}
-        renderBook(samples[index]||samples[0],'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE');
-        return;
-      }
-
-      if(params.has('book')){
-        const index=Number.isInteger(realIndex)&&realIndex>=0?realIndex:0;
-        const number=index+(sampleHidden?1:samples.length+1);
-        renderBook(books[index], 'BOOK '+String(number).padStart(2,'0'));
-        return;
-      }
-
+      const entries=[];
       if(!sampleHidden){
-        renderBook(samples[0],'BOOK 01 · SAMPLE');
-      }else if(books.length){
-        renderBook(books[0],'BOOK 01');
-      }else{
-        renderBook(null,'');
+        samples.forEach((book,index)=>{
+          entries.push({
+            book,
+            href:'/book.html?sample='+index,
+            label:'BOOK '+String(index+1).padStart(2,'0')+' · SAMPLE',
+            kind:'sample',
+            sourceIndex:index
+          });
+        });
       }
+      books.forEach((book,index)=>{
+        const number=index+(sampleHidden?1:samples.length+1);
+        entries.push({
+          book,
+          href:'/book.html?book='+index,
+          label:'BOOK '+String(number).padStart(2,'0'),
+          kind:'book',
+          sourceIndex:index
+        });
+      });
+
+      if(!entries.length){
+        renderBook(null,'');
+        return;
+      }
+
+      let currentIndex=0;
+      if(params.has('sample')){
+        if(sampleHidden){renderBook(null,'');return;}
+        const safeIndex=Number.isInteger(sampleIndex)&&sampleIndex>=0?sampleIndex:0;
+        currentIndex=Math.min(safeIndex,samples.length-1);
+      }else if(params.has('book')){
+        const safeIndex=Number.isInteger(realIndex)&&realIndex>=0?realIndex:0;
+        const found=entries.findIndex(entry=>entry.kind==='book'&&entry.sourceIndex===safeIndex);
+        if(found<0){renderBook(null,'');return;}
+        currentIndex=found;
+      }
+
+      const entry=entries[currentIndex];
+      renderBook(entry.book,entry.label,{
+        prev:entries[currentIndex-1]?.href||'',
+        next:entries[currentIndex+1]?.href||''
+      });
     }
     load();
   </script>
