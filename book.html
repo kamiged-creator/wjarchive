@@ -25,22 +25,8 @@
     .books{display:grid;gap:34px;padding:40px 0 72px}
     .book{display:grid;grid-template-columns:minmax(210px,300px) 1fr;gap:32px;align-items:start;padding:24px;border:1px solid var(--line);border-radius:26px;background:var(--paper);transition:opacity .18s ease,transform .18s ease}
     .books.is-switching .book{opacity:0;transform:translateY(8px)}
-    .cover{position:relative;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#eee6dc;border:1px solid var(--line);touch-action:pan-y}
-    .cover-page{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateX(12px);transition:opacity .2s ease,transform .2s ease;pointer-events:none}
-    .cover-page.active{opacity:1;transform:translateX(0);pointer-events:auto}
-    .cover-page img{width:100%;height:100%;object-fit:cover;display:block}
-    .toc-page{padding:24px;background:linear-gradient(180deg,#fffdf9 0%,#f7efe5 100%);color:var(--text);align-items:flex-start;justify-content:flex-start;flex-direction:column}
-    .toc-kicker{font-size:10px;letter-spacing:.14em;color:var(--accent);font-weight:850}
-    .toc-title{margin:8px 0 18px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:25px;font-weight:600;letter-spacing:-.04em}
-    .toc-list{display:grid;gap:10px;width:100%;margin:0;padding:0;list-style:none;font-size:13px;color:#51473f}
-    .toc-list li{display:flex;gap:10px;align-items:flex-start;padding-bottom:9px;border-bottom:1px solid rgba(31,26,23,.08)}
-    .toc-list b{min-width:22px;color:var(--accent);font-size:11px}
-    .toc-empty{color:var(--muted);font-size:13px;line-height:1.7}
-    .cover-arrow{position:absolute;top:50%;z-index:4;transform:translateY(-50%);width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,255,255,.9);color:#2b231e;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.14);cursor:pointer}
-    .cover-arrow.prev{left:8px}.cover-arrow.next{right:8px}
-    .cover-dots{position:absolute;left:0;right:0;bottom:8px;z-index:4;display:flex;justify-content:center;gap:5px}
-    .cover-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 1px 3px rgba(0,0,0,.25)}
-    .cover-dot.active{background:#fff}
+    .cover{aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#eee6dc;border:1px solid var(--line)}
+    .cover img{width:100%;height:100%;object-fit:cover;display:block}
     .copy{padding:12px 0;display:flex;flex-direction:column}
     .book-nav{margin-top:auto;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:auto auto auto;justify-content:center;align-items:center;gap:46px;font-size:12px;font-weight:750;color:var(--muted)}
     .book-nav a{transition:color .18s ease}
@@ -70,10 +56,6 @@
       .books{padding:14px 0 44px;gap:22px}
       .book{grid-template-columns:1fr;gap:16px;padding:14px;border-radius:20px}
       .cover{width:min(86%,320px);aspect-ratio:4/5;margin:0 auto;border-radius:16px}
-      .toc-page{padding:20px 18px}
-      .toc-title{font-size:23px;margin-bottom:15px}
-      .toc-list{font-size:12px;gap:8px}
-      .cover-arrow{width:30px;height:30px;font-size:18px}
       .copy{padding:2px 4px 8px}.intro{font-size:15px;margin-bottom:16px}.body{font-size:14px;line-height:1.8}
       .book-nav{margin-top:18px;padding-top:14px;gap:20px;font-size:11px}
     }
@@ -113,8 +95,6 @@
     const list=document.getElementById('bookList');
     let bookEntries=[];
     let currentBookIndex=0;
-    let currentCoverPage='cover';
-    let touchStartX=0;
     document.getElementById('year').textContent=new Date().getFullYear();
 
     function esc(value){
@@ -125,7 +105,6 @@
         title:'책 제목 샘플',
         intro:'작품과 글에 담긴 마음을 한 권의 책으로 엮어 소개합니다.',
         body:'이 페이지가 실제 책 소개가 어떻게 보이는지 확인할 수 있도록 만든 샘플입니다.',
-        toc:['책을 펴며','작품과 글','작가의 기록','마무리'],
         image:'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1200&auto=format&fit=crop',
         status:'준비중입니다'
       },
@@ -133,7 +112,6 @@
         title:'빛이 머무는 자리',
         intro:'빛과 여백, 손의 흔적을 따라 이어지는 작업 이야기를 담았습니다.',
         body:'작품이 만들어지는 순간의 빛, 공간의 여백, 손끝에 남은 흔적을 천천히 따라가는 샘플 상세페이지입니다.',
-        toc:['빛이 시작되는 곳','여백의 시간','손의 흔적','남은 장면'],
         image:'https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1200&auto=format&fit=crop',
         status:'준비중입니다'
       },
@@ -141,7 +119,6 @@
         title:'마음의 결',
         intro:'작품 속 선과 색에 스며든 감정과 시간을 차분히 기록한 책입니다.',
         body:'한 작품을 오래 바라보며 발견한 감정과 시간의 결을 글과 이미지로 엮는 형식을 보여주는 샘플입니다.',
-        toc:['마음의 선','색의 기억','시간의 층','다시 바라보기'],
         image:'https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=1200&auto=format&fit=crop',
         status:'준비중입니다'
       },
@@ -149,23 +126,10 @@
         title:'작업의 시간',
         intro:'작품이 태어나는 과정과 작가의 생각을 함께 엮은 기록입니다.',
         body:'작업 전의 생각부터 완성까지 이어지는 과정을 한 권의 기록처럼 구성한 샘플 상세페이지입니다.',
-        toc:['작업 전의 생각','만드는 과정','완성의 순간','작업 이후'],
         image:'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1200&auto=format&fit=crop',
         status:'준비중입니다'
       }
     ];
-
-    function normalizeToc(book){
-      if(Array.isArray(book?.toc)) return book.toc.map(v=>String(v||'').trim()).filter(Boolean);
-      if(typeof book?.toc==='string') return book.toc.split(/\n+/).map(v=>v.trim()).filter(Boolean);
-      return [];
-    }
-
-    function tocHtml(book){
-      const items=normalizeToc(book);
-      if(!items.length) return '<div class="toc-empty">목차 준비중입니다.</div>';
-      return '<ol class="toc-list">'+items.map((item,index)=>'<li><b>'+String(index+1).padStart(2,'0')+'</b><span>'+esc(item)+'</span></li>').join('')+'</ol>';
-    }
 
     function renderBook(book,label,nav={}){
       if(!book){
@@ -186,22 +150,7 @@
 
       list.innerHTML=`
         <article class="book">
-          <div class="cover" id="bookCoverPager" aria-label="책 표지와 목차 넘기기">
-            <div class="cover-page cover-image-page ${currentCoverPage==='cover'?'active':''}" data-cover-page="cover">
-              ${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}
-            </div>
-            <div class="cover-page toc-page ${currentCoverPage==='toc'?'active':''}" data-cover-page="toc">
-              <div class="toc-kicker">CONTENTS</div>
-              <div class="toc-title">목차</div>
-              ${tocHtml(book)}
-            </div>
-            <button class="cover-arrow prev" type="button" aria-label="이전 페이지">‹</button>
-            <button class="cover-arrow next" type="button" aria-label="다음 페이지">›</button>
-            <div class="cover-dots" aria-hidden="true">
-              <span class="cover-dot ${currentCoverPage==='cover'?'active':''}"></span>
-              <span class="cover-dot ${currentCoverPage==='toc'?'active':''}"></span>
-            </div>
-          </div>
+          <div class="cover">${book.image?'<img src="'+esc(book.image)+'" alt="'+esc(book.title||'책 표지')+'">':''}</div>
           <div class="copy">
             <div class="number">${esc(label)}</div>
             ${book.intro?'<p class="intro">'+esc(book.intro)+'</p>':''}
@@ -215,60 +164,12 @@
           </div>
         </article>
       `;
-      bindCoverPager(nav);
     }
 
-    function setCoverPage(page){
-      currentCoverPage=page==='toc'?'toc':'cover';
-      document.querySelectorAll('[data-cover-page]').forEach(el=>el.classList.toggle('active',el.dataset.coverPage===currentCoverPage));
-      const dots=document.querySelectorAll('.cover-dot');
-      dots.forEach((dot,index)=>dot.classList.toggle('active',(currentCoverPage==='cover'?0:1)===index));
-    }
-
-    function goCoverNext(nav){
-      if(currentCoverPage==='cover'){
-        setCoverPage('toc');
-        return;
-      }
-      if(Number.isInteger(nav.nextIndex)){
-        currentCoverPage='cover';
-        switchBook(nav.nextIndex,{push:true,scroll:false,coverPage:'cover'});
-      }
-    }
-
-    function goCoverPrev(nav){
-      if(currentCoverPage==='toc'){
-        setCoverPage('cover');
-        return;
-      }
-      if(Number.isInteger(nav.prevIndex)){
-        currentCoverPage='toc';
-        switchBook(nav.prevIndex,{push:true,scroll:false,coverPage:'toc'});
-      }
-    }
-
-    function bindCoverPager(nav){
-      const pager=document.getElementById('bookCoverPager');
-      if(!pager) return;
-      pager.querySelector('.cover-arrow.next')?.addEventListener('click',()=>goCoverNext(nav));
-      pager.querySelector('.cover-arrow.prev')?.addEventListener('click',()=>goCoverPrev(nav));
-      pager.addEventListener('touchstart',event=>{
-        touchStartX=event.changedTouches?.[0]?.clientX||0;
-      },{passive:true});
-      pager.addEventListener('touchend',event=>{
-        const endX=event.changedTouches?.[0]?.clientX||0;
-        const delta=endX-touchStartX;
-        if(Math.abs(delta)<42) return;
-        if(delta<0) goCoverNext(nav);
-        else goCoverPrev(nav);
-      },{passive:true});
-    }
-
-    function renderEntry(index,{coverPage=currentCoverPage}={}){
+    function renderEntry(index){
       const entry=bookEntries[index];
       if(!entry){renderBook(null,'');return;}
       currentBookIndex=index;
-      currentCoverPage=coverPage==='toc'?'toc':'cover';
       renderBook(entry.book,entry.label,{
         prevIndex:index>0?index-1:null,
         prevHref:index>0?bookEntries[index-1].href:'',
@@ -284,13 +185,13 @@
       window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
     }
 
-    function switchBook(index,{push=true,scroll=true,coverPage='cover'}={}){
+    function switchBook(index,{push=true,scroll=true}={}){
       if(!Number.isInteger(index)||index<0||index>=bookEntries.length||index===currentBookIndex) return;
       const target=bookEntries[index];
       list.classList.add('is-switching');
 
       window.setTimeout(()=>{
-        renderEntry(index,{coverPage});
+        renderEntry(index);
         if(push) history.pushState({bookIndex:index},'',target.href);
         if(scroll) scrollToBookCard();
         window.requestAnimationFrame(()=>{
@@ -367,13 +268,13 @@
 
       const requested=indexFromLocation();
       currentBookIndex=requested>=0?requested:0;
-      renderEntry(currentBookIndex,{coverPage:'cover'});
+      renderEntry(currentBookIndex);
     }
 
     window.addEventListener('popstate',()=>{
       const index=indexFromLocation();
       if(index>=0&&index!==currentBookIndex){
-        switchBook(index,{push:false,scroll:true,coverPage:'cover'});
+        switchBook(index,{push:false,scroll:true});
       }
     });
 
