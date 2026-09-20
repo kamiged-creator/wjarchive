@@ -1341,7 +1341,7 @@
       .popup-url-head{min-height:52px}
       .popup-url-actions{display:grid;grid-template-columns:1fr 1fr}
       .book-admin-head{min-height:52px}
-      .book-admin-actions{display:grid;grid-template-columns:1fr 1fr}
+      .book-admin-actions{display:grid;grid-template-columns:1fr 1fr 1fr}
       .book-admin-actions .btn{min-width:0}
     }
 
@@ -1783,9 +1783,8 @@
                 <div class="book-admin-list" id="bookAdminList"></div>
                 <div class="hero-actions" style="margin-top:4px">
                   <button class="btn" type="button" id="addBookBtn">+ 책 추가</button>
-                  <button class="btn primary" type="button" id="saveBooksBtn">책 소개 저장</button>
                 </div>
-                <div class="status" id="bookStatus">아직 공개 전이면 준비중을 체크하세요. 책 제목 · 짧은 소개 · 본문 · 출간/구매 안내만 입력하면 됩니다.</div>
+                <div class="status" id="bookStatus">책을 열어 내용을 입력한 뒤 책 안의 저장 버튼을 누르세요. 아직 공개 전이면 준비중을 체크하면 됩니다.</div>
               </div>
             </div>
 
@@ -3978,7 +3977,6 @@
     if(qs('#popupUrlList') && !qs('#popupUrlList .popup-url-input')) renderPopupUrlInputs(['']);
     if(qs('#bookAdminList') && !qs('#bookAdminList .book-admin-row')) renderBookAdminItems([]);
     qs('#addBookBtn')?.addEventListener('click', addBookItem);
-    qs('#saveBooksBtn')?.addEventListener('click', saveBooks);
     qs('#addPopupUrlBtn')?.addEventListener('click', addPopupUrlInput);
     qs('#savePopupBtn')?.addEventListener('click', savePopupSettings);
 
@@ -4237,6 +4235,7 @@
             <div><label class="label">책 설명 본문</label><textarea class="editor-area book-body" placeholder="책에 대한 설명">${escapeHtml(book.body || '')}</textarea></div>
             <div><label class="label">출간 · 구매 안내</label><input class="field book-status" type="text" value="${escapeHtml(book.status || '')}" placeholder="예: 출간 준비중 / 구매 문의"></div>
             <div class="book-admin-actions">
+              <button class="btn primary book-save" type="button">저장</button>
               <button class="btn subtle book-close" type="button">닫기</button>
               <button class="btn danger book-delete" type="button">${isDraft?'취소':'책 삭제'}</button>
             </div>
@@ -4265,10 +4264,8 @@
           openBtn.setAttribute('aria-expanded','false');
         });
         row.querySelector('.book-title')?.addEventListener('input',refreshBookHeadings);
-        row.querySelector('.book-delete')?.addEventListener('click',()=>{
-          row.remove();
-          refreshBookHeadings();
-        });
+        row.querySelector('.book-save')?.addEventListener('click',()=>saveBookRow(row));
+        row.querySelector('.book-delete')?.addEventListener('click',()=>deleteBookRow(row));
         const previewBtn=row.querySelector('.book-preview-btn');
         const previewBox=row.querySelector('.book-cover-preview');
         const previewImg=previewBox?.querySelector('img');
@@ -4348,25 +4345,88 @@
       renderBookAdminItems(current,current.length-1);
     }
 
-    async function saveBooks(){
+    function cleanBookForSave(book){
+      const {__draft,...clean}=book;
+      return clean;
+    }
+
+    function bookHasContent(book){
+      return !!(book && (book.title || book.intro || book.body || book.status || book.image));
+    }
+
+    async function persistBooks(items){
+      if(!supabaseReady()) return {error:new Error('Supabase 연결이 없어 저장할 수 없습니다.')};
+      return await supabaseClient
+        .from('site_settings')
+        .upsert([{key:'books',value:{items}}],{onConflict:'key'});
+    }
+
+    async function saveBookRow(row){
       const status=qs('#bookStatus');
+      const rows=qsa('#bookAdminList .book-admin-row:not(.book-admin-sample)');
+      const rowIndex=rows.indexOf(row);
+      const formItems=getBookItemsFromForm();
+      const current=formItems[rowIndex];
+
+      if(!bookHasContent(current)){
+        status.textContent='책 제목이나 이미지, 소개 내용을 먼저 입력해 주세요.';
+        status.className='status bad';
+        return;
+      }
+
+      const items=formItems
+        .filter(bookHasContent)
+        .map(cleanBookForSave);
+
+      const saveBtn=row.querySelector('.book-save');
+      if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='저장 중...';}
+
+      try{
+        const {error}=await persistBooks(items);
+        if(error) throw error;
+        renderBookAdminItems(items);
+        status.textContent=`저장되었습니다. 현재 실제 책 ${items.length}권이 등록되어 있습니다.`;
+        status.className='status ok';
+      }catch(error){
+        status.textContent='책 저장 실패: '+(error.message || '알 수 없는 오류');
+        status.className='status bad';
+        if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='저장';}
+      }
+    }
+
+    async function deleteBookRow(row){
+      if(row.dataset.draft==='true'){
+        row.remove();
+        refreshBookHeadings();
+        const status=qs('#bookStatus');
+        if(status){
+          status.textContent='저장 전 새 책 입력을 취소했습니다.';
+          status.className='status';
+        }
+        return;
+      }
+
+      const status=qs('#bookStatus');
+      const rows=qsa('#bookAdminList .book-admin-row:not(.book-admin-sample)');
+      const rowIndex=rows.indexOf(row);
       const items=getBookItemsFromForm()
-        .filter(book => book.title || book.intro || book.body || book.status || book.image)
-        .map(({__draft,...book})=>book);
-      if(!supabaseReady()){
-        status.textContent='Supabase 연결이 없어 저장할 수 없습니다.';
+        .filter((book,index)=>index!==rowIndex && bookHasContent(book))
+        .map(cleanBookForSave);
+
+      const deleteBtn=row.querySelector('.book-delete');
+      if(deleteBtn){deleteBtn.disabled=true;deleteBtn.textContent='삭제 중...';}
+
+      try{
+        const {error}=await persistBooks(items);
+        if(error) throw error;
+        renderBookAdminItems(items);
+        status.textContent='책을 삭제했습니다.';
+        status.className='status ok';
+      }catch(error){
+        status.textContent='책 삭제 실패: '+(error.message || '알 수 없는 오류');
         status.className='status bad';
-        return;
+        if(deleteBtn){deleteBtn.disabled=false;deleteBtn.textContent='책 삭제';}
       }
-      const {error}=await supabaseClient.from('site_settings').upsert([{key:'books',value:{items}}],{onConflict:'key'});
-      if(error){
-        status.textContent='책 소개 저장 실패: '+error.message;
-        status.className='status bad';
-        return;
-      }
-      renderBookAdminItems(items);
-      status.textContent=`책 소개 ${items.length}권이 저장되었습니다.`;
-      status.className='status ok';
     }
 
     function getPopupUrlValues(){
