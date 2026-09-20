@@ -23,6 +23,8 @@
     .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
     .btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 15px;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
     .btn.primary{border-color:var(--text);background:var(--text);color:#fffdf9}
+    .btn.store-view{border-color:#e09a52;background:#f0ad62;color:#2b1a0d;font-weight:700}
+    .btn.store-view:hover{background:#e8a154;border-color:#d88f43}
     .btn.danger{border-color:rgba(182,73,60,.35);color:var(--bad)}
     .btn:disabled{opacity:.45;cursor:not-allowed}
     main{padding:34px 0 72px}
@@ -63,7 +65,7 @@
     <div class="wrap top-inner">
       <a class="brand" href="/store.html">복작소 스토어 관리자</a>
       <div class="top-actions">
-        <a class="btn" href="/store.html">스토어 보기</a>
+        <a class="btn store-view" href="/store.html">스토어 보기</a>
         <button class="btn danger hidden" type="button" id="logoutBtn">로그아웃</button>
       </div>
     </div>
