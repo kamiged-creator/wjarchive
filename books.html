@@ -27,7 +27,7 @@
     .cover{aspect-ratio:3/4;background:#eee6dc;overflow:hidden}
     .cover img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}
     @media(min-width:821px){
-      .cover{aspect-ratio:auto;height:310px}
+      .cover{aspect-ratio:auto;height:250px}
     }
     .book-card:hover .cover img{transform:scale(1.025)}
     .copy{padding:18px 18px 20px}
@@ -46,6 +46,7 @@
       h1{font-size:34px}
       .books{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:20px 0 52px}
       .book-card{border-radius:16px}
+      .cover{aspect-ratio:auto;height:180px}
       .copy{padding:10px 10px 11px}
       .number{font-size:9px}
       .copy h2{font-size:17px;margin:5px 0 4px;line-height:1.22}
