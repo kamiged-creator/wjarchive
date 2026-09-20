@@ -571,6 +571,17 @@
     }
     .password-wrap h2{margin:0 0 8px;font-size:22px;letter-spacing:-.03em}
     .password-wrap p{margin:0 0 14px;color:var(--muted)}
+    .password-wrap .gate-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+    .password-wrap .gate-actions .btn{
+      width:100%;
+      min-height:48px;
+      margin:0;
+    }
     .hidden{display:none !important}
     .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
     .stat-box{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(180deg,#fff,#fbf7f1)}
@@ -1521,7 +1532,7 @@
       <p>비밀번호를 입력하면 관리자 기능이 열립니다.</p>
       <label class="label" for="adminPassword">비밀번호</label>
       <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
-      <div class="hero-actions" style="margin-top:14px">
+      <div class="gate-actions">
         <button class="btn primary" type="button" id="loginBtn">들어가기</button>
         <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
       </div>
