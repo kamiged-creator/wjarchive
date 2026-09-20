@@ -23,9 +23,9 @@
     h1{margin:10px 0 12px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:clamp(38px,7vw,62px);font-weight:500;letter-spacing:-.055em}
     .hero p{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
     .books{display:grid;gap:34px;padding:40px 0 72px}
-    .book{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:38px;align-items:start;padding:28px;border:1px solid var(--line);border-radius:28px;background:var(--paper);transition:opacity .18s ease,transform .18s ease}
+    .book{display:grid;grid-template-columns:minmax(210px,300px) 1fr;gap:32px;align-items:start;padding:24px;border:1px solid var(--line);border-radius:26px;background:var(--paper);transition:opacity .18s ease,transform .18s ease}
     .books.is-switching .book{opacity:0;transform:translateY(8px)}
-    .cover{aspect-ratio:3/4;border-radius:20px;overflow:hidden;background:#eee6dc;border:1px solid var(--line)}
+    .cover{aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#eee6dc;border:1px solid var(--line)}
     .cover img{width:100%;height:100%;object-fit:cover;display:block}
     .copy{padding:12px 0;display:flex;flex-direction:column}
     .book-nav{margin-top:auto;padding-top:22px;border-top:1px solid var(--line);display:grid;grid-template-columns:auto auto auto;justify-content:center;align-items:center;gap:46px;font-size:12px;font-weight:750;color:var(--muted)}
@@ -52,10 +52,10 @@
     @media(max-width:720px){
       .wrap{padding:0 18px}.topin{height:58px}.hero{padding:44px 0 30px}
       .books{padding:26px 0 56px;gap:22px}
-      .book{grid-template-columns:1fr;gap:20px;padding:16px;border-radius:22px}
-      .cover{width:min(100%,420px);margin:0 auto}
-      .copy{padding:4px 4px 10px}.intro{font-size:16px;margin-bottom:18px}.body{font-size:14px;line-height:1.85}
-      .book-nav{margin-top:22px;padding-top:16px;gap:22px;font-size:11px}
+      .book{grid-template-columns:1fr;gap:16px;padding:14px;border-radius:20px}
+      .cover{width:min(86%,320px);aspect-ratio:4/5;margin:0 auto;border-radius:16px}
+      .copy{padding:2px 4px 8px}.intro{font-size:15px;margin-bottom:16px}.body{font-size:14px;line-height:1.8}
+      .book-nav{margin-top:18px;padding-top:14px;gap:20px;font-size:11px}
     }
   </style>
 </head>
