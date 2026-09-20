@@ -1661,14 +1661,17 @@
       if(window.innerWidth <= 860){
         close.style.right = '';
         close.style.top = '';
+        close.style.bottom = '';
         return;
       }
 
       const frameRect = frame.getBoundingClientRect();
       const imageRect = image.getBoundingClientRect();
       const imageRightInset = Math.max(0, frameRect.right - imageRect.right);
-      close.style.right = `${Math.round(imageRightInset - 10)}px`;
-      close.style.top = '-22px';
+      const imageBottomInset = Math.max(0, frameRect.bottom - imageRect.bottom);
+      close.style.right = `${Math.round(imageRightInset - 2)}px`;
+      close.style.top = 'auto';
+      close.style.bottom = `${Math.round(imageBottomInset + 4)}px`;
     }
 
     function closeSitePopup(){
