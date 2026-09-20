@@ -471,14 +471,29 @@
     #adminApp .admin-fold-card{padding:0;overflow:hidden}
     #adminApp .admin-fold-card>h3{
       position:relative;margin:0;padding:16px 48px 16px 16px;cursor:pointer;
-      user-select:none;outline:none
+      user-select:none;outline:none;
+      transition:background .18s ease,color .18s ease,border-color .18s ease
     }
     #adminApp .admin-fold-card>h3::after{
       content:'＋';position:absolute;right:18px;top:50%;transform:translateY(-50%);
-      color:var(--muted);font-size:18px;font-weight:700
+      color:var(--muted);font-size:18px;font-weight:700;
+      transition:color .18s ease
     }
-    #adminApp .admin-fold-card.open>h3::after{content:'−'}
-    #adminApp .admin-fold-card.open>h3{border-bottom:1px solid var(--line)}
+    #adminApp .admin-fold-card.open>h3{
+      color:#f0ad62;
+      background:rgba(240,173,98,.08);
+      border-bottom:1px solid rgba(240,173,98,.24)
+    }
+    #adminApp .admin-fold-card.open>h3::after{
+      content:'−';
+      color:#f0ad62
+    }
+    #adminOverlay.admin-dark #adminApp .admin-fold-card.open>h3{
+      color:#f0ad62;
+      background:rgba(240,173,98,.10);
+      border-bottom-color:rgba(240,173,98,.30)
+    }
+    #adminOverlay.admin-dark #adminApp .admin-fold-card.open>h3::after{color:#f0ad62}
     #adminApp .admin-fold-card>h3:focus-visible{box-shadow:inset 0 0 0 2px rgba(139,104,71,.35)}
     #adminApp .admin-fold-body{padding:16px}
     @media(max-width:680px){
