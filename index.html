@@ -721,6 +721,13 @@
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:calc(26px + env(safe-area-inset-top, 0px)) 0 12px}
       .wrap{padding:0 18px}
       .hero{padding-top:8px}
+      #works .filter-bar{
+        flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
+        -webkit-overflow-scrolling:touch;scrollbar-width:none;
+        scroll-snap-type:x proximity;overscroll-behavior-inline:contain;
+      }
+      #works .filter-bar::-webkit-scrollbar{display:none}
+      #works .filter-btn{flex:0 0 auto;scroll-snap-align:start}
       .gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
       .gallery .work{border-radius:18px}
       .gallery .work-img{aspect-ratio:4/5}
