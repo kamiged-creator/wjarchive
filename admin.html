@@ -470,29 +470,45 @@
     #adminApp .admin-quick-links .btn{min-width:78px}
     #adminApp .admin-fold-card{padding:0;overflow:hidden}
     #adminApp .admin-fold-card>h3{
-      position:relative;margin:0;padding:16px 48px 16px 16px;cursor:pointer;
+      position:relative;margin:0;padding:15px 50px 15px 16px;cursor:pointer;
       user-select:none;outline:none;
-      transition:background .18s ease,color .18s ease,border-color .18s ease
+      transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease
     }
+    #adminApp .admin-fold-heading{display:flex;align-items:center;gap:12px;min-width:0}
+    #adminApp .admin-fold-icon{
+      width:40px;height:40px;min-width:40px;border-radius:13px;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:#f2ece4;border:1px solid rgba(139,104,71,.13);
+      color:#705b49;font-size:13px;font-weight:800;letter-spacing:-.02em
+    }
+    #adminApp .admin-fold-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+    #adminApp .admin-fold-title{font-size:17px;font-weight:800;line-height:1.3;color:var(--text)}
+    #adminApp .admin-fold-desc{font-size:12px;font-weight:500;line-height:1.45;color:var(--muted)}
     #adminApp .admin-fold-card>h3::after{
       content:'＋';position:absolute;right:18px;top:50%;transform:translateY(-50%);
       color:var(--muted);font-size:18px;font-weight:700;
-      transition:color .18s ease
+      transition:color .18s ease,transform .18s ease
     }
     #adminApp .admin-fold-card.open>h3{
-      color:#f0ad62;
       background:rgba(240,173,98,.08);
       border-bottom:1px solid rgba(240,173,98,.24)
     }
-    #adminApp .admin-fold-card.open>h3::after{
-      content:'−';
-      color:#f0ad62
+    #adminApp .admin-fold-card.open>h3::after{content:'−';color:#c2772f}
+    #adminApp .admin-fold-card.open .admin-fold-icon{
+      background:#fff1df;border-color:rgba(194,119,47,.30);color:#a45e1e
+    }
+    #adminApp .admin-fold-card.open .admin-fold-title{color:#a45e1e}
+    #adminOverlay.admin-dark #adminApp .admin-fold-icon{
+      background:#20262e;border-color:rgba(255,255,255,.10);color:#d9c9b9
     }
     #adminOverlay.admin-dark #adminApp .admin-fold-card.open>h3{
-      color:#f0ad62;
       background:rgba(240,173,98,.10);
       border-bottom-color:rgba(240,173,98,.30)
     }
+    #adminOverlay.admin-dark #adminApp .admin-fold-card.open .admin-fold-icon{
+      background:rgba(240,173,98,.14);border-color:rgba(240,173,98,.28);color:#f0ad62
+    }
+    #adminOverlay.admin-dark #adminApp .admin-fold-card.open .admin-fold-title,
     #adminOverlay.admin-dark #adminApp .admin-fold-card.open>h3::after{color:#f0ad62}
     #adminApp .admin-fold-card>h3:focus-visible{box-shadow:inset 0 0 0 2px rgba(139,104,71,.35)}
     #adminApp .admin-fold-body{padding:16px}
@@ -5346,11 +5362,11 @@
     stack.prepend(cropCard);
 
     const labels=new Map([
-      ['4. 사이트 문구 편집','사이트 문구'],
-      ['5. 메인 / 작가소개 편집','메인 · 작가소개'],
-      ['팝업 관리','팝업 관리'],
-      ['책 소개 관리','책 소개 관리'],
-      ['6. 작품 등록 추가','작품 관리']
+      ['4. 사이트 문구 편집',{title:'사이트 문구',icon:'문',desc:'홈페이지 공통 문구와 안내 문장을 수정합니다.'}],
+      ['5. 메인 / 작가소개 편집',{title:'메인 · 작가소개',icon:'인',desc:'메인 화면과 작가 소개 영역을 관리합니다.'}],
+      ['책 소개 관리',{title:'책 소개 관리',icon:'책',desc:'책 목록과 상세 소개 내용을 관리합니다.'}],
+      ['팝업 관리',{title:'팝업 관리',icon:'팝',desc:'팝업 이미지와 노출 여부를 설정합니다.'}],
+      ['6. 작품 등록 추가',{title:'작품 관리',icon:'작',desc:'작품 등록·수정과 표시 정보를 관리합니다.'}]
     ]);
 
     directCards.forEach(card=>{
@@ -5359,7 +5375,8 @@
       const original=h.textContent.trim();
       if(!labels.has(original)) return;
 
-      h.textContent=labels.get(original);
+      const meta=labels.get(original);
+      h.innerHTML=`<span class="admin-fold-heading"><span class="admin-fold-icon" aria-hidden="true">${meta.icon}</span><span class="admin-fold-copy"><span class="admin-fold-title">${meta.title}</span><span class="admin-fold-desc">${meta.desc}</span></span></span>`;
       card.classList.add('admin-fold-card');
       h.setAttribute('role','button');
       h.setAttribute('tabindex','0');
