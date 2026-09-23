@@ -282,6 +282,16 @@
       display:grid;
       gap:20px;
     }
+    .about-audio-row{display:flex;justify-content:flex-start;margin-bottom:-6px}
+    .about-audio-btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:9px;
+      min-height:46px;padding:0 18px;border:1px solid var(--line);border-radius:16px;
+      background:rgba(255,253,249,.9);color:var(--text);font:inherit;font-weight:750;
+      box-shadow:0 8px 24px rgba(36,28,20,.07);cursor:pointer;
+    }
+    .about-audio-btn svg{width:19px;height:19px;flex:0 0 auto}
+    .about-audio-btn[aria-pressed="true"]{background:var(--text);color:#fff;border-color:transparent}
+    .about-audio-btn:focus-visible{outline:3px solid rgba(31,29,26,.22);outline-offset:3px}
 
     .card{background:rgba(255,253,249,.84);border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
     .card p{margin:0;color:var(--muted)}
@@ -1484,6 +1494,12 @@
             <div class="artist-photo" id="artistPhoto"></div>
           </article>
           <div class="artist-copy">
+            <div class="about-audio-row">
+              <button class="about-audio-btn" id="aboutAudioBtn" type="button" aria-pressed="false" aria-label="작가 소개글 음성으로 듣기">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4Zm11.5-.9v7.8a5 5 0 0 0 0-7.8Zm0-3.1v2.1a7 7 0 0 1 0 9.8V19a9 9 0 0 0 0-14Z"/></svg>
+                <span>소개글 듣기</span>
+              </button>
+            </div>
             <article class="card">
               <p id="aboutParagraph1">
                 이원주는 사물과 공간, 인물의 잔상에서 출발해 ‘머무는 감정’을 시각적으로 구성하는 작업을 이어오고 있습니다.
@@ -1649,6 +1665,47 @@
       this.setAttribute('aria-expanded', String(expanded));
       this.textContent = expanded ? '접기' : '… 더 보기';
     });
+    const aboutAudioBtn = document.getElementById('aboutAudioBtn');
+    const aboutAudioLabel = aboutAudioBtn?.querySelector('span');
+    let aboutUtterance = null;
+    function resetAboutAudioButton(){
+      if(!aboutAudioBtn) return;
+      aboutAudioBtn.setAttribute('aria-pressed','false');
+      if(aboutAudioLabel) aboutAudioLabel.textContent = '소개글 듣기';
+      aboutUtterance = null;
+    }
+    if(aboutAudioBtn){
+      if(!('speechSynthesis' in window)){
+        aboutAudioBtn.disabled = true;
+        if(aboutAudioLabel) aboutAudioLabel.textContent = '음성 읽기 미지원';
+      }else{
+        aboutAudioBtn.addEventListener('click', () => {
+          if(aboutAudioBtn.getAttribute('aria-pressed') === 'true'){
+            window.speechSynthesis.cancel();
+            resetAboutAudioButton();
+            return;
+          }
+          const first = document.getElementById('aboutParagraph1')?.textContent.trim() || '';
+          const second = document.getElementById('aboutParagraph2')?.textContent.trim() || '';
+          const spokenText = (first + '. ' + second)
+            .replace(/水墨/g,'수묵').replace(/書藝/g,'서예').replace(/篆刻/g,'전각')
+            .replace(/紙筆墨/g,'지필묵').replace(/土魂/g,'토혼').replace(/金剛/g,'금강');
+          window.speechSynthesis.cancel();
+          aboutUtterance = new SpeechSynthesisUtterance(spokenText);
+          aboutUtterance.lang = 'ko-KR';
+          aboutUtterance.rate = 0.86;
+          aboutUtterance.pitch = 1;
+          const koreanVoice = window.speechSynthesis.getVoices().find(voice => voice.lang?.toLowerCase().startsWith('ko'));
+          if(koreanVoice) aboutUtterance.voice = koreanVoice;
+          aboutUtterance.onend = resetAboutAudioButton;
+          aboutUtterance.onerror = resetAboutAudioButton;
+          aboutAudioBtn.setAttribute('aria-pressed','true');
+          if(aboutAudioLabel) aboutAudioLabel.textContent = '듣기 중지';
+          window.speechSynthesis.speak(aboutUtterance);
+        });
+        window.addEventListener('pagehide', () => window.speechSynthesis.cancel());
+      }
+    }
     const sampleWorks = [
       {
         title: '한결',
