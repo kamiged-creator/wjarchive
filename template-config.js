@@ -2,6 +2,8 @@ window.ARTIST_TEMPLATE_CONFIG = Object.freeze({
   siteName: 'Artist Portfolio',
   artistName: 'Sample Artist',
   adminEmail: 'admin@example.com',
+  logoUrl: '',
+  accentColor: '#8b6847',
 
   // Supabase > Project Settings > API에서 복사해 입력하세요.
   // 비워두면 데모 샘플 데이터만 표시됩니다.
