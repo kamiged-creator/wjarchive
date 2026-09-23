@@ -117,15 +117,19 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/template-config.js"></script>
   <script>
-    const SUPABASE_URL='https://vefeplfczeztbplowjmj.supabase.co';
-    const SUPABASE_ANON_KEY='sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
-    const client=(window.supabase&&SUPABASE_URL&&SUPABASE_ANON_KEY)?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
+    const TEMPLATE_CONFIG=window.ARTIST_TEMPLATE_CONFIG||{};
+    const SUPABASE_URL=String(TEMPLATE_CONFIG.supabaseUrl||'').trim();
+    const SUPABASE_ANON_KEY=String(TEMPLATE_CONFIG.supabasePublishableKey||'').trim();
+    const client=(window.supabase&&/^https:\/\//i.test(SUPABASE_URL)&&SUPABASE_ANON_KEY)
+      ?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
+      :null;
     const grid=document.getElementById('bookGrid');
     const pagination=document.getElementById('bookPagination');
     const bookCount=document.getElementById('bookCount');
     const adminFooterLink=document.getElementById('adminFooterLink');
-    const ADMIN_TOKEN_KEY='wjarchiveAdminAccessToken';
+    const ADMIN_TOKEN_KEY=String(TEMPLATE_CONFIG.adminTokenStorageKey||'artistTemplateAdminAccessToken');
     const DESKTOP_PAGE_SIZE=6;
     const MOBILE_PAGE_SIZE=4;
     let allBookCards=[];
@@ -270,6 +274,12 @@
       if(error){console.warn(error);return;}
       let value=data?.value||{};
       if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
+      if(value.enabled===false){
+        grid.innerHTML='<div class="empty">이 사이트에서는 책 소개 기능을 사용하지 않습니다.</div>';
+        if(pagination) pagination.innerHTML='';
+        if(bookCount) bookCount.hidden=true;
+        return;
+      }
       const savedSamples=Array.isArray(value.sampleItems)?value.sampleItems:[];
       const sampleBooks=defaultSamples.map((fallback,index)=>({...fallback,...(savedSamples[index]||{})}));
       render(value.items||[],sampleBooks,value.sampleHidden===true);
