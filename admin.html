@@ -414,7 +414,7 @@
     #adminOverlay.admin-dark .admin-card,
     #adminOverlay.admin-dark .admin-themebar,
     #adminOverlay.admin-dark .popup-url-row,
-    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.12);color:#f5f7fb}
+    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.16);color:#f5f7fb}
     #adminOverlay.admin-dark #adminApp .admin-crop-shortcut{background:linear-gradient(180deg,#171c23,#13171c)}
     #adminOverlay.admin-dark .field,
     #adminOverlay.admin-dark .field-sm,
@@ -461,14 +461,20 @@
     #adminApp .legacy-image-result-card{display:none!important}
     #adminApp .admin-crop-shortcut{
       display:flex;align-items:center;justify-content:space-between;gap:14px;
-      padding:14px 16px;background:linear-gradient(180deg,#fffdf9,#fbf7f1)
+      padding:14px 16px;background:linear-gradient(180deg,#fffdf9,#fbf7f1);
+      border-color:rgba(31,26,23,.16);
+      box-shadow:0 4px 14px rgba(31,26,23,.035)
     }
     #adminApp .admin-crop-shortcut-copy{min-width:0}
     #adminApp .admin-crop-shortcut strong{display:block;font-size:16px;margin-bottom:3px}
     #adminApp .admin-crop-shortcut span{display:block;color:var(--muted);font-size:12px}
     #adminApp .admin-quick-links{display:flex;gap:8px;flex:0 0 auto}
     #adminApp .admin-quick-links .btn{min-width:78px}
-    #adminApp .admin-fold-card{padding:0;overflow:hidden}
+    #adminApp .admin-fold-card{
+      padding:0;overflow:hidden;
+      border-color:rgba(31,26,23,.16);
+      box-shadow:0 4px 14px rgba(31,26,23,.035)
+    }
     #adminApp .admin-fold-card>h3{
       position:relative;margin:0;padding:15px 50px 15px 16px;cursor:pointer;
       user-select:none;outline:none;
