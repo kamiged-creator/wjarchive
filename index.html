@@ -131,18 +131,19 @@
       right:8px;
       top:calc(100% + 8px);
       z-index:55;
-      width:18px;
-      height:24px;
+      width:16px;
+      height:21px;
       pointer-events:none;
-      filter:drop-shadow(0 3px 6px rgba(184,149,106,.18));
+      filter:drop-shadow(0 2px 5px rgba(184,149,106,.16));
     }
     .mobile-menu-guide::before{
       content:"";
       position:absolute;
       left:50%;
-      top:1px;
+      top:2px;
       width:4px;
-      height:16px;
+      height:14px;
+      border-radius:999px;
       background:#B8956A;
       transform:translateX(-50%);
     }
@@ -150,13 +151,13 @@
       content:"";
       position:absolute;
       left:50%;
-      top:-1px;
-      width:10px;
-      height:10px;
+      top:0;
+      width:9px;
+      height:9px;
       border-top:3px solid #B8956A;
       border-left:3px solid #B8956A;
       transform:translateX(-50%) rotate(45deg);
-      border-radius:0;
+      border-radius:2px;
     }
     .mobile-menu-guide.show{
       display:block;
