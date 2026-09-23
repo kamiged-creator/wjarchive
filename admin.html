@@ -2488,6 +2488,16 @@
         aboutCopy.textContent=`${data.artistName}의 작업 방향과 시선을 담는 소개 영역입니다.`;
       }
 
+      const metaDescription=document.querySelector('meta[name="description"]');
+      const ogTitle=document.querySelector('meta[property="og:title"]');
+      const ogDescription=document.querySelector('meta[property="og:description"]');
+      const appName=document.querySelector('meta[name="application-name"]');
+      const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if(metaDescription) metaDescription.content=`${data.artistName}의 ${data.siteName} 관리자 페이지입니다.`;
+      if(ogTitle) ogTitle.content=`${data.artistName} | ${data.siteName}`;
+      if(ogDescription) ogDescription.content=`${data.siteName} 관리자 페이지`;
+      if(appName) appName.content=data.siteName;
+      if(appleTitle) appleTitle.content=data.siteName;
       document.title=`${data.artistName} | ${data.siteName} 관리자`;
       return data;
     }
