@@ -1752,7 +1752,9 @@
       return window.matchMedia('(max-width: 680px)').matches ? 10 : state.worksPerPage;
     }
     qs('#year').textContent = new Date().getFullYear();
-    applyBranding({
+    let localBranding=null;
+    try{ localBranding=JSON.parse(localStorage.getItem('artistTemplateBranding') || 'null'); }catch(e){}
+    applyBranding(localBranding || {
       artistName:TEMPLATE_CONFIG.artistName,
       siteName:TEMPLATE_CONFIG.siteName,
       logoUrl:TEMPLATE_CONFIG.logoUrl,
@@ -2057,6 +2059,7 @@
             }
             if(row.key === 'branding'){
               applyBranding(value);
+              try{ localStorage.setItem('artistTemplateBranding',JSON.stringify(value)); }catch(e){}
             }
           });
           applyAboutContentToPage(merged);
