@@ -24,6 +24,8 @@
 
 자세한 설치 순서는 `TEMPLATE_SETUP_KO.md`를 참고하세요.
 
+새 Supabase 프로젝트의 테이블과 접근 정책 초안은 `supabase-setup.sql`에 있습니다. 구매자 계정에서 설치와 저장 흐름을 검증하기 전까지는 판매 준비용 초안입니다.
+
 ## 개발 브랜치
 
 `template/artist-portfolio-v1`
