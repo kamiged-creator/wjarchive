@@ -684,6 +684,30 @@
       min-height:48px;
       margin:0;
     }
+    #loginBtn{
+      background:linear-gradient(180deg,#9a7454,#7d5a3f);
+      color:#fff;
+      border-color:#7d5a3f;
+      box-shadow:0 8px 18px rgba(125,90,63,.22);
+      font-weight:800;
+    }
+    #loginBtn:hover,
+    #loginBtn:focus-visible{
+      background:linear-gradient(180deg,#8f694b,#714e36);
+      border-color:#714e36;
+      box-shadow:0 10px 22px rgba(113,78,54,.26);
+    }
+    #loginBtn:active{
+      transform:translateY(1px);
+      box-shadow:0 5px 12px rgba(113,78,54,.20);
+    }
+    #closeOverlayFromGate{
+      background:#ece9e4;
+      color:#4f4944;
+      border-color:rgba(79,73,68,.14);
+      box-shadow:none;
+      font-weight:700;
+    }
     .hidden{display:none !important}
     .stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
     .stat-box{border:1px solid var(--line);border-radius:18px;padding:12px;background:linear-gradient(180deg,#fff,#fbf7f1)}
