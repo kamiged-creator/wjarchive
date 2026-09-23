@@ -86,6 +86,8 @@
       min-height:72px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 0 14px;
     }
     .brand{display:flex;flex-direction:column;gap:2px;padding-top:0;flex:0 0 auto}
+    .brand-name-row{display:flex;align-items:center;gap:9px;min-width:0}
+    .brand-logo{width:34px;height:34px;border-radius:10px;object-fit:cover;display:none;flex:0 0 auto;border:1px solid var(--line);background:#fff}
     .brand-title{
       display:inline-flex;
       align-items:center;
@@ -1711,10 +1713,13 @@
     <div class="wrap topbar-inner">
       <div class="brand">
         <div class="brand-top">
-          <div class="brand-title" id="adminTapTarget" role="button" aria-label="작가명">샘플 작가</div>
+          <div class="brand-name-row">
+            <img class="brand-logo" id="brandLogo" alt="사이트 로고">
+            <div class="brand-title" id="adminTapTarget" role="button" aria-label="작가명">샘플 작가</div>
+          </div>
           <a class="news-mini news-mobile" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
         </div>
-        <div class="brand-sub">Artist · Portfolio</div>
+        <div class="brand-sub" id="brandSiteName">Artist · Portfolio</div>
       </div>
       <div class="top-tools">
         <div class="top-nav-row">
@@ -2019,6 +2024,41 @@
                 <button class="btn primary" type="button" id="downloadAllZipBtn">전체 ZIP</button>
               </div>
               <div class="status" id="zipStatus">아직 생성된 결과가 없습니다.</div>
+            </div>
+
+            <div class="admin-card" id="brandingAdminCard">
+              <h3>사이트 기본설정</h3>
+              <p>판매용 템플릿의 사이트명, 작가명, 로고와 대표색을 한곳에서 바꿉니다.</p>
+              <div class="stack" style="margin-top:14px">
+                <div class="field-row">
+                  <div>
+                    <label class="label" for="brandingSiteName">사이트명</label>
+                    <input class="field-sm" id="brandingSiteName" type="text" placeholder="Artist Portfolio">
+                  </div>
+                  <div>
+                    <label class="label" for="brandingArtistName">작가명</label>
+                    <input class="field-sm" id="brandingArtistName" type="text" placeholder="Sample Artist">
+                  </div>
+                </div>
+                <div>
+                  <label class="label" for="brandingLogoUrl">로고 이미지 URL</label>
+                  <input class="field" id="brandingLogoUrl" type="url" placeholder="https://ik.imagekit.io/...">
+                  <div class="mini-note">비워두면 텍스트 로고만 표시됩니다.</div>
+                </div>
+                <div>
+                  <label class="label" for="brandingAccentColor">대표색</label>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <input id="brandingAccentColor" type="color" value="#8b6847" style="width:56px;height:42px;padding:3px;border:1px solid var(--line);border-radius:12px;background:#fff">
+                    <input class="field-sm" id="brandingAccentText" type="text" value="#8b6847" maxlength="7" placeholder="#8b6847">
+                  </div>
+                </div>
+                <div class="hero-actions" style="margin-top:4px">
+                  <button class="btn primary" type="button" id="saveBrandingBtn">저장</button>
+                  <button class="btn" type="button" id="applyBrandingBtn">화면 반영</button>
+                  <button class="btn subtle" type="button" id="resetBrandingBtn">기본값 복원</button>
+                </div>
+                <div class="status" id="brandingStatus">구매자가 자신의 브랜드 정보로 바로 바꿀 수 있습니다.</div>
+              </div>
             </div>
 
             <div class="admin-card">
@@ -2405,6 +2445,116 @@
 
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
+
+    const defaultBranding = {
+      siteName:String(TEMPLATE_CONFIG.siteName || 'Artist Portfolio').trim() || 'Artist Portfolio',
+      artistName:String(TEMPLATE_CONFIG.artistName || 'Sample Artist').trim() || 'Sample Artist',
+      logoUrl:String(TEMPLATE_CONFIG.logoUrl || '').trim(),
+      accentColor:/^#[0-9a-f]{6}$/i.test(String(TEMPLATE_CONFIG.accentColor || '').trim())
+        ? String(TEMPLATE_CONFIG.accentColor).trim()
+        : '#8b6847'
+    };
+
+    function normalizeBranding(value={}){
+      const accentCandidate=String(value.accentColor || defaultBranding.accentColor).trim();
+      return {
+        siteName:String(value.siteName || defaultBranding.siteName).trim() || defaultBranding.siteName,
+        artistName:String(value.artistName || defaultBranding.artistName).trim() || defaultBranding.artistName,
+        logoUrl:String(value.logoUrl || '').trim(),
+        accentColor:/^#[0-9a-f]{6}$/i.test(accentCandidate) ? accentCandidate : defaultBranding.accentColor
+      };
+    }
+
+    function applyBrandingToPage(value={}){
+      const data=normalizeBranding(value);
+      document.documentElement.style.setProperty('--accent',data.accentColor);
+
+      if(qs('#adminTapTarget')) qs('#adminTapTarget').textContent=data.artistName;
+      if(qs('#brandSiteName')) qs('#brandSiteName').textContent=data.siteName;
+
+      const logo=qs('#brandLogo');
+      if(logo){
+        logo.style.display=data.logoUrl?'block':'none';
+        if(data.logoUrl) logo.src=data.logoUrl;
+        else logo.removeAttribute('src');
+      }
+
+      const hero=qs('#heroTitle');
+      if(hero && /샘플 작가|Sample Artist/.test(hero.textContent || '')){
+        hero.innerHTML=`빛과 감정을 담는<br>${escapeHtml(data.artistName)}의 작품 세계`;
+      }
+      const aboutCopy=qs('#aboutSectionCopy');
+      if(aboutCopy && /샘플 작가|Sample Artist/.test(aboutCopy.textContent || '')){
+        aboutCopy.textContent=`${data.artistName}의 작업 방향과 시선을 담는 소개 영역입니다.`;
+      }
+
+      document.title=`${data.artistName} | ${data.siteName} 관리자`;
+      return data;
+    }
+
+    function fillBrandingForm(value={}){
+      const data=normalizeBranding(value);
+      if(qs('#brandingSiteName')) qs('#brandingSiteName').value=data.siteName;
+      if(qs('#brandingArtistName')) qs('#brandingArtistName').value=data.artistName;
+      if(qs('#brandingLogoUrl')) qs('#brandingLogoUrl').value=data.logoUrl;
+      if(qs('#brandingAccentColor')) qs('#brandingAccentColor').value=data.accentColor;
+      if(qs('#brandingAccentText')) qs('#brandingAccentText').value=data.accentColor;
+      return data;
+    }
+
+    function getBrandingFromForm(){
+      return normalizeBranding({
+        siteName:qs('#brandingSiteName')?.value,
+        artistName:qs('#brandingArtistName')?.value,
+        logoUrl:qs('#brandingLogoUrl')?.value,
+        accentColor:qs('#brandingAccentText')?.value || qs('#brandingAccentColor')?.value
+      });
+    }
+
+    function loadLocalBranding(){
+      let saved=null;
+      try{ saved=JSON.parse(localStorage.getItem('artistTemplateBranding') || 'null'); }catch(e){}
+      const data=fillBrandingForm(saved || defaultBranding);
+      applyBrandingToPage(data);
+    }
+
+    async function saveBranding(saveToDb){
+      const data=getBrandingFromForm();
+      fillBrandingForm(data);
+      applyBrandingToPage(data);
+      const status=qs('#brandingStatus');
+
+      if(!saveToDb){
+        if(status){
+          status.textContent='현재 화면에 반영했습니다. 저장하려면 저장 버튼을 누르세요.';
+          status.className='status ok';
+        }
+        return;
+      }
+
+      localStorage.setItem('artistTemplateBranding',JSON.stringify(data));
+      if(!supabaseReady()){
+        if(status){
+          status.textContent='브라우저에는 저장했습니다. Supabase 연결 후 DB에도 저장할 수 있습니다.';
+          status.className='status ok';
+        }
+        return;
+      }
+
+      const {error}=await supabaseClient.from('site_settings').upsert([
+        {key:'branding',value:data}
+      ],{onConflict:'key'});
+
+      if(status){
+        if(error){
+          status.textContent='브라우저 저장 완료 · Supabase 저장 실패: '+error.message;
+          status.className='status bad';
+        }else{
+          status.textContent='사이트 기본설정이 저장되었습니다.';
+          status.className='status ok';
+        }
+      }
+    }
 
     let booksEnabled = true;
     let bookSampleHidden = false;
@@ -4541,10 +4691,32 @@
       }
     }
 
+    qs('#brandingAccentColor')?.addEventListener('input',()=>{
+      if(qs('#brandingAccentText')) qs('#brandingAccentText').value=qs('#brandingAccentColor').value;
+      saveBranding(false);
+    });
+    qs('#brandingAccentText')?.addEventListener('input',()=>{
+      const value=String(qs('#brandingAccentText').value || '').trim();
+      if(/^#[0-9a-f]{6}$/i.test(value) && qs('#brandingAccentColor')) qs('#brandingAccentColor').value=value;
+    });
+    qs('#saveBrandingBtn')?.addEventListener('click',()=>saveBranding(true));
+    qs('#applyBrandingBtn')?.addEventListener('click',()=>saveBranding(false));
+    qs('#resetBrandingBtn')?.addEventListener('click',()=>{
+      localStorage.removeItem('artistTemplateBranding');
+      fillBrandingForm(defaultBranding);
+      applyBrandingToPage(defaultBranding);
+      const status=qs('#brandingStatus');
+      if(status){
+        status.textContent='기본값으로 복원했습니다. DB에 반영하려면 저장을 누르세요.';
+        status.className='status';
+      }
+    });
+
     qs('#saveTextContentBtn')?.addEventListener('click', () => applyEditableTextContent(true));
     qs('#applyTextContentBtn')?.addEventListener('click', () => applyEditableTextContent(false));
     qs('#resetTextContentBtn')?.addEventListener('click', resetEditableTextContent);
 
+    loadLocalBranding();
     loadEditableTextContent();
     loadAboutContent();
 
@@ -4694,7 +4866,7 @@
       const {data, error} = await supabaseClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['hero', 'about', 'note', 'popup', 'books']);
+        .in('key', ['hero', 'about', 'note', 'popup', 'books', 'branding']);
       if(error){
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
@@ -4732,6 +4904,11 @@
         if(row.key === 'popup'){
           if(qs('#popupEnabled')) qs('#popupEnabled').checked = value.enabled === true;
           renderPopupUrlInputs(Array.isArray(value.images) ? value.images : ['']);
+        }
+        if(row.key === 'branding'){
+          const data=fillBrandingForm(value);
+          applyBrandingToPage(data);
+          localStorage.setItem('artistTemplateBranding',JSON.stringify(data));
         }
         if(row.key === 'books'){
           booksEnabled = value.enabled !== false;
@@ -5792,13 +5969,13 @@
           toggleBtn.setAttribute('aria-label',mode==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
           toggleBtn.setAttribute('title',mode==='dark'?'라이트 모드로 전환':'다크 모드로 전환');
         }
-        localStorage.setItem('wjarchiveAdminTheme',mode);
+        localStorage.setItem('artistTemplateAdminTheme',mode);
       };
       toggleBtn?.addEventListener('click',()=>{
         const current=overlay?.classList.contains('admin-dark')?'dark':'light';
         applyTheme(current==='dark'?'light':'dark');
       });
-      applyTheme(localStorage.getItem('wjarchiveAdminTheme') || 'light');
+      applyTheme(localStorage.getItem('artistTemplateAdminTheme') || 'light');
     }
     stack.dataset.compactAdminReady='1';
 
@@ -5828,6 +6005,7 @@
     stack.prepend(cropCard);
 
     const labels=new Map([
+      ['사이트 기본설정',{title:'사이트 기본설정',icon:'설',desc:'사이트명·작가명·로고·대표색을 설정합니다.'}],
       ['4. 사이트 문구 편집',{title:'사이트 문구',icon:'문',desc:'홈페이지 공통 문구와 안내 문장을 수정합니다.'}],
       ['5. 메인 / 작가소개 편집',{title:'메인 · 작가소개',icon:'인',desc:'메인 화면과 작가 소개 영역을 관리합니다.'}],
       ['책 소개 관리',{title:'책 소개 관리',icon:'책',desc:'책 목록과 상세 소개 내용을 관리합니다.'}],
