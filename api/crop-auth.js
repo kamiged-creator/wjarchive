@@ -1,22 +1,22 @@
 const crypto = require('crypto');
 
 const tokenLifetimeSeconds = 12 * 60 * 60;
-const allowedOrigins = new Set([
-  'https://wjarchive.vercel.app',
-  'https://ycuve.com',
-  'https://www.ycuve.com',
-  'https://bokjakso.com',
-  'https://www.bokjakso.com'
-]);
 
 function setCors(req, res) {
-  const origin = req.headers.origin;
-  if (allowedOrigins.has(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
+  const origin = String(req.headers.origin || '');
+  const host = String(req.headers.host || '');
+  if (origin) {
+    try {
+      const parsed = new URL(origin);
+      if (parsed.host === host) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+      }
+    } catch (error) {}
   }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Cache-Control', 'no-store');
 }
 
 function signToken(secret, expire, nonce) {
@@ -50,7 +50,6 @@ module.exports = function handler(req, res) {
   }
 
   const password = normalizePassword(process.env.CROP_ACCESS_PASSWORD);
-
   if (!password) {
     res.status(500).json({ message: 'CROP_ACCESS_PASSWORD is not configured.' });
     return;
@@ -58,11 +57,7 @@ module.exports = function handler(req, res) {
 
   let body = req.body || {};
   if (typeof body === 'string') {
-    try {
-      body = JSON.parse(body);
-    } catch (error) {
-      body = {};
-    }
+    try { body = JSON.parse(body); } catch (error) { body = {}; }
   }
 
   if (!safeEqual(normalizePassword(body.password), password)) {
