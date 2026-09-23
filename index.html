@@ -296,6 +296,7 @@
       margin-left:auto;
       margin-right:auto;
     }
+    .filter-swipe-hint{display:none}
     .filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 auto 18px}
     .filter-btn{
       padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.55);
@@ -721,6 +722,7 @@
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:calc(26px + env(safe-area-inset-top, 0px)) 0 12px}
       .wrap{padding:0 18px}
       .hero{padding-top:8px}
+      .filter-swipe-hint{display:block;text-align:right;margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.01em}
       #works .filter-bar{
         flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
         -webkit-overflow-scrolling:touch;scrollbar-width:none;
@@ -1494,6 +1496,7 @@
             <p class="section-copy" id="worksSectionCopy">카테고리별로 작품을 나눠 보이게 했습니다. 전체, 필선, 전각, 합죽, 묵색, 기타 중에서 골라 보세요.</p>
           </div>
         </div>
+        <div class="filter-swipe-hint" aria-hidden="true">옆으로 밀기 →</div>
         <div class="filter-bar" id="filterBar">
           <button class="filter-btn active" type="button" data-category="전체">전체</button>
           <button class="filter-btn" type="button" data-category="필선">필선</button>
