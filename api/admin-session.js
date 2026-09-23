@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const ADMIN_EMAIL = 'bokjakso.shop@gmail.com';
+const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 const TOKEN_LIFETIME_SECONDS = 12 * 60 * 60;
 
 function normalize(value) {
@@ -29,12 +29,12 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || 'https://vefeplfczeztbplowjmj.supabase.co';
-  const publishableKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
+  const supabaseUrl = String(process.env.SUPABASE_URL || '').trim().replace(/\/+$/g, '');
+  const publishableKey = String(process.env.SUPABASE_ANON_KEY || '').trim();
   const legacySecret = normalize(process.env.CROP_ACCESS_PASSWORD);
 
-  if (!legacySecret) {
-    res.status(503).json({ message: '관리자 세션 설정을 확인해 주세요.' });
+  if (!ADMIN_EMAIL || !supabaseUrl || !publishableKey || !legacySecret) {
+    res.status(503).json({ message: '관리자 인증 환경변수를 확인해 주세요.' });
     return;
   }
 
