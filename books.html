@@ -15,7 +15,8 @@
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
     .top{position:sticky;top:0;z-index:10;background:rgba(246,241,234,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
     .topin{height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{font-weight:800;font-size:23px;color:#2b2724;letter-spacing:-.03em}
+    .brand{font-weight:800;font-size:23px;color:#2b2724;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:9px}
+    .brand-logo{width:32px;height:32px;border-radius:9px;object-fit:cover;display:none;border:1px solid var(--line);background:#fff}
     .back{font-size:13px;color:var(--muted);font-weight:750}
     .hero{padding:36px 0 24px;border-bottom:1px solid var(--line)}
     .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:800;text-transform:uppercase}
@@ -83,7 +84,7 @@
 <body>
   <header class="top">
     <div class="wrap topin">
-      <a class="brand" href="/">샘플 작가</a>
+      <a class="brand" href="/"><img class="brand-logo" id="bookBrandLogo" alt="사이트 로고"><span id="bookBrandArtist">샘플 작가</span></a>
       <a class="back" href="/">← 홈페이지</a>
     </div>
   </header>
@@ -113,13 +114,42 @@
   </main>
 
   <footer>
-    <div class="wrap foot"><span>© <span id="year"></span> Sample Artist.</span><a id="adminFooterLink" href="/admin.html" style="display:none">관리자</a></div>
+    <div class="wrap foot"><span>© <span id="year"></span> <span id="bookFooterArtist">Sample Artist</span>.</span><a id="adminFooterLink" href="/admin.html" style="display:none">관리자</a></div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/template-config.js"></script>
   <script>
     const TEMPLATE_CONFIG=window.ARTIST_TEMPLATE_CONFIG||{};
+
+    function normalizeBranding(value={}){
+      const accentCandidate=String(value.accentColor || TEMPLATE_CONFIG.accentColor || '#8b6847').trim();
+      return {
+        artistName:String(value.artistName || TEMPLATE_CONFIG.artistName || 'Sample Artist').trim() || 'Sample Artist',
+        siteName:String(value.siteName || TEMPLATE_CONFIG.siteName || 'Artist Portfolio').trim() || 'Artist Portfolio',
+        logoUrl:String(value.logoUrl || TEMPLATE_CONFIG.logoUrl || '').trim(),
+        accentColor:/^#[0-9a-f]{6}$/i.test(accentCandidate) ? accentCandidate : '#8b6847'
+      };
+    }
+
+    function applyBranding(value={}){
+      const data=normalizeBranding(value);
+      document.documentElement.style.setProperty('--accent',data.accentColor);
+      const artist=document.getElementById('bookBrandArtist');
+      const footer=document.getElementById('bookFooterArtist');
+      const logo=document.getElementById('bookBrandLogo');
+      if(artist) artist.textContent=data.artistName;
+      if(footer) footer.textContent=data.artistName;
+      if(logo){
+        logo.style.display=data.logoUrl?'block':'none';
+        if(data.logoUrl) logo.src=data.logoUrl;
+        else logo.removeAttribute('src');
+      }
+      document.title=`책 소개 | ${data.artistName}`;
+    }
+
+    applyBranding(TEMPLATE_CONFIG);
+
     const SUPABASE_URL=String(TEMPLATE_CONFIG.supabaseUrl||'').trim();
     const SUPABASE_ANON_KEY=String(TEMPLATE_CONFIG.supabasePublishableKey||'').trim();
     const client=(window.supabase&&/^https:\/\//i.test(SUPABASE_URL)&&SUPABASE_ANON_KEY)
@@ -270,9 +300,20 @@
     async function load(){
       render([],defaultSamples,false);
       if(!client) return;
-      const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
-      if(error){console.warn(error);return;}
-      let value=data?.value||{};
+
+      const [booksRes,brandingRes]=await Promise.all([
+        client.from('site_settings').select('value').eq('key','books').maybeSingle(),
+        client.from('site_settings').select('value').eq('key','branding').maybeSingle()
+      ]);
+
+      if(!brandingRes.error && brandingRes.data?.value){
+        let branding=brandingRes.data.value;
+        if(typeof branding==='string'){try{branding=JSON.parse(branding)}catch(e){branding={}}}
+        applyBranding(branding);
+      }
+
+      if(booksRes.error){console.warn(booksRes.error);return;}
+      let value=booksRes.data?.value||{};
       if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
       if(value.enabled===false){
         grid.innerHTML='<div class="empty">이 사이트에서는 책 소개 기능을 사용하지 않습니다.</div>';
