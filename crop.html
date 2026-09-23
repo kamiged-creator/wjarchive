@@ -609,19 +609,21 @@
       toast: document.getElementById('toast')
     };
 
+    const TEMPLATE_CONFIG = window.ARTIST_TEMPLATE_CONFIG || {};
     const imageKitConfig = {
-      publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
-      urlEndpoint: 'https://ik.imagekit.io/gig3jr5rp',
-      authenticationEndpoint: 'https://wjarchive.vercel.app/api/imagekit-auth'
+      publicKey: String(TEMPLATE_CONFIG.imagekitPublicKey || '').trim(),
+      urlEndpoint: String(TEMPLATE_CONFIG.imagekitBaseUrl || '').trim(),
+      authenticationEndpoint: '/api/imagekit-auth',
+      folder: String(TEMPLATE_CONFIG.imagekitFolder || '/artist-portfolio').trim() || '/artist-portfolio'
     };
 
     const authConfig = {
-      loginEndpoint: 'https://wjarchive.vercel.app/api/crop-auth',
-      tokenStorageKey: 'wjarchiveCropAccessToken'
+      loginEndpoint: '/api/crop-auth',
+      tokenStorageKey: 'artistTemplateCropAccessToken'
     };
 
     const ctx = els.canvas.getContext('2d');
-    const sequenceStorageKey = 'wjarchiveCropNextSequence';
+    const sequenceStorageKey = 'artistTemplateCropNextSequence';
     const state = {
       image: null,
       files: [],
@@ -1217,7 +1219,7 @@
         form.append('signature', auth.signature);
         form.append('expire', auth.expire);
         form.append('token', auth.token);
-        form.append('folder', '/wjarchive');
+        form.append('folder', imageKitConfig.folder);
         form.append('useUniqueFileName', 'true');
 
         const uploadResponse = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
