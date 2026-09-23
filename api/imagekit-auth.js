@@ -1,21 +1,20 @@
 const crypto = require('crypto');
 
-const allowedOrigins = new Set([
-  'https://wjarchive.vercel.app',
-  'https://ycuve.com',
-  'https://www.ycuve.com',
-  'https://bokjakso.com',
-  'https://www.bokjakso.com'
-]);
-
 function setCors(req, res) {
-  const origin = req.headers.origin;
-  if (allowedOrigins.has(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
+  const origin = String(req.headers.origin || '');
+  const host = String(req.headers.host || '');
+  if (origin) {
+    try {
+      const parsed = new URL(origin);
+      if (parsed.host === host) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+      }
+    } catch (error) {}
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Cache-Control', 'no-store');
 }
 
 function normalizePassword(value) {
@@ -47,10 +46,9 @@ module.exports = function handler(req, res) {
     return;
   }
 
-  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  const privateKey = String(process.env.IMAGEKIT_PRIVATE_KEY || '').trim();
   const accessPasswords = [
-    normalizePassword(process.env.CROP_ACCESS_PASSWORD),
-    normalizePassword(process.env.STORE_ADMIN_PASSWORD)
+    normalizePassword(process.env.CROP_ACCESS_PASSWORD)
   ].filter(Boolean);
 
   if (!privateKey) {
@@ -62,7 +60,7 @@ module.exports = function handler(req, res) {
     return;
   }
 
-  const authHeader = req.headers.authorization || '';
+  const authHeader = String(req.headers.authorization || '');
   const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
   if (!accessPasswords.some(secret => verifyAccessToken(accessToken, secret))) {
     res.status(401).json({ message: '관리자 로그인이 필요합니다.' });
