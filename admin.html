@@ -414,10 +414,10 @@
     #adminOverlay.admin-dark .admin-card,
     #adminOverlay.admin-dark .admin-themebar,
     #adminOverlay.admin-dark .popup-url-row,
-    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.32);color:#f5f7fb}
+    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.40);color:#f5f7fb}
     #adminOverlay.admin-dark #adminApp .admin-crop-shortcut{
       background:linear-gradient(180deg,#171c23,#13171c);
-      border-color:rgba(255,255,255,.32)
+      border-color:rgba(255,255,255,.40)
     }
     #adminOverlay.admin-dark .field,
     #adminOverlay.admin-dark .field-sm,
@@ -428,7 +428,7 @@
     #adminOverlay.admin-dark input[type="url"],
     #adminOverlay.admin-dark input[type="number"],
     #adminOverlay.admin-dark input[type="password"]{
-      background:#0d1116!important;color:#f7f9fc!important;border-color:rgba(255,255,255,.17)!important;
+      background:#0d1116!important;color:#f7f9fc!important;border-color:rgba(255,255,255,.28)!important;
       caret-color:#fff
     }
     #adminOverlay.admin-dark input::placeholder,
@@ -515,16 +515,37 @@
       background:#20262e;border-color:rgba(255,255,255,.10);color:#d9c9b9
     }
     #adminOverlay.admin-dark #adminApp .admin-fold-card.open{
-      border-color:rgba(255,255,255,.34);
+      border-color:rgba(255,255,255,.42);
       box-shadow:0 8px 24px rgba(0,0,0,.22)
     }
     #adminOverlay.admin-dark #adminApp .admin-fold-card.open>h3{
       background:rgba(240,173,98,.10);
-      border-bottom-color:rgba(255,255,255,.12)
+      border-bottom-color:rgba(255,255,255,.20)
     }
     #adminOverlay.admin-dark #adminApp .admin-fold-body{
       background:#141920;
-      border-top-color:rgba(255,255,255,.10)
+      border-top-color:rgba(255,255,255,.18)
+    }
+    #adminOverlay.admin-dark #adminApp .field,
+    #adminOverlay.admin-dark #adminApp .field-sm,
+    #adminOverlay.admin-dark #adminApp .editor-area,
+    #adminOverlay.admin-dark #adminApp textarea,
+    #adminOverlay.admin-dark #adminApp select,
+    #adminOverlay.admin-dark #adminApp input[type="text"],
+    #adminOverlay.admin-dark #adminApp input[type="url"],
+    #adminOverlay.admin-dark #adminApp input[type="number"],
+    #adminOverlay.admin-dark #adminApp input[type="password"]{
+      border-color:rgba(255,255,255,.30)!important;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)
+    }
+    #adminOverlay.admin-dark #adminApp .field:focus,
+    #adminOverlay.admin-dark #adminApp .field-sm:focus,
+    #adminOverlay.admin-dark #adminApp .editor-area:focus,
+    #adminOverlay.admin-dark #adminApp textarea:focus,
+    #adminOverlay.admin-dark #adminApp select:focus,
+    #adminOverlay.admin-dark #adminApp input:focus{
+      border-color:rgba(240,173,98,.60)!important;
+      box-shadow:0 0 0 3px rgba(240,173,98,.10)
     }
     #adminOverlay.admin-dark #adminApp .admin-fold-card.open .admin-fold-icon{
       background:rgba(240,173,98,.14);border-color:rgba(240,173,98,.28);color:#f0ad62
