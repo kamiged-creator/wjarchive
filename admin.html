@@ -2077,7 +2077,6 @@
                 <div class="hero-actions artwork-actions" style="margin-top:10px">
                   <button class="btn apply-accent" type="button" id="applyArtworkBtn">작품/유튜브 반영</button>
                   <button class="btn" type="button" id="batchAddArtworkBtn">URL 목록 일괄 추가</button>
-                  <button class="btn" type="button" id="exportHtmlBtnInline">업로드용 HTML 저장</button>
                   <button class="btn danger" type="button" id="deleteArtworkBtn">선택 작품 삭제</button>
                 </div>
 
@@ -4243,7 +4242,6 @@
     populateArtTargetWork('__new__');
 
     qs('#exportHtmlBtn')?.addEventListener('click', exportCurrentHtml);
-    qs('#exportHtmlBtnInline')?.addEventListener('click', exportCurrentHtml);
 
     qsa('[data-accordion]').forEach(btn => {
       btn.addEventListener('click', () => {
