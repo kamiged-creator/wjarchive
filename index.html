@@ -1445,7 +1445,7 @@
           <span class="eyebrow" id="heroEyebrow">Selected Works · Artist Portfolio</span>
           <h1 id="heroTitle">빛과 감정을 담는<br>이원주의 작품 세계</h1>
           <p class="lead" id="heroLead">
-            사진과 회화적 감성을 넘나들며, 익숙한 장면 안에 남아 있는 시간과 온도를 기록합니다.
+            천년의 흙에 금강경의 구절을 새겨, 마음을 담는 그릇으로 빚었습니다.
           </p>
           <div class="hero-actions">
             <a class="btn primary" href="#works">작품 보기</a>
@@ -1887,7 +1887,7 @@
     function applyAboutContentToPage(data){
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow || qs('#heroEyebrow').textContent;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle || qs('#heroTitle').innerHTML;
-      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead || qs('#heroLead').textContent;
+      if(qs('#heroLead')){ const lead = data.heroLead || ''; qs('#heroLead').textContent = lead.includes('천 년의 침묵을 깨고 일어선 흙이여') ? '천년의 흙에 금강경의 구절을 새겨, 마음을 담는 그릇으로 빚었습니다.' : (lead || qs('#heroLead').textContent); }
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption || qs('#heroCaption').textContent;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || qs('#aboutSectionCopy').textContent;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1 || qs('#aboutParagraph1').textContent;
