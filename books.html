@@ -145,6 +145,8 @@
         if(data.logoUrl) logo.src=data.logoUrl;
         else logo.removeAttribute('src');
       }
+      const metaDescription=document.querySelector('meta[name="description"]');
+      if(metaDescription) metaDescription.content=`${data.artistName}의 책과 작업 이야기를 소개합니다.`;
       document.title=`책 소개 | ${data.artistName}`;
     }
 
