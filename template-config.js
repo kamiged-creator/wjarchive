@@ -11,6 +11,8 @@ window.ARTIST_TEMPLATE_CONFIG = Object.freeze({
   // ImageKit을 사용할 경우 URL endpoint를 입력하세요.
   // 예: https://ik.imagekit.io/your_id
   imagekitBaseUrl: '',
+  imagekitPublicKey: '',
+  imagekitFolder: '/artist-portfolio',
 
   // 일반적으로 수정할 필요가 없습니다.
   adminRecoveryRedirect: (window.location.origin || '') + '/admin.html?recovery=1',
