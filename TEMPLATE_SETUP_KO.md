@@ -10,6 +10,8 @@
 - `supabaseUrl`: Supabase Project URL
 - `supabasePublishableKey`: Supabase Publishable Key
 - `imagekitBaseUrl`: ImageKit URL endpoint
+- `imagekitPublicKey`: 구매자 ImageKit public key
+- `imagekitFolder`: 구매자 이미지 보관 폴더
 
 관리자 이메일은 Vercel의 `ADMIN_EMAIL` 환경변수와 반드시 동일하게 맞춥니다.
 
@@ -27,7 +29,14 @@ Vercel 프로젝트의 Settings > Environment Variables에 아래 값을 추가�
 
 ## 3. Supabase 준비
 
-Supabase에서 새 프로젝트를 만든 뒤 다음 기능을 사용합니다.
+구매자 본인의 새 프로젝트를 만들고 Authentication의 이메일 로그인을 활성화합니다.
+관리자 이메일로 Auth 사용자를 만든 뒤 SQL Editor에서 아래 쿼리로 **id(UUID)**를 확인합니다.
+
+```sql
+select id, email from auth.users where email = 'admin@example.com';
+```
+
+`supabase-setup.sql`의 `REPLACE_WITH_ADMIN_USER_UUID`를 해당 id로 교체하여 **새 프로젝트에서만** 실행합니다. 이 파일이 아래 테이블과 공개 읽기/관리자 쓰기 접근 규칙을 만듭니다.
 
 - Authentication > Email
 - `site_settings` 테이블
@@ -36,11 +45,11 @@ Supabase에서 새 프로젝트를 만든 뒤 다음 기능을 사용합니다.
 - `exhibitions` 테이블
 - `contact_items` 테이블
 
-기존 복작소 데이터베이스와 연결하지 말고 구매자별 새 프로젝트를 사용합니다.
+기존 사이트의 데이터베이스와 연결하지 말고 구매자별 새 프로젝트를 사용합니다. 관리자 계정의 UUID를 다른 계정으로 바꿀 때는 SQL의 관리자 정책도 새 UUID로 다시 설정해야 합니다.
 
 ## 4. 관리자 로그인
 
-처음에는 Vercel의 `CROP_ACCESS_PASSWORD`에 넣은 비밀번호로 로그인합니다.
+처음에는 Vercel의 `CROP_ACCESS_PASSWORD`에 넣은 비밀번호로 로그인합니다. 관리자 이메일 계정의 이메일 확인이 필요한 경우 인증 메일을 완료한 후 로그인합니다.
 
 관리자 이메일은 `ADMIN_EMAIL`과 `template-config.js > adminEmail`이 같아야 합니다.
 
@@ -77,10 +86,16 @@ Supabase Authentication의 Redirect URLs에는 실제 사이트 주소의 아래
 
 1. GitHub 저장소 복제
 2. Vercel 연결
-3. Supabase 새 프로젝트 생성
-4. `template-config.js` 입력
-5. Vercel 환경변수 입력
-6. Supabase Auth Redirect URL 등록
-7. 관리자 로그인 확인
-8. 작품/책/작가 정보 교체
-9. 커스텀 도메인 연결
+3. 구매자 명의의 Supabase와 ImageKit 프로젝트 생성
+4. `template-config.js`에 구매자 키와 브랜드 입력
+5. Vercel 환경변수 입력 후 배포
+6. Supabase Auth 관리자 계정 생성 및 UUID 확인
+7. `supabase-setup.sql`의 UUID 교체 후 새 프로젝트에서 실행
+8. Supabase Auth Redirect URL 등록
+9. 관리자 로그인, 작품 등록, 책 소개 저장 확인
+10. 샘플 데이터와 기본 이미지를 본인 콘텐츠로 교체
+11. 커스텀 도메인 연결
+
+## 판매 전 확인 상태
+
+이 파일은 설치 초안입니다. 별도의 새 Supabase·ImageKit·Vercel 계정에서 전체 설치 및 저장 흐름을 아직 실증하지 않았습니다. 판매 안내에서 설치 검증 완료라고 표시하지 마세요.
