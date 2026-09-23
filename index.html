@@ -725,14 +725,23 @@
       .hero{padding-top:8px}
       #heroLead:not(.expanded){display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
       .hero-read-more{display:inline-block;margin-top:-4px;padding:7px 0;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
-      .filter-swipe-hint{display:block;text-align:right;margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.01em}
+      #works{padding-top:12px}
+      .filter-swipe-hint{display:none}
       #works .filter-bar{
-        flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
-        -webkit-overflow-scrolling:touch;scrollbar-width:none;
-        scroll-snap-type:x proximity;overscroll-behavior-inline:contain;
+        display:grid;
+        grid-template-columns:repeat(6,minmax(0,1fr));
+        gap:5px;
+        overflow:visible;
+        margin-bottom:14px;
       }
-      #works .filter-bar::-webkit-scrollbar{display:none}
-      #works .filter-btn{flex:0 0 auto;scroll-snap-align:start}
+      #works .filter-btn{
+        min-width:0;
+        padding:9px 2px;
+        border-radius:14px;
+        font-size:14px;
+        line-height:1.2;
+        white-space:nowrap;
+      }
       .gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
       .gallery .work{border-radius:18px}
       .gallery .work-img{aspect-ratio:4/5}
