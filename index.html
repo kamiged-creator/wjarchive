@@ -96,6 +96,8 @@
       min-height:72px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 0 14px;
     }
     .brand{display:flex;flex-direction:column;gap:2px;padding-top:0;flex:0 0 auto}
+    .brand-name-row{display:flex;align-items:center;gap:9px;min-width:0}
+    .brand-logo{width:34px;height:34px;border-radius:10px;object-fit:cover;display:none;flex:0 0 auto;border:1px solid var(--line);background:#fff}
     .brand-title{
       display:inline-flex;
       align-items:center;
@@ -1396,7 +1398,10 @@
     <div class="wrap topbar-inner">
       <div class="brand">
         <div class="brand-top">
-          <div class="brand-title">샘플 작가</div>
+          <div class="brand-name-row">
+            <img class="brand-logo" id="brandLogo" alt="사이트 로고">
+            <div class="brand-title" id="brandArtistName">샘플 작가</div>
+          </div>
           <div class="brand-mobile-actions">
             <a class="news-mini news-mobile" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
             <div class="mobile-extra-wrap" id="mobileExtraWrap">
@@ -1411,7 +1416,7 @@
             </div>
           </div>
         </div>
-        <div class="brand-sub">Artist · Portfolio</div>
+        <div class="brand-sub" id="brandSiteName">Artist · Portfolio</div>
       </div>
       <div class="top-tools">
         <div class="top-nav-row">
@@ -1574,7 +1579,7 @@
 
   <footer class="footer">
     <div class="wrap footer-bar">
-      <div>© <span id="year"></span> Sample Artist. All rights reserved.</div>
+      <div>© <span id="year"></span> <span id="brandingFooterName">Sample Artist</span>. All rights reserved.</div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap">
         <a href="/privacy.html">Privacy</a>
         <a class="footer-admin" href="/admin.html">관리자</a>
@@ -1695,11 +1700,53 @@
 
     const qs = sel => document.querySelector(sel);
     const qsa = sel => [...document.querySelectorAll(sel)];
+
+    function safeAccentColor(value){
+      const color=String(value || '').trim();
+      return /^#[0-9a-f]{6}$/i.test(color) ? color : '#8b6847';
+    }
+
+    function applyBranding(value={}){
+      const artistName=String(value.artistName || TEMPLATE_CONFIG.artistName || 'Sample Artist').trim() || 'Sample Artist';
+      const siteName=String(value.siteName || TEMPLATE_CONFIG.siteName || 'Artist Portfolio').trim() || 'Artist Portfolio';
+      const logoUrl=String(value.logoUrl || TEMPLATE_CONFIG.logoUrl || '').trim();
+      const accentColor=safeAccentColor(value.accentColor || TEMPLATE_CONFIG.accentColor);
+
+      document.documentElement.style.setProperty('--accent',accentColor);
+      if(qs('#brandArtistName')) qs('#brandArtistName').textContent=artistName;
+      if(qs('#brandSiteName')) qs('#brandSiteName').textContent=siteName;
+      if(qs('#brandingFooterName')) qs('#brandingFooterName').textContent=artistName;
+
+      const logo=qs('#brandLogo');
+      if(logo){
+        logo.style.display=logoUrl?'block':'none';
+        if(logoUrl) logo.src=logoUrl;
+        else logo.removeAttribute('src');
+      }
+
+      const hero=qs('#heroTitle');
+      if(hero && /샘플 작가|Sample Artist/.test(hero.textContent || '')){
+        hero.innerHTML=`빛과 감정을 담는<br>${escapeHtml(artistName)}의 작품 세계`;
+      }
+      const aboutCopy=qs('#aboutSectionCopy');
+      if(aboutCopy && /샘플 작가|Sample Artist/.test(aboutCopy.textContent || '')){
+        aboutCopy.textContent=`${artistName}의 작업 방향과 시선을 담는 소개 영역입니다.`;
+      }
+
+      document.title=`${artistName} | ${siteName}`;
+    }
+
     const state = { currentCategory:'전체', currentPage:1, worksPerPage:9, dbWorks:null };
     function getWorksPerPage(){
       return window.matchMedia('(max-width: 680px)').matches ? 10 : state.worksPerPage;
     }
     qs('#year').textContent = new Date().getFullYear();
+    applyBranding({
+      artistName:TEMPLATE_CONFIG.artistName,
+      siteName:TEMPLATE_CONFIG.siteName,
+      logoUrl:TEMPLATE_CONFIG.logoUrl,
+      accentColor:TEMPLATE_CONFIG.accentColor
+    });
 
     function escapeHtml(str){
       return String(str || '').replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
@@ -1996,6 +2043,9 @@
             }
             if(row.key === 'books'){
               applyBookVisibility(value.enabled !== false);
+            }
+            if(row.key === 'branding'){
+              applyBranding(value);
             }
           });
           applyAboutContentToPage(merged);
