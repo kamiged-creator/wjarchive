@@ -471,7 +471,33 @@
       box-shadow:none;
       font-weight:700;
     }
-    #adminOverlay.admin-dark .btn.danger{background:#5a2227;color:#fff;border-color:#7b343b}
+    .password-forgot{
+      display:block;
+      margin:8px 2px 0 auto;
+      padding:4px 2px;
+      border:0;
+      background:transparent;
+      color:#7d5a3f;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:underline;
+      text-underline-offset:3px;
+    }
+    .password-forgot:hover,
+    .password-forgot:focus-visible{color:#5f412d}
+    .reset-confirm-label{display:block;margin-top:12px}
+    #saveNewPasswordBtn{
+      background:linear-gradient(180deg,#9a7454,#7d5a3f);
+      color:#fff;
+      border-color:#7d5a3f;
+      box-shadow:0 8px 18px rgba(125,90,63,.22);
+      font-weight:800;
+    }
+    #adminOverlay.admin-dark .password-forgot{color:#d7b28f}
+    #adminOverlay.admin-dark .password-forgot:hover,
+    #adminOverlay.admin-dark .password-forgot:focus-visible{color:#efd1b4}
+        #adminOverlay.admin-dark .btn.danger{background:#5a2227;color:#fff;border-color:#7b343b}
     #adminOverlay.admin-dark .admin-theme-toggle{background:#171c23;color:#f3eee8;border-color:rgba(255,255,255,.20)}
     #adminOverlay.admin-dark .book-cover-preview{background:#0a0d11;border-color:rgba(255,255,255,.12)}
     #adminOverlay.admin-dark .popup-url-edit,
@@ -1844,15 +1870,32 @@
 
   <div class="admin-overlay" id="adminOverlay" aria-hidden="true">
     <div id="passwordGate" class="password-wrap">
-      <h2>관리자 모드</h2>
-      <p>비밀번호를 입력하면 관리자 기능이 열립니다.</p>
-      <label class="label" for="adminPassword">비밀번호</label>
-      <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
-      <div class="gate-actions">
-        <button class="btn primary" type="button" id="loginBtn">들어가기</button>
-        <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
+      <div id="adminLoginForm">
+        <h2>관리자 모드</h2>
+        <p>비밀번호를 입력하면 관리자 기능이 열립니다.</p>
+        <label class="label" for="adminPassword">비밀번호</label>
+        <input class="field" id="adminPassword" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+        <button class="password-forgot" type="button" id="forgotPasswordBtn">비밀번호를 잊으셨나요?</button>
+        <div class="gate-actions">
+          <button class="btn primary" type="button" id="loginBtn">들어가기</button>
+          <button class="btn" type="button" id="closeOverlayFromGate">닫기</button>
+        </div>
+        <div class="status" id="loginStatus">관리자 비밀번호를 입력하면 사이트 관리 기능이 열립니다.</div>
       </div>
-      <div class="status" id="loginStatus">관리자 비밀번호를 입력하면 사이트 관리 기능이 열립니다.</div>
+
+      <div id="adminResetForm" class="hidden">
+        <h2>새 비밀번호 설정</h2>
+        <p>메일 인증이 완료되었습니다. 새 비밀번호를 입력해 주세요.</p>
+        <label class="label" for="newAdminPassword">새 비밀번호</label>
+        <input class="field" id="newAdminPassword" type="password" placeholder="8자 이상 입력" autocomplete="new-password">
+        <label class="label reset-confirm-label" for="confirmAdminPassword">새 비밀번호 확인</label>
+        <input class="field" id="confirmAdminPassword" type="password" placeholder="한 번 더 입력" autocomplete="new-password">
+        <div class="gate-actions">
+          <button class="btn primary" type="button" id="saveNewPasswordBtn">새 비밀번호 저장</button>
+          <button class="btn" type="button" id="cancelResetBtn">취소</button>
+        </div>
+        <div class="status" id="resetPasswordStatus">새 비밀번호는 8자 이상으로 설정해 주세요.</div>
+      </div>
     </div>
 
     <div id="adminApp" class="admin-shell hidden">
@@ -2272,7 +2315,11 @@
     ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     const adminAuthConfig = {
-      loginEndpoint: 'https://wjarchive.vercel.app/api/crop-auth',
+      legacyLoginEndpoint: '/api/crop-auth',
+      bootstrapEndpoint: '/api/admin-auth-bootstrap',
+      sessionEndpoint: '/api/admin-session',
+      adminEmail: 'bokjakso.shop@gmail.com',
+      recoveryRedirect: 'https://wjarchive.vercel.app/admin.html?recovery=1',
       tokenStorageKey: 'wjarchiveAdminAccessToken'
     };
 
@@ -3612,31 +3659,86 @@
       return Number.isFinite(expire) && expire > Math.floor(Date.now() / 1000) + 15;
     }
 
+    function isPasswordRecoveryUrl(){
+      const params = new URLSearchParams(window.location.search);
+      return params.get('recovery') === '1' || /(?:^|[&#])type=recovery(?:&|$)/.test(window.location.hash || '');
+    }
+
+    function showLoginForm(){
+      qs('#adminLoginForm')?.classList.remove('hidden');
+      qs('#adminResetForm')?.classList.add('hidden');
+    }
+
+    function showRecoveryForm(){
+      qs('#passwordGate')?.classList.remove('hidden');
+      qs('#adminApp')?.classList.add('hidden');
+      qs('#adminLoginForm')?.classList.add('hidden');
+      qs('#adminResetForm')?.classList.remove('hidden');
+      window.setTimeout(() => qs('#newAdminPassword')?.focus(), 50);
+    }
+
+    async function ensureAdminAuthAccount(){
+      try{
+        const response = await fetch(adminAuthConfig.bootstrapEndpoint, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'}
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '관리자 계정 준비에 실패했습니다.');
+        return {ok:true, result};
+      }catch(error){
+        return {ok:false, error};
+      }
+    }
+
+    async function mintAdminSession(supabaseAccessToken){
+      const response = await fetch(adminAuthConfig.sessionEndpoint, {
+        method:'POST',
+        headers:{Authorization:`Bearer ${supabaseAccessToken}`}
+      });
+      const result = await response.json().catch(() => ({}));
+      if(!response.ok) throw new Error(result.message || '관리자 세션을 만들 수 없습니다.');
+      sessionStorage.setItem(adminAuthConfig.tokenStorageKey, result.accessToken);
+      return result;
+    }
+
     function openAdmin(){
       state.adminOpen = true;
-      state.loggedIn = adminTokenIsFresh(getAdminAccessToken());
+      const recoveryMode = isPasswordRecoveryUrl();
+      state.loggedIn = !recoveryMode && adminTokenIsFresh(getAdminAccessToken());
       qs('#adminOverlay').classList.add('open');
       qs('#adminOverlay').setAttribute('aria-hidden', 'false');
+
+      if(recoveryMode){
+        showRecoveryForm();
+        return;
+      }
+
       if(state.loggedIn){
         qs('#passwordGate').classList.add('hidden');
         qs('#adminApp').classList.remove('hidden');
       } else {
         qs('#passwordGate').classList.remove('hidden');
         qs('#adminApp').classList.add('hidden');
+        showLoginForm();
         qs('#adminPassword').focus();
       }
     }
+
     function closeAdmin(){
       state.adminOpen = false;
       window.location.href = '/';
     }
-    function logoutAdmin(){
+
+    async function logoutAdmin(){
       state.loggedIn = false;
       sessionStorage.removeItem(adminAuthConfig.tokenStorageKey);
+      try{ await supabaseClient?.auth?.signOut({scope:'local'}); }catch(err){}
       qs('#adminPassword').value = '';
       qs('#loginStatus').textContent = '로그아웃되었습니다.';
       qs('#passwordGate').classList.remove('hidden');
       qs('#adminApp').classList.add('hidden');
+      showLoginForm();
     }
 
     qs('#adminFooterBtn')?.addEventListener('click', openAdmin);
@@ -3645,31 +3747,55 @@
     qs('#logoutBtn').addEventListener('click', logoutAdmin);
     qs('#adminOverlay').addEventListener('click', e => { if(e.target.id === 'adminOverlay') closeAdmin(); });
 
-    async function handleLogin(){
-      const pw = qs('#adminPassword').value.trim();
-      const status = qs('#loginStatus');
-      const btn = qs('#loginBtn');
-      if(!pw){
-        status.textContent = '비밀번호를 입력해 주세요.';
-        status.className = 'status bad';
-        return;
-      }
-      btn.disabled = true;
-      btn.textContent = '확인 중...';
-      status.textContent = '';
+    async function legacyLogin(pw){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 12000);
       try{
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 12000);
-        const response = await fetch(adminAuthConfig.loginEndpoint, {
+        const response = await fetch(adminAuthConfig.legacyLoginEndpoint, {
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({password:pw}),
           signal:controller.signal
         });
-        clearTimeout(timer);
         const result = await response.json().catch(() => ({}));
         if(!response.ok) throw new Error(result.message || '비밀번호가 맞지 않습니다.');
         sessionStorage.setItem(adminAuthConfig.tokenStorageKey, result.accessToken);
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+
+    async function handleLogin(){
+      const pw = qs('#adminPassword').value.trim();
+      const status = qs('#loginStatus');
+      const btn = qs('#loginBtn');
+
+      if(!pw){
+        status.textContent = '비밀번호를 입력해 주세요.';
+        status.className = 'status bad';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '확인 중...';
+      status.textContent = '';
+
+      try{
+        const bootstrap = await ensureAdminAuthAccount();
+
+        if(bootstrap.ok && supabaseClient){
+          const {data, error} = await supabaseClient.auth.signInWithPassword({
+            email: adminAuthConfig.adminEmail,
+            password: pw
+          });
+          if(error) throw new Error('비밀번호가 맞지 않습니다.');
+          const accessToken = data?.session?.access_token;
+          if(!accessToken) throw new Error('로그인 세션을 만들 수 없습니다.');
+          await mintAdminSession(accessToken);
+        }else{
+          await legacyLogin(pw);
+        }
+
         state.loggedIn = true;
         qs('#adminPassword').value = '';
         status.textContent = '비밀번호 확인 완료. 관리자 모드가 열렸습니다.';
@@ -3679,7 +3805,9 @@
       }catch(error){
         state.loggedIn = false;
         sessionStorage.removeItem(adminAuthConfig.tokenStorageKey);
-        status.textContent = error.name === 'AbortError' ? '인증 서버 응답이 지연되고 있습니다.' : (error.message || '비밀번호가 맞지 않습니다.');
+        status.textContent = error.name === 'AbortError'
+          ? '인증 서버 응답이 지연되고 있습니다.'
+          : (error.message || '비밀번호가 맞지 않습니다.');
         status.className = 'status bad';
         qs('#adminPassword').select();
       }finally{
@@ -3687,8 +3815,112 @@
         btn.disabled = false;
       }
     }
+
+    async function handleForgotPassword(){
+      const btn = qs('#forgotPasswordBtn');
+      const status = qs('#loginStatus');
+      if(!supabaseClient){
+        status.textContent = '비밀번호 재설정 기능을 불러오지 못했습니다.';
+        status.className = 'status bad';
+        return;
+      }
+
+      btn.disabled = true;
+      status.textContent = '재설정 메일을 준비하고 있습니다...';
+      status.className = 'status';
+
+      try{
+        const bootstrap = await ensureAdminAuthAccount();
+        if(!bootstrap.ok) throw bootstrap.error || new Error('관리자 계정 준비에 실패했습니다.');
+
+        const {error} = await supabaseClient.auth.resetPasswordForEmail(
+          adminAuthConfig.adminEmail,
+          {redirectTo: adminAuthConfig.recoveryRedirect}
+        );
+        if(error) throw error;
+
+        status.textContent = 'bokjakso.shop@gmail.com으로 비밀번호 재설정 메일을 보냈습니다. 메일의 링크를 눌러 새 비밀번호를 설정해 주세요.';
+        status.className = 'status ok';
+      }catch(error){
+        status.textContent = error.message || '재설정 메일을 보내지 못했습니다.';
+        status.className = 'status bad';
+      }finally{
+        btn.disabled = false;
+      }
+    }
+
+    async function handleResetPassword(){
+      const password = qs('#newAdminPassword').value;
+      const confirmPassword = qs('#confirmAdminPassword').value;
+      const status = qs('#resetPasswordStatus');
+      const btn = qs('#saveNewPasswordBtn');
+
+      if(password.length < 8){
+        status.textContent = '새 비밀번호는 8자 이상으로 입력해 주세요.';
+        status.className = 'status bad';
+        return;
+      }
+      if(password !== confirmPassword){
+        status.textContent = '새 비밀번호가 서로 일치하지 않습니다.';
+        status.className = 'status bad';
+        return;
+      }
+      if(!supabaseClient){
+        status.textContent = '비밀번호 재설정 기능을 불러오지 못했습니다.';
+        status.className = 'status bad';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '저장 중...';
+      status.textContent = '';
+
+      try{
+        let {data:{session}} = await supabaseClient.auth.getSession();
+        if(!session){
+          await new Promise(resolve => setTimeout(resolve, 400));
+          ({data:{session}} = await supabaseClient.auth.getSession());
+        }
+        if(!session) throw new Error('재설정 링크가 만료되었거나 올바르지 않습니다. 다시 재설정 메일을 받아 주세요.');
+
+        const {error} = await supabaseClient.auth.updateUser({password});
+        if(error) throw error;
+
+        ({data:{session}} = await supabaseClient.auth.getSession());
+        if(!session?.access_token) throw new Error('새 비밀번호는 저장되었지만 로그인 세션을 만들 수 없습니다.');
+
+        await mintAdminSession(session.access_token);
+        state.loggedIn = true;
+        qs('#newAdminPassword').value = '';
+        qs('#confirmAdminPassword').value = '';
+        window.history.replaceState(null, '', '/admin.html');
+        status.textContent = '새 비밀번호로 변경되었습니다.';
+        status.className = 'status ok';
+        qs('#passwordGate').classList.add('hidden');
+        qs('#adminApp').classList.remove('hidden');
+      }catch(error){
+        status.textContent = error.message || '새 비밀번호 저장 중 오류가 발생했습니다.';
+        status.className = 'status bad';
+      }finally{
+        btn.textContent = '새 비밀번호 저장';
+        btn.disabled = false;
+      }
+    }
+
     qs('#loginBtn').addEventListener('click', handleLogin);
     qs('#adminPassword').addEventListener('keydown', e => { if(e.key === 'Enter') handleLogin(); });
+    qs('#forgotPasswordBtn').addEventListener('click', handleForgotPassword);
+    qs('#saveNewPasswordBtn').addEventListener('click', handleResetPassword);
+    qs('#confirmAdminPassword').addEventListener('keydown', e => { if(e.key === 'Enter') handleResetPassword(); });
+    qs('#cancelResetBtn').addEventListener('click', () => {
+      window.location.href = '/admin.html';
+    });
+
+    if(supabaseClient){
+      supabaseClient.auth.onAuthStateChange((event) => {
+        if(event === 'PASSWORD_RECOVERY') showRecoveryForm();
+      });
+    }
 
     function updateFileSelectionStatus(files){
       const fileStatus = qs('#fileStatus');
