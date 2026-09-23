@@ -128,34 +128,45 @@
     .mobile-menu-guide{
       display:none;
       position:absolute;
-      right:0;
-      top:calc(100% + 12px);
+      right:7px;
+      top:calc(100% + 8px);
       z-index:55;
-      width:210px;
-      padding:13px 15px;
-      border-radius:14px;
-      background:#2f6fd6;
-      color:#fff;
-      font-size:13px;
-      font-weight:700;
-      line-height:1.45;
-      letter-spacing:-.02em;
-      box-shadow:0 10px 24px rgba(35,86,170,.26);
+      width:22px;
+      height:30px;
       pointer-events:none;
+      filter:drop-shadow(0 4px 8px rgba(47,111,214,.22));
     }
     .mobile-menu-guide::before{
       content:"";
       position:absolute;
-      top:-7px;
-      right:12px;
-      width:14px;
-      height:14px;
+      left:50%;
+      top:0;
+      width:8px;
+      height:18px;
+      border-radius:999px;
       background:#2f6fd6;
-      transform:rotate(45deg);
+      transform:translateX(-50%);
+    }
+    .mobile-menu-guide::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      top:-1px;
+      width:12px;
+      height:12px;
+      border-top:4px solid #2f6fd6;
+      border-left:4px solid #2f6fd6;
+      transform:translateX(-50%) rotate(45deg);
       border-radius:2px;
     }
-    .mobile-menu-guide strong{display:block;font-size:14px;margin-bottom:2px}
-    .mobile-menu-guide.show{display:block}
+    .mobile-menu-guide.show{
+      display:block;
+      animation:mobileMenuArrowNudge 1s ease-in-out infinite;
+    }
+    @keyframes mobileMenuArrowNudge{
+      0%,100%{transform:translateY(3px)}
+      50%{transform:translateY(-2px)}
+    }
     .mobile-extra-menu{
       position:absolute;right:0;top:calc(100% + 8px);z-index:45;
       width:158px;padding:8px;border:1px solid var(--line);border-radius:16px;
@@ -1375,10 +1386,7 @@
               <button class="mobile-extra-trigger" id="mobileExtraTrigger" type="button" aria-label="추가 메뉴 열기" aria-expanded="false">
                 <span></span><span></span><span></span>
               </button>
-              <div class="mobile-menu-guide" id="mobileMenuGuide" role="status">
-                <strong>메뉴를 확인해보세요</strong>
-                책 소개와 스토어 메뉴가 여기 있어요.
-              </div>
+              <div class="mobile-menu-guide" id="mobileMenuGuide" aria-hidden="true"></div>
               <div class="mobile-extra-menu" id="mobileExtraMenu" aria-label="추가 메뉴">
                 <a class="mobile-extra-item" href="/books.html"><span>책 소개</span><small>보기</small></a>
                 <button class="mobile-extra-item" type="button" data-coming-soon="스토어"><span>스토어</span><small>준비중</small></button>
