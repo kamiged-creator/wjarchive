@@ -150,7 +150,9 @@
       document.title=`책 소개 | ${data.artistName}`;
     }
 
-    applyBranding(TEMPLATE_CONFIG);
+    let localBranding=null;
+    try{localBranding=JSON.parse(localStorage.getItem('artistTemplateBranding')||'null')}catch(e){}
+    applyBranding(localBranding||TEMPLATE_CONFIG);
 
     const SUPABASE_URL=String(TEMPLATE_CONFIG.supabaseUrl||'').trim();
     const SUPABASE_ANON_KEY=String(TEMPLATE_CONFIG.supabasePublishableKey||'').trim();
@@ -312,6 +314,7 @@
         let branding=brandingRes.data.value;
         if(typeof branding==='string'){try{branding=JSON.parse(branding)}catch(e){branding={}}}
         applyBranding(branding);
+        try{localStorage.setItem('artistTemplateBranding',JSON.stringify(branding))}catch(e){}
       }
 
       if(booksRes.error){console.warn(booksRes.error);return;}
