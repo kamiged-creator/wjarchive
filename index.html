@@ -289,7 +289,7 @@
       background:rgba(255,253,249,.9);color:var(--text);font:inherit;font-weight:750;
       box-shadow:0 8px 24px rgba(36,28,20,.07);cursor:pointer;
     }
-    .about-audio-icon{font-size:19px;line-height:1;flex:0 0 auto}
+    .about-audio-btn svg{width:19px;height:19px;flex:0 0 auto}
     .about-audio-btn[aria-pressed="true"]{background:var(--text);color:#fff;border-color:transparent}
     .about-audio-btn:focus-visible{outline:3px solid rgba(31,29,26,.22);outline-offset:3px}
 
@@ -1496,7 +1496,7 @@
           <div class="artist-copy">
             <div class="about-audio-row">
               <button class="about-audio-btn" id="aboutAudioBtn" type="button" aria-pressed="false" aria-label="작가 소개글 음성으로 듣기">
-                <span class="about-audio-icon" aria-hidden="true">🔊</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4Zm11.5-.9v7.8a5 5 0 0 0 0-7.8Zm0-3.1v2.1a7 7 0 0 1 0 9.8V19a9 9 0 0 0 0-14Z"/></svg>
                 <span class="about-audio-label">소개글 듣기</span>
               </button>
             </div>
