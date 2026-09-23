@@ -125,6 +125,37 @@
       box-shadow:0 2px 8px rgba(31,26,23,.06);
     }
     .mobile-extra-trigger span{display:block;width:18px;height:2px;border-radius:999px;background:currentColor}
+    .mobile-menu-guide{
+      display:none;
+      position:absolute;
+      right:0;
+      top:calc(100% + 12px);
+      z-index:55;
+      width:210px;
+      padding:13px 15px;
+      border-radius:14px;
+      background:#2f6fd6;
+      color:#fff;
+      font-size:13px;
+      font-weight:700;
+      line-height:1.45;
+      letter-spacing:-.02em;
+      box-shadow:0 10px 24px rgba(35,86,170,.26);
+      pointer-events:none;
+    }
+    .mobile-menu-guide::before{
+      content:"";
+      position:absolute;
+      top:-7px;
+      right:12px;
+      width:14px;
+      height:14px;
+      background:#2f6fd6;
+      transform:rotate(45deg);
+      border-radius:2px;
+    }
+    .mobile-menu-guide strong{display:block;font-size:14px;margin-bottom:2px}
+    .mobile-menu-guide.show{display:block}
     .mobile-extra-menu{
       position:absolute;right:0;top:calc(100% + 8px);z-index:45;
       width:158px;padding:8px;border:1px solid var(--line);border-radius:16px;
@@ -761,6 +792,7 @@
       .brand-mobile-actions{display:flex!important;align-items:center;gap:8px;flex:0 0 auto}
       .mobile-extra-wrap{display:block!important;position:relative;flex:0 0 auto;top:4px}
       .mobile-extra-trigger{display:flex!important;visibility:visible!important;opacity:1!important;flex:0 0 36px}
+      .mobile-menu-guide.show{display:block}
       .news-desktop-link{display:none !important}
       .accordion-btn{
         padding:16px 18px 8px;
@@ -1343,6 +1375,10 @@
               <button class="mobile-extra-trigger" id="mobileExtraTrigger" type="button" aria-label="추가 메뉴 열기" aria-expanded="false">
                 <span></span><span></span><span></span>
               </button>
+              <div class="mobile-menu-guide" id="mobileMenuGuide" role="status">
+                <strong>메뉴를 확인해보세요</strong>
+                책 소개와 스토어 메뉴가 여기 있어요.
+              </div>
               <div class="mobile-extra-menu" id="mobileExtraMenu" aria-label="추가 메뉴">
                 <a class="mobile-extra-item" href="/books.html"><span>책 소개</span><small>보기</small></a>
                 <button class="mobile-extra-item" type="button" data-coming-soon="스토어"><span>스토어</span><small>준비중</small></button>
@@ -2045,8 +2081,22 @@
     function bindComingSoonMenu(){
       const wrap = qs('#mobileExtraWrap');
       const trigger = qs('#mobileExtraTrigger');
+      const guide = qs('#mobileMenuGuide');
       const toast = qs('#comingSoonToast');
+      const guideStorageKey = 'wjarchive:mobileMenuGuide:v1';
       let toastTimer = null;
+
+      if(guide){
+        let alreadySeen = false;
+        try{ alreadySeen = localStorage.getItem(guideStorageKey) === 'seen'; }catch(err){}
+        if(!alreadySeen) guide.classList.add('show');
+      }
+
+      const dismissGuide = () => {
+        if(!guide) return;
+        guide.classList.remove('show');
+        try{ localStorage.setItem(guideStorageKey, 'seen'); }catch(err){}
+      };
 
       const closeMenu = () => {
         if(!wrap || !trigger) return;
@@ -2056,6 +2106,7 @@
 
       trigger?.addEventListener('click', (event) => {
         event.stopPropagation();
+        dismissGuide();
         const isOpen = wrap.classList.toggle('open');
         trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       });
