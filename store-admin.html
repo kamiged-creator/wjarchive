@@ -88,8 +88,15 @@
       <input class="field" id="adminPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
       <div class="toolbar">
         <button class="btn primary" type="button" id="loginBtn">들어가기</button>
+        <button class="btn" type="button" id="forgotPasswordBtn">비밀번호 찾기</button>
       </div>
       <div class="status" id="loginStatus"></div>
+      <div class="status hidden" id="passwordHelp">
+        기존 비밀번호는 보안상 다시 표시할 수 없습니다. 아래 버튼에서 새 비밀번호로 재설정할 수 있습니다.
+        <div class="toolbar" style="margin-top:10px">
+          <a class="btn" href="https://vercel.com/karisma-s-projects1/wjarchive/settings/environment-variables" target="_blank" rel="noopener">비밀번호 재설정 열기</a>
+        </div>
+      </div>
     </section>
 
     <section class="admin-shell hidden" id="adminApp">
@@ -451,6 +458,10 @@
     async function uploadSettingImage(){const file=$('#settingFile').files?.[0];if(!file||!settingUploadTarget)return;const button=document.querySelector(`[data-target="${settingUploadTarget}"]`);button.disabled=true;setStatus('#mainStatus','이미지 업로드 중...');try{const authResponse=await fetch(authConfig.imagekitAuthEndpoint,{cache:'no-store',headers:{Authorization:`Bearer ${getToken()}`}});const auth=await authResponse.json();if(!authResponse.ok)throw new Error(auth.message||'업로드 인증 실패');const form=new FormData();form.append('file',file,file.name);form.append('fileName',file.name);form.append('publicKey',imageKitConfig.publicKey);form.append('signature',auth.signature);form.append('expire',auth.expire);form.append('token',auth.token);form.append('folder','/bokjakso-store/banners');form.append('useUniqueFileName','true');const response=await fetch(imageKitConfig.uploadEndpoint,{method:'POST',body:form});const result=await response.json();if(!response.ok)throw new Error(result.message||'업로드 실패');const width=button.dataset.width||1800;$('#'+settingUploadTarget).value=optimizedImageKitUrl(result.url,width);previewSettings();setStatus('#mainStatus','이미지를 올렸습니다. 메인 화면 저장을 눌러 반영해 주세요.','ok');}catch(error){setStatus('#mainStatus',error.message||'업로드 실패','bad');}finally{button.disabled=false;$('#settingFile').value='';}}
 
     $('#loginBtn').addEventListener('click', login);
+    $('#forgotPasswordBtn').addEventListener('click', () => {
+      $('#passwordHelp').classList.toggle('hidden');
+      setStatus('#loginStatus', '', '');
+    });
     $('#adminPassword').addEventListener('keydown', event => { if(event.key === 'Enter') login(); });
     $('#logoutBtn').addEventListener('click', closeApp);
     $('#newBtn').addEventListener('click', () => fillForm({price_text:'가격 준비중', category:'keyring', status:'preparing', sort_order:10, is_visible:true}));
