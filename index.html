@@ -1733,6 +1733,17 @@
         aboutCopy.textContent=`${artistName}의 작업 방향과 시선을 담는 소개 영역입니다.`;
       }
 
+      const pageDescription=`${artistName}의 작품 포트폴리오. 작품 보기와 작가 소개, 소식과 문의 정보를 제공합니다.`;
+      const metaDescription=document.querySelector('meta[name="description"]');
+      const ogTitle=document.querySelector('meta[property="og:title"]');
+      const ogDescription=document.querySelector('meta[property="og:description"]');
+      const appName=document.querySelector('meta[name="application-name"]');
+      const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if(metaDescription) metaDescription.content=pageDescription;
+      if(ogTitle) ogTitle.content=`${artistName} | ${siteName}`;
+      if(ogDescription) ogDescription.content=`${artistName}의 작품 보기와 작가 소개, 소식과 문의 정보가 포함된 포트폴리오 사이트`;
+      if(appName) appName.content=siteName;
+      if(appleTitle) appleTitle.content=siteName;
       document.title=`${artistName} | ${siteName}`;
     }
 
