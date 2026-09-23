@@ -1227,6 +1227,41 @@
     }
 
 
+
+    /* Desktop admin: full-page canvas with fixed content width */
+    @media (min-width: 741px){
+      #adminOverlay.admin-overlay{
+        position:fixed;
+        inset:0;
+        display:none;
+        padding:24px;
+        overflow:auto;
+        background:#f3f1ed;
+        backdrop-filter:none;
+        -webkit-backdrop-filter:none;
+      }
+      #adminOverlay.admin-overlay.open{
+        display:block;
+      }
+      #adminOverlay .admin-shell{
+        width:980px;
+        max-width:calc(100vw - 48px);
+        min-width:0;
+        height:auto;
+        min-height:calc(100vh - 48px);
+        margin:0 auto;
+      }
+      #adminOverlay .admin-panel{
+        width:100%;
+        min-height:calc(100vh - 48px);
+        overflow:visible;
+        box-shadow:none;
+      }
+      #adminOverlay.admin-dark{
+        background:#0b0f14;
+      }
+    }
+
     /* Galaxy Fold / 좁은 화면 관리자 미리보기 보정 */
     @media (max-width: 740px){
       .admin-overlay.open{
