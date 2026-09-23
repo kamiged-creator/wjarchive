@@ -1,25 +1,20 @@
 {
-  "name": "이원주 작품 포트폴리오",
-  "short_name": "복작소",
-  "description": "이원주 작가의 작품 포트폴리오",
-  "start_url": "/?source=pwa",
-  "scope": "/",
+  "name": "Artist Portfolio Template",
+  "short_name": "Artist Portfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f4",
+  "theme_color": "#fbf8f4",
   "icons": [
     {
       "src": "/favicon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "/favicon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
-  ],
-  "theme_color": "#fbf8f4",
-  "background_color": "#fbf8f4",
-  "display": "standalone",
-  "orientation": "portrait-primary"
+  ]
 }
