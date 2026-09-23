@@ -125,6 +125,19 @@
       box-shadow:0 2px 8px rgba(31,26,23,.06);
     }
     .mobile-extra-trigger span{display:block;width:18px;height:2px;border-radius:999px;background:currentColor}
+    .mobile-extra-trigger.guide-glow{
+      animation:mobileMenuGuideGlow 1.15s ease-in-out 2;
+    }
+    @keyframes mobileMenuGuideGlow{
+      0%,100%{
+        border-color:rgba(111,86,63,.28);
+        box-shadow:0 2px 8px rgba(31,26,23,.06);
+      }
+      50%{
+        border-color:rgba(184,149,106,.72);
+        box-shadow:0 0 0 2px rgba(184,149,106,.16),0 0 12px rgba(184,149,106,.30);
+      }
+    }
     .mobile-menu-guide{
       display:none;
       position:absolute;
@@ -2097,12 +2110,16 @@
       if(guide){
         let alreadySeen = false;
         try{ alreadySeen = localStorage.getItem(guideStorageKey) === 'seen'; }catch(err){}
-        if(!alreadySeen) guide.classList.add('show');
+        if(!alreadySeen){
+          guide.classList.add('show');
+          trigger?.classList.add('guide-glow');
+        }
       }
 
       const dismissGuide = () => {
         if(!guide) return;
         guide.classList.remove('show');
+        trigger?.classList.remove('guide-glow');
         try{ localStorage.setItem(guideStorageKey, 'seen'); }catch(err){}
       };
 
