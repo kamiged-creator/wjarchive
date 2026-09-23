@@ -92,6 +92,7 @@
   <script src="/template-config.js"></script>
   <script>
     const TEMPLATE_CONFIG=window.ARTIST_TEMPLATE_CONFIG||{};
+    let activeBranding=null;
 
     function normalizeBranding(value={}){
       const accentCandidate=String(value.accentColor || TEMPLATE_CONFIG.accentColor || '#8b6847').trim();
@@ -105,6 +106,7 @@
 
     function applyBranding(value={}){
       const data=normalizeBranding(value);
+      activeBranding=data;
       document.documentElement.style.setProperty('--accent',data.accentColor);
       const artist=document.getElementById('bookDetailBrandArtist');
       const footer=document.getElementById('bookDetailFooterArtist');
@@ -116,6 +118,8 @@
         if(data.logoUrl) logo.src=data.logoUrl;
         else logo.removeAttribute('src');
       }
+      const metaDescription=document.querySelector('meta[name="description"]');
+      if(metaDescription) metaDescription.content=`${data.artistName}의 책과 작업 이야기를 소개합니다.`;
       document.title=`책 소개 | ${data.artistName}`;
     }
 
@@ -172,7 +176,7 @@
         return;
       }
       const title=book.title||'제목 미정';
-      document.title=title+' | 샘플 작가';
+      document.title=title+' | '+(activeBranding?.artistName||normalizeBranding(TEMPLATE_CONFIG).artistName);
       const heroTitle=document.getElementById('bookHeroTitle');
       if(heroTitle) heroTitle.textContent=title;
 
