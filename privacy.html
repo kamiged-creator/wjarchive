@@ -4,13 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="google" content="notranslate" />
-  <title>Privacy | 샘플 작가 작품 포트폴리오</title>
-  <meta name="description" content="샘플 작가 작품 포트폴리오 개인정보처리방침" />
+  <title>Privacy | Artist Portfolio</title>
+  <meta name="description" content="Artist Portfolio 개인정보처리방침" />
   <meta name="theme-color" content="#fbf8f4" />
-  <meta name="application-name" content="복작소" />
+  <meta name="application-name" content="Artist Portfolio" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="복작소" />
+  <meta name="apple-mobile-web-app-title" content="Artist Portfolio" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="msapplication-TileColor" content="#fbf8f4" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -23,6 +23,7 @@
       --paper:#fffdf9;
       --text:#1f1a17;
       --muted:#6e655d;
+      --accent:#8b6847;
       --line:rgba(31,26,23,.12);
       --shadow:0 20px 48px rgba(31,26,23,.08);
       --max:860px;
@@ -39,7 +40,8 @@
     a{color:inherit}
     .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
     header{padding:34px 0 18px}
-    .brand{font-size:22px;font-weight:900;letter-spacing:-.04em;text-decoration:none}
+    .brand{font-size:22px;font-weight:900;letter-spacing:-.04em;text-decoration:none;display:inline-flex;align-items:center;gap:9px}
+    .brand-logo{width:32px;height:32px;border-radius:9px;object-fit:cover;display:none;border:1px solid var(--line);background:#fff}
     main{padding:28px 0 70px}
     article{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:var(--shadow)}
     h1{margin:0 0 12px;font-size:clamp(30px,5vw,46px);line-height:1.12;letter-spacing:-.04em}
@@ -47,14 +49,14 @@
     p,li{color:var(--muted)}
     ul{padding-left:20px}
     .meta{margin:0 0 28px;color:var(--muted);font-size:14px}
-    .home{display:inline-flex;margin-top:24px;font-weight:800;text-decoration:none}
+    .home{display:inline-flex;margin-top:24px;font-weight:800;text-decoration:none;color:var(--accent)}
     footer{padding:24px 0 48px;color:var(--muted);font-size:13px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <a class="brand" href="/">샘플 작가</a>
+      <a class="brand" href="/"><img class="brand-logo" id="privacyBrandLogo" alt="사이트 로고"><span id="privacyBrandArtist">샘플 작가</span></a>
     </div>
   </header>
   <main>
@@ -63,7 +65,7 @@
         <h1>개인정보처리방침</h1>
         <p class="meta">시행일: 2026년 7월 19일</p>
 
-        <p>샘플 작가 작품 포트폴리오(YOUR-DOMAIN)는 방문자의 개인정보를 중요하게 생각하며, 사이트 운영에 필요한 최소한의 정보만 처리합니다.</p>
+        <p><span id="privacyPolicySite">샘플 작가 작품 포트폴리오</span>(YOUR-DOMAIN)는 방문자의 개인정보를 중요하게 생각하며, 사이트 운영에 필요한 최소한의 정보만 처리합니다.</p>
 
         <h2>1. 수집하는 개인정보</h2>
         <p>본 사이트는 일반 방문 과정에서 회원가입을 요구하지 않으며, 이름, 주소, 전화번호 등 개인을 직접 식별할 수 있는 정보를 자동으로 수집하지 않습니다.</p>
@@ -99,10 +101,48 @@
     </div>
   </main>
   <footer>
-    <div class="wrap">© <span id="year"></span> Sample Artist. All rights reserved.</div>
+    <div class="wrap">© <span id="year"></span> <span id="privacyFooterArtist">Sample Artist</span>. All rights reserved.</div>
   </footer>
+  <script src="/template-config.js"></script>
   <script>
+    const TEMPLATE_CONFIG=window.ARTIST_TEMPLATE_CONFIG||{};
+
+    function normalizePrivacyBranding(value={}){
+      const accentCandidate=String(value.accentColor || TEMPLATE_CONFIG.accentColor || '#8b6847').trim();
+      return {
+        artistName:String(value.artistName || TEMPLATE_CONFIG.artistName || 'Sample Artist').trim() || 'Sample Artist',
+        siteName:String(value.siteName || TEMPLATE_CONFIG.siteName || 'Artist Portfolio').trim() || 'Artist Portfolio',
+        logoUrl:String(value.logoUrl || TEMPLATE_CONFIG.logoUrl || '').trim(),
+        accentColor:/^#[0-9a-f]{6}$/i.test(accentCandidate) ? accentCandidate : '#8b6847'
+      };
+    }
+
+    function applyPrivacyBranding(value={}){
+      const data=normalizePrivacyBranding(value);
+      document.documentElement.style.setProperty('--accent',data.accentColor);
+      const brand=document.getElementById('privacyBrandArtist');
+      const footer=document.getElementById('privacyFooterArtist');
+      const policySite=document.getElementById('privacyPolicySite');
+      const logo=document.getElementById('privacyBrandLogo');
+      const metaDescription=document.querySelector('meta[name="description"]');
+      const appName=document.querySelector('meta[name="application-name"]');
+      const appleTitle=document.querySelector('meta[name="apple-mobile-web-app-title"]');
+      if(brand) brand.textContent=data.artistName;
+      if(footer) footer.textContent=data.artistName;
+      if(policySite) policySite.textContent=`${data.artistName} ${data.siteName}`;
+      if(logo){
+        logo.style.display=data.logoUrl?'block':'none';
+        if(data.logoUrl) logo.src=data.logoUrl;
+        else logo.removeAttribute('src');
+      }
+      if(metaDescription) metaDescription.content=`${data.artistName} ${data.siteName} 개인정보처리방침`;
+      if(appName) appName.content=data.siteName;
+      if(appleTitle) appleTitle.content=data.siteName;
+      document.title=`Privacy | ${data.artistName} ${data.siteName}`;
+    }
+
     document.querySelector('#year').textContent = new Date().getFullYear();
+    applyPrivacyBranding(TEMPLATE_CONFIG);
   </script>
 </body>
 </html>
