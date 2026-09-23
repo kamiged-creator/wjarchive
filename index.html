@@ -88,6 +88,10 @@
       transform:translateY(calc(-100% - 8px));
       opacity:.98;
     }
+    body.is-loading .topbar{
+      transform:none !important;
+      transition:none !important;
+    }
     .topbar-inner{
       min-height:72px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 0 14px;
     }
@@ -2042,10 +2046,10 @@
     function bindAutoHideTopbar(){
       const topbar = qs('.topbar');
       if(!topbar) return;
-      let lastY = window.scrollY || 0;
+      let lastY = Math.max(0, window.scrollY || 0);
       let ticking = false;
       const updateTopbar = () => {
-        const currentY = window.scrollY || 0;
+        const currentY = Math.max(0, window.scrollY || 0);
         const delta = currentY - lastY;
         if(currentY <= 8) topbar.classList.remove('is-hidden');
         else if(delta > 8) topbar.classList.add('is-hidden');
@@ -2058,6 +2062,10 @@
           window.requestAnimationFrame(updateTopbar);
           ticking = true;
         }
+      }, {passive:true});
+      window.addEventListener('pageshow', () => {
+        lastY = Math.max(0, window.scrollY || 0);
+        if(lastY <= 8) topbar.classList.remove('is-hidden');
       }, {passive:true});
     }
     function revealSiteContent(){
