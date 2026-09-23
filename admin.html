@@ -393,7 +393,7 @@
     }
     .admin-grid{display:grid;grid-template-columns:350px minmax(0,1fr);gap:18px;align-items:start}
     .stack{display:grid;gap:14px}
-    .admin-card{background:#fffdf9;border:1px solid rgba(31,26,23,.17);border-radius:22px;padding:16px}
+    .admin-card{background:#fffdf9;border:1px solid rgba(31,26,23,.24);border-radius:22px;padding:16px}
     .admin-card h3{margin:0 0 10px;font-size:17px}
     .admin-card p{margin:0;color:var(--muted);font-size:14px}
     /* 관리자 화면 정리: 이미지 작업은 crop.html로 분리하고 나머지는 접기식으로 표시 */
@@ -414,7 +414,7 @@
     #adminOverlay.admin-dark .admin-card,
     #adminOverlay.admin-dark .admin-themebar,
     #adminOverlay.admin-dark .popup-url-row,
-    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.22);color:#f5f7fb}
+    #adminOverlay.admin-dark .book-admin-row{background:#171c23;border-color:rgba(255,255,255,.28);color:#f5f7fb}
     #adminOverlay.admin-dark #adminApp .admin-crop-shortcut{background:linear-gradient(180deg,#171c23,#13171c)}
     #adminOverlay.admin-dark .field,
     #adminOverlay.admin-dark .field-sm,
@@ -462,7 +462,7 @@
     #adminApp .admin-crop-shortcut{
       display:flex;align-items:center;justify-content:space-between;gap:14px;
       padding:14px 16px;background:linear-gradient(180deg,#fffdf9,#fbf7f1);
-      border-color:rgba(31,26,23,.21);
+      border-color:rgba(31,26,23,.27);
       box-shadow:0 4px 14px rgba(31,26,23,.045)
     }
     #adminApp .admin-crop-shortcut-copy{min-width:0}
@@ -496,12 +496,12 @@
       transition:color .18s ease,transform .18s ease
     }
     #adminApp .admin-fold-card.open{
-      border-color:rgba(31,26,23,.22);
+      border-color:rgba(31,26,23,.28);
       box-shadow:0 8px 24px rgba(31,26,23,.055)
     }
     #adminApp .admin-fold-card.open>h3{
       background:rgba(240,173,98,.08);
-      border-bottom:1px solid rgba(31,26,23,.14)
+      border-bottom:1px solid rgba(31,26,23,.22)
     }
     #adminApp .admin-fold-card.open>h3::after{content:'−';color:#c2772f}
     #adminApp .admin-fold-card.open .admin-fold-icon{
@@ -532,7 +532,7 @@
     #adminApp .admin-fold-body{
       padding:16px;
       background:#fffdfa;
-      border-top:1px solid rgba(31,26,23,.10)
+      border-top:1px solid rgba(31,26,23,.18)
     }
     @media(max-width:680px){
       #adminApp .admin-crop-shortcut{align-items:flex-start;flex-direction:column}
@@ -579,7 +579,7 @@
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
     .dropzone{
-      border:1.5px dashed rgba(139,104,71,.48);border-radius:18px;padding:18px;background:linear-gradient(180deg,#fff, #fbf7f1);
+      border:1.5px dashed rgba(139,104,71,.58);border-radius:18px;padding:18px;background:linear-gradient(180deg,#fff, #fbf7f1);
       text-align:center;
       transition:border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease;
     }
@@ -1359,7 +1359,7 @@
     .popup-admin-toggle input{width:20px;height:20px;accent-color:var(--accent)}
     .popup-url-list{display:grid;gap:10px}
     .popup-url-row{
-      border:1px solid rgba(31,26,23,.18);border-radius:16px;background:rgba(255,255,255,.56);
+      border:1px solid rgba(31,26,23,.25);border-radius:16px;background:rgba(255,255,255,.56);
       overflow:hidden
     }
     .popup-url-head{
@@ -1395,7 +1395,7 @@
     .book-cover-preview{width:100%;max-width:220px;aspect-ratio:3/4;border:1px solid var(--line);border-radius:14px;background:#f4efe8;overflow:hidden;display:none}
     .book-cover-preview.has-image{display:block}
     .book-cover-preview img{width:100%;height:100%;object-fit:cover;display:block}
-    .book-image-address{border:1px solid rgba(31,26,23,.18);border-radius:14px;overflow:hidden}
+    .book-image-address{border:1px solid rgba(31,26,23,.24);border-radius:14px;overflow:hidden}
     .book-image-address-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px}
     .book-image-address-title{font-size:13px;font-weight:800}
     .book-image-address-state{margin-left:7px;font-size:11px;color:var(--muted);font-weight:650}
