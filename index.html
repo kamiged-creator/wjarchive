@@ -1411,7 +1411,7 @@
             </div>
           </div>
         </div>
-        <div class="brand-sub">Seal · Calligraphy</div>
+        <div class="brand-sub">Artist · Portfolio</div>
       </div>
       <div class="top-tools">
         <div class="top-nav-row">
@@ -1484,7 +1484,7 @@
         <div class="section-head">
           <div>
             <h2 class="section-title" id="worksSectionTitle">작품</h2>
-            <p class="section-copy" id="worksSectionCopy">카테고리별로 작품을 나눠 보이게 했습니다. 전체, 필선, 전각, 합죽, 묵색, 기타 중에서 골라 보세요.</p>
+            <p class="section-copy" id="worksSectionCopy">카테고리별로 작품을 나눠 볼 수 있습니다. 전체, 회화, 드로잉, 사진, 공예, 기타 중에서 골라 보세요.</p>
           </div>
         </div>
         <div class="filter-bar" id="filterBar">
@@ -1619,77 +1619,78 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/template-config.js"></script>
   <script>
     const sampleWorks = [
       {
-        title: '한결',
-        category: '전각',
+        title: '빛의 조각',
+        category: '회화',
         year: '2026',
-        medium: '전각',
-        desc: '힘 있게 다듬은 획과 여백의 균형을 보여주는 전각 작업.',
-        thumb: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop',
+        medium: 'Acrylic on canvas',
+        desc: '빛과 색의 겹을 통해 공간의 온도를 표현한 샘플 작품입니다.',
+        thumb: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: '묵향',
-        category: '서예',
-        year: '2025',
-        medium: '서예',
-        desc: '먹의 농담과 운필의 호흡을 담아낸 서예 작품.',
-        thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
+        title: '선의 기억',
+        category: '드로잉',
+        year: '2026',
+        medium: 'Ink on paper',
+        desc: '반복되는 선과 여백의 리듬을 담은 드로잉 샘플입니다.',
+        thumb: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: '담연',
-        category: '전각',
+        title: '오후의 장면',
+        category: '사진',
         year: '2025',
-        medium: '전각',
-        desc: '전통미와 현대적 정서를 함께 담아낸 인장 작업.',
+        medium: 'Photography',
+        desc: '일상의 한 장면에 남아 있는 빛과 시간을 기록한 사진 샘플입니다.',
         thumb: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: '유려',
-        category: '서예',
-        year: '2024',
-        medium: '서예',
-        desc: '흐르듯 이어지는 선과 절제된 여백이 살아 있는 작업.',
-        thumb: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1600&auto=format&fit=crop',
+        title: '손의 형태',
+        category: '공예',
+        year: '2025',
+        medium: 'Mixed media',
+        desc: '재료의 질감과 손의 흔적을 살린 공예 샘플 작품입니다.',
+        thumb: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1515405295579-ba7b45403062?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: '기록된 시간',
+        title: '전시 기록 01',
         category: '기타',
         year: '2024',
-        medium: '전시 기록',
-        desc: '전시 공간과 작품 설치 장면을 아카이브한 이미지.',
+        medium: 'Archive',
+        desc: '전시 공간과 설치 장면을 보여주는 아카이브 샘플입니다.',
         thumb: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=900&auto=format&fit=crop',
         large: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       },
       {
-        title: '온기',
+        title: '작업실 기록',
         category: '기타',
-        year: '2023',
-        medium: '기록 사진',
-        desc: '작업의 온도와 여운을 담은 아카이브 성격의 작품 이미지.',
-        thumb: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=900&auto=format&fit=crop',
-        large: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=1600&auto=format&fit=crop',
+        year: '2024',
+        medium: 'Studio archive',
+        desc: '작업 과정과 공간의 분위기를 담은 기록용 샘플 이미지입니다.',
+        thumb: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=900&auto=format&fit=crop',
+        large: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop',
         youtube: ''
       }
     ];
 
-    const SUPABASE_URL = 'https://vefeplfczeztbplowjmj.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
+    const TEMPLATE_CONFIG = window.ARTIST_TEMPLATE_CONFIG || {};
+    const SUPABASE_URL = String(TEMPLATE_CONFIG.supabaseUrl || '').trim();
+    const SUPABASE_ANON_KEY = String(TEMPLATE_CONFIG.supabasePublishableKey || '').trim();
     const supabaseClient = (
       window.supabase &&
-      SUPABASE_URL &&
-      SUPABASE_ANON_KEY &&
-      !SUPABASE_ANON_KEY.includes('여기에_')
+      /^https:\/\//i.test(SUPABASE_URL) &&
+      SUPABASE_ANON_KEY
     ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     const qs = sel => document.querySelector(sel);
@@ -1726,6 +1727,14 @@
     }
     function normalizeArtworkImageUrl(url){
       return String(url || '').trim();
+    }
+
+    function applyBookVisibility(enabled){
+      const visible = enabled !== false;
+      qsa('a[href="/books.html"]').forEach(link => {
+        link.style.display = visible ? '' : 'none';
+        link.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      });
     }
 
     const popupState = { images:[], index:0 };
@@ -1984,6 +1993,9 @@
             }
             if(row.key === 'popup'){
               openSitePopup(value);
+            }
+            if(row.key === 'books'){
+              applyBookVisibility(value.enabled !== false);
             }
           });
           applyAboutContentToPage(merged);
