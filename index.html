@@ -285,6 +285,7 @@
 
     .card{background:rgba(255,253,249,.84);border:1px solid var(--line);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
     .card p{margin:0;color:var(--muted)}
+    .hero-read-more{display:none}
     .note-quote{font-size:clamp(22px,4vw,34px);line-height:1.3;letter-spacing:-.03em;margin:0}
     .small{font-size:14px;color:var(--muted)}
 
@@ -722,6 +723,8 @@
       .topbar-inner{align-items:flex-start;flex-direction:column;gap:12px;padding:calc(26px + env(safe-area-inset-top, 0px)) 0 12px}
       .wrap{padding:0 18px}
       .hero{padding-top:8px}
+      #heroLead:not(.expanded){display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+      .hero-read-more{display:inline-block;margin-top:8px;padding:7px 0;border:0;background:none;color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
       .filter-swipe-hint{display:block;text-align:right;margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.01em}
       #works .filter-bar{
         flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
@@ -1445,8 +1448,9 @@
           <span class="eyebrow" id="heroEyebrow">Selected Works · Artist Portfolio</span>
           <h1 id="heroTitle">빛과 감정을 담는<br>이원주의 작품 세계</h1>
           <p class="lead" id="heroLead">
-            천년의 흙에 금강경의 구절을 새겨, 마음을 담는 그릇으로 빚었습니다.
+            천 년의 침묵을 깨고 일어선 흙이여, 그대의 거친 살결 속에 금강(金剛)의 지혜를 새기노니, 천년의 흙이 금강경의 구절을 품었을 때, 비로소 마음은 깨지지 않는 그릇이 된다. 이 토혼(土魂, 옹기)을 보고 느끼는 것만으로 당신의 삶은 영겁의 자유와 복을 얻을 것이다.
           </p>
+          <button id="heroReadMore" class="hero-read-more" type="button" aria-controls="heroLead" aria-expanded="false">… 더 보기</button>
           <div class="hero-actions">
             <a class="btn primary" href="#works">작품 보기</a>
           </div>
@@ -1630,6 +1634,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    document.getElementById('heroReadMore')?.addEventListener('click', function(){
+      const lead = document.getElementById('heroLead');
+      const expanded = lead.classList.toggle('expanded');
+      this.setAttribute('aria-expanded', String(expanded));
+      this.textContent = expanded ? '접기' : '… 더 보기';
+    });
     const sampleWorks = [
       {
         title: '한결',
@@ -1887,7 +1897,7 @@
     function applyAboutContentToPage(data){
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow || qs('#heroEyebrow').textContent;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle || qs('#heroTitle').innerHTML;
-      if(qs('#heroLead')){ const lead = data.heroLead || ''; qs('#heroLead').textContent = lead.includes('천 년의 침묵을 깨고 일어선 흙이여') ? '천년의 흙에 금강경의 구절을 새겨, 마음을 담는 그릇으로 빚었습니다.' : (lead || qs('#heroLead').textContent); }
+      if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead || qs('#heroLead').textContent;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption || qs('#heroCaption').textContent;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || qs('#aboutSectionCopy').textContent;
       if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = data.paragraph1 || qs('#aboutParagraph1').textContent;
