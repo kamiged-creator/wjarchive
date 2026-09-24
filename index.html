@@ -297,14 +297,22 @@
     }
     .filter-bar{
       display:flex;gap:10px;flex-wrap:nowrap;margin:0 auto 18px;
-      overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
+      overflow:visible;
     }
-    .filter-bar::-webkit-scrollbar{display:none}
     .filter-btn{
       flex:0 0 auto;white-space:nowrap;
       padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.55);
       color:var(--muted);font-weight:700;cursor:pointer;
+    }
+    @media (max-width:680px){
+      .filter-bar{width:100%;gap:5px}
+      .filter-btn{
+        flex:1 1 0;
+        min-width:0;
+        padding:8px 4px;
+        font-size:11px;
+        text-align:center;
+      }
     }
     .filter-btn.active{background:var(--text);color:#fff;border-color:transparent}
     .gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
