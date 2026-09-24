@@ -276,8 +276,10 @@
       min-height:520px;
       background:
         linear-gradient(180deg, rgba(10,14,22,.06), rgba(10,14,22,.16)),
-        url('https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=1200&auto=format&fit=crop') center 20%/cover no-repeat;
+        url('https://ik.imagekit.io/wonjuart/ara.png?updatedAt=1789481607484') center 20%/cover no-repeat;
     }
+    .artist-photo-card{position:relative}
+    .artist-sample-label{position:absolute;left:16px;bottom:16px;padding:6px 10px;border-radius:10px;background:rgba(255,253,249,.9);color:#514a42;font-size:12px;line-height:1.4;pointer-events:none}
     .artist-copy{
       display:grid;
       gap:20px;
@@ -1474,7 +1476,8 @@
         </div>
         <div class="about-profile">
           <article class="artist-photo-card" aria-label="작가 소개 이미지">
-            <div class="artist-photo" id="artistPhoto"></div>
+            <div class="artist-photo" id="artistPhoto" role="img" aria-label="아라 가상 캐릭터 — 작가 소개 샘플"></div>
+            <span class="artist-sample-label">아라 · 가상 인물 샘플</span>
           </article>
           <div class="artist-copy">
             <article class="card">
