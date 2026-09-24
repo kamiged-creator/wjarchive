@@ -295,8 +295,14 @@
       margin-left:auto;
       margin-right:auto;
     }
-    .filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 auto 18px}
+    .filter-bar{
+      display:flex;gap:10px;flex-wrap:nowrap;margin:0 auto 18px;
+      overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    .filter-bar::-webkit-scrollbar{display:none}
     .filter-btn{
+      flex:0 0 auto;white-space:nowrap;
       padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.55);
       color:var(--muted);font-weight:700;cursor:pointer;
     }
