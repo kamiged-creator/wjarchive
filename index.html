@@ -290,6 +290,16 @@
       box-shadow:0 8px 24px rgba(36,28,20,.07);cursor:pointer;
     }
     .about-audio-btn svg{width:19px;height:19px;flex:0 0 auto}
+    @media (min-width:681px){
+      .about-audio-row{align-items:flex-start;align-self:start}
+      .about-audio-btn{
+        min-height:38px;height:38px;flex:0 0 auto;
+        padding:0 12px;gap:6px;border-radius:12px;
+        font-size:14px;font-weight:650;line-height:1.2;
+        box-shadow:0 3px 10px rgba(36,28,20,.05);
+      }
+      .about-audio-btn svg{width:16px;height:16px}
+    }
     .about-audio-btn[aria-pressed="true"]{background:var(--text);color:#fff;border-color:transparent}
     .about-audio-btn:focus-visible{outline:3px solid rgba(31,29,26,.22);outline-offset:3px}
 
