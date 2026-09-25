@@ -1677,7 +1677,10 @@
     });
     const aboutAudioBtn = document.getElementById('aboutAudioBtn');
     const aboutAudioLabel = aboutAudioBtn?.querySelector('.about-audio-label');
+    const aboutBgmUrl = 'https://pherh2oisbugqyou.public.blob.vercel-storage.com/tatamusic-documentary-documentary-music-595125.mp3';
+    const aboutBgmBaseVolume = 0.06;
     let aboutAudio = null;
+    let aboutBgm = null;
 
     function resetAboutAudioButton(){
       if(!aboutAudioBtn) return;
@@ -1685,41 +1688,86 @@
       if(aboutAudioLabel) aboutAudioLabel.textContent = '소개글 듣기';
     }
 
+    function ensureAboutBgm(){
+      if(aboutBgm) return aboutBgm;
+      aboutBgm = new Audio();
+      aboutBgm.preload = 'none';
+      aboutBgm.src = aboutBgmUrl;
+      aboutBgm.volume = aboutBgmBaseVolume;
+      return aboutBgm;
+    }
+
+    function stopAboutBgm(){
+      if(!aboutBgm) return;
+      aboutBgm.pause();
+      aboutBgm.currentTime = 0;
+      aboutBgm.volume = aboutBgmBaseVolume;
+    }
+
     function ensureAboutAudio(){
       if(aboutAudio) return aboutAudio;
       aboutAudio = new Audio();
       aboutAudio.preload = 'none';
       aboutAudio.src = './audio/artist-intro.wav';
-      aboutAudio.addEventListener('ended', resetAboutAudioButton);
-      aboutAudio.addEventListener('error', resetAboutAudioButton);
+
+      aboutAudio.addEventListener('timeupdate', () => {
+        if(!aboutBgm || !Number.isFinite(aboutAudio.duration)) return;
+        const remaining = aboutAudio.duration - aboutAudio.currentTime;
+        if(remaining <= 2){
+          aboutBgm.volume = aboutBgmBaseVolume * Math.max(0, remaining / 2);
+        }else{
+          aboutBgm.volume = aboutBgmBaseVolume;
+        }
+      });
+
+      aboutAudio.addEventListener('ended', () => {
+        stopAboutBgm();
+        resetAboutAudioButton();
+      });
+
+      aboutAudio.addEventListener('error', () => {
+        stopAboutBgm();
+        resetAboutAudioButton();
+      });
+
       return aboutAudio;
     }
 
     if(aboutAudioBtn){
       aboutAudioBtn.addEventListener('click', async () => {
         const audio = ensureAboutAudio();
+        const bgm = ensureAboutBgm();
 
         if(!audio.paused){
           audio.pause();
           audio.currentTime = 0;
+          stopAboutBgm();
           resetAboutAudioButton();
           return;
         }
 
         try{
           audio.currentTime = 0;
+          bgm.currentTime = 0;
+          bgm.volume = aboutBgmBaseVolume;
+
           await audio.play();
+          bgm.play().catch(() => {});
+
           aboutAudioBtn.setAttribute('aria-pressed','true');
           if(aboutAudioLabel) aboutAudioLabel.textContent = '듣기 중지';
         }catch(error){
+          stopAboutBgm();
           resetAboutAudioButton();
         }
       });
 
       window.addEventListener('pagehide', () => {
-        if(!aboutAudio) return;
-        aboutAudio.pause();
-        aboutAudio.currentTime = 0;
+        if(aboutAudio){
+          aboutAudio.pause();
+          aboutAudio.currentTime = 0;
+        }
+        stopAboutBgm();
         resetAboutAudioButton();
       });
     }
