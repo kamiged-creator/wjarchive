@@ -1677,44 +1677,51 @@
     });
     const aboutAudioBtn = document.getElementById('aboutAudioBtn');
     const aboutAudioLabel = aboutAudioBtn?.querySelector('.about-audio-label');
-    let aboutUtterance = null;
+    let aboutAudio = null;
+
     function resetAboutAudioButton(){
       if(!aboutAudioBtn) return;
       aboutAudioBtn.setAttribute('aria-pressed','false');
       if(aboutAudioLabel) aboutAudioLabel.textContent = '소개글 듣기';
-      aboutUtterance = null;
     }
+
+    function ensureAboutAudio(){
+      if(aboutAudio) return aboutAudio;
+      aboutAudio = new Audio();
+      aboutAudio.preload = 'none';
+      aboutAudio.src = './audio/artist-intro.wav';
+      aboutAudio.addEventListener('ended', resetAboutAudioButton);
+      aboutAudio.addEventListener('error', resetAboutAudioButton);
+      return aboutAudio;
+    }
+
     if(aboutAudioBtn){
-      if(!('speechSynthesis' in window)){
-        aboutAudioBtn.disabled = true;
-        if(aboutAudioLabel) aboutAudioLabel.textContent = '음성 읽기 미지원';
-      }else{
-        aboutAudioBtn.addEventListener('click', () => {
-          if(aboutAudioBtn.getAttribute('aria-pressed') === 'true'){
-            window.speechSynthesis.cancel();
-            resetAboutAudioButton();
-            return;
-          }
-          const first = document.getElementById('aboutParagraph1')?.textContent.trim() || '';
-          const second = document.getElementById('aboutParagraph2')?.textContent.trim() || '';
-          const spokenText = (first + '. ' + second)
-            .replace(/水墨/g,'수묵').replace(/書藝/g,'서예').replace(/篆刻/g,'전각')
-            .replace(/紙筆墨/g,'지필묵').replace(/土魂/g,'토혼').replace(/金剛/g,'금강');
-          window.speechSynthesis.cancel();
-          aboutUtterance = new SpeechSynthesisUtterance(spokenText);
-          aboutUtterance.lang = 'ko-KR';
-          aboutUtterance.rate = 0.86;
-          aboutUtterance.pitch = 1;
-          const koreanVoice = window.speechSynthesis.getVoices().find(voice => voice.lang?.toLowerCase().startsWith('ko'));
-          if(koreanVoice) aboutUtterance.voice = koreanVoice;
-          aboutUtterance.onend = resetAboutAudioButton;
-          aboutUtterance.onerror = resetAboutAudioButton;
+      aboutAudioBtn.addEventListener('click', async () => {
+        const audio = ensureAboutAudio();
+
+        if(!audio.paused){
+          audio.pause();
+          audio.currentTime = 0;
+          resetAboutAudioButton();
+          return;
+        }
+
+        try{
+          audio.currentTime = 0;
+          await audio.play();
           aboutAudioBtn.setAttribute('aria-pressed','true');
           if(aboutAudioLabel) aboutAudioLabel.textContent = '듣기 중지';
-          window.speechSynthesis.speak(aboutUtterance);
-        });
-        window.addEventListener('pagehide', () => window.speechSynthesis.cancel());
-      }
+        }catch(error){
+          resetAboutAudioButton();
+        }
+      });
+
+      window.addEventListener('pagehide', () => {
+        if(!aboutAudio) return;
+        aboutAudio.pause();
+        aboutAudio.currentTime = 0;
+        resetAboutAudioButton();
+      });
     }
     const sampleWorks = [
       {
