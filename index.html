@@ -2331,10 +2331,19 @@
     }
     function bindToTopBadge(){
       const badge = qs('#toTopBadge');
+      const footer = qs('.footer');
       if(!badge) return;
-      window.addEventListener('scroll', () => {
-        badge.classList.toggle('show', window.scrollY > 500);
-      }, {passive:true});
+
+      const updateBadge = () => {
+        const isMobile = window.matchMedia('(max-width: 680px)').matches;
+        const footerVisible = !!footer && footer.getBoundingClientRect().top < window.innerHeight;
+        const shouldShow = window.scrollY > 500 && !(isMobile && footerVisible);
+        badge.classList.toggle('show', shouldShow);
+      };
+
+      window.addEventListener('scroll', updateBadge, {passive:true});
+      window.addEventListener('resize', updateBadge, {passive:true});
+      updateBadge();
       badge.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
     }
 
