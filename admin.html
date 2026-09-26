@@ -2103,11 +2103,14 @@
                   </div>
                 </div>
                 <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="saveAboutContentBtn" disabled>저장</button>
+                  <button class="btn primary" type="button" id="saveHeroContentBtn" disabled>상단 저장</button>
+                  <button class="btn primary" type="button" id="saveArtistContentBtn" disabled>작가소개 저장</button>
+                  <button class="btn primary" type="button" id="saveNoteContentBtn" disabled>작가노트 저장</button>
                   <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
                   <button class="btn subtle" type="button" id="restoreAboutBackupBtn">최근 백업 복원</button>
                   <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
                 </div>
+                <div class="mini-note">각 저장 버튼은 해당 항목만 DB에 저장합니다. 다른 영역의 문구·이미지는 함께 덮어쓰지 않습니다.</div>
                 <div class="status" id="aboutContentStatus">상단 제목/설명, 대표 이미지 링크와 작가소개 이미지 링크, 문구를 수정할 수 있습니다.</div>
               </div>
             </div>
@@ -3076,10 +3079,7 @@
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
     }
 
-    function applyAboutContent(save){
-      updateAboutImageSizeDisplay();
-
-      const status = qs('#aboutContentStatus');
+    function collectAboutEditorData(){
       let saved = null;
       try{
         saved = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
@@ -3088,7 +3088,7 @@
       }
       const sharedImages = getSharedImageContent();
       const prev = {...defaultAboutContent, ...(saved || {}), ...sharedImages};
-      const data = {
+      return {
         heroEyebrow: qs('#heroEyebrowEditor')?.value?.trim() || defaultAboutContent.heroEyebrow,
         heroTitle: (qs('#heroTitleEditor')?.value || '').trim().replace(/\n+/g, '<br>') || defaultAboutContent.heroTitle,
         heroLead: qs('#heroLeadEditor')?.value?.trim() || defaultAboutContent.heroLead,
@@ -3098,9 +3098,15 @@
         paragraph2: qs('#aboutParagraph2Editor')?.value?.trim() || defaultAboutContent.paragraph2,
         noteQuote: qs('#noteQuoteEditor')?.value?.trim() || defaultAboutContent.noteQuote,
         noteBody: qs('#noteBodyEditor')?.value?.trim() || defaultAboutContent.noteBody,
-        heroImage: normalizeArtworkImageUrl(qs('#heroImageInput')?.value || prev.heroImage || ''),
-        artistImage: normalizeArtworkImageUrl(qs('#artistImageInput')?.value || prev.artistImage || '')
+        heroImage: normalizeArtworkImageUrl(qs('#heroImageInput')?.value || prev.heroImage || defaultAboutContent.heroImage || ''),
+        artistImage: normalizeArtworkImageUrl(qs('#artistImageInput')?.value || prev.artistImage || defaultAboutContent.artistImage || '')
       };
+    }
+
+    function applyAboutContent(){
+      updateAboutImageSizeDisplay();
+      const status = qs('#aboutContentStatus');
+      const data = collectAboutEditorData();
 
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow;
       if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle;
@@ -3114,26 +3120,15 @@
       if(data.heroImage) setBackgroundImage(qs('#heroArt'), data.heroImage);
       if(data.artistImage) setBackgroundImage(qs('#artistPhoto'), data.artistImage);
 
-      if(save){
-        localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(data));
-        writeSharedImageContent({
-          heroImage: data.heroImage,
-          artistImage: data.artistImage
-        });
-        if(status){
-          status.textContent = '메인 / 작가소개 / 작가 노트 내용이 저장되었습니다.';
-          status.className = 'status ok';
-        }
-        saveAboutContentToSupabase(data);
-      }else if(status){
-        status.textContent = '메인 / 작가소개 / 작가 노트 내용이 화면에 반영되었습니다.';
+      if(status){
+        status.textContent = '화면에만 미리 반영했습니다. 실제 DB 저장은 상단 / 작가소개 / 작가노트 저장 버튼을 각각 눌러 주세요.';
         status.className = 'status ok';
       }
     }
 
     function resetAboutContent(){
-      localStorage.removeItem('wonjuSiteAboutContent');
-      localStorage.removeItem('wonjuSharedImageContent');
+      if(!window.confirm('입력칸을 복작소 원본 기본값으로 되돌릴까요?\nDB에는 아직 저장되지 않으며, 필요한 항목의 저장 버튼을 눌러야 실제 반영됩니다.')) return;
+
       if(qs('#heroEyebrowEditor')) qs('#heroEyebrowEditor').value = defaultAboutContent.heroEyebrow;
       if(qs('#heroTitleEditor')) qs('#heroTitleEditor').value = defaultAboutContent.heroTitle.replace(/<br\s*\/?>/gi, '\n');
       if(qs('#heroLeadEditor')) qs('#heroLeadEditor').value = defaultAboutContent.heroLead;
@@ -3143,31 +3138,19 @@
       if(qs('#aboutParagraph2Editor')) qs('#aboutParagraph2Editor').value = defaultAboutContent.paragraph2;
       if(qs('#noteQuoteEditor')) qs('#noteQuoteEditor').value = defaultAboutContent.noteQuote;
       if(qs('#noteBodyEditor')) qs('#noteBodyEditor').value = defaultAboutContent.noteBody;
-      if(qs('#heroImageInput')) qs('#heroImageInput').value = '';
-      if(qs('#artistImageInput')) qs('#artistImageInput').value = '';
+      if(qs('#heroImageInput')) qs('#heroImageInput').value = defaultAboutContent.heroImage || '';
+      if(qs('#artistImageInput')) qs('#artistImageInput').value = defaultAboutContent.artistImage || '';
 
-      if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = defaultAboutContent.heroEyebrow;
-      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = defaultAboutContent.heroTitle;
-      if(qs('#heroLead')) qs('#heroLead').textContent = defaultAboutContent.heroLead;
-      if(qs('#heroCaption')) qs('#heroCaption').textContent = defaultAboutContent.heroCaption;
-      if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = defaultAboutContent.aboutSectionCopy;
-      if(qs('#aboutParagraph1')) qs('#aboutParagraph1').textContent = defaultAboutContent.paragraph1;
-      if(qs('#aboutParagraph2')) qs('#aboutParagraph2').textContent = defaultAboutContent.paragraph2;
-      if(qs('#noteQuote')) qs('#noteQuote').textContent = defaultAboutContent.noteQuote;
-      if(qs('#noteBody')) qs('#noteBody').textContent = defaultAboutContent.noteBody;
-
-      const heroArt = qs('#heroArt');
-      const artistPhoto = qs('#artistPhoto');
-      if(heroArt) heroArt.style.backgroundImage = '';
-      if(artistPhoto) artistPhoto.style.backgroundImage = '';
+      applyAboutContentToPage({...defaultAboutContent});
+      if(defaultAboutContent.heroImage) setBackgroundImage(qs('#heroArt'), defaultAboutContent.heroImage);
+      if(defaultAboutContent.artistImage) setBackgroundImage(qs('#artistPhoto'), defaultAboutContent.artistImage);
 
       const status = qs('#aboutContentStatus');
       if(status){
-        status.textContent = '메인 / 작가소개 / 작가 노트 내용이 기본값으로 복원되었습니다.';
+        status.textContent = '입력칸과 미리보기만 원본 기본값으로 되돌렸습니다. DB는 아직 변경되지 않았습니다.';
         status.className = 'status';
       }
     }
-
 
     function loadArtDraft(){
       let saved = null;
@@ -4540,7 +4523,9 @@
     qs('#addPopupUrlBtn')?.addEventListener('click', addPopupUrlInput);
     qs('#savePopupBtn')?.addEventListener('click', savePopupSettings);
 
-    qs('#saveAboutContentBtn')?.addEventListener('click', () => applyAboutContent(true));
+    qs('#saveHeroContentBtn')?.addEventListener('click', () => saveAboutSection('hero'));
+    qs('#saveArtistContentBtn')?.addEventListener('click', () => saveAboutSection('about'));
+    qs('#saveNoteContentBtn')?.addEventListener('click', () => saveAboutSection('note'));
     qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
     qs('#restoreAboutBackupBtn')?.addEventListener('click', restoreLatestHomepageBackup);
     qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
@@ -4714,8 +4699,10 @@
 
       applyAboutContentToPage(merged);
 
-      const saveBtn = qs('#saveAboutContentBtn');
-      if(saveBtn) saveBtn.disabled = false;
+      ['#saveHeroContentBtn', '#saveArtistContentBtn', '#saveNoteContentBtn'].forEach(selector => {
+        const button = qs(selector);
+        if(button) button.disabled = false;
+      });
 
       const backupRow = (data || []).find(row => row.key === 'homepage_backups');
       const backupValue = valueToObject(backupRow?.value);
@@ -5522,56 +5509,131 @@
       }
     }
 
-    async function saveAboutContentToSupabase(data){
-      if(!supabaseReady()) return;
+    function updateLocalAboutSection(section, data){
+      let cached = null;
+      try{
+        cached = JSON.parse(localStorage.getItem('wonjuSiteAboutContent') || 'null');
+      }catch(e){
+        cached = null;
+      }
+      const next = {...defaultAboutContent, ...(cached || {})};
+      const shared = getSharedImageContent();
 
+      if(section === 'hero'){
+        Object.assign(next, {
+          heroEyebrow:data.heroEyebrow,
+          heroTitle:data.heroTitle,
+          heroLead:data.heroLead,
+          heroCaption:data.heroCaption
+        });
+        shared.heroImage = data.heroImage || '';
+      }else if(section === 'about'){
+        Object.assign(next, {
+          aboutSectionCopy:data.aboutSectionCopy,
+          paragraph1:data.paragraph1,
+          paragraph2:data.paragraph2
+        });
+        shared.artistImage = data.artistImage || '';
+      }else if(section === 'note'){
+        Object.assign(next, {
+          noteQuote:data.noteQuote,
+          noteBody:data.noteBody
+        });
+      }
+
+      localStorage.setItem('wonjuSiteAboutContent', JSON.stringify(next));
+      writeSharedImageContent(shared);
+    }
+
+    async function ensureSupabaseAdminSession(){
+      if(!supabaseClient) return false;
+      try{
+        const {data} = await supabaseClient.auth.getSession();
+        return !!data?.session?.user;
+      }catch(e){
+        return false;
+      }
+    }
+
+    async function saveAboutSection(section){
       const status = qs('#aboutContentStatus');
-      const backup = await createHomepageBackup('메인 · 작가소개 저장 전');
-      if(!backup.ok){
+      if(!supabaseReady()){
         if(status){
-          status.textContent = `자동 백업 실패로 DB 저장을 중단했습니다: ${backup.message}`;
+          status.textContent = 'Supabase 연결이 없어 저장할 수 없습니다.';
           status.className = 'status bad';
         }
         return;
       }
 
-      const rows = [
-        {
-          key: 'hero',
-          value: {
-            eyebrow: data.heroEyebrow,
-            title: String(data.heroTitle || '').replace(/<br\s*\/?>/gi, '\n'),
-            lead: data.heroLead,
-            caption: data.heroCaption,
-            image: data.heroImage || ''
-          }
-        },
-        {
-          key: 'about',
-          value: {
-            aboutSectionCopy: data.aboutSectionCopy,
-            paragraph1: data.paragraph1,
-            paragraph2: data.paragraph2,
-            artistImage: data.artistImage || ''
-          }
-        },
-        {
-          key: 'note',
-          value: {
-            quote: data.noteQuote || '',
-            body: data.noteBody || ''
-          }
-        }
-      ];
-      const {error} = await supabaseClient.from('site_settings').upsert(rows, {onConflict:'key'});
-      if(status){
-        if(error){
-          status.textContent = `자동 백업은 완료. Supabase 저장 실패: ${error.message}`;
+      const hasAdminSession = await ensureSupabaseAdminSession();
+      if(!hasAdminSession){
+        if(status){
+          status.textContent = '관리자 인증 세션을 확인할 수 없습니다. 관리자 페이지에 다시 로그인한 뒤 저장해 주세요.';
           status.className = 'status bad';
-        }else{
-          status.textContent = `자동 백업 완료 · 메인 / 작가소개 / 작가 노트가 DB에 저장되었습니다. (백업 ${backup.count}개 보관)`;
-          status.className = 'status ok';
         }
+        return;
+      }
+
+      const data = collectAboutEditorData();
+      const labels = {hero:'상단', about:'작가소개', note:'작가노트'};
+      const backup = await createHomepageBackup(`${labels[section] || section} 저장 전`);
+      if(!backup.ok){
+        if(status){
+          status.textContent = `자동 백업 실패로 저장을 중단했습니다: ${backup.message}`;
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      let row = null;
+      if(section === 'hero'){
+        row = {
+          key:'hero',
+          value:{
+            eyebrow:data.heroEyebrow,
+            title:String(data.heroTitle || '').replace(/<br\s*\/?>/gi, '\n'),
+            lead:data.heroLead,
+            caption:data.heroCaption,
+            image:data.heroImage || ''
+          }
+        };
+      }else if(section === 'about'){
+        row = {
+          key:'about',
+          value:{
+            aboutSectionCopy:data.aboutSectionCopy,
+            paragraph1:data.paragraph1,
+            paragraph2:data.paragraph2,
+            artistImage:data.artistImage || ''
+          }
+        };
+      }else if(section === 'note'){
+        row = {
+          key:'note',
+          value:{
+            quote:data.noteQuote || '',
+            body:data.noteBody || ''
+          }
+        };
+      }
+      if(!row) return;
+
+      const {error} = await supabaseClient
+        .from('site_settings')
+        .upsert([row], {onConflict:'key'});
+
+      if(error){
+        if(status){
+          status.textContent = `자동 백업은 완료했지만 ${labels[section]} 저장에 실패했습니다: ${error.message}`;
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      updateLocalAboutSection(section, data);
+      if(status){
+        status.textContent = `자동 백업 완료 · ${labels[section]}만 DB에 저장했습니다. 다른 영역은 변경하지 않았습니다.`;
+        status.className = 'status ok';
       }
     }
 
