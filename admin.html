@@ -5311,17 +5311,17 @@
     }
 
     function mapDbWork(row){
-      const thumb = normalizeArtworkImageUrl(row.thumb_url || row.thumb || row.image_url || row.image || row.large_url || row.large || '');
-      const large = normalizeArtworkImageUrl(row.large_image_url || row.large_url || row.large || row.full_url || thumb || '');
+      const thumb = normalizeArtworkImageUrl(row.image_url || row.large_image_url || '');
+      const large = normalizeArtworkImageUrl(row.large_image_url || row.image_url || '');
       return {
         title: row.title || '제목 없음',
         category: row.category || '기타',
-        year: row.year_text || row.year || '',
+        year: row.year_text || '',
         medium: row.medium || row.category || '',
-        desc: row.description || row.desc || row.content || '',
+        desc: row.description || '',
         thumb,
         large: large || thumb,
-        youtube: row.youtube_url || row.youtube || '',
+        youtube: row.youtube_url || '',
         _dbId: row.id,
         _isVisible: row.is_visible !== false
       };
@@ -5635,17 +5635,13 @@
 
       const {data, error} = await supabaseClient
         .from('works')
-        .select('id, image_url, large_image_url, thumb_url, thumb, large_url, large, is_visible');
+        .select('id, image_url, large_image_url, is_visible');
       if(error || !data) return null;
 
       return data.find(row => {
         const rowUrls = [
           row.image_url,
-          row.large_image_url,
-          row.thumb_url,
-          row.thumb,
-          row.large_url,
-          row.large
+          row.large_image_url
         ].map(normalizeWorkUrlForCompare).filter(Boolean);
         return rowUrls.some(url => targetUrls.includes(url));
       }) || null;
