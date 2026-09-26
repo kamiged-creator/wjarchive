@@ -1698,8 +1698,30 @@
     function stopAboutBgm(){
       if(!aboutBgm) return;
       aboutBgm.pause();
-      aboutBgm.currentTime = 0;
+      try{ aboutBgm.currentTime = 0; }catch(e){}
       aboutBgm.volume = aboutBgmBaseVolume;
+    }
+
+    function releaseAboutAudioSession(){
+      if(aboutAudio){
+        aboutAudio.pause();
+        try{ aboutAudio.currentTime = 0; }catch(e){}
+        aboutAudio.removeAttribute('src');
+        aboutAudio.load();
+        aboutAudio = null;
+      }
+      if(aboutBgm){
+        aboutBgm.pause();
+        try{ aboutBgm.currentTime = 0; }catch(e){}
+        aboutBgm.removeAttribute('src');
+        aboutBgm.load();
+        aboutBgm = null;
+      }
+      if('mediaSession' in navigator){
+        try{ navigator.mediaSession.playbackState = 'none'; }catch(e){}
+        try{ navigator.mediaSession.metadata = null; }catch(e){}
+      }
+      resetAboutAudioButton();
     }
 
     function ensureAboutAudio(){
@@ -1709,7 +1731,7 @@
       aboutAudio.src = './audio/artist-intro.wav';
 
       aboutAudio.addEventListener('timeupdate', () => {
-        if(!aboutBgm || !Number.isFinite(aboutAudio.duration)) return;
+        if(!aboutAudio || !aboutBgm || !Number.isFinite(aboutAudio.duration)) return;
         const remaining = aboutAudio.duration - aboutAudio.currentTime;
         if(remaining <= 2){
           aboutBgm.volume = aboutBgmBaseVolume * Math.max(0, remaining / 2);
@@ -1718,15 +1740,8 @@
         }
       });
 
-      aboutAudio.addEventListener('ended', () => {
-        stopAboutBgm();
-        resetAboutAudioButton();
-      });
-
-      aboutAudio.addEventListener('error', () => {
-        stopAboutBgm();
-        resetAboutAudioButton();
-      });
+      aboutAudio.addEventListener('ended', releaseAboutAudioSession);
+      aboutAudio.addEventListener('error', releaseAboutAudioSession);
 
       return aboutAudio;
     }
@@ -1737,10 +1752,7 @@
         const bgm = ensureAboutBgm();
 
         if(!audio.paused){
-          audio.pause();
-          audio.currentTime = 0;
-          stopAboutBgm();
-          resetAboutAudioButton();
+          releaseAboutAudioSession();
           return;
         }
 
@@ -1751,23 +1763,18 @@
 
           await audio.play();
           bgm.play().catch(() => {});
+          if('mediaSession' in navigator){
+            try{ navigator.mediaSession.playbackState = 'playing'; }catch(e){}
+          }
 
           aboutAudioBtn.setAttribute('aria-pressed','true');
           if(aboutAudioLabel) aboutAudioLabel.textContent = '듣기 중지';
         }catch(error){
-          stopAboutBgm();
-          resetAboutAudioButton();
+          releaseAboutAudioSession();
         }
       });
 
-      window.addEventListener('pagehide', () => {
-        if(aboutAudio){
-          aboutAudio.pause();
-          aboutAudio.currentTime = 0;
-        }
-        stopAboutBgm();
-        resetAboutAudioButton();
-      });
+      window.addEventListener('pagehide', releaseAboutAudioSession);
     }
     const sampleWorks = [
       {
