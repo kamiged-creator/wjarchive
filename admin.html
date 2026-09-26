@@ -2103,8 +2103,9 @@
                   </div>
                 </div>
                 <div class="hero-actions" style="margin-top:4px">
-                  <button class="btn primary" type="button" id="saveAboutContentBtn">저장</button>
+                  <button class="btn primary" type="button" id="saveAboutContentBtn" disabled>저장</button>
                   <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
+                  <button class="btn subtle" type="button" id="restoreAboutBackupBtn">최근 백업 복원</button>
                   <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
                 </div>
                 <div class="status" id="aboutContentStatus">상단 제목/설명, 대표 이미지 링크와 작가소개 이미지 링크, 문구를 수정할 수 있습니다.</div>
@@ -4541,6 +4542,7 @@
 
     qs('#saveAboutContentBtn')?.addEventListener('click', () => applyAboutContent(true));
     qs('#applyAboutContentBtn')?.addEventListener('click', () => applyAboutContent(false));
+    qs('#restoreAboutBackupBtn')?.addEventListener('click', restoreLatestHomepageBackup);
     qs('#resetAboutContentBtn')?.addEventListener('click', resetAboutContent);
     bindAboutImageInputs();
     qs('#applyArtworkBtn')?.addEventListener('click', applyArtworkToSelectedWork);
@@ -4660,7 +4662,7 @@
       const {data, error} = await supabaseClient
         .from('site_settings')
         .select('key, value')
-        .in('key', ['hero', 'about', 'note', 'popup', 'books']);
+        .in('key', ['hero', 'about', 'note', 'popup', 'books', 'homepage_backups']);
       if(error){
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
@@ -4711,6 +4713,27 @@
       });
 
       applyAboutContentToPage(merged);
+
+      const saveBtn = qs('#saveAboutContentBtn');
+      if(saveBtn) saveBtn.disabled = false;
+
+      const backupRow = (data || []).find(row => row.key === 'homepage_backups');
+      const backupValue = valueToObject(backupRow?.value);
+      const existingBackups = Array.isArray(backupValue.items) ? backupValue.items : [];
+      if(!existingBackups.length){
+        const rowMap = Object.fromEntries((data || []).map(row => [row.key, valueToObject(row.value)]));
+        const baseline = {
+          createdAt: new Date().toISOString(),
+          reason: '자동 기준 백업',
+          hero: rowMap.hero || {},
+          about: rowMap.about || {},
+          note: rowMap.note || {}
+        };
+        const {error: baselineError} = await supabaseClient
+          .from('site_settings')
+          .upsert([{key:'homepage_backups', value:{items:[baseline]}}], {onConflict:'key'});
+        if(baselineError) console.warn('초기 홈페이지 백업 저장 실패', baselineError);
+      }
     }
 
 
@@ -5376,8 +5399,142 @@
       }
     }
 
+    async function createHomepageBackup(reason='저장 전 자동 백업'){
+      if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
+
+      const {data: rows, error: readError} = await supabaseClient
+        .from('site_settings')
+        .select('key, value')
+        .in('key', ['hero', 'about', 'note', 'homepage_backups']);
+
+      if(readError) return {ok:false, message:readError.message};
+
+      const rowMap = Object.fromEntries((rows || []).map(row => [row.key, valueToObject(row.value)]));
+      const current = {
+        createdAt: new Date().toISOString(),
+        reason,
+        hero: rowMap.hero || {},
+        about: rowMap.about || {},
+        note: rowMap.note || {}
+      };
+
+      const backupValue = rowMap.homepage_backups || {};
+      let items = Array.isArray(backupValue.items) ? backupValue.items : [];
+
+      const comparable = snapshot => JSON.stringify({
+        hero:snapshot?.hero || {},
+        about:snapshot?.about || {},
+        note:snapshot?.note || {}
+      });
+      if(!items.length || comparable(items[0]) !== comparable(current)){
+        items = [current, ...items].slice(0, 10);
+      }
+
+      const {error: backupError} = await supabaseClient
+        .from('site_settings')
+        .upsert([{key:'homepage_backups', value:{items}}], {onConflict:'key'});
+
+      if(backupError) return {ok:false, message:backupError.message};
+
+      try{
+        localStorage.setItem('wonjuHomepageBackups', JSON.stringify(items));
+      }catch(e){}
+
+      return {ok:true, count:items.length};
+    }
+
+    async function restoreLatestHomepageBackup(){
+      const status = qs('#aboutContentStatus');
+      if(!supabaseReady()){
+        if(status){
+          status.textContent = '백업을 불러올 수 없습니다. DB 연결을 확인해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const {data: backupRow, error} = await supabaseClient
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'homepage_backups')
+        .maybeSingle();
+
+      if(error){
+        if(status){
+          status.textContent = `백업 불러오기 실패: ${error.message}`;
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const backupValue = valueToObject(backupRow?.value);
+      const items = Array.isArray(backupValue.items) ? backupValue.items : [];
+      const target = items[0];
+      if(!target){
+        if(status){
+          status.textContent = '아직 복원할 백업이 없습니다.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const when = target.createdAt ? new Date(target.createdAt).toLocaleString('ko-KR') : '최근';
+      if(!window.confirm(`${when} 백업으로 메인 · 작가소개 · 작가 노트를 복원할까요?\n현재 상태도 먼저 백업한 뒤 복원합니다.`)) return;
+
+      if(status){
+        status.textContent = '현재 상태를 안전하게 백업한 뒤 복원 중입니다...';
+        status.className = 'status';
+      }
+
+      const safetyBackup = await createHomepageBackup('백업 복원 직전');
+      if(!safetyBackup.ok){
+        if(status){
+          status.textContent = `안전 백업 실패로 복원을 중단했습니다: ${safetyBackup.message}`;
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      const restoreRows = [];
+      if(target.hero) restoreRows.push({key:'hero', value:target.hero});
+      if(target.about) restoreRows.push({key:'about', value:target.about});
+      if(target.note) restoreRows.push({key:'note', value:target.note});
+
+      const {error: restoreError} = await supabaseClient
+        .from('site_settings')
+        .upsert(restoreRows, {onConflict:'key'});
+
+      if(restoreError){
+        if(status){
+          status.textContent = `백업 복원 실패: ${restoreError.message}`;
+          status.className = 'status bad';
+        }
+        return;
+      }
+
+      localStorage.removeItem('wonjuSiteAboutContent');
+      localStorage.removeItem('wonjuSharedImageContent');
+      await loadSupabaseSiteSettings();
+
+      if(status){
+        status.textContent = `${when} 백업으로 복원했습니다. 현재 상태도 별도 백업되어 있습니다.`;
+        status.className = 'status ok';
+      }
+    }
+
     async function saveAboutContentToSupabase(data){
       if(!supabaseReady()) return;
+
+      const status = qs('#aboutContentStatus');
+      const backup = await createHomepageBackup('메인 · 작가소개 저장 전');
+      if(!backup.ok){
+        if(status){
+          status.textContent = `자동 백업 실패로 DB 저장을 중단했습니다: ${backup.message}`;
+          status.className = 'status bad';
+        }
+        return;
+      }
+
       const rows = [
         {
           key: 'hero',
@@ -5407,13 +5564,12 @@
         }
       ];
       const {error} = await supabaseClient.from('site_settings').upsert(rows, {onConflict:'key'});
-      const status = qs('#aboutContentStatus');
       if(status){
         if(error){
-          status.textContent = `브라우저 저장은 완료. Supabase 저장 실패: ${error.message}`;
+          status.textContent = `자동 백업은 완료. Supabase 저장 실패: ${error.message}`;
           status.className = 'status bad';
         }else{
-          status.textContent = '메인 / 작가소개 / 작가 노트가 Supabase DB까지 저장되었습니다.';
+          status.textContent = `자동 백업 완료 · 메인 / 작가소개 / 작가 노트가 DB에 저장되었습니다. (백업 ${backup.count}개 보관)`;
           status.className = 'status ok';
         }
       }
