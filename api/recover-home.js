@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
   try{
     const [settings, works] = await Promise.all([
       db('site_settings?select=key,value&key=in.(hero,about)'),
-      db('works?select=id,title,description,image_url,large_image_url,thumb_url,thumb,large_url,large,is_visible&order=created_at.desc')
+      db('works?select=id,title,description,image_url,large_image_url,is_visible,created_at&order=created_at.desc')
     ]);
     res.status(200).json({ok:true, settings, works});
   }catch(error){
