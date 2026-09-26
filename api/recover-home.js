@@ -8,15 +8,11 @@ module.exports = async function handler(req, res) {
   }
 
   const supabaseUrl = process.env.SUPABASE_URL || 'https://vefeplfczeztbplowjmj.supabase.co';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceKey) {
-    res.status(500).json({ ok:false, message:'SUPABASE_SERVICE_ROLE_KEY is not configured' });
-    return;
-  }
+  const publicKey = process.env.SUPABASE_ANON_KEY || 'sb_publishable_mYAEJ3rvEscEgM3esQi_7Q_1Nv_fRLC';
 
   const headers = {
-    apikey: serviceKey,
-    Authorization: `Bearer ${serviceKey}`,
+    apikey: publicKey,
+    Authorization: `Bearer ${publicKey}`,
     'Content-Type':'application/json'
   };
 
