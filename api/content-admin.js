@@ -40,33 +40,6 @@ function requireAdmin(req) {
 
 async function db(path, options = {}) {
   return supabaseAdminRequest(path, options);
-}) {
-  const { url, serviceKey } = env();
-  if (!serviceKey) {
-    const error = new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');
-    error.statusCode = 500;
-    throw error;
-  }
-
-  const response = await fetch(`${url}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    }
-  });
-
-  const text = await response.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
-  if (!response.ok) {
-    const error = new Error(data?.message || data?.hint || '관리자 저장소를 확인해 주세요.');
-    error.statusCode = response.status;
-    throw error;
-  }
-  return data;
 }
 
 function canonical(value) {
