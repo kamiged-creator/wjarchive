@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { supabaseAdminRequest } = require('../lib/supabase-admin');
 
 const defaults = {
   announcement_visible: 'true',
@@ -36,7 +37,9 @@ const defaults = {
 function env(){ return {url:process.env.SUPABASE_URL || 'https://vefeplfczeztbplowjmj.supabase.co', key:process.env.SUPABASE_SERVICE_ROLE_KEY, password:String(process.env.STORE_ADMIN_PASSWORD||process.env.CROP_ACCESS_PASSWORD||'').normalize('NFC').trim()}; }
 function verify(token, secret){ const [expire,nonce,signature]=String(token||'').split(':'); if(!expire||!nonce||!signature||Number(expire)<=Date.now()/1000)return false; const expected=crypto.createHmac('sha256',secret).update(`${expire}:${nonce}`).digest('hex'); const a=Buffer.from(signature),b=Buffer.from(expected); return a.length===b.length&&crypto.timingSafeEqual(a,b); }
 function admin(req){ const {password}=env(); const token=String(req.headers.authorization||'').replace(/^Bearer /,''); if(!password||!verify(token,password)){ const e=new Error('관리자 로그인이 필요합니다.');e.statusCode=401;throw e; } }
-async function db(path,options={}){ const {url,key}=env(); if(!key){const e=new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');e.statusCode=500;throw e;} const response=await fetch(`${url}/rest/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'return=representation',...(options.headers||{})}}); const text=await response.text(); const data=text?JSON.parse(text):null; if(!response.ok){const e=new Error(data?.message||'스토어 설정 저장소를 확인해 주세요.');e.statusCode=response.status;throw e;} return data; }
+async function db(path, options = {}) {
+  return supabaseAdminRequest(path, options);
+}){ const {url,key}=env(); if(!key){const e=new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');e.statusCode=500;throw e;} const response=await fetch(`${url}/rest/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'return=representation',...(options.headers||{})}}); const text=await response.text(); const data=text?JSON.parse(text):null; if(!response.ok){const e=new Error(data?.message||'스토어 설정 저장소를 확인해 주세요.');e.statusCode=response.status;throw e;} return data; }
 function clean(body){ const result={}; Object.keys(defaults).forEach(key=>{ if(Object.prototype.hasOwnProperty.call(body||{},key)) result[key]=String(body[key]??'').trim(); }); return result; }
 function canonical(value){ if(Array.isArray(value))return value.map(canonical);if(value&&typeof value==='object')return Object.keys(value).sort().reduce((out,key)=>{out[key]=canonical(value[key]);return out;},{});return value; }
 function same(a,b){ return JSON.stringify(canonical(a))===JSON.stringify(canonical(b)); }
