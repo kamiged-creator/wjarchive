@@ -4572,6 +4572,13 @@
       try{ return JSON.parse(value); }catch(e){ return {}; }
     }
 
+    const siteSettingsBaseSnapshots = {hero:null, about:null, note:null};
+
+    function cloneSiteSettingValue(value){
+      try{ return JSON.parse(JSON.stringify(value || {})); }
+      catch(e){ return {}; }
+    }
+
     function dbRowsToLines(rows){
       return (rows || [])
         .filter(row => row && row.is_visible !== false)
@@ -4650,6 +4657,11 @@
         console.warn('Supabase site_settings 불러오기 오류', error);
         return;
       }
+
+      const rowMap = Object.fromEntries((data || []).map(row => [row.key, valueToObject(row.value)]));
+      ['hero', 'about', 'note'].forEach(key => {
+        siteSettingsBaseSnapshots[key] = cloneSiteSettingValue(rowMap[key] || {});
+      });
 
       const merged = {...defaultAboutContent};
       (data || []).forEach(row => {
@@ -5583,6 +5595,15 @@
 
       if(!value) return;
 
+      const baseValue = siteSettingsBaseSnapshots[section];
+      if(baseValue === null){
+        if(status){
+          status.textContent = '최신 DB 상태를 확인하지 못해 저장을 중단했습니다. 관리자 페이지를 새로고침한 뒤 다시 저장해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+
       if(status){
         status.textContent = `${labels[section]} 저장 중입니다...`;
         status.className = 'status';
@@ -5595,11 +5616,12 @@
             'Content-Type':'application/json',
             Authorization:`Bearer ${token}`
           },
-          body:JSON.stringify({section, value})
+          body:JSON.stringify({section, value, baseValue})
         });
         const result = await response.json().catch(() => ({}));
         if(!response.ok) throw new Error(result.message || `${labels[section]} 저장에 실패했습니다.`);
 
+        siteSettingsBaseSnapshots[section] = cloneSiteSettingValue(value);
         updateLocalAboutSection(section, data);
         if(status){
           status.textContent = `자동 백업 완료 · ${labels[section]}만 DB에 저장했습니다. 다른 영역은 변경하지 않았습니다.`;
