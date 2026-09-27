@@ -121,6 +121,44 @@
     }
     .btn.primary{background:var(--text);color:#fff;border-color:transparent}
     .btn.subtle{background:rgba(255,255,255,.55);box-shadow:none}
+    .about-recovery{
+      margin-top:10px;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top:10px;
+    }
+    .about-recovery summary{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      min-height:34px;
+      padding:0 10px;
+      border-radius:10px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+      user-select:none;
+      list-style:none;
+    }
+    .about-recovery summary::-webkit-details-marker{display:none}
+    .about-recovery summary::after{
+      content:'⌄';
+      font-size:13px;
+      transition:transform .18s ease;
+    }
+    .about-recovery[open] summary::after{transform:rotate(180deg)}
+    .about-recovery-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .about-recovery-actions .btn{
+      min-height:38px;
+      padding:0 14px;
+      font-size:13px;
+      box-shadow:none;
+    }
     .btn.danger{background:#fff5f5;color:var(--danger);border-color:rgba(179,61,61,.18)}
     .btn.apply-accent{background:linear-gradient(180deg,#8b6847,#735337);color:#fff;border-color:transparent}
     .btn.applied{background:linear-gradient(180deg,#2f7d4d,#25633d);color:#fff;border-color:transparent;box-shadow:0 0 0 4px rgba(47,125,77,.12)}
@@ -2105,11 +2143,15 @@
                   <button class="btn primary" type="button" id="saveHeroContentBtn" disabled>상단 저장</button>
                   <button class="btn primary" type="button" id="saveArtistContentBtn" disabled>작가소개 저장</button>
                   <button class="btn primary" type="button" id="saveNoteContentBtn" disabled>작가노트 저장</button>
-                  <button class="btn" type="button" id="applyAboutContentBtn">화면 반영</button>
-                  <button class="btn subtle" type="button" id="restoreAboutBackupBtn">최근 백업 복원</button>
-                  <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
                 </div>
-                <div class="mini-note">각 저장 버튼은 해당 항목만 DB에 저장합니다. 다른 영역의 문구·이미지는 함께 덮어쓰지 않습니다.</div>
+                <details class="about-recovery">
+                  <summary>복구 옵션</summary>
+                  <div class="about-recovery-actions">
+                    <button class="btn subtle" type="button" id="restoreAboutBackupBtn">최근 백업 복원</button>
+                    <button class="btn subtle" type="button" id="resetAboutContentBtn">기본값 복원</button>
+                  </div>
+                </details>
+                <div class="mini-note">저장하면 해당 항목만 DB와 화면에 반영됩니다. 다른 영역의 문구·이미지는 함께 덮어쓰지 않습니다.</div>
                 <div class="status" id="aboutContentStatus">상단 제목/설명, 대표 이미지 링크와 작가소개 이미지 링크, 문구를 수정할 수 있습니다.</div>
               </div>
             </div>
