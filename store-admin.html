@@ -228,6 +228,12 @@
     const $ = selector => document.querySelector(selector);
     let products = [];
     let storeSettings = {};
+    let productBaseSnapshot = null;
+
+    function cloneValue(value){
+      try{return JSON.parse(JSON.stringify(value ?? null));}
+      catch(error){return null;}
+    }
 
     function getToken(){ return sessionStorage.getItem(authConfig.tokenStorageKey) || ''; }
     function tokenIsFresh(token){
@@ -281,6 +287,7 @@
       return [$('#detailImage1').value, $('#detailImage2').value, $('#detailImage3').value].map(v => v.trim()).filter(Boolean);
     }
     function fillForm(product={}){
+      productBaseSnapshot = product?.id ? cloneValue(product) : null;
       $('#productId').value = product.id || '';
       $('#titleInput').value = product.title || '';
       $('#priceInput').value = product.price_text || '가격 준비중';
@@ -380,7 +387,7 @@
         const response = await fetch(authConfig.productsEndpoint, {
           method,
           headers:{'Content-Type':'application/json', Authorization:`Bearer ${getToken()}`},
-          body:JSON.stringify(payload)
+          body:JSON.stringify(payload.id ? {...payload, baseProduct:productBaseSnapshot} : payload)
         });
         const result = await response.json().catch(() => ({}));
         if(!response.ok) throw new Error(result.message || '저장 실패');
@@ -404,7 +411,7 @@
         const response = await fetch(authConfig.productsEndpoint, {
           method:'DELETE',
           headers:{'Content-Type':'application/json', Authorization:`Bearer ${getToken()}`},
-          body:JSON.stringify({id})
+          body:JSON.stringify({id, baseProduct:productBaseSnapshot})
         });
         const result = await response.json().catch(() => ({}));
         if(!response.ok) throw new Error(result.message || '삭제 실패');
@@ -466,7 +473,7 @@
     function fillSettings(settings){ storeSettings=settings||{}; Object.entries(settingMap).forEach(([id,key])=>{if($('#'+id)) $('#'+id).value=storeSettings[key]||'';}); previewSettings(); }
     function settingsPayload(){ const data={...storeSettings}; Object.entries(settingMap).forEach(([id,key])=>{if($('#'+id)) data[key]=$('#'+id).value;}); return data; }
     async function loadSettings(){ try{const response=await fetch(authConfig.settingsEndpoint,{cache:'no-store'});const data=await response.json();if(!response.ok)throw new Error(data.message);fillSettings(data.settings);setStatus('#mainStatus',data.usingDefaults?'기본 화면을 불러왔습니다. 처음 저장 전에는 설정용 표를 준비해야 합니다.':'현재 스토어 설정을 불러왔습니다.','ok');}catch(error){setStatus('#mainStatus',error.message||'설정 불러오기 실패','bad');} }
-    async function saveSettings(statusSelector){ if(!tokenIsFresh(getToken())){closeApp();return;} setStatus(statusSelector,'저장 중...'); try{const response=await fetch(authConfig.settingsEndpoint,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${getToken()}`},body:JSON.stringify(settingsPayload())});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||'저장 실패');fillSettings(data.settings);setStatus(statusSelector,'저장되었습니다. 스토어 새로고침 후 확인할 수 있습니다.','ok');}catch(error){setStatus(statusSelector,error.message||'저장 실패','bad');} }
+    async function saveSettings(statusSelector){ if(!tokenIsFresh(getToken())){closeApp();return;} setStatus(statusSelector,'저장 중...'); try{const response=await fetch(authConfig.settingsEndpoint,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:`Bearer ${getToken()}`},body:JSON.stringify({baseSettings:storeSettings,settings:settingsPayload()})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||'저장 실패');fillSettings(data.settings);setStatus(statusSelector,'저장되었습니다. 스토어 새로고침 후 확인할 수 있습니다.','ok');}catch(error){setStatus(statusSelector,error.message||'저장 실패','bad');} }
     let settingUploadTarget='';
     async function uploadSettingImage(){const file=$('#settingFile').files?.[0];if(!file||!settingUploadTarget)return;const button=document.querySelector(`[data-target="${settingUploadTarget}"]`);button.disabled=true;setStatus('#mainStatus','이미지 업로드 중...');try{const authResponse=await fetch(authConfig.imagekitAuthEndpoint,{cache:'no-store',headers:{Authorization:`Bearer ${getToken()}`}});const auth=await authResponse.json();if(!authResponse.ok)throw new Error(auth.message||'업로드 인증 실패');const form=new FormData();form.append('file',file,file.name);form.append('fileName',file.name);form.append('publicKey',imageKitConfig.publicKey);form.append('signature',auth.signature);form.append('expire',auth.expire);form.append('token',auth.token);form.append('folder','/bokjakso-store/banners');form.append('useUniqueFileName','true');const response=await fetch(imageKitConfig.uploadEndpoint,{method:'POST',body:form});const result=await response.json();if(!response.ok)throw new Error(result.message||'업로드 실패');const width=button.dataset.width||1800;$('#'+settingUploadTarget).value=optimizedImageKitUrl(result.url,width);previewSettings();setStatus('#mainStatus','이미지를 올렸습니다. 메인 화면 저장을 눌러 반영해 주세요.','ok');}catch(error){setStatus('#mainStatus',error.message||'업로드 실패','bad');}finally{button.disabled=false;$('#settingFile').value='';}}
 
