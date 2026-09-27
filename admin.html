@@ -5387,23 +5387,7 @@
       }
     }
 
-    async function replaceSupabaseTextRows(tableName, lines){
-      if(!supabaseReady()) return {ok:false, message:'Supabase anon key가 아직 입력되지 않았습니다.'};
-      const {error: deleteError} = await supabaseClient
-        .from(tableName)
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-      if(deleteError) return {ok:false, message:deleteError.message};
-
-      const rows = lines.map((content, index) => ({
-        content,
-        sort_order: (index + 1) * 10,
-        is_visible: true
-      }));
-      const {error: insertError} = await supabaseClient.from(tableName).insert(rows);
-      if(insertError) return {ok:false, message:insertError.message};
-      return {ok:true, message:'저장 완료'};
-    }
+    
 
     async function saveEditableTextContentToSupabase({contactLines, exhibitionLines, newsLines}){
       const status = qs('#textContentStatus');
@@ -5457,49 +5441,7 @@
       }
     }
 
-    async function createHomepageBackup(reason='저장 전 자동 백업'){
-      if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
-
-      const {data: rows, error: readError} = await supabaseClient
-        .from('site_settings')
-        .select('key, value')
-        .in('key', ['hero', 'about', 'note', 'homepage_backups']);
-
-      if(readError) return {ok:false, message:readError.message};
-
-      const rowMap = Object.fromEntries((rows || []).map(row => [row.key, valueToObject(row.value)]));
-      const current = {
-        createdAt: new Date().toISOString(),
-        reason,
-        hero: rowMap.hero || {},
-        about: rowMap.about || {},
-        note: rowMap.note || {}
-      };
-
-      const backupValue = rowMap.homepage_backups || {};
-      let items = Array.isArray(backupValue.items) ? backupValue.items : [];
-
-      const comparable = snapshot => JSON.stringify({
-        hero:snapshot?.hero || {},
-        about:snapshot?.about || {},
-        note:snapshot?.note || {}
-      });
-      if(!items.length || comparable(items[0]) !== comparable(current)){
-        items = [current, ...items].slice(0, 10);
-      }
-
-      const {error: backupError} = await supabaseClient
-        .from('site_settings')
-        .upsert([{key:'homepage_backups', value:{items}}], {onConflict:'key'});
-
-      if(backupError) return {ok:false, message:backupError.message};
-
-      try{
-        localStorage.setItem('wonjuHomepageBackups', JSON.stringify(items));
-      }catch(e){}
-
-      return {ok:true, count:items.length};
-    }
+    
 
     async function restoreLatestHomepageBackup(){
       const status = qs('#aboutContentStatus');
