@@ -81,6 +81,23 @@ function sameSnapshot(a, b) {
   });
 }
 
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.keys(value)
+      .sort()
+      .reduce((result, key) => {
+        result[key] = canonicalize(value[key]);
+        return result;
+      }, {});
+  }
+  return value;
+}
+
+function sameValue(a, b) {
+  return JSON.stringify(canonicalize(a || {})) === JSON.stringify(canonicalize(b || {}));
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
@@ -101,7 +118,12 @@ module.exports = async function handler(req, res) {
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const section = String(body.section || '').trim();
-    const value = body.value && typeof body.value === 'object' ? body.value : null;
+    const value = body.value && typeof body.value === 'object' && !Array.isArray(body.value) ? body.value : null;
+    const hasBaseValue = Object.prototype.hasOwnProperty.call(body, 'baseValue')
+      && body.baseValue
+      && typeof body.baseValue === 'object'
+      && !Array.isArray(body.baseValue);
+    const baseValue = hasBaseValue ? body.baseValue : null;
 
     if (!ALLOWED_SECTIONS.has(section) || !value) {
       res.status(400).json({ message: '저장할 항목이 올바르지 않습니다.' });
@@ -115,6 +137,25 @@ module.exports = async function handler(req, res) {
 
     const rowMap = Object.fromEntries((rows || []).map(row => [row.key, valueObject(row.value)]));
     const labels = { hero: '상단', about: '작가소개', note: '작가노트' };
+    const currentSectionValue = rowMap[section] || {};
+
+    if (!hasBaseValue) {
+      res.status(409).json({
+        ok: false,
+        code: 'STALE_ADMIN_STATE',
+        message: '이 관리자 화면은 이전 버전입니다. 새로고침 후 최신 내용을 확인하고 다시 저장해 주세요.'
+      });
+      return;
+    }
+
+    if (!sameValue(currentSectionValue, baseValue)) {
+      res.status(409).json({
+        ok: false,
+        code: 'STALE_ADMIN_STATE',
+        message: '다른 기기나 창에서 더 최신 내용이 저장되었습니다. 현재 저장은 취소했습니다. 새로고침 후 최신 내용을 확인해 주세요.'
+      });
+      return;
+    }
 
     const current = {
       createdAt: new Date().toISOString(),
