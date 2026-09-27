@@ -4914,6 +4914,7 @@
             <div class="book-admin-actions">
               <button class="btn primary sample-book-save" type="button">표지 저장</button>
               <button class="btn subtle sample-book-close" type="button">닫기</button>
+              <button class="btn danger sample-book-delete" type="button">샘플 삭제</button>
             </div>
           </div>
         </div>
@@ -4945,6 +4946,8 @@
             sampleOpen.setAttribute('aria-expanded','false');
           }
         });
+
+        sampleRow.querySelector('.sample-book-delete')?.addEventListener('click', deleteSampleBook);
 
         imageInput?.addEventListener('input',()=>{
           const url=String(imageInput.value || '').trim();
