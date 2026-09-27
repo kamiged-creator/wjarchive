@@ -1770,6 +1770,45 @@
       }
     }
 
+
+    /* Save feedback must win over admin light/dark button themes */
+    #adminOverlay #saveHeroContentBtn.save-pending,
+    #adminOverlay #saveArtistContentBtn.save-pending,
+    #adminOverlay #saveNoteContentBtn.save-pending{
+      background:#9a6a3a !important;
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+      border-color:#9a6a3a !important;
+      box-shadow:0 0 0 4px rgba(154,106,58,.28) !important;
+      opacity:1 !important;
+      transform:scale(.985);
+    }
+    #adminOverlay #saveHeroContentBtn.save-success,
+    #adminOverlay #saveArtistContentBtn.save-success,
+    #adminOverlay #saveNoteContentBtn.save-success{
+      background:#24a259 !important;
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+      border-color:#24a259 !important;
+      box-shadow:0 0 0 5px rgba(36,162,89,.24) !important;
+      opacity:1 !important;
+      animation:saveSuccessPulse .42s ease-out;
+    }
+    #adminOverlay #saveHeroContentBtn.save-error,
+    #adminOverlay #saveArtistContentBtn.save-error,
+    #adminOverlay #saveNoteContentBtn.save-error{
+      background:#c54848 !important;
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+      border-color:#c54848 !important;
+      box-shadow:0 0 0 5px rgba(197,72,72,.22) !important;
+      opacity:1 !important;
+    }
+    @keyframes saveSuccessPulse{
+      0%{transform:scale(.97)}
+      55%{transform:scale(1.025)}
+      100%{transform:scale(1)}
+    }
 </style>
 </head>
 <body id="top" class="is-loading">
