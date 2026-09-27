@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { supabaseAdminRequest } = require('../lib/supabase-admin');
 
 const LIST_TABLES = {
   contact: 'contact_items',
@@ -38,6 +39,8 @@ function requireAdmin(req) {
 }
 
 async function db(path, options = {}) {
+  return supabaseAdminRequest(path, options);
+}) {
   const { url, serviceKey } = env();
   if (!serviceKey) {
     const error = new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');
