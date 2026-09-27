@@ -37,9 +37,12 @@ function env(){ return {url:process.env.SUPABASE_URL || 'https://vefeplfczeztbpl
 function verify(token, secret){ const [expire,nonce,signature]=String(token||'').split(':'); if(!expire||!nonce||!signature||Number(expire)<=Date.now()/1000)return false; const expected=crypto.createHmac('sha256',secret).update(`${expire}:${nonce}`).digest('hex'); const a=Buffer.from(signature),b=Buffer.from(expected); return a.length===b.length&&crypto.timingSafeEqual(a,b); }
 function admin(req){ const {password}=env(); const token=String(req.headers.authorization||'').replace(/^Bearer /,''); if(!password||!verify(token,password)){ const e=new Error('관리자 로그인이 필요합니다.');e.statusCode=401;throw e; } }
 async function db(path,options={}){ const {url,key}=env(); if(!key){const e=new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');e.statusCode=500;throw e;} const response=await fetch(`${url}/rest/v1/${path}`,{...options,headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'return=representation',...(options.headers||{})}}); const text=await response.text(); const data=text?JSON.parse(text):null; if(!response.ok){const e=new Error(data?.message||'스토어 설정 저장소를 확인해 주세요.');e.statusCode=response.status;throw e;} return data; }
-function clean(body){ const result={}; Object.keys(defaults).forEach(key=>{ if(Object.prototype.hasOwnProperty.call(body,key)) result[key]=String(body[key]??'').trim(); }); return result; }
+function clean(body){ const result={}; Object.keys(defaults).forEach(key=>{ if(Object.prototype.hasOwnProperty.call(body||{},key)) result[key]=String(body[key]??'').trim(); }); return result; }
+function canonical(value){ if(Array.isArray(value))return value.map(canonical);if(value&&typeof value==='object')return Object.keys(value).sort().reduce((out,key)=>{out[key]=canonical(value[key]);return out;},{});return value; }
+function same(a,b){ return JSON.stringify(canonical(a))===JSON.stringify(canonical(b)); }
 
 module.exports=async function handler(req,res){
+  res.setHeader('Cache-Control','no-store');
   res.setHeader('Access-Control-Allow-Methods','GET, PUT, OPTIONS'); res.setHeader('Access-Control-Allow-Headers','Content-Type, Authorization');
   if(req.method==='OPTIONS'){res.status(204).end();return;}
   try{
@@ -49,7 +52,20 @@ module.exports=async function handler(req,res){
       return;
     }
     if(req.method!=='PUT'){res.status(405).json({message:'Method not allowed.'});return;}
-    admin(req); const body=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{}); const settings={...defaults,...clean(body)};
+    admin(req);
+    const body=typeof req.body==='string'?JSON.parse(req.body||'{}'):(req.body||{});
+    if(!body.baseSettings || typeof body.baseSettings!=='object' || !body.settings || typeof body.settings!=='object'){
+      res.status(409).json({code:'STALE_ADMIN_STATE',message:'이 스토어 관리자 화면은 이전 버전입니다. 새로고침 후 최신 설정을 확인하고 다시 저장해 주세요.'});
+      return;
+    }
+    const rows=await db('store_settings?select=settings&id=eq.main&limit=1',{method:'GET'});
+    const current={...defaults,...(rows?.[0]?.settings||{})};
+    const base={...defaults,...clean(body.baseSettings)};
+    if(!same(current,base)){
+      res.status(409).json({code:'STALE_ADMIN_STATE',message:'다른 기기나 창에서 스토어 설정이 먼저 변경되었습니다. 현재 저장은 취소했습니다. 새로고침 후 다시 저장해 주세요.'});
+      return;
+    }
+    const settings={...defaults,...clean(body.settings)};
     await db('store_settings?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({id:'main',settings})});
     res.status(200).json({settings});
   }catch(error){res.status(error.statusCode||500).json({message:error.message||'스토어 설정 처리 실패'});}
