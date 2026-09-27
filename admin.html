@@ -2795,11 +2795,16 @@
         renderGallery();
 
         if(qs('#artFeatured')?.checked && urls[0]){
-          const currentAbout = {...defaultAboutContent};
-          currentAbout.heroImage = urls[0];
-          currentAbout.heroCaption = getBatchWorkTitle(title, 0, urls.length);
-          applyAboutContentToPage(currentAbout);
-          if(supabaseReady()) await saveAboutContentToSupabase(currentAbout);
+          const featuredTitle = getBatchWorkTitle(title, 0, urls.length);
+          if(qs('#heroImageInput')) qs('#heroImageInput').value = urls[0];
+          if(qs('#heroCaptionEditor')) qs('#heroCaptionEditor').value = featuredTitle;
+          const heroDraft = collectAboutEditorData();
+          applyAboutContentToPage(heroDraft);
+          const heroSaved = await saveAboutSection('hero');
+          if(!heroSaved && status){
+            status.textContent = '작품은 저장됐지만 대표 작품 설정은 저장되지 않았습니다. 메인 화면을 새로고침한 뒤 다시 설정해 주세요.';
+            status.className = 'status bad';
+          }
         }
 
         clearArtworkFormInputs();
@@ -2903,11 +2908,16 @@
         }
 
         if(qs('#artFeatured')?.checked){
-          const currentAbout = {...defaultAboutContent};
-          currentAbout.heroImage = fullUrl || thumbUrl || '';
-          currentAbout.heroCaption = title || currentAbout.heroCaption;
-          applyAboutContentToPage(currentAbout);
-          await saveAboutContentToSupabase(currentAbout);
+          const featuredImage = fullUrl || thumbUrl || '';
+          if(qs('#heroImageInput')) qs('#heroImageInput').value = featuredImage;
+          if(qs('#heroCaptionEditor') && title) qs('#heroCaptionEditor').value = title;
+          const heroDraft = collectAboutEditorData();
+          applyAboutContentToPage(heroDraft);
+          const heroSaved = await saveAboutSection('hero');
+          if(!heroSaved && status){
+            status.textContent = '작품은 저장됐지만 대표 작품 설정은 저장되지 않았습니다. 메인 화면을 새로고침한 뒤 다시 설정해 주세요.';
+            status.className = 'status bad';
+          }
         }
 
         flashApplyButton(true);
@@ -4456,7 +4466,7 @@
       renderListItems('#newsDisplayList', newsLines);
     }
 
-    function applyEditableTextContent(save){
+    async function applyEditableTextContent(save){
       const contactLines = linesFromTextarea(qs('#contactEditor')?.value);
       const exhibitionLines = linesFromTextarea(qs('#exhibitionEditor')?.value);
       const newsLines = linesFromTextarea(qs('#newsEditor')?.value);
@@ -4481,10 +4491,10 @@
           news: newsLines
         }));
         if(status){
-          status.textContent = '문구가 저장되었고 화면에도 반영되었습니다.';
-          status.className = 'status ok';
+          status.textContent = 'DB에 저장 중입니다...';
+          status.className = 'status';
         }
-        saveEditableTextContentToSupabase({contactLines, exhibitionLines, newsLines});
+        await saveEditableTextContentToSupabase({contactLines, exhibitionLines, newsLines});
       }else{
         if(status){
           status.textContent = '문구가 화면에 반영되었습니다. 저장하려면 문구 저장을 누르세요.';
@@ -4572,7 +4582,8 @@
       try{ return JSON.parse(value); }catch(e){ return {}; }
     }
 
-    const siteSettingsBaseSnapshots = {hero:null, about:null, note:null};
+    const textBaseSnapshots = {contact:null, exhibition:null, news:null};
+    const siteSettingsBaseSnapshots = {hero:null, about:null, note:null, popup:null, books:null};
 
     function cloneSiteSettingValue(value){
       try{ return JSON.parse(JSON.stringify(value || {})); }
@@ -4633,6 +4644,10 @@
       const exhibitionLines = dbRowsToLines(exhibitionRes.data);
       const newsLines = dbRowsToLines(newsRes.data);
 
+      textBaseSnapshots.contact = [...contactLines];
+      textBaseSnapshots.exhibition = [...exhibitionLines];
+      textBaseSnapshots.news = [...newsLines];
+
       if(contactLines.length){
         renderListItems('#contactDisplayList', contactLines);
         if(qs('#contactEditor')) qs('#contactEditor').value = contactLines.join('\n');
@@ -4659,7 +4674,7 @@
       }
 
       const rowMap = Object.fromEntries((data || []).map(row => [row.key, valueToObject(row.value)]));
-      ['hero', 'about', 'note'].forEach(key => {
+      ['hero', 'about', 'note', 'popup', 'books'].forEach(key => {
         siteSettingsBaseSnapshots[key] = cloneSiteSettingValue(rowMap[key] || {});
       });
 
@@ -4714,23 +4729,6 @@
         if(button) button.disabled = false;
       });
 
-      const backupRow = (data || []).find(row => row.key === 'homepage_backups');
-      const backupValue = valueToObject(backupRow?.value);
-      const existingBackups = Array.isArray(backupValue.items) ? backupValue.items : [];
-      if(!existingBackups.length){
-        const rowMap = Object.fromEntries((data || []).map(row => [row.key, valueToObject(row.value)]));
-        const baseline = {
-          createdAt: new Date().toISOString(),
-          reason: '자동 기준 백업',
-          hero: rowMap.hero || {},
-          about: rowMap.about || {},
-          note: rowMap.note || {}
-        };
-        const {error: baselineError} = await supabaseClient
-          .from('site_settings')
-          .upsert([{key:'homepage_backups', value:{items:[baseline]}}], {onConflict:'key'});
-        if(baselineError) console.warn('초기 홈페이지 백업 저장 실패', baselineError);
-      }
     }
 
 
@@ -5046,10 +5044,25 @@
     }
 
     async function persistBooks(items){
-      if(!supabaseReady()) return {error:new Error('Supabase 연결이 없어 저장할 수 없습니다.')};
-      return await supabaseClient
-        .from('site_settings')
-        .upsert([{key:'books',value:{items,sampleHidden:bookSampleHidden,sampleItems:bookSampleItems}}],{onConflict:'key'});
+      const token = getAdminAccessToken();
+      if(!adminTokenIsFresh(token)) return {error:new Error('관리자 로그인이 만료되었습니다. 다시 로그인해 주세요.')};
+      const baseValue = siteSettingsBaseSnapshots.books;
+      if(baseValue === null) return {error:new Error('최신 책소개 설정을 확인하지 못했습니다. 새로고침 후 다시 저장해 주세요.')};
+
+      const value = {items,sampleHidden:bookSampleHidden,sampleItems:bookSampleItems};
+      try{
+        const response = await fetch('/api/site-settings-admin', {
+          method:'PUT',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body:JSON.stringify({section:'books', value, baseValue})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '책소개 저장에 실패했습니다.');
+        siteSettingsBaseSnapshots.books = cloneSiteSettingValue(value);
+        return {error:null};
+      }catch(error){
+        return {error};
+      }
     }
 
     async function deleteSampleBook(){
@@ -5272,6 +5285,7 @@
       const status = qs('#popupStatus');
       const enabled = !!qs('#popupEnabled')?.checked;
       const images = getPopupUrlValues();
+      const token = getAdminAccessToken();
 
       if(enabled && !images.length){
         if(status){
@@ -5280,29 +5294,44 @@
         }
         return;
       }
-      if(!supabaseReady()){
+      if(!adminTokenIsFresh(token)){
         if(status){
-          status.textContent = 'Supabase 연결이 없어 저장할 수 없습니다.';
+          status.textContent = '관리자 로그인이 만료되었습니다. 다시 로그인한 뒤 저장해 주세요.';
+          status.className = 'status bad';
+        }
+        return;
+      }
+      const baseValue = siteSettingsBaseSnapshots.popup;
+      if(baseValue === null){
+        if(status){
+          status.textContent = '최신 팝업 설정을 확인하지 못해 저장을 중단했습니다. 새로고침 후 다시 저장해 주세요.';
           status.className = 'status bad';
         }
         return;
       }
 
-      const {error} = await supabaseClient.from('site_settings').upsert([{
-        key:'popup',
-        value:{enabled, images}
-      }], {onConflict:'key'});
+      try{
+        const value = {enabled, images};
+        const response = await fetch('/api/site-settings-admin', {
+          method:'PUT',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body:JSON.stringify({section:'popup', value, baseValue})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '팝업 저장에 실패했습니다.');
+        siteSettingsBaseSnapshots.popup = cloneSiteSettingValue(value);
 
-      if(status){
-        if(error){
-          status.textContent = '팝업 저장 실패: ' + error.message;
-          status.className = 'status bad';
-        }else{
+        if(status){
           status.textContent = enabled
             ? `팝업 ON · ${images.length}장 저장되었습니다.`
             : '팝업 OFF로 저장되었습니다.';
           status.className = 'status ok';
           renderPopupUrlInputs(images.length ? images : ['']);
+        }
+      }catch(error){
+        if(status){
+          status.textContent = error.message || '팝업 저장 중 오류가 발생했습니다.';
+          status.className = 'status bad';
         }
       }
     }
@@ -5377,22 +5406,54 @@
     }
 
     async function saveEditableTextContentToSupabase({contactLines, exhibitionLines, newsLines}){
-      if(!supabaseReady()) return;
-      const results = await Promise.all([
-        replaceSupabaseTextRows('contact_items', contactLines),
-        replaceSupabaseTextRows('exhibitions', exhibitionLines),
-        replaceSupabaseTextRows('news_items', newsLines)
-      ]);
-      const failed = results.find(r => !r.ok);
       const status = qs('#textContentStatus');
-      if(status){
-        if(failed){
-          status.textContent = `브라우저 저장은 완료. Supabase 저장 실패: ${failed.message}`;
+      const token = getAdminAccessToken();
+      if(!adminTokenIsFresh(token)){
+        if(status){
+          status.textContent = '관리자 로그인이 만료되었습니다. 다시 로그인한 뒤 저장해 주세요.';
           status.className = 'status bad';
-        }else{
-          status.textContent = 'Supabase DB까지 저장되었습니다.';
+        }
+        return false;
+      }
+      if(textBaseSnapshots.contact === null || textBaseSnapshots.exhibition === null || textBaseSnapshots.news === null){
+        if(status){
+          status.textContent = '최신 DB 문구를 확인하지 못해 저장을 중단했습니다. 새로고침 후 다시 저장해 주세요.';
+          status.className = 'status bad';
+        }
+        return false;
+      }
+
+      try{
+        const response = await fetch('/api/content-admin', {
+          method:'POST',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body:JSON.stringify({
+            action:'replace-lists',
+            base:{
+              contact:textBaseSnapshots.contact,
+              exhibition:textBaseSnapshots.exhibition,
+              news:textBaseSnapshots.news
+            },
+            values:{contact:contactLines, exhibition:exhibitionLines, news:newsLines}
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '사이트 문구 저장에 실패했습니다.');
+
+        textBaseSnapshots.contact = [...contactLines];
+        textBaseSnapshots.exhibition = [...exhibitionLines];
+        textBaseSnapshots.news = [...newsLines];
+        if(status){
+          status.textContent = 'Supabase DB까지 안전하게 저장되었습니다.';
           status.className = 'status ok';
         }
+        return true;
+      }catch(error){
+        if(status){
+          status.textContent = error.message || '사이트 문구 저장 중 오류가 발생했습니다.';
+          status.className = 'status bad';
+        }
+        return false;
       }
     }
 
@@ -5442,80 +5503,45 @@
 
     async function restoreLatestHomepageBackup(){
       const status = qs('#aboutContentStatus');
-      if(!supabaseReady()){
+      const token = getAdminAccessToken();
+
+      if(!adminTokenIsFresh(token)){
         if(status){
-          status.textContent = '백업을 불러올 수 없습니다. DB 연결을 확인해 주세요.';
+          status.textContent = '관리자 로그인이 만료되었습니다. 다시 로그인한 뒤 복원해 주세요.';
           status.className = 'status bad';
         }
         return;
       }
-
-      const {data: backupRow, error} = await supabaseClient
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'homepage_backups')
-        .maybeSingle();
-
-      if(error){
-        if(status){
-          status.textContent = `백업 불러오기 실패: ${error.message}`;
-          status.className = 'status bad';
-        }
-        return;
-      }
-
-      const backupValue = valueToObject(backupRow?.value);
-      const items = Array.isArray(backupValue.items) ? backupValue.items : [];
-      const target = items[0];
-      if(!target){
-        if(status){
-          status.textContent = '아직 복원할 백업이 없습니다.';
-          status.className = 'status bad';
-        }
-        return;
-      }
-
-      const when = target.createdAt ? new Date(target.createdAt).toLocaleString('ko-KR') : '최근';
-      if(!window.confirm(`${when} 백업으로 메인 · 작가소개 · 작가 노트를 복원할까요?\n현재 상태도 먼저 백업한 뒤 복원합니다.`)) return;
+      if(!window.confirm('가장 최근 자동 백업으로 메인 · 작가소개 · 작가노트를 복원할까요? 현재 상태도 먼저 안전 백업됩니다.')) return;
 
       if(status){
         status.textContent = '현재 상태를 안전하게 백업한 뒤 복원 중입니다...';
         status.className = 'status';
       }
 
-      const safetyBackup = await createHomepageBackup('백업 복원 직전');
-      if(!safetyBackup.ok){
+      try{
+        const response = await fetch('/api/site-settings-admin', {
+          method:'PUT',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body:JSON.stringify({action:'restore-latest-homepage-backup'})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || '홈페이지 백업 복원에 실패했습니다.');
+
+        localStorage.removeItem('wonjuSiteAboutContent');
+        localStorage.removeItem('wonjuSharedImageContent');
+        await loadSupabaseSiteSettings();
+
+        const when = result.restoredAt ? new Date(result.restoredAt).toLocaleString('ko-KR') : '최근';
         if(status){
-          status.textContent = `안전 백업 실패로 복원을 중단했습니다: ${safetyBackup.message}`;
+          status.textContent = `${when} 백업으로 복원했습니다. 복원 직전 상태도 별도 백업되어 있습니다.`;
+          status.className = 'status ok';
+        }
+      }catch(error){
+        if(status){
+          status.textContent = error.message || '홈페이지 백업 복원 중 오류가 발생했습니다.';
           status.className = 'status bad';
         }
-        return;
-      }
-
-      const restoreRows = [];
-      if(target.hero) restoreRows.push({key:'hero', value:target.hero});
-      if(target.about) restoreRows.push({key:'about', value:target.about});
-      if(target.note) restoreRows.push({key:'note', value:target.note});
-
-      const {error: restoreError} = await supabaseClient
-        .from('site_settings')
-        .upsert(restoreRows, {onConflict:'key'});
-
-      if(restoreError){
-        if(status){
-          status.textContent = `백업 복원 실패: ${restoreError.message}`;
-          status.className = 'status bad';
-        }
-        return;
-      }
-
-      localStorage.removeItem('wonjuSiteAboutContent');
-      localStorage.removeItem('wonjuSharedImageContent');
-      await loadSupabaseSiteSettings();
-
-      if(status){
-        status.textContent = `${when} 백업으로 복원했습니다. 현재 상태도 별도 백업되어 있습니다.`;
-        status.className = 'status ok';
       }
     }
 
@@ -5565,7 +5591,7 @@
           status.textContent = '관리자 로그인이 만료되었습니다. 관리자 페이지에서 다시 로그인한 뒤 저장해 주세요.';
           status.className = 'status bad';
         }
-        return;
+        return false;
       }
 
       const data = collectAboutEditorData();
@@ -5593,7 +5619,7 @@
         };
       }
 
-      if(!value) return;
+      if(!value) return false;
 
       const baseValue = siteSettingsBaseSnapshots[section];
       if(baseValue === null){
@@ -5601,7 +5627,7 @@
           status.textContent = '최신 DB 상태를 확인하지 못해 저장을 중단했습니다. 관리자 페이지를 새로고침한 뒤 다시 저장해 주세요.';
           status.className = 'status bad';
         }
-        return;
+        return false;
       }
 
       if(status){
@@ -5627,11 +5653,13 @@
           status.textContent = `자동 백업 완료 · ${labels[section]}만 DB에 저장했습니다. 다른 영역은 변경하지 않았습니다.`;
           status.className = 'status ok';
         }
+        return true;
       }catch(error){
         if(status){
           status.textContent = error.message || `${labels[section]} 저장 중 오류가 발생했습니다.`;
           status.className = 'status bad';
         }
+        return false;
       }
     }
 
@@ -5719,7 +5747,9 @@
     }
 
     async function saveArtworkToSupabase({info, title, category, year, desc, youtube, thumbUrl, fullUrl}){
-      if(!supabaseReady()) return {ok:false, message:'Supabase 연결이 없습니다.'};
+      const token = getAdminAccessToken();
+      if(!adminTokenIsFresh(token)) return {ok:false, message:'관리자 로그인이 만료되었습니다. 다시 로그인해 주세요.'};
+
       const payload = buildSupabaseWorkPayload({title, category, year, desc, youtube, thumbUrl, fullUrl});
       const explicitDbId = info?.work?._dbId
         || info?.dbId
@@ -5737,30 +5767,72 @@
       }
 
       const existingDbId = explicitDbId || existingWork?._dbId || existingWork?.id || '';
-
+      let baseValue = null;
       if(existingDbId){
-        const {error} = await supabaseClient
-          .from('works')
-          .update(payload)
-          .eq('id', existingDbId);
-        if(error) return {ok:false, message:error.message};
-        return {ok:true, dbId:existingDbId, message:`${payload.title} 작품이 Supabase works에 수정 저장되었습니다.`};
+        const source = info?.work || existingWork;
+        if(!source) return {ok:false, message:'최신 작품 정보를 확인하지 못했습니다. 새로고침 후 다시 수정해 주세요.'};
+        baseValue = buildSupabaseWorkPayload({
+          title:source.title,
+          category:source.category,
+          year:source.year,
+          desc:source.desc,
+          youtube:source.youtube,
+          thumbUrl:source.thumb,
+          fullUrl:source.large
+        });
+        baseValue.medium = source.medium || source.category || '';
+        baseValue.is_visible = source._isVisible !== false;
       }
 
-      payload.sort_order = await getNextWorkSortOrder();
-      const {data, error} = await supabaseClient.from('works').insert(payload).select('id').single();
-      if(error) return {ok:false, message:error.message};
-      return {ok:true, dbId:data?.id, message:`${payload.title} 작품이 Supabase works에 새로 등록되었습니다.`};
+      try{
+        const response = await fetch('/api/content-admin', {
+          method:'POST',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body:JSON.stringify({action:'save-work', id:existingDbId || '', value:payload, baseValue})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) return {ok:false, message:result.message || '작품 저장에 실패했습니다.'};
+        return {
+          ok:true,
+          dbId:result.dbId || existingDbId || '',
+          skipped:result.skipped === true,
+          message:result.message || (existingDbId ? `${payload.title} 작품이 수정 저장되었습니다.` : `${payload.title} 작품이 새로 등록되었습니다.`)
+        };
+      }catch(error){
+        return {ok:false, message:error.message || '작품 저장 중 오류가 발생했습니다.'};
+      }
     }
 
     async function deleteArtworkFromSupabase(info){
-      if(!supabaseReady() || info?.type !== 'db' || !info.work?._dbId) return {ok:false, message:'Supabase 작품이 아닙니다.'};
-      const {error} = await supabaseClient
-        .from('works')
-        .update({is_visible:false})
-        .eq('id', info.work._dbId);
-      if(error) return {ok:false, message:error.message};
-      return {ok:true, message:'Supabase works에서 숨김 처리했습니다.'};
+      const token = getAdminAccessToken();
+      if(!adminTokenIsFresh(token) || info?.type !== 'db' || !info.work?._dbId){
+        return {ok:false, message:'관리자 로그인 또는 작품 정보를 확인해 주세요.'};
+      }
+      const source = info.work;
+      const baseValue = buildSupabaseWorkPayload({
+        title:source.title,
+        category:source.category,
+        year:source.year,
+        desc:source.desc,
+        youtube:source.youtube,
+        thumbUrl:source.thumb,
+        fullUrl:source.large
+      });
+      baseValue.medium = source.medium || source.category || '';
+      baseValue.is_visible = source._isVisible !== false;
+
+      try{
+        const response = await fetch('/api/content-admin', {
+          method:'POST',
+          headers:{'Content-Type':'application/json', Authorization:`Bearer ${token}`},
+          body:JSON.stringify({action:'hide-work', id:source._dbId, baseValue})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) return {ok:false, message:result.message || '작품 삭제에 실패했습니다.'};
+        return {ok:true, message:result.message || '작품을 숨김 처리했습니다.'};
+      }catch(error){
+        return {ok:false, message:error.message || '작품 삭제 중 오류가 발생했습니다.'};
+      }
     }
 
 
