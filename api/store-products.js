@@ -50,32 +50,6 @@ function getEnv() {
 
 async function supabaseRequest(path, options = {}) {
   return supabaseAdminRequest(path, options);
-}) {
-  const { supabaseUrl, serviceKey } = getEnv();
-  if (!serviceKey) {
-    const error = new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');
-    error.statusCode = 500;
-    throw error;
-  }
-
-  const response = await fetch(`${supabaseUrl}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation',
-      ...(options.headers || {})
-    }
-  });
-  const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!response.ok) {
-    const error = new Error(data?.message || data?.hint || 'Supabase request failed.');
-    error.statusCode = response.status;
-    throw error;
-  }
-  return data;
 }
 
 function requireAdmin(req) {
