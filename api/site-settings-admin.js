@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 
-const ALLOWED_SECTIONS = new Set(['hero', 'about', 'note']);
+const ALLOWED_SECTIONS = new Set(['hero', 'about', 'note', 'popup', 'books']);
+const HOMEPAGE_SECTIONS = new Set(['hero', 'about', 'note']);
 
 function normalize(value) {
   return String(value || '').normalize('NFC').trim();
@@ -117,6 +118,51 @@ module.exports = async function handler(req, res) {
     requireAdmin(req);
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+
+    if (body.action === 'restore-latest-homepage-backup') {
+      const rows = await db(
+        'site_settings?select=key,value&key=in.(hero,about,note,homepage_backups)',
+        { method: 'GET' }
+      );
+      const rowMap = Object.fromEntries((rows || []).map(row => [row.key, valueObject(row.value)]));
+      const backupValue = rowMap.homepage_backups || {};
+      const items = Array.isArray(backupValue.items) ? backupValue.items : [];
+      const target = items[0];
+
+      if (!target) {
+        res.status(404).json({ message: '아직 복원할 홈페이지 백업이 없습니다.' });
+        return;
+      }
+
+      const safety = {
+        createdAt: new Date().toISOString(),
+        reason: '백업 복원 직전',
+        hero: rowMap.hero || {},
+        about: rowMap.about || {},
+        note: rowMap.note || {}
+      };
+      const nextItems = [safety, ...items].slice(0, 10);
+      const payload = [
+        { key: 'homepage_backups', value: { items: nextItems } },
+        { key: 'hero', value: target.hero || {} },
+        { key: 'about', value: target.about || {} },
+        { key: 'note', value: target.note || {} }
+      ];
+
+      await db('site_settings?on_conflict=key', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+        body: JSON.stringify(payload)
+      });
+
+      res.status(200).json({
+        ok: true,
+        restoredAt: target.createdAt || null,
+        message: '최근 홈페이지 백업으로 복원했습니다.'
+      });
+      return;
+    }
+
     const section = String(body.section || '').trim();
     const value = body.value && typeof body.value === 'object' && !Array.isArray(body.value) ? body.value : null;
     const hasBaseValue = Object.prototype.hasOwnProperty.call(body, 'baseValue')
@@ -131,12 +177,12 @@ module.exports = async function handler(req, res) {
     }
 
     const rows = await db(
-      'site_settings?select=key,value&key=in.(hero,about,note,homepage_backups)',
+      'site_settings?select=key,value&key=in.(hero,about,note,popup,books,homepage_backups)',
       { method: 'GET' }
     );
 
     const rowMap = Object.fromEntries((rows || []).map(row => [row.key, valueObject(row.value)]));
-    const labels = { hero: '상단', about: '작가소개', note: '작가노트' };
+    const labels = { hero: '상단', about: '작가소개', note: '작가노트', popup: '팝업', books: '책소개' };
     const currentSectionValue = rowMap[section] || {};
 
     if (!hasBaseValue) {
@@ -157,24 +203,29 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    const current = {
-      createdAt: new Date().toISOString(),
-      reason: `${labels[section]} 저장 전`,
-      hero: rowMap.hero || {},
-      about: rowMap.about || {},
-      note: rowMap.note || {}
-    };
+    let items = [];
+    let payload = [{ key: section, value }];
 
-    const backupValue = rowMap.homepage_backups || {};
-    let items = Array.isArray(backupValue.items) ? backupValue.items : [];
-    if (!items.length || !sameSnapshot(items[0], current)) {
-      items = [current, ...items].slice(0, 10);
+    if (HOMEPAGE_SECTIONS.has(section)) {
+      const current = {
+        createdAt: new Date().toISOString(),
+        reason: `${labels[section]} 저장 전`,
+        hero: rowMap.hero || {},
+        about: rowMap.about || {},
+        note: rowMap.note || {}
+      };
+
+      const backupValue = rowMap.homepage_backups || {};
+      items = Array.isArray(backupValue.items) ? backupValue.items : [];
+      if (!items.length || !sameSnapshot(items[0], current)) {
+        items = [current, ...items].slice(0, 10);
+      }
+
+      payload = [
+        { key: 'homepage_backups', value: { items } },
+        { key: section, value }
+      ];
     }
-
-    const payload = [
-      { key: 'homepage_backups', value: { items } },
-      { key: section, value }
-    ];
 
     await db('site_settings?on_conflict=key', {
       method: 'POST',
