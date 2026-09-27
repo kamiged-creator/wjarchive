@@ -1,4 +1,5 @@
 const allowedOrigins = new Set([
+const { supabaseAdminRequest } = require('../lib/supabase-admin');
   'https://wjarchive.vercel.app',
   'https://ycuve.com',
   'https://www.ycuve.com',
@@ -17,6 +18,8 @@ function setCors(req, res) {
 }
 
 async function supabaseRequest(path, options = {}) {
+  return supabaseAdminRequest(path, options);
+}) {
   const supabaseUrl = process.env.SUPABASE_URL || 'https://vefeplfczeztbplowjmj.supabase.co';
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) {
