@@ -5543,95 +5543,73 @@
       writeSharedImageContent(shared);
     }
 
-    async function ensureSupabaseAdminSession(){
-      if(!supabaseClient) return false;
-      try{
-        const {data} = await supabaseClient.auth.getSession();
-        return !!data?.session?.user;
-      }catch(e){
-        return false;
-      }
-    }
-
     async function saveAboutSection(section){
       const status = qs('#aboutContentStatus');
-      if(!supabaseReady()){
-        if(status){
-          status.textContent = 'Supabase 연결이 없어 저장할 수 없습니다.';
-          status.className = 'status bad';
-        }
-        return;
-      }
+      const token = getAdminAccessToken();
+      const labels = {hero:'상단', about:'작가소개', note:'작가노트'};
 
-      const hasAdminSession = await ensureSupabaseAdminSession();
-      if(!hasAdminSession){
+      if(!adminTokenIsFresh(token)){
         if(status){
-          status.textContent = '관리자 인증 세션을 확인할 수 없습니다. 관리자 페이지에 다시 로그인한 뒤 저장해 주세요.';
+          status.textContent = '관리자 로그인이 만료되었습니다. 관리자 페이지에서 다시 로그인한 뒤 저장해 주세요.';
           status.className = 'status bad';
         }
         return;
       }
 
       const data = collectAboutEditorData();
-      const labels = {hero:'상단', about:'작가소개', note:'작가노트'};
-      const backup = await createHomepageBackup(`${labels[section] || section} 저장 전`);
-      if(!backup.ok){
-        if(status){
-          status.textContent = `자동 백업 실패로 저장을 중단했습니다: ${backup.message}`;
-          status.className = 'status bad';
-        }
-        return;
-      }
+      let value = null;
 
-      let row = null;
       if(section === 'hero'){
-        row = {
-          key:'hero',
-          value:{
-            eyebrow:data.heroEyebrow,
-            title:String(data.heroTitle || '').replace(/<br\s*\/?>/gi, '\n'),
-            lead:data.heroLead,
-            caption:data.heroCaption,
-            image:data.heroImage || ''
-          }
+        value = {
+          eyebrow:data.heroEyebrow,
+          title:String(data.heroTitle || '').replace(/<br\s*\/?>/gi, '\n'),
+          lead:data.heroLead,
+          caption:data.heroCaption,
+          image:data.heroImage || ''
         };
       }else if(section === 'about'){
-        row = {
-          key:'about',
-          value:{
-            aboutSectionCopy:data.aboutSectionCopy,
-            paragraph1:data.paragraph1,
-            paragraph2:data.paragraph2,
-            artistImage:data.artistImage || ''
-          }
+        value = {
+          aboutSectionCopy:data.aboutSectionCopy,
+          paragraph1:data.paragraph1,
+          paragraph2:data.paragraph2,
+          artistImage:data.artistImage || ''
         };
       }else if(section === 'note'){
-        row = {
-          key:'note',
-          value:{
-            quote:data.noteQuote || '',
-            body:data.noteBody || ''
-          }
+        value = {
+          quote:data.noteQuote || '',
+          body:data.noteBody || ''
         };
       }
-      if(!row) return;
 
-      const {error} = await supabaseClient
-        .from('site_settings')
-        .upsert([row], {onConflict:'key'});
+      if(!value) return;
 
-      if(error){
-        if(status){
-          status.textContent = `자동 백업은 완료했지만 ${labels[section]} 저장에 실패했습니다: ${error.message}`;
-          status.className = 'status bad';
-        }
-        return;
+      if(status){
+        status.textContent = `${labels[section]} 저장 중입니다...`;
+        status.className = 'status';
       }
 
-      updateLocalAboutSection(section, data);
-      if(status){
-        status.textContent = `자동 백업 완료 · ${labels[section]}만 DB에 저장했습니다. 다른 영역은 변경하지 않았습니다.`;
-        status.className = 'status ok';
+      try{
+        const response = await fetch('/api/site-settings-admin', {
+          method:'PUT',
+          headers:{
+            'Content-Type':'application/json',
+            Authorization:`Bearer ${token}`
+          },
+          body:JSON.stringify({section, value})
+        });
+        const result = await response.json().catch(() => ({}));
+        if(!response.ok) throw new Error(result.message || `${labels[section]} 저장에 실패했습니다.`);
+
+        updateLocalAboutSection(section, data);
+        if(status){
+          status.textContent = `자동 백업 완료 · ${labels[section]}만 DB에 저장했습니다. 다른 영역은 변경하지 않았습니다.`;
+          status.className = 'status ok';
+        }
+      }catch(error){
+        if(status){
+          status.textContent = error.message || `${labels[section]} 저장 중 오류가 발생했습니다.`;
+          status.className = 'status bad';
+        }
       }
     }
 
