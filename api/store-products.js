@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { supabaseAdminRequest } = require('../lib/supabase-admin');
 
 const allowedOrigins = new Set([
   'https://wjarchive.vercel.app',
@@ -48,6 +49,8 @@ function getEnv() {
 }
 
 async function supabaseRequest(path, options = {}) {
+  return supabaseAdminRequest(path, options);
+}) {
   const { supabaseUrl, serviceKey } = getEnv();
   if (!serviceKey) {
     const error = new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');
