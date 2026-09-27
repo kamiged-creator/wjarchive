@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { supabaseAdminRequest } = require('../lib/supabase-admin');
 
 const ALLOWED_SECTIONS = new Set(['hero', 'about', 'note', 'popup', 'books']);
 const HOMEPAGE_SECTIONS = new Set(['hero', 'about', 'note']);
@@ -35,6 +36,8 @@ function requireAdmin(req) {
 }
 
 async function db(path, options = {}) {
+  return supabaseAdminRequest(path, options);
+}) {
   const { url, serviceKey } = env();
   if (!serviceKey) {
     const error = new Error('SUPABASE_SERVICE_ROLE_KEY is not configured.');
