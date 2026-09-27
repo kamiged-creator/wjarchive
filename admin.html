@@ -120,6 +120,34 @@
       background:var(--paper);box-shadow:var(--shadow);cursor:pointer;color:var(--text);
     }
     .btn.primary{background:var(--text);color:#fff;border-color:transparent}
+    #saveHeroContentBtn,
+    #saveArtistContentBtn,
+    #saveNoteContentBtn{
+      transition:transform .12s ease, background .2s ease, box-shadow .2s ease, color .2s ease, opacity .2s ease;
+    }
+    #saveHeroContentBtn:active,
+    #saveArtistContentBtn:active,
+    #saveNoteContentBtn:active{
+      transform:scale(.97);
+    }
+    .btn.save-pending{
+      background:linear-gradient(180deg,#8b6847,#735337);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 0 0 4px rgba(139,104,71,.13);
+    }
+    .btn.save-success{
+      background:linear-gradient(180deg,#2f7d4d,#25633d);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 0 0 4px rgba(47,125,77,.14);
+    }
+    .btn.save-error{
+      background:linear-gradient(180deg,#b84b4b,#943b3b);
+      color:#fff;
+      border-color:transparent;
+      box-shadow:0 0 0 4px rgba(184,75,75,.13);
+    }
     .btn.subtle{background:rgba(255,255,255,.55);box-shadow:none}
     .about-recovery{
       margin-top:10px;
@@ -5345,6 +5373,7 @@
       }
       const baseValue = siteSettingsBaseSnapshots.popup;
       if(baseValue === null){
+        setAboutSaveButtonState(section, 'error');
         if(status){
           status.textContent = '최신 팝업 설정을 확인하지 못해 저장을 중단했습니다. 새로고침 후 다시 저장해 주세요.';
           status.className = 'status bad';
@@ -5371,6 +5400,7 @@
           renderPopupUrlInputs(images.length ? images : ['']);
         }
       }catch(error){
+        setAboutSaveButtonState(section, 'error');
         if(status){
           status.textContent = error.message || '팝업 저장 중 오류가 발생했습니다.';
           status.className = 'status bad';
@@ -5565,12 +5595,55 @@
       writeSharedImageContent(shared);
     }
 
+    const aboutSaveButtonMeta = {
+      hero:{selector:'#saveHeroContentBtn', label:'상단 저장'},
+      about:{selector:'#saveArtistContentBtn', label:'작가소개 저장'},
+      note:{selector:'#saveNoteContentBtn', label:'작가노트 저장'}
+    };
+
+    function setAboutSaveButtonState(section, state){
+      const meta = aboutSaveButtonMeta[section];
+      const button = meta ? qs(meta.selector) : null;
+      if(!button) return;
+
+      clearTimeout(button._saveFeedbackTimer);
+      button.classList.remove('save-pending','save-success','save-error');
+
+      if(state === 'pending'){
+        button.dataset.wasDisabled = button.disabled ? '1' : '0';
+        button.disabled = true;
+        button.textContent = '저장 중…';
+        button.classList.add('save-pending');
+        return;
+      }
+
+      if(state === 'success'){
+        button.textContent = '저장됨 ✓';
+        button.classList.add('save-success');
+      }else if(state === 'error'){
+        button.textContent = '저장 실패';
+        button.classList.add('save-error');
+      }else{
+        button.textContent = meta.label;
+      }
+
+      button._saveFeedbackTimer = setTimeout(() => {
+        button.classList.remove('save-pending','save-success','save-error');
+        button.textContent = meta.label;
+        if(button.dataset.wasDisabled === '0') button.disabled = false;
+        delete button.dataset.wasDisabled;
+      }, state === 'error' ? 1800 : 1400);
+    }
+
     async function saveAboutSection(section){
       const status = qs('#aboutContentStatus');
       const token = getAdminAccessToken();
       const labels = {hero:'상단', about:'작가소개', note:'작가노트'};
 
+      setAboutSaveButtonState(section, 'pending');
+
       if(!adminTokenIsFresh(token)){
+        setAboutSaveButtonState(section, 'error');
         if(status){
           status.textContent = '관리자 로그인이 만료되었습니다. 관리자 페이지에서 다시 로그인한 뒤 저장해 주세요.';
           status.className = 'status bad';
@@ -5603,7 +5676,10 @@
         };
       }
 
-      if(!value) return false;
+      if(!value){
+        setAboutSaveButtonState(section, 'error');
+        return false;
+      }
 
       const baseValue = siteSettingsBaseSnapshots[section];
       if(baseValue === null){
@@ -5637,6 +5713,7 @@
           status.textContent = `자동 백업 완료 · ${labels[section]}만 DB에 저장했습니다. 다른 영역은 변경하지 않았습니다.`;
           status.className = 'status ok';
         }
+        setAboutSaveButtonState(section, 'success');
         return true;
       }catch(error){
         if(status){
