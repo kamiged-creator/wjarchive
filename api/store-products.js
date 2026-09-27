@@ -91,6 +91,26 @@ function requireAdmin(req) {
   }
 }
 
+function canonical(value) {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === 'object') {
+    return Object.keys(value).sort().reduce((out, key) => {
+      out[key] = canonical(value[key]);
+      return out;
+    }, {});
+  }
+  return value;
+}
+
+function sameProduct(a, b) {
+  return JSON.stringify(canonical(toProductPayload(a || {}))) === JSON.stringify(canonical(toProductPayload(b || {})));
+}
+
+async function getProductById(id) {
+  const rows = await supabaseRequest(`store_products?select=*&id=eq.${encodeURIComponent(id)}&limit=1`, { method: 'GET' });
+  return rows?.[0] || null;
+}
+
 function toProductPayload(body) {
   const detailImages = Array.isArray(body.detail_image_urls)
     ? body.detail_image_urls
@@ -116,6 +136,7 @@ function toProductPayload(body) {
 
 module.exports = async function handler(req, res) {
   setCors(req, res);
+  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') {
     res.status(204).end();
@@ -148,6 +169,19 @@ module.exports = async function handler(req, res) {
         res.status(400).json({ message: '상품 id가 필요합니다.' });
         return;
       }
+      if (!body.baseProduct || typeof body.baseProduct !== 'object') {
+        res.status(409).json({ code: 'STALE_ADMIN_STATE', message: '이 상품 편집 화면은 이전 버전입니다. 새로고침 후 다시 수정해 주세요.' });
+        return;
+      }
+      const current = await getProductById(body.id);
+      if (!current) {
+        res.status(404).json({ message: '수정할 상품을 찾지 못했습니다.' });
+        return;
+      }
+      if (!sameProduct(current, body.baseProduct)) {
+        res.status(409).json({ code: 'STALE_ADMIN_STATE', message: '다른 기기나 창에서 이 상품이 먼저 변경되었습니다. 현재 저장은 취소했습니다. 새로고침 후 다시 수정해 주세요.' });
+        return;
+      }
       const data = await supabaseRequest(`store_products?id=eq.${encodeURIComponent(body.id)}`, {
         method: 'PATCH',
         body: JSON.stringify(toProductPayload(body))
@@ -159,6 +193,19 @@ module.exports = async function handler(req, res) {
     if (req.method === 'DELETE') {
       if (!body.id) {
         res.status(400).json({ message: '상품 id가 필요합니다.' });
+        return;
+      }
+      if (!body.baseProduct || typeof body.baseProduct !== 'object') {
+        res.status(409).json({ code: 'STALE_ADMIN_STATE', message: '이 상품 화면은 이전 버전입니다. 새로고침 후 다시 확인해 주세요.' });
+        return;
+      }
+      const current = await getProductById(body.id);
+      if (!current) {
+        res.status(404).json({ message: '삭제할 상품을 찾지 못했습니다.' });
+        return;
+      }
+      if (!sameProduct(current, body.baseProduct)) {
+        res.status(409).json({ code: 'STALE_ADMIN_STATE', message: '다른 기기나 창에서 이 상품이 먼저 변경되었습니다. 삭제를 취소했습니다. 새로고침 후 다시 확인해 주세요.' });
         return;
       }
       await supabaseRequest(`store_products?id=eq.${encodeURIComponent(body.id)}`, {
