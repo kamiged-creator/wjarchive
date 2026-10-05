@@ -143,6 +143,10 @@
       margin-bottom:8px;
       font-size:22px;
       line-height:1.25;
+      transition:color .18s ease;
+    }
+    body.book-cover-selected .drop strong{
+      color:#d7b07a;
     }
     .drop span{
       display:block;
@@ -1407,6 +1411,7 @@
       clearResult();
     });
     els.outputModeSelect.addEventListener('change', () => {
+      document.body.classList.toggle('book-cover-selected', els.outputModeSelect.value === 'book-cover');
       getOutputSize();
       clearResult();
       const stageRect = els.stageWrap.getBoundingClientRect();
@@ -1479,6 +1484,7 @@
     state.sequenceStart = getSequenceStart();
     updateSequenceUi();
     initAccessLock();
+    document.body.classList.toggle('book-cover-selected', els.outputModeSelect.value === 'book-cover');
     resizeCanvas();
   </script>
 </body>
