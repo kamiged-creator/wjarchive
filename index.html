@@ -1753,6 +1753,81 @@
   #news .accordion-panel > p{display:none}
 </style>
 
+<style id="work-card-stitch-copy-v1">
+  @media (min-width:681px){
+    #works .work{border-radius:12px}
+    #works .work-img{position:relative}
+    #works .work-badge{
+      position:absolute;
+      top:12px;
+      right:12px;
+      display:inline-flex;
+      align-items:center;
+      min-height:26px;
+      padding:0 10px;
+      border:1px solid rgba(31,26,23,.10);
+      border-radius:4px;
+      background:rgba(255,253,249,.92);
+      color:#655f57;
+      font-size:11px;
+      letter-spacing:.02em;
+      backdrop-filter:blur(5px);
+    }
+    #works .work-body{
+      min-height:150px;
+      padding:22px 24px 18px;
+    }
+    #works .work-title{
+      margin:0 0 10px;
+      color:#1f1a17;
+      font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+      font-size:20px;
+      line-height:1.35;
+      font-weight:650;
+      transition:color .18s ease;
+    }
+    #works .work:hover .work-title{color:#b07f43}
+    #works .work-meta{display:none}
+    #works .work-text{
+      color:#7a736b;
+      font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+      font-size:13px;
+      line-height:1.65;
+      -webkit-line-clamp:2;
+    }
+    #works .work-footer{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      min-height:52px;
+      padding:0 24px;
+      border-top:1px solid rgba(31,26,23,.09);
+      background:rgba(255,255,255,.38);
+    }
+    #works .work-archive{
+      color:#9d8d7d;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11px;
+      letter-spacing:.04em;
+    }
+    #works .work-inquiry{
+      border:0;
+      padding:8px 0;
+      background:transparent;
+      color:#2e2925;
+      font-size:12px;
+      font-weight:650;
+      cursor:pointer;
+      transition:color .18s ease;
+    }
+    #works .work-inquiry:hover{color:#b07f43}
+  }
+  @media (max-width:680px){
+    #works .work-badge,#works .work-footer{display:none}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -2330,17 +2405,33 @@
         const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
         const thumb = getGalleryImageUrl(work.thumb || work.large || '');
         const shortDesc = truncateText(work.desc, 68);
+        const archiveNo = String(index + 1).padStart(2,'0');
         return `
         <article class="work" data-index="${index}">
-          <div class="work-img" style="background-image:url('${cssImageUrl(thumb)}')"></div>
+          <div class="work-img" style="background-image:url('${cssImageUrl(thumb)}')">
+            <span class="work-badge">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</span>
+          </div>
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
             <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
             <p class="work-text" title="${escapeHtml(work.desc)}">${escapeHtml(shortDesc)}</p>
           </div>
+          <div class="work-footer">
+            <span class="work-archive">Archive #${archiveNo}</span>
+            <button class="work-inquiry" type="button">작품 문의 →</button>
+          </div>
         </article>`;
       }).join('');
       qsa('.work').forEach(card => card.addEventListener('click', () => openViewer(Number(card.dataset.index))));
+      qsa('.work-inquiry').forEach(btn => {
+        btn.addEventListener('click', event => {
+          event.stopPropagation();
+          const item = qs('#contactAccordion');
+          const section = qs('#contact');
+          if(item) item.classList.add('open');
+          if(section) section.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
       if(!pagination) return;
       if(totalPages <= 1){
         pagination.innerHTML = '';
