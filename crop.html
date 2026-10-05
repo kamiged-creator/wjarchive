@@ -903,11 +903,14 @@
 
     function updateCropBox(width, height){
       const pad = width < 640 ? 28 : 52;
-      let cropW = Math.min(width - pad * 2, (height - pad * 2) * aspect);
-      let cropH = cropW / aspect;
+      const targetAspect = els.outputModeSelect?.value === 'book-cover'
+        ? aspect
+        : (state.naturalWidth && state.naturalHeight ? state.naturalWidth / state.naturalHeight : aspect);
+      let cropW = Math.min(width - pad * 2, (height - pad * 2) * targetAspect);
+      let cropH = cropW / targetAspect;
       if (cropH > height - pad * 2){
         cropH = height - pad * 2;
-        cropW = cropH * aspect;
+        cropW = cropH * targetAspect;
       }
       state.crop = {
         x: (width - cropW) / 2,
@@ -1076,6 +1079,8 @@
           state.fileName = sanitizeFileName(file.name);
           state.naturalWidth = img.naturalWidth;
           state.naturalHeight = img.naturalHeight;
+          const stageRect = els.stageWrap.getBoundingClientRect();
+          updateCropBox(stageRect.width, stageRect.height);
           const countText = state.files.length > 1 ? `${state.fileIndex + 1}/${state.files.length} · ` : '';
           els.sourceMeta.textContent = `${countText}${file.name} · ${img.naturalWidth} x ${img.naturalHeight}px · 저장 번호 ${state.batchStamp || createBatchStamp()}-${formatSequence(getCurrentSequence())}`;
           els.dropLayer.classList.add('is-hidden');
@@ -1400,9 +1405,13 @@
     els.outputModeSelect.addEventListener('change', () => {
       getOutputSize();
       clearResult();
+      const stageRect = els.stageWrap.getBoundingClientRect();
+      updateCropBox(stageRect.width, stageRect.height);
       if (state.image){
         rememberUndo();
         fitImage(els.outputModeSelect.value === 'book-cover' ? 'book-cover' : 'contain', true);
+        draw();
+      } else {
         draw();
       }
     });
