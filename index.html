@@ -121,6 +121,8 @@
       .store-desktop-link:hover .store-coming{display:inline}
     }
     .brand-mobile-actions{display:flex;align-items:center;gap:8px}
+    .mobile-books-link{display:none !important}
+    .mobile-books-link svg{width:15px;height:15px;flex:0 0 auto;stroke:currentColor}
     .mobile-extra-wrap{display:none;position:relative}
     .mobile-extra-trigger{
       width:36px;height:36px;border:1px solid rgba(111,86,63,.28);border-radius:12px;
@@ -861,6 +863,7 @@
       }
       .news-mobile{display:inline-flex !important}
       .future-desktop-link{display:none !important}
+      .mobile-books-link{display:inline-flex !important;align-items:center;gap:4px;white-space:nowrap}
       .brand-mobile-actions{display:flex!important;align-items:center;gap:8px;flex:0 0 auto}
       .mobile-extra-wrap{display:block!important;position:relative;flex:0 0 auto;top:4px}
       .mobile-extra-trigger{display:flex!important;visibility:visible!important;opacity:1!important;flex:0 0 36px}
@@ -1466,6 +1469,7 @@
             <a class="future-desktop-link" href="/books.html">책 소개</a>
             <a class="future-desktop-link store-desktop-link" href="#" data-coming-soon="스토어"><span class="store-label">스토어</span><span class="store-coming">준비중</span></a>
             <a href="#contact">문의</a>
+            <a class="mobile-books-link" href="/books.html" aria-label="책 소개"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.5 5.5A2.5 2.5 0 0 1 7 3h5v16H7a2.5 2.5 0 0 0-2.5 2V5.5Z" stroke-width="1.7" stroke-linejoin="round"/><path d="M19.5 5.5A2.5 2.5 0 0 0 17 3h-5v16h5a2.5 2.5 0 0 1 2.5 2V5.5Z" stroke-width="1.7" stroke-linejoin="round"/></svg><span>책소개</span></a>
             <a class="news-desktop-link" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
           </nav>
         </div>
