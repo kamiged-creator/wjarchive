@@ -1737,6 +1737,10 @@
   }
 </style>
 
+<style id="news-three-lines-v1">
+  #news .accordion-panel > p{display:none}
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -2461,7 +2465,7 @@
         if(!exhibitionRes.error) renderListItems('#exhibitionDisplayList', dbRowsToLines(exhibitionRes.data));
         if(!newsRes.error){
           const newsLines = dbRowsToLines(newsRes.data);
-          renderListItems('#newsDisplayList', newsLines);
+          renderListItems('#newsDisplayList', newsLines.slice(0,3));
           updateNewsBadges(newsLines);
         }
         if(!settingsRes.error){
