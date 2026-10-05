@@ -31,7 +31,10 @@
     .add-paper{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(139,104,71,.28);border-radius:50%;background:var(--paper);color:var(--accent);font-size:24px;line-height:1;cursor:pointer}
     .add-paper.show{display:inline-flex}
     .paper-list{display:grid;gap:12px}
-    .paper-item{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:20px;font-weight:600;line-height:1.45}
+    .paper-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:20px;font-weight:600;line-height:1.45}
+    .paper-title{min-width:0;flex:1}
+    .delete-paper{display:none;flex:0 0 auto;padding:6px 9px;border:1px solid rgba(173,67,55,.22);border-radius:10px;background:#fff8f6;color:#9b4b42;font:700 11px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
+    .delete-paper.show{display:inline-flex}
     .paper-editor{display:none;gap:8px;margin-bottom:14px}
     .paper-editor.show{display:flex}
     .paper-editor input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit}
@@ -130,9 +133,10 @@
 
     function renderPapers(){
       const items=Array.isArray(papersValue.items)?papersValue.items.filter(Boolean):[];
+      const isAdmin=Boolean(currentAdminToken());
       paperList.innerHTML=items.map((item,index)=>{
         const title=typeof item==='string'?item:item.title;
-        return '<div class="paper-item" data-index="'+index+'">'+esc(title||'제목 없음')+'</div>';
+        return '<div class="paper-item" data-index="'+index+'"><span class="paper-title">'+esc(title||'제목 없음')+'</span><button class="delete-paper'+(isAdmin?' show':'')+'" type="button" data-delete-index="'+index+'" aria-label="논문 제목 삭제">삭제</button></div>';
       }).join('');
       paperEmpty.hidden=items.length>0;
       paperCount.textContent=items.length+'편';
@@ -197,6 +201,20 @@
         event.preventDefault();
         savePaperBtn.click();
       }
+    });
+
+    paperList.addEventListener('click',async event=>{
+      const button=event.target.closest('[data-delete-index]');
+      if(!button) return;
+      if(!currentAdminToken()) return;
+      const index=Number(button.dataset.deleteIndex);
+      if(!Number.isInteger(index)) return;
+      const items=Array.isArray(papersValue.items)?papersValue.items:[];
+      const target=items[index];
+      const title=typeof target==='string'?target:target?.title;
+      if(!confirm('이 논문 제목을 삭제할까요?\n\n'+(title||''))) return;
+      const next={...papersValue,items:items.filter((_,i)=>i!==index)};
+      await savePapers(next);
     });
 
     loadPapers();
