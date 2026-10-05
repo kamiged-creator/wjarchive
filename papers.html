@@ -155,7 +155,18 @@
       renderPapers();
     }
 
-    async function savePapers(nextValue){
+    async function fetchLatestPapers(){
+      if(!client) return papersValue&&typeof papersValue==='object'?papersValue:{items:[]};
+      const {data,error}=await client.from('site_settings').select('value').eq('key','papers').maybeSingle();
+      if(error) throw error;
+      let value=data?.value||{};
+      if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
+      if(!value||typeof value!=='object'||Array.isArray(value)) value={};
+      if(!Array.isArray(value.items)) value.items=[];
+      return value;
+    }
+
+    async function savePapers(buildNextValue){
       const token=currentAdminToken();
       if(!token){
         alert('관리자 로그인이 필요합니다.');
@@ -163,16 +174,24 @@
       }
       savePaperBtn.disabled=true;
       try{
-        const response=await fetch('/api/site-settings-admin',{
-          method:'PUT',
-          headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-          body:JSON.stringify({section:'papers',value:nextValue,baseValue:papersValue})
-        });
-        const result=await response.json().catch(()=>({}));
-        if(!response.ok) throw new Error(result.message||'저장에 실패했습니다.');
-        papersValue=nextValue;
-        renderPapers();
-        return true;
+        for(let attempt=0;attempt<2;attempt+=1){
+          const latestValue=await fetchLatestPapers();
+          const nextValue=buildNextValue(latestValue);
+          const response=await fetch('/api/site-settings-admin',{
+            method:'PUT',
+            headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+            body:JSON.stringify({section:'papers',value:nextValue,baseValue:latestValue})
+          });
+          const result=await response.json().catch(()=>({}));
+          if(response.ok){
+            papersValue=nextValue;
+            renderPapers();
+            return true;
+          }
+          if(response.status===409 && result.code==='STALE_ADMIN_STATE' && attempt===0) continue;
+          throw new Error(result.message||'저장에 실패했습니다.');
+        }
+        throw new Error('최신 내용을 다시 확인한 뒤 저장해 주세요.');
       }catch(error){
         alert(error.message||'저장에 실패했습니다.');
         return false;
@@ -189,8 +208,10 @@
     savePaperBtn.addEventListener('click',async()=>{
       const title=paperTitleInput.value.trim();
       if(!title) return;
-      const next={...papersValue,items:[...(papersValue.items||[]),{title}]};
-      const ok=await savePapers(next);
+      const ok=await savePapers(latest=>({
+        ...latest,
+        items:[...(Array.isArray(latest.items)?latest.items:[]),{title}]
+      }));
       if(ok){
         paperTitleInput.value='';
         paperEditor.classList.remove('show');
@@ -214,8 +235,13 @@
       const target=items[index];
       const title=typeof target==='string'?target:target?.title;
       if(!confirm('이 논문 제목을 삭제할까요?\n\n'+(title||''))) return;
-      const next={...papersValue,items:items.filter((_,i)=>i!==index)};
-      await savePapers(next);
+      const targetKey=JSON.stringify(target);
+      await savePapers(latest=>{
+        const latestItems=Array.isArray(latest.items)?latest.items:[];
+        const removeIndex=latestItems.findIndex(item=>JSON.stringify(item)===targetKey);
+        if(removeIndex<0) return latest;
+        return {...latest,items:latestItems.filter((_,i)=>i!==removeIndex)};
+      });
     });
 
     loadPapers();
