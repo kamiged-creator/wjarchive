@@ -937,7 +937,7 @@
       if (!state.image) return;
       state.fitMode = mode;
       if (mode === 'contain') state.baseScale = getContainScale();
-      else if (mode === 'book-cover') state.baseScale = getCoverScale() * 0.90;
+      else if (mode === 'book-cover') state.baseScale = getCoverScale() * 0.95;
       else state.baseScale = getCoverScale();
       els.zoomRange.min = mode === 'contain' ? '0.3' : (mode === 'book-cover' ? '0.75' : '1');
       els.zoomRange.max = mode === 'contain' ? '3' : '5';
