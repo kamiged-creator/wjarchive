@@ -36,11 +36,13 @@
     .paper-title::before{content:"·";position:absolute;left:0;top:0;color:var(--accent);font-weight:900}
     .paper-meta{margin-top:7px;color:var(--accent);font-size:12px;font-weight:750;letter-spacing:-.01em}
     .paper-summary{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.75;white-space:pre-line}
-    .paper-actions{display:none;flex:0 0 auto;gap:6px}
+    .paper-actions{display:none;flex:0 0 auto;gap:6px;flex-wrap:wrap;justify-content:flex-end}
     .paper-actions.show{display:flex}
-    .edit-paper,.delete-paper{padding:7px 10px;border-radius:10px;font:800 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
+    .edit-paper,.delete-paper,.move-paper{padding:7px 10px;border-radius:10px;font:800 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
     .edit-paper{border:1px solid rgba(139,104,71,.28);background:#fffaf3;color:#795f45}
     .delete-paper{border:1px solid rgba(173,67,55,.34);background:#fff4f1;color:#a23d32}
+    .move-paper{min-width:34px;border:1px solid rgba(139,104,71,.22);background:#fff;color:#6f6258}
+    .move-paper:disabled{opacity:.35;cursor:default}
     .paper-editor{display:none;margin-bottom:18px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--paper)}
     .paper-editor.show{display:block}
     .paper-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -187,6 +189,8 @@
           +'<div class="paper-actions'+(isAdmin?' show':'')+'">'
           +'<button class="edit-paper" type="button" data-edit-index="'+index+'">수정</button>'
           +'<button class="delete-paper" type="button" data-delete-index="'+index+'">삭제</button>'
+          +'<button class="move-paper" type="button" data-move-index="'+index+'" data-move-dir="-1" aria-label="위로 이동" '+(index===0?'disabled':'')+'>↑</button>'
+          +'<button class="move-paper" type="button" data-move-index="'+index+'" data-move-dir="1" aria-label="아래로 이동" '+(index===items.length-1?'disabled':'')+'>↓</button>'
           +'</div>'
           +'</article>';
       }).join('');
@@ -348,6 +352,28 @@
         paperEditor.classList.add('show');
         paperEditor.scrollIntoView({behavior:'smooth',block:'center'});
         setTimeout(()=>paperTitleInput.focus(),250);
+        return;
+      }
+
+      const moveButton=event.target.closest('[data-move-index]');
+      if(moveButton){
+        const index=Number(moveButton.dataset.moveIndex);
+        const dir=Number(moveButton.dataset.moveDir);
+        if(!Number.isInteger(index) || ![-1,1].includes(dir)) return;
+        const items=Array.isArray(papersValue.items)?papersValue.items:[];
+        const target=items[index];
+        if(!target) return;
+        const targetKey=JSON.stringify(target);
+        await savePapers(latest=>{
+          const latestItems=Array.isArray(latest.items)?[...latest.items]:[];
+          const currentIndex=latestItems.findIndex(item=>JSON.stringify(item)===targetKey);
+          if(currentIndex<0) return latest;
+          const nextIndex=currentIndex+dir;
+          if(nextIndex<0 || nextIndex>=latestItems.length) return latest;
+          [latestItems[currentIndex],latestItems[nextIndex]]=[latestItems[nextIndex],latestItems[currentIndex]];
+          currentPaperPage=Math.floor(nextIndex/PAPERS_PER_PAGE)+1;
+          return {...latest,items:latestItems};
+        });
         return;
       }
 
