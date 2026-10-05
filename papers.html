@@ -338,7 +338,7 @@
       if(!Number.isInteger(page) || page<1) return;
       currentPaperPage=page;
       renderPapers();
-      document.querySelector('.papers')?.scrollIntoView({behavior:'smooth',block:'start'});
+      window.scrollTo({top:0,behavior:'smooth'});
     });
 
     paperList.addEventListener('click',async event=>{
