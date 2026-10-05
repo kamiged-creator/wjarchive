@@ -722,6 +722,7 @@
       #works .pagination{flex-wrap:nowrap;gap:6px}
       #works .page-btn{min-width:38px;height:38px;padding:0 10px;font-size:13px}
       #works .page-btn.next-page{min-width:52px}
+      #works .page-btn:disabled{opacity:.38;cursor:default}
       .preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
       .asset-preview{grid-template-columns:1fr}
       .btn{width:100%}
@@ -1955,7 +1956,7 @@
           html+=`<button class="page-btn ${page===state.currentPage?'active':''}" type="button" data-page="${page}">${page}</button>`;
         }
         if(groupEnd<totalPages){
-          html+=`<button class="page-btn next-page" type="button" data-page="${groupEnd+1}">다음</button>`;
+          html+=`<button class="page-btn next-page" type="button" data-page="${groupEnd+1}" ${state.currentPage===groupEnd?'':'disabled'}>다음</button>`;
         }
         pagination.innerHTML=html;
       }else{
