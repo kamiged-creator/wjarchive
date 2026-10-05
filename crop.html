@@ -1035,11 +1035,19 @@
       }
 
       if (!state.image){
-        ctx.fillStyle = 'rgba(255,255,255,.78)';
-        ctx.font = '700 18px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
-        ctx.textAlign = 'center';
-        const label = els.outputModeSelect?.value === 'book-cover' ? '책표지 4:5 영역' : '원본 비율 영역';
-        ctx.fillText(label, state.crop.x + state.crop.w / 2, state.crop.y + state.crop.h / 2);
+        const label = els.outputModeSelect?.value === 'book-cover' ? '책표지 4:5' : '원본 비율';
+        ctx.font = '700 13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+        ctx.textAlign = 'left';
+        const paddingX = 10;
+        const badgeH = 26;
+        const textW = ctx.measureText(label).width;
+        const badgeW = textW + paddingX * 2;
+        const badgeX = state.crop.x + 12;
+        const badgeY = state.crop.y + 12;
+        ctx.fillStyle = 'rgba(0,0,0,.58)';
+        ctx.fillRect(badgeX, badgeY, badgeW, badgeH);
+        ctx.fillStyle = 'rgba(255,255,255,.9)';
+        ctx.fillText(label, badgeX + paddingX, badgeY + 17);
       }
       ctx.restore();
     }
