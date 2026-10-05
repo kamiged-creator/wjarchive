@@ -1580,6 +1580,118 @@
   }
 </style>
 
+<style id="bottom-stitch-ui-v1">
+  #news{
+    padding:58px 0 12px;
+    background:#fbfaf7;
+  }
+  #contact{
+    padding:12px 0 70px;
+    background:#fbfaf7;
+  }
+  #news .wrap,#contact .wrap{max-width:980px}
+  #news .accordion,#contact .accordion{gap:24px}
+  #news .accordion-item,#contact .accordion-item{
+    border:1px solid rgba(31,26,23,.12);
+    border-radius:12px;
+    background:rgba(255,255,255,.78);
+    box-shadow:none;
+    overflow:hidden;
+  }
+  #news .accordion-item.news-accent{
+    background:rgba(255,255,255,.82);
+    border-color:rgba(31,26,23,.12);
+  }
+  #news .accordion-btn,#contact .accordion-btn{
+    min-height:72px;
+    align-items:center;
+    padding:0 28px;
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-.025em;
+  }
+  #news .accordion-heading,#contact .accordion-heading{
+    display:flex;
+    align-items:center;
+    min-width:0;
+    gap:16px;
+  }
+  #news .accordion-index,#contact .accordion-index{
+    flex:0 0 auto;
+    color:#a77b45;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+  }
+  #news .accordion-title,#contact .accordion-title{
+    min-width:0;
+    color:#27231f;
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:20px;
+    font-style:normal;
+    font-weight:650;
+  }
+  #news .accordion-title em,#contact .accordion-title em{
+    font-style:normal;
+    font-weight:500;
+  }
+  #news .accordion-toggle,#contact .accordion-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:30px;
+    height:30px;
+    margin:0;
+    border-radius:50%;
+    background:#f5f2ec;
+    color:#9b7549;
+    font-size:16px;
+    font-weight:400;
+    line-height:1;
+    transform:none;
+    transition:background .18s ease,color .18s ease,transform .18s ease;
+  }
+  #news .accordion-item.open .accordion-toggle,
+  #contact .accordion-item.open .accordion-toggle{
+    transform:rotate(45deg);
+    background:#f1ede7;
+  }
+  #news .accordion-panel,#contact .accordion-panel{
+    padding:0 32px 24px;
+    border-top:1px solid rgba(31,26,23,.07);
+  }
+  #news .accordion-panel > p,#contact .accordion-panel > p{
+    margin:15px 0 8px !important;
+    color:#8a8279;
+    font-size:12px;
+  }
+  #news .contact-list,#contact .contact-list{gap:0;margin-top:0}
+  #news .contact-item,#contact .contact-item{
+    padding:14px 0;
+    border:0;
+    border-top:1px solid rgba(31,26,23,.08);
+    border-radius:0;
+    background:transparent;
+    color:#36312c;
+    font-size:14px;
+    line-height:1.5;
+  }
+  #news .contact-item:first-child,#contact .contact-item:first-child{border-top:0}
+  @media (max-width:680px){
+    #news{padding:34px 0 8px}
+    #contact{padding:8px 0 42px}
+    #news .accordion,#contact .accordion{gap:12px}
+    #news .accordion-btn,#contact .accordion-btn{min-height:64px;padding:0 16px}
+    #news .accordion-heading,#contact .accordion-heading{gap:10px}
+    #news .accordion-title,#contact .accordion-title{font-size:16px;line-height:1.35}
+    #news .accordion-title em,#contact .accordion-title em{font-size:12px;color:#7d756c}
+    #news .accordion-toggle,#contact .accordion-toggle{width:28px;height:28px;font-size:15px}
+    #news .accordion-panel,#contact .accordion-panel{padding:0 18px 18px}
+    #news .contact-item,#contact .contact-item{padding:12px 0;font-size:13px}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -1725,8 +1837,11 @@
         <div class="accordion">
           <article class="accordion-item news-accent" id="newsAccordion">
             <button class="accordion-btn" type="button" data-accordion="newsAccordion">
-              <span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span>
-              <span>＋</span>
+              <span class="accordion-heading">
+                <span class="accordion-index">01</span>
+                <span class="accordion-title news-link-label">소식 <em>(News &amp; Exhibitions)</em> <span class="new-badge" data-news-badge>NEW</span></span>
+              </span>
+              <span class="accordion-toggle">＋</span>
             </button>
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">최근 작업, 전시 준비, 업데이트 소식</p>
@@ -1746,8 +1861,11 @@
         <div class="accordion">
           <article class="accordion-item" id="contactAccordion">
             <button class="accordion-btn" type="button" data-accordion="contactAccordion">
-              <span>문의</span>
-              <span>＋</span>
+              <span class="accordion-heading">
+                <span class="accordion-index">02</span>
+                <span class="accordion-title">문의 <em>(Collector &amp; Exhibition Inquiry)</em></span>
+              </span>
+              <span class="accordion-toggle">＋</span>
             </button>
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">전시·소장·협업 문의</p>
@@ -1761,8 +1879,11 @@
 
           <article class="accordion-item" id="exhibitionAccordion">
             <button class="accordion-btn" type="button" data-accordion="exhibitionAccordion">
-              <span>전시 이력</span>
-              <span>＋</span>
+              <span class="accordion-heading">
+                <span class="accordion-index">03</span>
+                <span class="accordion-title">전시 이력 <em>(Chronology)</em></span>
+              </span>
+              <span class="accordion-toggle">＋</span>
             </button>
             <div class="accordion-panel">
               <div class="contact-list" id="exhibitionDisplayList">
