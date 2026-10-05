@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>논문 | 이원주</title>
+  <meta name="description" content="이원주의 연구와 논문을 소개합니다.">
+  <link rel="icon" href="/favicon-32x32.png">
+  <style>
+    :root{--bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#6e655d;--line:rgba(31,26,23,.12);--accent:#8b6847;--max:980px}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;word-break:keep-all}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+    .top{position:sticky;top:0;z-index:10;background:rgba(246,241,234,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .topin{height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{font-weight:800;font-size:23px;color:#2b2724;letter-spacing:-.03em}
+    .back{font-size:13px;color:var(--muted);font-weight:750}
+    .hero{padding:36px 0 24px;border-bottom:1px solid var(--line)}
+    .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:800;text-transform:uppercase}
+    .section-nav{display:flex;align-items:center;gap:10px;margin:7px 0 8px}
+    .section-nav h1{margin:0;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:38px;font-weight:500;letter-spacing:-.055em}
+    .section-nav .divider{color:rgba(31,26,23,.28);font-size:26px;font-weight:300}
+    .section-nav a{font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:28px;font-weight:500;letter-spacing:-.045em;color:var(--muted);transition:color .18s ease}
+    .section-nav a:hover{color:var(--accent)}
+    .hero-summary{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+    .hero p{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
+    .paper-count{flex:0 0 auto;color:var(--accent);font-size:13px;font-weight:800}
+    .papers{padding:28px 0 72px}
+    .empty{padding:72px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:24px;background:rgba(255,253,249,.62)}
+    .empty strong{display:block;margin-bottom:10px;color:var(--text);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:24px;font-weight:600}
+    footer{padding:22px 0 34px;font-size:12px;color:var(--muted)}
+    .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    @media(max-width:560px){
+      .wrap{padding:0 14px}.topin{height:58px}.hero{padding:14px 0 12px}
+      .section-nav{gap:8px;margin:2px 0 0}
+      .section-nav h1{font-size:34px}
+      .section-nav a{font-size:24px}
+      .section-nav .divider{font-size:22px}
+      .hero-summary{gap:10px;align-items:baseline}.hero p{margin-top:6px}.paper-count{font-size:12px}
+      .papers{padding:12px 0 36px}.empty{padding:52px 16px}
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap topin">
+      <a class="brand" href="/">이원주</a>
+      <a class="back" href="/">← 홈페이지</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Paper · Research</div>
+      <div class="section-nav" aria-label="책과 논문">
+        <a href="/books.html">책 소개</a>
+        <span class="divider">·</span>
+        <h1>논문</h1>
+      </div>
+      <div class="hero-summary">
+        <p>연구와 논문 기록을 한곳에 정리합니다.</p>
+        <span class="paper-count">0편</span>
+      </div>
+    </section>
+
+    <section class="papers">
+      <div class="empty">
+        <strong>논문 페이지를 준비하고 있습니다.</strong>
+        논문 제목, 학술지·학위 정보, 발표연도와 요약을 이곳에 추가할 수 있습니다.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot"><span>© <span id="year"></span> Lee Wonju.</span><a href="/admin.html">관리자</a></div>
+  </footer>
+  <script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+</body>
+</html>
