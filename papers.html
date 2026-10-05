@@ -29,16 +29,27 @@
     .paper-toolbar{display:flex;justify-content:flex-end;margin-bottom:14px}
     .add-paper{display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(139,104,71,.28);border-radius:50%;background:var(--paper);color:var(--accent);font-size:24px;line-height:1;cursor:pointer}
     .add-paper.show{display:inline-flex}
-    .paper-list{display:grid;gap:12px}
-    .paper-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:20px;font-weight:600;line-height:1.45}
-    .paper-title{min-width:0;flex:1}
-    .delete-paper{display:none;flex:0 0 auto;align-items:center;justify-content:center;padding:7px 11px;border:1px solid rgba(173,67,55,.34);border-radius:10px;background:#fff4f1;color:#a23d32;font:800 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 1px 0 rgba(173,67,55,.06)}
-    .delete-paper.show{display:inline-flex}
-    .delete-paper:hover{background:#ffe9e4;border-color:rgba(173,67,55,.5)}
-    .paper-editor{display:none;gap:8px;margin-bottom:14px}
-    .paper-editor.show{display:flex}
-    .paper-editor input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit}
-    .paper-editor button{padding:0 14px;border:1px solid rgba(139,104,71,.28);border-radius:12px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer}
+    .paper-list{display:grid;gap:0}
+    .paper-item{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:24px 4px;border-bottom:1px solid var(--line)}
+    .paper-content{min-width:0;flex:1}
+    .paper-title{font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:22px;font-weight:650;line-height:1.45;letter-spacing:-.035em}
+    .paper-meta{margin-top:7px;color:var(--accent);font-size:12px;font-weight:750;letter-spacing:-.01em}
+    .paper-summary{margin-top:10px;color:var(--muted);font-size:14px;line-height:1.75;white-space:pre-line}
+    .paper-actions{display:none;flex:0 0 auto;gap:6px}
+    .paper-actions.show{display:flex}
+    .edit-paper,.delete-paper{padding:7px 10px;border-radius:10px;font:800 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
+    .edit-paper{border:1px solid rgba(139,104,71,.28);background:#fffaf3;color:#795f45}
+    .delete-paper{border:1px solid rgba(173,67,55,.34);background:#fff4f1;color:#a23d32}
+    .paper-editor{display:none;margin-bottom:18px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--paper)}
+    .paper-editor.show{display:block}
+    .paper-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .paper-editor .full{grid-column:1/-1}
+    .paper-editor input,.paper-editor textarea{width:100%;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;color:var(--text)}
+    .paper-editor textarea{min-height:92px;resize:vertical;line-height:1.6}
+    .paper-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+    .paper-editor-actions button{padding:10px 16px;border-radius:12px;font-weight:800;cursor:pointer}
+    #cancelPaperBtn{border:1px solid var(--line);background:#fff;color:var(--muted)}
+    #savePaperBtn{border:1px solid rgba(139,104,71,.28);background:var(--accent);color:#fff}
     .empty{padding:72px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:24px;background:rgba(255,253,249,.62)}
     .empty strong{display:block;margin-bottom:10px;color:var(--text);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:24px;font-weight:600}
     footer{padding:22px 0 34px;font-size:12px;color:var(--muted)}
@@ -49,7 +60,7 @@
       .section-nav h1{font-size:34px}
       .books-link{padding:7px 10px;font-size:12px}
       .hero-summary{gap:10px;align-items:baseline}.hero p{margin-top:6px}.paper-count{font-size:12px}
-      .papers{padding:12px 0 36px}.paper-item{padding:15px 14px;font-size:18px}.empty{padding:52px 16px}
+      .papers{padding:12px 0 36px}.paper-item{padding:20px 2px;gap:10px}.paper-title{font-size:20px}.paper-summary{font-size:13px}.paper-editor{padding:14px}.paper-editor-grid{grid-template-columns:1fr}.paper-editor .full{grid-column:auto}.empty{padding:52px 16px}
     }
   </style>
 </head>
@@ -79,8 +90,16 @@
         <button class="add-paper" id="addPaperBtn" type="button" aria-label="논문 제목 추가">+</button>
       </div>
       <div class="paper-editor" id="paperEditor">
-        <input id="paperTitleInput" type="text" maxlength="180" placeholder="논문 제목 입력">
-        <button id="savePaperBtn" type="button">추가</button>
+        <div class="paper-editor-grid">
+          <input class="full" id="paperTitleInput" type="text" maxlength="180" placeholder="논문 제목">
+          <input id="paperYearInput" type="text" maxlength="20" inputmode="numeric" placeholder="발표연도 예: 2026">
+          <input id="paperJournalInput" type="text" maxlength="120" placeholder="학술지 · 학교 · 기관명">
+          <textarea class="full" id="paperSummaryInput" maxlength="600" placeholder="논문을 한두 문장으로 간단히 소개해 주세요."></textarea>
+        </div>
+        <div class="paper-editor-actions">
+          <button id="cancelPaperBtn" type="button">취소</button>
+          <button id="savePaperBtn" type="button">저장</button>
+        </div>
       </div>
       <div class="paper-list" id="paperList"></div>
       <div class="empty" id="paperEmpty">
@@ -103,11 +122,16 @@
     const addPaperBtn=document.getElementById('addPaperBtn');
     const paperEditor=document.getElementById('paperEditor');
     const paperTitleInput=document.getElementById('paperTitleInput');
+    const paperYearInput=document.getElementById('paperYearInput');
+    const paperJournalInput=document.getElementById('paperJournalInput');
+    const paperSummaryInput=document.getElementById('paperSummaryInput');
+    const cancelPaperBtn=document.getElementById('cancelPaperBtn');
     const savePaperBtn=document.getElementById('savePaperBtn');
     const paperList=document.getElementById('paperList');
     const paperEmpty=document.getElementById('paperEmpty');
     const paperCount=document.querySelector('.paper-count');
     let papersValue={items:[]};
+    let editingPaperIndex=-1;
 
     document.getElementById('year').textContent=new Date().getFullYear();
 
@@ -133,8 +157,21 @@
       const items=Array.isArray(papersValue.items)?papersValue.items.filter(Boolean):[];
       const isAdmin=Boolean(currentAdminToken());
       paperList.innerHTML=items.map((item,index)=>{
-        const title=typeof item==='string'?item:item.title;
-        return '<div class="paper-item" data-index="'+index+'"><span class="paper-title">'+esc(title||'제목 없음')+'</span><button class="delete-paper'+(isAdmin?' show':'')+'" type="button" data-delete-index="'+index+'" aria-label="논문 제목 삭제">삭제</button></div>';
+        const data=typeof item==='string'?{title:item}:item||{};
+        const title=data.title||'제목 없음';
+        const meta=[data.year,data.journal].filter(Boolean).join(' · ');
+        const summary=data.summary||'';
+        return '<article class="paper-item" data-index="'+index+'">'
+          +'<div class="paper-content">'
+          +'<div class="paper-title">'+esc(title)+'</div>'
+          +(meta?'<div class="paper-meta">'+esc(meta)+'</div>':'')
+          +(summary?'<div class="paper-summary">'+esc(summary)+'</div>':'')
+          +'</div>'
+          +'<div class="paper-actions'+(isAdmin?' show':'')+'">'
+          +'<button class="edit-paper" type="button" data-edit-index="'+index+'">수정</button>'
+          +'<button class="delete-paper" type="button" data-delete-index="'+index+'">삭제</button>'
+          +'</div>'
+          +'</article>';
       }).join('');
       paperEmpty.hidden=items.length>0;
       paperCount.textContent=items.length+'편';
@@ -200,41 +237,86 @@
       }
     }
 
+    function resetPaperEditor(){
+      editingPaperIndex=-1;
+      paperTitleInput.value='';
+      paperYearInput.value='';
+      paperJournalInput.value='';
+      paperSummaryInput.value='';
+      paperEditor.classList.remove('show');
+    }
+
     addPaperBtn.addEventListener('click',()=>{
-      paperEditor.classList.toggle('show');
-      if(paperEditor.classList.contains('show')) setTimeout(()=>paperTitleInput.focus(),0);
+      if(paperEditor.classList.contains('show') && editingPaperIndex<0){
+        resetPaperEditor();
+        return;
+      }
+      resetPaperEditor();
+      paperEditor.classList.add('show');
+      setTimeout(()=>paperTitleInput.focus(),0);
     });
+
+    cancelPaperBtn.addEventListener('click',resetPaperEditor);
 
     savePaperBtn.addEventListener('click',async()=>{
       const title=paperTitleInput.value.trim();
-      if(!title) return;
-      const ok=await savePapers(latest=>({
-        ...latest,
-        items:[...(Array.isArray(latest.items)?latest.items:[]),{title}]
-      }));
-      if(ok){
-        paperTitleInput.value='';
-        paperEditor.classList.remove('show');
+      const year=paperYearInput.value.trim();
+      const journal=paperJournalInput.value.trim();
+      const summary=paperSummaryInput.value.trim();
+      if(!title){
+        alert('논문 제목을 입력해 주세요.');
+        paperTitleInput.focus();
+        return;
       }
-    });
 
-    paperTitleInput.addEventListener('keydown',event=>{
-      if(event.key==='Enter'){
-        event.preventDefault();
-        savePaperBtn.click();
-      }
+      const originalIndex=editingPaperIndex;
+      const originalItem=originalIndex>=0 && Array.isArray(papersValue.items)?papersValue.items[originalIndex]:null;
+      const originalKey=originalItem==null?'':JSON.stringify(originalItem);
+      const nextPaper={title,year,journal,summary};
+
+      const ok=await savePapers(latest=>{
+        const latestItems=Array.isArray(latest.items)?[...latest.items]:[];
+        if(originalIndex>=0){
+          const matchIndex=latestItems.findIndex(item=>JSON.stringify(item)===originalKey);
+          if(matchIndex>=0) latestItems[matchIndex]=nextPaper;
+          else latestItems.push(nextPaper);
+        }else{
+          latestItems.push(nextPaper);
+        }
+        return {...latest,items:latestItems};
+      });
+
+      if(ok) resetPaperEditor();
     });
 
     paperList.addEventListener('click',async event=>{
+      if(!currentAdminToken()) return;
+      const editButton=event.target.closest('[data-edit-index]');
+      if(editButton){
+        const index=Number(editButton.dataset.editIndex);
+        if(!Number.isInteger(index)) return;
+        const items=Array.isArray(papersValue.items)?papersValue.items:[];
+        const raw=items[index];
+        const item=typeof raw==='string'?{title:raw}:raw||{};
+        editingPaperIndex=index;
+        paperTitleInput.value=item.title||'';
+        paperYearInput.value=item.year||'';
+        paperJournalInput.value=item.journal||'';
+        paperSummaryInput.value=item.summary||'';
+        paperEditor.classList.add('show');
+        paperEditor.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>paperTitleInput.focus(),250);
+        return;
+      }
+
       const button=event.target.closest('[data-delete-index]');
       if(!button) return;
-      if(!currentAdminToken()) return;
       const index=Number(button.dataset.deleteIndex);
       if(!Number.isInteger(index)) return;
       const items=Array.isArray(papersValue.items)?papersValue.items:[];
       const target=items[index];
       const title=typeof target==='string'?target:target?.title;
-      if(!confirm('이 논문 제목을 삭제할까요?\n\n'+(title||''))) return;
+      if(!confirm('이 논문을 삭제할까요?\n\n'+(title||''))) return;
       const targetKey=JSON.stringify(target);
       await savePapers(latest=>{
         const latestItems=Array.isArray(latest.items)?latest.items:[];
