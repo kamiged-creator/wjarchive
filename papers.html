@@ -51,6 +51,11 @@
     .paper-editor-actions button{padding:10px 16px;border-radius:12px;font-weight:800;cursor:pointer}
     #cancelPaperBtn{border:1px solid var(--line);background:#fff;color:var(--muted)}
     #savePaperBtn{border:1px solid rgba(139,104,71,.28);background:var(--accent);color:#fff}
+    .paper-pagination{display:none;align-items:center;justify-content:center;gap:8px;margin-top:24px}
+    .paper-pagination.show{display:flex}
+    .paper-pagination button{min-width:38px;height:38px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--muted);font-weight:800;cursor:pointer}
+    .paper-pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .paper-pagination button:disabled{opacity:.4;cursor:default}
     .empty{padding:72px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:24px;background:rgba(255,253,249,.62)}
     .empty strong{display:block;margin-bottom:10px;color:var(--text);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:24px;font-weight:600}
     footer{padding:22px 0 34px;font-size:12px;color:var(--muted)}
@@ -103,6 +108,7 @@
         </div>
       </div>
       <div class="paper-list" id="paperList"></div>
+      <div class="paper-pagination" id="paperPagination"></div>
       <div class="empty" id="paperEmpty">
         <strong>등록된 논문이 없습니다.</strong>
         관리자 로그인 후 + 버튼으로 논문 제목을 추가할 수 있습니다.
@@ -131,8 +137,11 @@
     const paperList=document.getElementById('paperList');
     const paperEmpty=document.getElementById('paperEmpty');
     const paperCount=document.querySelector('.paper-count');
+    const paperPagination=document.getElementById('paperPagination');
     let papersValue={items:[]};
     let editingPaperIndex=-1;
+    let currentPaperPage=1;
+    const PAPERS_PER_PAGE=5;
 
     document.getElementById('year').textContent=new Date().getFullYear();
 
@@ -157,7 +166,14 @@
     function renderPapers(){
       const items=Array.isArray(papersValue.items)?papersValue.items.filter(Boolean):[];
       const isAdmin=Boolean(currentAdminToken());
-      paperList.innerHTML=items.map((item,index)=>{
+      const totalPages=Math.max(1,Math.ceil(items.length/PAPERS_PER_PAGE));
+      if(currentPaperPage>totalPages) currentPaperPage=totalPages;
+      if(currentPaperPage<1) currentPaperPage=1;
+      const start=(currentPaperPage-1)*PAPERS_PER_PAGE;
+      const visibleItems=items.slice(start,start+PAPERS_PER_PAGE);
+
+      paperList.innerHTML=visibleItems.map((item,visibleIndex)=>{
+        const index=start+visibleIndex;
         const data=typeof item==='string'?{title:item}:item||{};
         const title=data.title||'제목 없음';
         const meta=[data.year,data.journal].filter(Boolean).join(' · ');
@@ -174,6 +190,20 @@
           +'</div>'
           +'</article>';
       }).join('');
+
+      if(items.length>PAPERS_PER_PAGE){
+        let paginationHtml='<button type="button" data-page="'+(currentPaperPage-1)+'" '+(currentPaperPage===1?'disabled':'')+'>이전</button>';
+        for(let page=1;page<=totalPages;page+=1){
+          paginationHtml+='<button type="button" data-page="'+page+'" class="'+(page===currentPaperPage?'active':'')+'">'+page+'</button>';
+        }
+        paginationHtml+='<button type="button" data-page="'+(currentPaperPage+1)+'" '+(currentPaperPage===totalPages?'disabled':'')+'>다음</button>';
+        paperPagination.innerHTML=paginationHtml;
+        paperPagination.classList.add('show');
+      }else{
+        paperPagination.innerHTML='';
+        paperPagination.classList.remove('show');
+      }
+
       paperEmpty.hidden=items.length>0;
       paperCount.textContent=items.length+'편';
       addPaperBtn.classList.toggle('show',isAdmin);
@@ -288,6 +318,16 @@
       });
 
       if(ok) resetPaperEditor();
+    });
+
+    paperPagination.addEventListener('click',event=>{
+      const button=event.target.closest('[data-page]');
+      if(!button || button.disabled) return;
+      const page=Number(button.dataset.page);
+      if(!Number.isInteger(page) || page<1) return;
+      currentPaperPage=page;
+      renderPapers();
+      document.querySelector('.papers')?.scrollIntoView({behavior:'smooth',block:'start'});
     });
 
     paperList.addEventListener('click',async event=>{
