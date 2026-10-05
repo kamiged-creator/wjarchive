@@ -264,10 +264,16 @@
     });
 
     async function load(){
-      render([],defaultSamples,false);
-      if(!client) return;
+      if(!client){
+        render([],defaultSamples,false);
+        return;
+      }
       const {data,error}=await client.from('site_settings').select('value').eq('key','books').maybeSingle();
-      if(error){console.warn(error);return;}
+      if(error){
+        console.warn(error);
+        render([],defaultSamples,false);
+        return;
+      }
       let value=data?.value||{};
       if(typeof value==='string'){try{value=JSON.parse(value)}catch(e){value={}}}
       const savedSamples=Array.isArray(value.sampleItems)?value.sampleItems:[];
