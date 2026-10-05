@@ -1034,8 +1034,8 @@
         ctx.stroke();
       }
 
-      if (!state.image){
-        const label = els.outputModeSelect?.value === 'book-cover' ? '책표지 4:5' : '원본 비율';
+      if (!state.image && els.outputModeSelect?.value === 'book-cover'){
+        const label = '책표지 4:5';
         ctx.font = '700 13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
         ctx.textAlign = 'left';
         const paddingX = 10;
