@@ -1940,6 +1940,72 @@
   }
 </style>
 
+<style id="docent-audio-guide-v1">
+  #about .about-audio-row{width:100%;margin:0 0 24px;align-self:stretch}
+  #about .about-audio-btn{
+    width:100%;min-height:74px;height:auto;display:grid;
+    grid-template-columns:42px minmax(0,1fr) 54px;align-items:center;gap:14px;
+    padding:12px 18px;border:1px solid rgba(31,26,23,.12);border-radius:14px;
+    background:rgba(255,255,255,.82);color:#27231f;
+    box-shadow:0 6px 18px rgba(31,26,23,.035);text-align:left;
+    transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
+  }
+  #about .about-audio-btn:hover{border-color:rgba(176,127,67,.34);box-shadow:0 8px 22px rgba(31,26,23,.055)}
+  #about .about-audio-btn[aria-pressed="true"]{background:rgba(255,255,255,.9);color:#27231f;border-color:rgba(176,127,67,.42)}
+  #about .audio-play-icon{
+    position:relative;width:40px;height:40px;border-radius:50%;background:#1f1f1d;flex:0 0 auto;
+  }
+  #about .audio-play-icon::before{
+    content:"";position:absolute;left:16px;top:12px;width:0;height:0;
+    border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:11px solid #fff;
+  }
+  #about .about-audio-btn[aria-pressed="true"] .audio-play-icon::before{
+    left:13px;top:12px;width:14px;height:16px;border:0;
+    background:linear-gradient(90deg,#fff 0 4px,transparent 4px 10px,#fff 10px 14px);
+  }
+  #about .about-audio-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
+  #about .about-audio-label{color:#25221f;font-size:13px;font-weight:700;line-height:1.25}
+  #about .about-audio-status{color:#8a8278;font-size:11px;line-height:1.35}
+  #about .audio-wave{display:flex;align-items:center;justify-content:flex-end;gap:3px;height:28px}
+  #about .audio-wave-bar{
+    display:block;width:2px;height:8px;border-radius:999px;background:#b8894e;
+    transform-origin:center;opacity:.72;
+  }
+  #about .audio-wave-bar:nth-child(2){height:16px}
+  #about .audio-wave-bar:nth-child(3){height:23px}
+  #about .audio-wave-bar:nth-child(4){height:14px}
+  #about .audio-wave-bar:nth-child(5){height:20px}
+  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar{
+    opacity:1;animation:docentWave .78s ease-in-out infinite alternate;
+  }
+  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(2){animation-delay:-.22s}
+  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(3){animation-delay:-.47s}
+  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(4){animation-delay:-.14s}
+  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(5){animation-delay:-.36s}
+  @keyframes docentWave{from{transform:scaleY(.45)}to{transform:scaleY(1.15)}}
+  @media (prefers-reduced-motion:reduce){
+    #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar{animation:none}
+  }
+  @media (max-width:680px){
+    #about .about-audio-row{margin:0 0 16px}
+    #about .about-audio-btn{
+      min-height:66px;grid-template-columns:36px minmax(0,1fr) 42px;
+      gap:11px;padding:10px 13px;border-radius:13px;
+    }
+    #about .audio-play-icon{width:34px;height:34px}
+    #about .audio-play-icon::before{
+      left:14px;top:10px;border-top-width:7px;border-bottom-width:7px;border-left-width:9px;
+    }
+    #about .about-audio-btn[aria-pressed="true"] .audio-play-icon::before{
+      left:11px;top:9px;width:12px;height:16px;
+      background:linear-gradient(90deg,#fff 0 4px,transparent 4px 8px,#fff 8px 12px);
+    }
+    #about .about-audio-label{font-size:12px}
+    #about .about-audio-status{font-size:10px}
+    #about .audio-wave{gap:2px}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -2015,9 +2081,19 @@
           </article>
           <div class="artist-copy">
             <div class="about-audio-row">
-              <button class="about-audio-btn" id="aboutAudioBtn" type="button" aria-pressed="false" aria-label="작가 소개글 음성으로 듣기">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4Zm11.5-.9v7.8a5 5 0 0 0 0-7.8Zm0-3.1v2.1a7 7 0 0 1 0 9.8V19a9 9 0 0 0 0-14Z"/></svg>
-                <span class="about-audio-label">소개글 듣기</span>
+              <button class="about-audio-btn" id="aboutAudioBtn" type="button" aria-pressed="false" aria-label="도슨트 오디오 가이드 재생">
+                <span class="audio-play-icon" aria-hidden="true"></span>
+                <span class="about-audio-copy">
+                  <span class="about-audio-label">도슨트 오디오 가이드</span>
+                  <span class="about-audio-status">작가 소개글 음성 해설 듣기</span>
+                </span>
+                <span class="audio-wave" aria-hidden="true">
+                  <span class="audio-wave-bar"></span>
+                  <span class="audio-wave-bar"></span>
+                  <span class="audio-wave-bar"></span>
+                  <span class="audio-wave-bar"></span>
+                  <span class="audio-wave-bar"></span>
+                </span>
               </button>
             </div>
             <article class="card">
@@ -2234,6 +2310,7 @@
     });
     const aboutAudioBtn = document.getElementById('aboutAudioBtn');
     const aboutAudioLabel = aboutAudioBtn?.querySelector('.about-audio-label');
+    const aboutAudioStatus = aboutAudioBtn?.querySelector('.about-audio-status');
     const aboutBgmUrl = 'https://pherh2oisbugqyou.public.blob.vercel-storage.com/tatamusic-documentary-documentary-music-595125.mp3';
     const aboutBgmBaseVolume = 0.08;
     let aboutAudio = null;
@@ -2242,7 +2319,8 @@
     function resetAboutAudioButton(){
       if(!aboutAudioBtn) return;
       aboutAudioBtn.setAttribute('aria-pressed','false');
-      if(aboutAudioLabel) aboutAudioLabel.textContent = '소개글 듣기';
+      if(aboutAudioLabel) aboutAudioLabel.textContent = '도슨트 오디오 가이드';
+      if(aboutAudioStatus) aboutAudioStatus.textContent = '작가 소개글 음성 해설 듣기';
     }
 
     function ensureAboutBgm(){
@@ -2327,7 +2405,8 @@
           }
 
           aboutAudioBtn.setAttribute('aria-pressed','true');
-          if(aboutAudioLabel) aboutAudioLabel.textContent = '듣기 중지';
+          if(aboutAudioLabel) aboutAudioLabel.textContent = '도슨트 오디오 가이드';
+          if(aboutAudioStatus) aboutAudioStatus.textContent = '재생 중 · 누르면 중지';
         }catch(error){
           releaseAboutAudioSession();
         }
