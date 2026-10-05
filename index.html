@@ -719,6 +719,9 @@
       .gallery .work-title{margin:0 0 4px;font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
       .gallery .work-meta{font-size:11px;margin-bottom:0}
       .gallery .work-text{display:none}
+      #works .pagination{flex-wrap:nowrap;gap:6px}
+      #works .page-btn{min-width:38px;height:38px;padding:0 10px;font-size:13px}
+      #works .page-btn.next-page{min-width:52px}
       .preview-grid,.field-row,.field-row-3{grid-template-columns:1fr}
       .asset-preview{grid-template-columns:1fr}
       .btn{width:100%}
@@ -1940,10 +1943,24 @@
         pagination.innerHTML = '';
         return;
       }
-      pagination.innerHTML = Array.from({length: totalPages}, (_, i) => {
-        const page = i + 1;
-        return `<button class="page-btn ${page === state.currentPage ? 'active' : ''}" type="button" data-page="${page}">${page}</button>`;
-      }).join('');
+      const isMobile=window.matchMedia('(max-width: 680px)').matches;
+      if(isMobile && totalPages>5){
+        const groupStart=state.currentPage<=5?1:6;
+        const groupEnd=Math.min(groupStart+4,totalPages);
+        let html='';
+        for(let page=groupStart;page<=groupEnd;page+=1){
+          html+=`<button class="page-btn ${page===state.currentPage?'active':''}" type="button" data-page="${page}">${page}</button>`;
+        }
+        if(groupEnd<totalPages){
+          html+=`<button class="page-btn next-page" type="button" data-page="${groupEnd+1}">다음</button>`;
+        }
+        pagination.innerHTML=html;
+      }else{
+        pagination.innerHTML = Array.from({length: totalPages}, (_, i) => {
+          const page = i + 1;
+          return `<button class="page-btn ${page === state.currentPage ? 'active' : ''}" type="button" data-page="${page}">${page}</button>`;
+        }).join('');
+      }
       qsa('#pagination .page-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           state.currentPage = Number(btn.dataset.page);
