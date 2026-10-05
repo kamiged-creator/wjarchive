@@ -772,7 +772,7 @@
       state.fitMode = viewState.fitMode;
       state.offsetX = viewState.offsetX;
       state.offsetY = viewState.offsetY;
-      els.zoomRange.min = state.fitMode === 'contain' ? '0.3' : '1';
+      els.zoomRange.min = state.fitMode === 'contain' ? '0.3' : (state.fitMode === 'book-cover' ? '0.75' : '1');
       els.zoomRange.max = state.fitMode === 'contain' ? '3' : '5';
       updateZoomText();
       draw();
@@ -936,8 +936,10 @@
     function fitImage(mode = 'cover', resetZoom = true){
       if (!state.image) return;
       state.fitMode = mode;
-      state.baseScale = mode === 'contain' ? getContainScale() : getCoverScale();
-      els.zoomRange.min = mode === 'contain' ? '0.3' : '1';
+      if (mode === 'contain') state.baseScale = getContainScale();
+      else if (mode === 'book-cover') state.baseScale = getCoverScale() * 0.90;
+      else state.baseScale = getCoverScale();
+      els.zoomRange.min = mode === 'contain' ? '0.3' : (mode === 'book-cover' ? '0.75' : '1');
       els.zoomRange.max = mode === 'contain' ? '3' : '5';
       if (resetZoom){
         state.zoom = 1;
@@ -954,7 +956,7 @@
       const scaledH = state.naturalHeight * state.baseScale * state.zoom;
       state.offsetX = state.crop.x + (state.crop.w - scaledW) / 2;
       state.offsetY = state.crop.y + (state.crop.h - scaledH) / 2;
-      keepImageCoveringCrop();
+      if (state.fitMode === 'cover') keepImageCoveringCrop();
       draw();
     }
 
@@ -989,7 +991,11 @@
       if (state.image){
         const scaledW = state.naturalWidth * state.baseScale * state.zoom;
         const scaledH = state.naturalHeight * state.baseScale * state.zoom;
-        if (state.fitMode === 'cover'){
+        if (state.fitMode === 'book-cover'){
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(state.crop.x, state.crop.y, state.crop.w, state.crop.h);
+        }
+        if (state.fitMode === 'cover' || state.fitMode === 'book-cover'){
           ctx.save();
           ctx.beginPath();
           ctx.rect(state.crop.x, state.crop.y, state.crop.w, state.crop.h);
@@ -1078,7 +1084,7 @@
           state.undoStack = [];
           updateSequenceUi();
           clearResult();
-          fitImage('contain', true);
+          fitImage(els.outputModeSelect?.value === 'book-cover' ? 'book-cover' : 'contain', true);
           draw();
         };
         img.onerror = () => showToast('이미지를 불러오지 못했습니다.');
@@ -1150,12 +1156,19 @@
       outCtx.fillRect(0, 0, width, height);
 
       if (els.outputModeSelect?.value === 'book-cover'){
+        const scaleX = width / state.crop.w;
+        const scaleY = height / state.crop.h;
         const displayScale = state.baseScale * state.zoom;
-        const sx = clamp((state.crop.x - state.offsetX) / displayScale, 0, state.naturalWidth);
-        const sy = clamp((state.crop.y - state.offsetY) / displayScale, 0, state.naturalHeight);
-        const sw = Math.min(state.crop.w / displayScale, state.naturalWidth - sx);
-        const sh = Math.min(state.crop.h / displayScale, state.naturalHeight - sy);
-        outCtx.drawImage(state.image, sx, sy, sw, sh, 0, 0, width, height);
+        const dx = (state.offsetX - state.crop.x) * scaleX;
+        const dy = (state.offsetY - state.crop.y) * scaleY;
+        const dw = state.naturalWidth * displayScale * scaleX;
+        const dh = state.naturalHeight * displayScale * scaleY;
+        outCtx.save();
+        outCtx.beginPath();
+        outCtx.rect(0, 0, width, height);
+        outCtx.clip();
+        outCtx.drawImage(state.image, dx, dy, dw, dh);
+        outCtx.restore();
       } else {
         outCtx.drawImage(state.image, 0, 0, state.naturalWidth, state.naturalHeight, 0, 0, width, height);
       }
@@ -1389,7 +1402,7 @@
       clearResult();
       if (state.image){
         rememberUndo();
-        fitImage(els.outputModeSelect.value === 'book-cover' ? 'cover' : 'contain', true);
+        fitImage(els.outputModeSelect.value === 'book-cover' ? 'book-cover' : 'contain', true);
         draw();
       }
     });
@@ -1412,7 +1425,7 @@
     });
     els.resetViewBtn.addEventListener('click', () => {
       rememberUndo();
-      if (state.image) fitImage('contain', true);
+      if (state.image) fitImage(els.outputModeSelect?.value === 'book-cover' ? 'book-cover' : 'contain', true);
       draw();
     });
     els.coverCropBtn.addEventListener('click', () => {
