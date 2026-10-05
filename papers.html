@@ -33,8 +33,9 @@
     .paper-list{display:grid;gap:12px}
     .paper-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:20px;font-weight:600;line-height:1.45}
     .paper-title{min-width:0;flex:1}
-    .delete-paper{display:none;flex:0 0 auto;padding:6px 9px;border:1px solid rgba(173,67,55,.22);border-radius:10px;background:#fff8f6;color:#9b4b42;font:700 11px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer}
+    .delete-paper{display:none;flex:0 0 auto;align-items:center;justify-content:center;padding:7px 11px;border:1px solid rgba(173,67,55,.34);border-radius:10px;background:#fff4f1;color:#a23d32;font:800 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;box-shadow:0 1px 0 rgba(173,67,55,.06)}
     .delete-paper.show{display:inline-flex}
+    .delete-paper:hover{background:#ffe9e4;border-color:rgba(173,67,55,.5)}
     .paper-editor{display:none;gap:8px;margin-bottom:14px}
     .paper-editor.show{display:flex}
     .paper-editor input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit}
@@ -140,7 +141,10 @@
       }).join('');
       paperEmpty.hidden=items.length>0;
       paperCount.textContent=items.length+'편';
-      addPaperBtn.classList.toggle('show',Boolean(currentAdminToken()));
+      addPaperBtn.classList.toggle('show',isAdmin);
+      paperEmpty.innerHTML=isAdmin
+        ? '<strong>등록된 논문이 없습니다.</strong>위의 + 버튼을 눌러 논문 제목을 추가하면, 제목 오른쪽에 삭제 버튼이 표시됩니다.'
+        : '<strong>등록된 논문이 없습니다.</strong>논문 목록을 준비하고 있습니다.';
     }
 
     async function loadPapers(){
