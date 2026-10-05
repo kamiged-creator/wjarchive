@@ -2080,6 +2080,64 @@
   }
 </style>
 
+<style id="hero-spec-meta-v1">
+  .hero-philosophy-link{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:48px;
+    padding:0 18px;
+    color:#6d655d;
+    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
+    font-size:14px;
+    font-weight:600;
+    transition:color .18s ease;
+  }
+  .hero-philosophy-link:hover{color:#b07f43}
+  .hero-meta{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:22px;
+    margin-top:32px;
+    padding-top:22px;
+    border-top:1px solid rgba(31,26,23,.09);
+  }
+  .hero-meta-item{min-width:0}
+  .hero-meta-label{
+    display:block;
+    margin-bottom:5px;
+    color:#b2a69a;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:9px;
+    line-height:1.2;
+    font-weight:700;
+    letter-spacing:.14em;
+  }
+  .hero-meta-value{
+    display:block;
+    color:#7a7168;
+    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
+    font-size:12px;
+    line-height:1.45;
+    font-weight:500;
+  }
+  @media (max-width:860px){
+    .hero-philosophy-link{
+      width:auto;
+      min-height:42px;
+      padding:0 8px;
+      font-size:13px;
+    }
+    .hero-meta{
+      gap:10px;
+      margin-top:22px;
+      padding-top:18px;
+    }
+    .hero-meta-label{font-size:8px;letter-spacing:.08em}
+    .hero-meta-value{font-size:10px;line-height:1.35}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -2130,7 +2188,22 @@
           </p>
           <button id="heroReadMore" class="hero-read-more" type="button" aria-controls="heroLead" aria-expanded="false">… 더 보기</button>
           <div class="hero-actions">
-            <a class="btn primary" href="#works">작품 보기</a>
+            <a class="btn primary" href="#works">작품 보기 <span aria-hidden="true">→</span></a>
+            <a class="hero-philosophy-link" href="#note">작가 철학 읽기</a>
+          </div>
+          <div class="hero-meta" aria-label="대표작 정보">
+            <div class="hero-meta-item">
+              <span class="hero-meta-label">GENRE</span>
+              <span class="hero-meta-value">토혼 (옹기각)</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hero-meta-label">MATERIAL</span>
+              <span class="hero-meta-value">황토 · 순금박 분채</span>
+            </div>
+            <div class="hero-meta-item">
+              <span class="hero-meta-label">INSCRIPTION</span>
+              <span class="hero-meta-value">금강반야바라밀경</span>
+            </div>
           </div>
         </div>
         <div class="hero-card">
