@@ -2017,6 +2017,35 @@
   }
 </style>
 
+<style id="hero-two-line-red-dot-v1">
+  #heroEyebrow::before{
+    content:"";
+    width:6px;
+    height:6px;
+    flex:0 0 6px;
+    border-radius:50%;
+    background:#b33b31;
+    box-shadow:0 0 0 1px rgba(179,59,49,.06);
+  }
+  #heroTitle{
+    max-width:430px;
+    line-height:.98;
+  }
+  @media (max-width:860px){
+    #heroTitle{
+      max-width:300px;
+      margin-left:auto;
+      margin-right:auto;
+      line-height:1.02;
+    }
+    #heroEyebrow::before{
+      width:6px;
+      height:6px;
+      flex-basis:6px;
+    }
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -2061,7 +2090,7 @@
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow" id="heroEyebrow">木香/玄香/明香</span>
-          <h1 id="heroTitle">흙에 새긴 금빛 마음</h1>
+          <h1 id="heroTitle">흙에 새긴<br>금빛 마음</h1>
           <p class="lead" id="heroLead">
             천 년의 침묵을 깨고 일어선 흙이여, 그대의 거친 살결 속에 금강(金剛)의 지혜를 새기노니, 천년의 흙이 금강경의 구절을 품었을 때, 비로소 마음은 깨지지 않는 그릇이 된다. 이 토혼(土魂, 옹기)을 보고 느끼는 것만으로 당신의 삶은 영겁의 자유와 복을 얻을 것이다.
           </p>
@@ -2714,7 +2743,17 @@
 
     function applyAboutContentToPage(data){
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow || qs('#heroEyebrow').textContent;
-      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle || qs('#heroTitle').innerHTML;
+      if(qs('#heroTitle')){
+        let nextHeroTitle = data.heroTitle || qs('#heroTitle').innerHTML;
+        const plainHeroTitle = String(nextHeroTitle)
+          .replace(/<br\s*\/?>/gi, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        if(plainHeroTitle === '흙에 새긴 금빛 마음'){
+          nextHeroTitle = '흙에 새긴<br>금빛 마음';
+        }
+        qs('#heroTitle').innerHTML = nextHeroTitle;
+      }
       if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead || qs('#heroLead').textContent;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption || qs('#heroCaption').textContent;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || qs('#aboutSectionCopy').textContent;
