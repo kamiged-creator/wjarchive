@@ -459,7 +459,7 @@
       <div class="editor">
         <div class="stage-wrap" id="stageWrap">
           <canvas id="stageCanvas" aria-label="크롭 편집 캔버스"></canvas>
-          <div class="drop" id="dropLayer" aria-label="이미지 선택 영역"><div><strong>이미지를 올리세요</strong></div></div>
+          <div class="drop" id="dropLayer" aria-label="이미지 선택 영역"><div><strong id="dropTitle">이미지를 올리세요</strong></div></div>
         </div>
       </div>
 
@@ -580,6 +580,7 @@
       stageWrap: document.getElementById('stageWrap'),
       canvas: document.getElementById('stageCanvas'),
       dropLayer: document.getElementById('dropLayer'),
+      dropTitle: document.getElementById('dropTitle'),
       fileInput: document.getElementById('fileInput'),
       sourceMeta: document.getElementById('sourceMeta'),
       sequenceInput: document.getElementById('sequenceInput'),
@@ -666,6 +667,11 @@
       els.toast.classList.add('is-on');
       clearTimeout(showToast.timer);
       showToast.timer = setTimeout(() => els.toast.classList.remove('is-on'), 2100);
+    }
+
+    function updateDropTitle(){
+      if (!els.dropTitle) return;
+      els.dropTitle.textContent = els.outputModeSelect?.value === 'book-cover' ? '책표지' : '이미지를 올리세요';
     }
 
     function getAccessToken(){
@@ -1412,6 +1418,7 @@
     });
     els.outputModeSelect.addEventListener('change', () => {
       document.body.classList.toggle('book-cover-selected', els.outputModeSelect.value === 'book-cover');
+      updateDropTitle();
       getOutputSize();
       clearResult();
       const stageRect = els.stageWrap.getBoundingClientRect();
@@ -1485,6 +1492,7 @@
     updateSequenceUi();
     initAccessLock();
     document.body.classList.toggle('book-cover-selected', els.outputModeSelect.value === 'book-cover');
+    updateDropTitle();
     resizeCanvas();
   </script>
 </body>
