@@ -18,11 +18,10 @@
     .back{font-size:13px;color:var(--muted);font-weight:750}
     .hero{padding:36px 0 24px;border-bottom:1px solid var(--line)}
     .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:800;text-transform:uppercase}
-    .section-nav{display:flex;align-items:center;gap:10px;margin:7px 0 8px}
+    .section-nav{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:7px 0 8px}
     .section-nav h1{margin:0;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:38px;font-weight:500;letter-spacing:-.055em}
-    .section-nav .divider{color:rgba(31,26,23,.28);font-size:26px;font-weight:300}
-    .section-nav a{font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:28px;font-weight:500;letter-spacing:-.045em;color:var(--muted);transition:color .18s ease}
-    .section-nav a:hover{color:var(--accent)}
+    .books-link{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid rgba(139,104,71,.22);border-radius:999px;background:rgba(255,253,249,.62);color:#6a5643;font-size:13px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+    .books-link:hover{background:#fffaf3;border-color:rgba(139,104,71,.42);color:var(--accent);transform:translateY(-1px)}
     .hero-summary{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
     .hero p{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
     .paper-count{flex:0 0 auto;color:var(--accent);font-size:13px;font-weight:800}
@@ -46,10 +45,9 @@
     .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
     @media(max-width:560px){
       .wrap{padding:0 14px}.topin{height:58px}.hero{padding:14px 0 12px}
-      .section-nav{gap:8px;margin:2px 0 0}
+      .section-nav{gap:10px;margin:2px 0 0}
       .section-nav h1{font-size:34px}
-      .section-nav a{font-size:24px}
-      .section-nav .divider{font-size:22px}
+      .books-link{padding:7px 10px;font-size:12px}
       .hero-summary{gap:10px;align-items:baseline}.hero p{margin-top:6px}.paper-count{font-size:12px}
       .papers{padding:12px 0 36px}.paper-item{padding:15px 14px;font-size:18px}.empty{padding:52px 16px}
     }
@@ -66,10 +64,9 @@
   <main class="wrap">
     <section class="hero">
       <div class="eyebrow">Paper · Research</div>
-      <div class="section-nav" aria-label="책과 논문">
-        <a href="/books.html">책 소개</a>
-        <span class="divider">·</span>
+      <div class="section-nav" aria-label="논문과 책 소개">
         <h1>논문</h1>
+        <a class="books-link" href="/books.html">← 책 소개</a>
       </div>
       <div class="hero-summary">
         <p>연구와 논문 기록을 한곳에 정리합니다.</p>
