@@ -1692,6 +1692,51 @@
   }
 </style>
 
+<style id="footer-stitch-ui-v1">
+  .footer{
+    padding:0;
+    background:#171714;
+    color:#9f998f;
+    border-top:1px solid rgba(255,255,255,.04);
+    font-size:12px;
+  }
+  .footer-shell{padding-top:54px;padding-bottom:34px}
+  .footer-top{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:40px;
+    padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .footer-brand-block{max-width:560px}
+  .footer-brand{display:inline-flex;align-items:baseline;gap:14px;color:#f5f2ea}
+  .footer-brand strong{
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:18px;line-height:1;font-weight:700;
+  }
+  .footer-brand span{color:#b99a6a;font-size:10px;letter-spacing:.22em;white-space:nowrap}
+  .footer-brand-block p{margin:10px 0 0;color:#8f897f;line-height:1.6}
+  .footer-links{display:flex;align-items:center;gap:28px;flex-wrap:wrap;justify-content:flex-end}
+  .footer-links a{color:#bdb6ab;font-size:12px;transition:color .18s ease}
+  .footer-links a:hover{color:#fff}
+  .footer-links .footer-admin{
+    opacity:1;display:inline-flex;align-items:center;min-height:auto;padding:0;
+    color:#b99a6a;font-size:12px;font-weight:600;
+  }
+  .footer-bottom{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;
+    padding-top:26px;color:#8c867d;font-size:11px;
+  }
+  .footer-motto{color:#7e776e;letter-spacing:.08em}
+  @media (max-width:680px){
+    .footer-shell{padding-top:36px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px))}
+    .footer-top{flex-direction:column;gap:24px;padding-bottom:24px}
+    .footer-links{width:100%;justify-content:flex-start;gap:16px 20px}
+    .footer-bottom{align-items:flex-start;flex-direction:column;gap:8px;padding-top:20px}
+    .footer-brand{gap:10px}
+    .footer-brand strong{font-size:17px}
+    .footer-brand span{font-size:9px}
+    .footer-brand-block p{font-size:11px}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -1900,11 +1945,25 @@
 </main>
 
   <footer class="footer">
-    <div class="wrap footer-bar">
-      <div>© <span id="year"></span> Lee Wonju. All rights reserved.</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap">
-        <a href="/privacy.html">Privacy</a>
-        <a class="footer-admin" href="/admin.html">관리자</a>
+    <div class="wrap footer-shell">
+      <div class="footer-top">
+        <div class="footer-brand-block">
+          <a class="footer-brand" href="#top" aria-label="페이지 맨 위로">
+            <strong>이원주</strong>
+            <span>SEAL · CALLIGRAPHY</span>
+          </a>
+          <p>한국 전통 서화각의 맥을 잇고 토혼(土魂)의 지평을 여는 예술 아카이브</p>
+        </div>
+        <nav class="footer-links" aria-label="하단 메뉴">
+          <a href="#about">작가 소개</a>
+          <a href="#contact" data-footer-contact>작품 소장</a>
+          <a href="/privacy.html">개인정보처리방침</a>
+          <a class="footer-admin" href="/admin.html">관리자 모드</a>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <div>© <span id="year"></span> Lee Wonju. All rights reserved.</div>
+        <div class="footer-motto">木香 · 玄香 · 明香</div>
       </div>
     </div>
   </footer>
@@ -2604,6 +2663,18 @@
         });
       });
     }
+    function bindFooterLinks(){
+      qsa('[data-footer-contact]').forEach(link => {
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          const item = qs('#contactAccordion');
+          const section = qs('#contact');
+          if(item) item.classList.add('open');
+          if(section) section.scrollIntoView({behavior:'smooth', block:'start'});
+        });
+      });
+    }
+
     function bindToTopBadge(){
       const badge = qs('#toTopBadge');
       const footer = qs('.footer');
@@ -2669,6 +2740,7 @@
     bindCleanHashLinks();
     bindComingSoonMenu();
     bindAccordions();
+    bindFooterLinks();
     if(document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', bindToTopBadge);
     }else{
