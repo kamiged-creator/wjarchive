@@ -312,7 +312,8 @@
           if(matchIndex>=0) latestItems[matchIndex]=nextPaper;
           else latestItems.push(nextPaper);
         }else{
-          latestItems.push(nextPaper);
+          latestItems.unshift(nextPaper);
+          currentPaperPage=1;
         }
         return {...latest,items:latestItems};
       });
