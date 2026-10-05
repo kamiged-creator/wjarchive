@@ -117,16 +117,6 @@
       background-size:28px 28px;
       background-position:0 0,0 14px,14px -14px,-14px 0;
     }
-    .editor.book-cover-mode{
-      width:min(100%,608px);
-      margin:0 auto;
-    }
-    .editor.book-cover-mode .stage-wrap{
-      width:100%;
-      height:auto;
-      min-height:0;
-      aspect-ratio:4/5;
-    }
     canvas{
       display:block;
       width:100%;
@@ -441,14 +431,6 @@
         height:62vh;
         min-height:340px;
       }
-      .editor.book-cover-mode{
-        width:min(100%,520px);
-      }
-      .editor.book-cover-mode .stage-wrap{
-        height:auto;
-        min-height:0;
-        aspect-ratio:4/5;
-      }
       .side{grid-template-columns:1fr}
       .row{grid-template-columns:1fr}
       .actions{grid-template-columns:1fr}
@@ -591,7 +573,6 @@
   <script>
     const aspect = 4 / 5;
     const els = {
-      editor: document.querySelector('.editor'),
       stageWrap: document.getElementById('stageWrap'),
       canvas: document.getElementById('stageCanvas'),
       dropLayer: document.getElementById('dropLayer'),
@@ -900,11 +881,6 @@
         els.uploadUrlOutput.select();
         showToast('URL을 선택했습니다. Ctrl+C로 복사해주세요.');
       }
-    }
-
-    function updateStageMode(){
-      const isBookCover = els.outputModeSelect?.value === 'book-cover';
-      els.editor?.classList.toggle('book-cover-mode', isBookCover);
     }
 
     function resizeCanvas(){
@@ -1433,15 +1409,15 @@
     els.outputModeSelect.addEventListener('change', () => {
       getOutputSize();
       clearResult();
-      updateStageMode();
-      requestAnimationFrame(() => {
-        resizeCanvas();
-        if (state.image){
-          rememberUndo();
-          fitImage(els.outputModeSelect.value === 'book-cover' ? 'book-cover' : 'contain', true);
-          draw();
-        }
-      });
+      const stageRect = els.stageWrap.getBoundingClientRect();
+      updateCropBox(stageRect.width, stageRect.height);
+      if (state.image){
+        rememberUndo();
+        fitImage(els.outputModeSelect.value === 'book-cover' ? 'book-cover' : 'contain', true);
+        draw();
+      } else {
+        draw();
+      }
     });
     els.formatSelect.addEventListener('change', clearResult);
     els.qualityInput.addEventListener('change', clearResult);
@@ -1503,7 +1479,6 @@
     state.sequenceStart = getSequenceStart();
     updateSequenceUi();
     initAccessLock();
-    updateStageMode();
     resizeCanvas();
   </script>
 </body>
