@@ -27,10 +27,7 @@
       }
     })();
   </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Noto+Serif+KR:wght@600;700;800;900&display=swap" rel="stylesheet">
-<style>
+  <style>
     :root{
       --bg:#f6f1ea;
       --paper:#fffdf9;
@@ -106,19 +103,14 @@
       min-height:34px;
       margin:-5px -8px -4px;
       padding:5px 8px 4px;
-      font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
-      font-size:24px;
+      font-size:23px;
       font-weight:800;
-      color:#171310;
-      -webkit-text-stroke:.8px #171310;
-      text-shadow:0 0 .2px rgba(23,19,16,.35);
-      letter-spacing:-.05em;
+      color:#2b2724;
+      letter-spacing:-.04em;
       line-height:1;
       user-select:none;
       -webkit-user-select:none;
-      transition:color .18s ease;
     }
-    .brand-title:hover{color:#b88943;-webkit-text-stroke:.8px #b88943;text-shadow:0 0 .2px rgba(184,137,67,.28)}
     .brand-sub{font-size:12px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
     .nav{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
     .nav a{position:relative;padding:6px 12px;border-radius:999px;color:rgba(31,26,23,.74);font-size:14px;font-weight:650;background:transparent;transition:all .2s ease}
@@ -1401,955 +1393,6 @@
     }
 
 </style>
-
-
-
-<style id="mobile-works-catalog-v1">
-  @media (max-width:860px){
-    #works .section-head{
-      display:block;
-      text-align:center;
-    }
-    #works .section-head > div{
-      width:100%;
-    }
-    #works .section-head::before{
-      content:"EXHIBITION CATALOG";
-      display:block;
-      margin-bottom:7px;
-      color:#b08652;
-      font-size:9px;
-      font-weight:800;
-      letter-spacing:.24em;
-      text-align:center;
-    }
-  }
-</style>
-
-<style id="pc-works-catalog-v1">
-  @media (min-width:861px){
-    #works{padding-top:62px}
-    #works .section-head{
-      display:block;
-      margin:0 auto 28px;
-      text-align:center;
-    }
-    #works .section-head::before{
-      content:"EXHIBITION CATALOG";
-      display:block;
-      margin-bottom:8px;
-      color:#b08652;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.22em;
-    }
-    #works .section-head > div{width:100%}
-    #works .section-title{
-      margin:0;
-      text-align:center;
-      font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:36px;
-      line-height:1.25;
-      font-weight:600;
-      letter-spacing:-.04em;
-    }
-    #works .section-copy{
-      margin:10px auto 0;
-      text-align:center;
-      font-size:13px;
-      color:var(--muted);
-    }
-    #works .filter-bar{
-      justify-content:center;
-      gap:10px;
-      margin:0 auto 30px;
-    }
-    #works .filter-btn{
-      padding:9px 15px;
-      border-radius:999px;
-      font-size:13px;
-    }
-  }
-</style>
-
-<style id="artist-statement-ui-v1">
-  #note.statement-section{
-    position:relative;
-    overflow:hidden;
-    padding:62px 0 66px;
-    background:#23211d;
-    color:#f5efe6;
-  }
-  #note.statement-section::after{
-    content:"刻";
-    position:absolute;
-    right:-12px;
-    bottom:-90px;
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:310px;
-    line-height:1;
-    color:rgba(255,255,255,.035);
-    pointer-events:none;
-  }
-  #note .statement-heading{
-    position:relative;
-    z-index:1;
-    text-align:center;
-    margin-bottom:54px;
-  }
-  #note .statement-eyebrow{
-    color:#c79a5a;
-    font-size:11px;
-    font-weight:800;
-    letter-spacing:.32em;
-  }
-  #note .statement-heading h2{
-    margin:8px 0 0;
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:34px;
-    line-height:1.25;
-    font-weight:500;
-    letter-spacing:-.035em;
-  }
-  #note .statement-grid{
-    position:relative;
-    z-index:1;
-    display:grid;
-    grid-template-columns:minmax(0,1.12fr) 1px minmax(0,.88fr);
-    gap:54px;
-    align-items:stretch;
-  }
-  #note .statement-divider{background:rgba(255,255,255,.09)}
-  #note .statement-quote{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    min-width:0;
-    padding:4px 0;
-  }
-  #note .statement-mark{
-    height:42px;
-    color:#c79a5a;
-    font-family:Georgia,serif;
-    font-size:58px;
-    line-height:1;
-  }
-  #note .note-quote{
-    margin:16px 0 26px;
-    color:#fffaf2;
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:clamp(25px,2.35vw,34px);
-    line-height:1.48;
-    letter-spacing:-.035em;
-    font-weight:500;
-  }
-  #note .statement-credit{
-    color:#aaa298;
-    font-size:12px;
-    letter-spacing:.04em;
-  }
-  #note .statement-panel{
-    position:relative;
-    align-self:center;
-    padding:26px 28px 22px;
-    border:1px solid rgba(255,255,255,.11);
-    border-radius:12px;
-    background:rgba(255,255,255,.055);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
-  }
-  #note .statement-panel-mark{
-    position:absolute;
-    top:16px;
-    right:18px;
-    color:#c79a5a;
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:24px;
-    opacity:.9;
-  }
-  #note .statement-panel p{
-    margin:0;
-    padding-right:32px;
-    color:#d7d0c6;
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:16px;
-    line-height:1.78;
-  }
-  #note .statement-caption{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-top:22px;
-    color:#b9b1a5;
-    font-size:12px;
-  }
-  #note .statement-caption span{
-    display:block;
-    width:34px;
-    height:1px;
-    background:#c79a5a;
-    flex:0 0 auto;
-  }
-  @media (max-width:1020px){
-    #note .statement-grid{grid-template-columns:1fr;gap:28px}
-    #note .statement-divider{height:1px;width:100%}
-    #note .statement-panel{align-self:stretch}
-  }
-  @media (max-width:680px){
-    #note.statement-section{padding:44px 0 46px}
-    #note.statement-section::after{font-size:190px;right:-28px;bottom:-48px}
-    #note .statement-heading{margin-bottom:34px}
-    #note .statement-eyebrow{font-size:10px;letter-spacing:.25em}
-    #note .statement-heading h2{font-size:29px}
-    #note .statement-grid{gap:24px}
-    #note .statement-mark{height:34px;font-size:48px}
-    #note .note-quote{margin:10px 0 18px;font-size:24px;line-height:1.5}
-    #note .statement-credit{font-size:11px}
-    #note .statement-panel{padding:22px 20px 18px;border-radius:14px}
-    #note .statement-panel p{padding-right:26px;font-size:15px;line-height:1.78}
-    #note .statement-caption{margin-top:18px;font-size:11px}
-  }
-</style>
-
-<style id="bottom-stitch-ui-v1">
-  #news{
-    padding:58px 0 12px;
-    background:#fbfaf7;
-  }
-  #contact{
-    padding:12px 0 70px;
-    background:#fbfaf7;
-  }
-  #news .wrap,#contact .wrap{max-width:980px}
-  #news .accordion,#contact .accordion{gap:24px}
-  #news .accordion-item,#contact .accordion-item{
-    border:1px solid rgba(31,26,23,.12);
-    border-radius:12px;
-    background:rgba(255,255,255,.78);
-    box-shadow:none;
-    overflow:hidden;
-  }
-  #news .accordion-item.news-accent{
-    background:rgba(255,255,255,.82);
-    border-color:rgba(31,26,23,.12);
-  }
-  #news .accordion-btn,#contact .accordion-btn{
-    min-height:72px;
-    align-items:center;
-    padding:0 28px;
-    font-size:20px;
-    font-weight:700;
-    letter-spacing:-.025em;
-  }
-  #news .accordion-heading,#contact .accordion-heading{
-    display:flex;
-    align-items:center;
-    min-width:0;
-    gap:16px;
-  }
-  #news .accordion-index,#contact .accordion-index{
-    flex:0 0 auto;
-    color:#a77b45;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:.06em;
-  }
-  #news .accordion-title,#contact .accordion-title{
-    min-width:0;
-    color:#27231f;
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:20px;
-    font-style:normal;
-    font-weight:650;
-  }
-  #news .accordion-title em,#contact .accordion-title em{
-    font-style:normal;
-    font-weight:500;
-  }
-  #news .accordion-title,
-  #contact .accordion-title{
-    transition:color .18s ease;
-  }
-  #news .accordion-btn:hover .accordion-title,
-  #contact .accordion-btn:hover .accordion-title{
-    color:#c79a5a;
-  }
-  #news .accordion-btn:hover .accordion-toggle,
-  #contact .accordion-btn:hover .accordion-toggle{
-    color:#c79a5a;
-  }
-  #news .accordion-toggle,#contact .accordion-toggle{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:30px;
-    height:30px;
-    margin:0;
-    border-radius:50%;
-    background:#f5f2ec;
-    color:#9b7549;
-    font-size:16px;
-    font-weight:400;
-    line-height:1;
-    transform:none;
-    transition:background .18s ease,color .18s ease,transform .18s ease;
-  }
-  #news .accordion-item.open .accordion-toggle,
-  #contact .accordion-item.open .accordion-toggle{
-    transform:rotate(45deg);
-    background:#f1ede7;
-  }
-  #news .accordion-panel,#contact .accordion-panel{
-    padding:0 32px 24px;
-    border-top:1px solid rgba(31,26,23,.07);
-  }
-  #news .accordion-panel > p,#contact .accordion-panel > p{
-    margin:15px 0 8px !important;
-    color:#8a8279;
-    font-size:12px;
-  }
-  #news .contact-list,#contact .contact-list{gap:0;margin-top:0}
-  #news .contact-item,#contact .contact-item{
-    padding:14px 0;
-    border:0;
-    border-top:1px solid rgba(31,26,23,.08);
-    border-radius:0;
-    background:transparent;
-    color:#36312c;
-    font-size:14px;
-    line-height:1.5;
-  }
-  #news .contact-item:first-child,#contact .contact-item:first-child{border-top:0}
-  @media (max-width:680px){
-    #news{padding:34px 0 8px}
-    #contact{padding:8px 0 42px}
-    #news .accordion,#contact .accordion{gap:12px}
-    #news .accordion-btn,#contact .accordion-btn{min-height:64px;padding:0 16px}
-    #news .accordion-heading,#contact .accordion-heading{gap:10px}
-    #news .accordion-title,#contact .accordion-title{font-size:16px;line-height:1.35}
-    #news .accordion-title em,#contact .accordion-title em{font-size:12px;color:#7d756c}
-    #news .accordion-toggle,#contact .accordion-toggle{width:28px;height:28px;font-size:15px}
-    #news .accordion-panel,#contact .accordion-panel{padding:0 18px 18px}
-    #news .contact-item,#contact .contact-item{padding:12px 0;font-size:13px}
-  }
-</style>
-
-<style id="footer-stitch-ui-v1">
-  .footer{
-    padding:0;
-    background:#171714;
-    color:#9f998f;
-    border-top:1px solid rgba(255,255,255,.04);
-    font-size:12px;
-  }
-  .footer-shell{padding-top:42px;padding-bottom:12px}
-  .footer-top{
-    display:flex;align-items:flex-start;justify-content:space-between;gap:40px;
-    padding-bottom:32px;border-bottom:1px solid rgba(255,255,255,.08);
-  }
-  .footer-brand-block{max-width:560px}
-  .footer-brand{display:inline-flex;align-items:baseline;gap:14px;color:#f5f2ea}
-  .footer-brand strong{
-    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-    font-size:18px;line-height:1;font-weight:700;
-  }
-  .footer-brand span{color:#b99a6a;font-size:10px;letter-spacing:.22em;white-space:nowrap}
-  .footer-brand-block p{margin:10px 0 0;color:#8f897f;line-height:1.6}
-  .footer-links{display:flex;align-items:center;gap:28px;flex-wrap:wrap;justify-content:flex-end}
-  .footer-links a{color:#bdb6ab;font-size:12px;transition:color .18s ease}
-  .footer-links a:hover{color:#c79a5a}
-  .footer-links .footer-admin{
-    opacity:1;display:inline-flex;align-items:center;min-height:auto;padding:0;
-    color:#b99a6a;font-size:12px;font-weight:600;
-  }
-  .footer-bottom{
-    display:flex;align-items:center;justify-content:space-between;gap:20px;
-    padding-top:18px;color:#8c867d;font-size:11px;
-  }
-  @media (max-width:680px){
-    .footer-shell{padding-top:30px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
-    .footer-top{flex-direction:column;gap:24px;padding-bottom:24px}
-    .footer-links{width:100%;justify-content:flex-start;gap:16px 20px}
-    .footer-bottom{align-items:flex-start;flex-direction:column;gap:8px;padding-top:20px}
-    .footer-brand{gap:10px}
-    .footer-brand strong{font-size:17px}
-    .footer-brand span{font-size:9px}
-    .footer-brand-block p{font-size:11px}
-  }
-</style>
-
-<style id="news-three-lines-v1">
-  #news .accordion-panel > p{display:none}
-</style>
-
-<style id="work-card-stitch-copy-v1">
-  @media (min-width:681px){
-    #works .work{border-radius:12px}
-    #works .work-img{position:relative}
-    #works .work-badge{
-      position:absolute;
-      top:12px;
-      right:12px;
-      display:inline-flex;
-      align-items:center;
-      min-height:26px;
-      padding:0 10px;
-      border:1px solid rgba(31,26,23,.10);
-      border-radius:4px;
-      background:rgba(255,253,249,.92);
-      color:#655f57;
-      font-size:11px;
-      letter-spacing:.02em;
-      backdrop-filter:blur(5px);
-    }
-    #works .work-body{
-      min-height:150px;
-      padding:22px 24px 18px;
-    }
-    #works .work-title{
-      margin:0 0 10px;
-      color:#1f1a17;
-      font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:20px;
-      line-height:1.35;
-      font-weight:650;
-      transition:color .18s ease;
-    }
-    #works .work:hover .work-title{color:#b07f43}
-    #works .work-meta{display:none}
-    #works .work-text{
-      color:#7a736b;
-      font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:13px;
-      line-height:1.65;
-      -webkit-line-clamp:2;
-    }
-    #works .work-footer{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      min-height:52px;
-      padding:0 24px;
-      border-top:1px solid rgba(31,26,23,.09);
-      background:rgba(255,255,255,.38);
-    }
-    #works .work-archive{
-      color:#9d8d7d;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:11px;
-      letter-spacing:.04em;
-    }
-    #works .work-inquiry{
-      border:0;
-      padding:8px 0;
-      background:transparent;
-      color:#2e2925;
-      font-size:12px;
-      font-weight:650;
-      cursor:pointer;
-      transition:color .18s ease;
-    }
-    #works .work-inquiry:hover{color:#b07f43}
-  }
-  @media (max-width:680px){
-    #works .work-badge,#works .work-footer{display:none}
-  }
-</style>
-
-<style id="about-monograph-layout-v1">
-  @media (min-width:861px){
-    #about{padding:76px 0 82px;background:#fbfaf7}
-    #about .wrap{max-width:1240px}
-    #about .section-head{
-      display:flex;align-items:flex-end;justify-content:space-between;gap:28px;
-      margin-bottom:46px;padding-bottom:18px;border-bottom:1px solid rgba(31,26,23,.11);text-align:left;
-    }
-    #about .section-head > div:first-child::before{
-      content:"MASTER OF MODERN INK & SEAL";
-      display:block;margin-bottom:7px;color:#b08652;
-      font-size:10px;font-weight:800;letter-spacing:.26em;
-    }
-    #about .section-title{
-      margin:0;text-align:left;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:36px;line-height:1.18;font-weight:600;letter-spacing:-.045em;
-    }
-    #about .about-monograph{
-      padding-bottom:4px;color:#9b9187;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:10px;letter-spacing:.16em;white-space:nowrap;
-    }
-    #about .about-profile{
-      grid-template-columns:minmax(360px,460px) minmax(0,1fr);
-      gap:64px;align-items:stretch;
-    }
-    #about .artist-photo-card{
-      min-height:0;border-radius:14px;border-color:rgba(31,26,23,.10);
-      box-shadow:0 18px 46px rgba(31,26,23,.09);
-    }
-    #about .artist-photo{min-height:570px;height:100%;background-position:center 16%}
-    #about .artist-copy{
-      display:flex;flex-direction:column;justify-content:center;gap:0;min-width:0;
-    }
-    #about .about-audio-row{align-self:flex-end;margin:0 0 10px}
-    #about .about-audio-btn{
-      min-height:34px;height:34px;padding:0 10px;border-radius:999px;
-      background:transparent;box-shadow:none;font-size:11px;color:#81786f;
-    }
-    #about .artist-copy .card{
-      position:relative;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;
-    }
-    #about .artist-copy .card + .card{margin-top:28px;padding-top:28px}
-    #about .artist-copy .card + .card::before{
-      content:"";position:absolute;top:0;left:0;width:46px;height:1px;background:#c8ad82;
-    }
-    #about .artist-copy .card p{
-      margin:0;color:#4f4a43;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:17px;line-height:1.95;letter-spacing:-.015em;
-    }
-    #about #aboutParagraph1::first-letter{
-      float:left;margin:2px 8px 0 0;color:#1f1a17;font-size:42px;line-height:.9;font-weight:700;
-    }
-    #about .discipline-grid{
-      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:34px;
-    }
-    #about .discipline-card{
-      min-height:104px;padding:18px 18px 16px;border:1px solid rgba(31,26,23,.09);
-      border-radius:9px;background:rgba(255,255,255,.52);
-    }
-    #about .discipline-card span{
-      display:block;margin-bottom:8px;color:#b08652;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:9px;letter-spacing:.09em;
-    }
-    #about .discipline-card strong{
-      display:block;color:#2c2824;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:15px;font-weight:650;
-    }
-    #about .discipline-card p{margin:8px 0 0;color:#82796f;font-size:11px;line-height:1.5}
-  }
-  @media (max-width:860px){
-    #about .section-head > div:first-child::before{
-      content:"MASTER OF MODERN INK & SEAL";
-      display:block;
-      margin-bottom:7px;
-      color:#98672f;
-      font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:9px;
-      font-weight:800;
-      letter-spacing:.20em;
-      text-align:center;
-    }
-    #about .about-monograph{display:none}
-    #about .discipline-grid{
-      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px;
-    }
-    #about .discipline-card{
-      padding:12px 9px;border:1px solid rgba(31,26,23,.09);
-      border-radius:12px;background:rgba(255,255,255,.55);
-    }
-    #about .discipline-card span{
-      display:block;margin-bottom:5px;color:#b08652;font-size:8px;letter-spacing:.04em;
-    }
-    #about .discipline-card strong{
-      display:block;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
-      font-size:12px;line-height:1.35;
-    }
-    #about .discipline-card p{display:none}
-  }
-</style>
-
-<style id="docent-audio-guide-v1">
-  #about .about-audio-row{width:100%;margin:0 0 24px;align-self:stretch}
-  #about .about-audio-btn{
-    width:100%;min-height:74px;height:auto;display:grid;
-    grid-template-columns:42px minmax(0,1fr) 54px;align-items:center;gap:14px;
-    padding:12px 18px;border:1px solid rgba(31,26,23,.12);border-radius:14px;
-    background:rgba(255,255,255,.82);color:#27231f;
-    box-shadow:0 6px 18px rgba(31,26,23,.035);text-align:left;
-    transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;
-  }
-  #about .about-audio-btn:hover{border-color:rgba(176,127,67,.34);box-shadow:0 8px 22px rgba(31,26,23,.055)}
-  #about .about-audio-btn[aria-pressed="true"]{background:rgba(255,255,255,.9);color:#27231f;border-color:rgba(176,127,67,.42)}
-  #about .audio-play-icon{
-    position:relative;width:40px;height:40px;border-radius:50%;background:#1f1f1d;flex:0 0 auto;
-  }
-  #about .audio-play-icon::before{
-    content:"";position:absolute;left:16px;top:12px;width:0;height:0;
-    border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:11px solid #fff;
-  }
-  #about .about-audio-btn[aria-pressed="true"] .audio-play-icon::before{
-    left:13px;top:12px;width:14px;height:16px;border:0;
-    background:linear-gradient(90deg,#fff 0 4px,transparent 4px 10px,#fff 10px 14px);
-  }
-  #about .about-audio-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
-  #about .about-audio-label{color:#25221f;font-size:13px;font-weight:700;line-height:1.25}
-  #about .about-audio-status{color:#8a8278;font-size:11px;line-height:1.35}
-  #about .audio-wave{display:flex;align-items:center;justify-content:flex-end;gap:3px;height:28px}
-  #about .audio-wave-bar{
-    display:block;width:2px;height:8px;border-radius:999px;background:#b8894e;
-    transform-origin:center;opacity:.72;
-  }
-  #about .audio-wave-bar:nth-child(2){height:16px}
-  #about .audio-wave-bar:nth-child(3){height:23px}
-  #about .audio-wave-bar:nth-child(4){height:14px}
-  #about .audio-wave-bar:nth-child(5){height:20px}
-  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar{
-    opacity:1;animation:docentWave .78s ease-in-out infinite alternate;
-  }
-  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(2){animation-delay:-.22s}
-  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(3){animation-delay:-.47s}
-  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(4){animation-delay:-.14s}
-  #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar:nth-child(5){animation-delay:-.36s}
-  @keyframes docentWave{from{transform:scaleY(.45)}to{transform:scaleY(1.15)}}
-  @media (prefers-reduced-motion:reduce){
-    #about .about-audio-btn[aria-pressed="true"] .audio-wave-bar{animation:none}
-  }
-  @media (max-width:680px){
-    #about .about-audio-row{margin:0 0 16px}
-    #about .about-audio-btn{
-      min-height:66px;grid-template-columns:36px minmax(0,1fr) 42px;
-      gap:11px;padding:10px 13px;border-radius:13px;
-    }
-    #about .audio-play-icon{width:34px;height:34px}
-    #about .audio-play-icon::before{
-      left:14px;top:10px;border-top-width:7px;border-bottom-width:7px;border-left-width:9px;
-    }
-    #about .about-audio-btn[aria-pressed="true"] .audio-play-icon::before{
-      left:11px;top:9px;width:12px;height:16px;
-      background:linear-gradient(90deg,#fff 0 4px,transparent 4px 8px,#fff 8px 12px);
-    }
-    #about .about-audio-label{font-size:12px}
-    #about .about-audio-status{font-size:10px}
-    #about .audio-wave{gap:2px}
-  }
-</style>
-
-<style id="hero-lead-serif-v1">
-  #heroLead{
-    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
-    font-weight:600;
-    letter-spacing:-.018em;
-    line-height:1.78;
-    color:#625a52;
-  }
-  @media (min-width:861px){
-    #heroLead{
-      font-size:17px;
-      max-width:590px;
-      padding-right:12px;
-    }
-  }
-  @media (max-width:860px){
-    #heroLead{
-      font-size:16px;
-      line-height:1.72;
-    }
-  }
-</style>
-
-<style id="hero-two-line-red-dot-v1">
-  #heroEyebrow::before{
-    content:"";
-    width:6px;
-    height:6px;
-    flex:0 0 6px;
-    border-radius:50%;
-    background:#b33b31;
-    box-shadow:0 0 0 1px rgba(179,59,49,.06);
-  }
-  #heroTitle{
-    max-width:430px;
-    line-height:1.02;
-    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
-    font-weight:600;
-    letter-spacing:-.055em;
-  }
-  #heroTitle .hero-title-accent{
-    position:relative;
-    display:inline-block;
-    z-index:0;
-  }
-  #heroTitle .hero-title-accent::after{
-    content:"";
-    position:absolute;
-    left:1px;
-    right:1px;
-    bottom:-5px;
-    height:4px;
-    border-radius:999px;
-    background:linear-gradient(90deg,#b88943 0%,#d4b06c 50%,#b88943 100%);
-    opacity:.72;
-    z-index:-1;
-  }
-  @media (max-width:860px){
-    #heroTitle{
-      max-width:300px;
-      margin-left:auto;
-      margin-right:auto;
-      line-height:1.05;
-    }
-    #heroTitle .hero-title-accent::after{
-      bottom:-4px;
-      height:3px;
-    }
-    #heroEyebrow::before{
-      width:6px;
-      height:6px;
-      flex-basis:6px;
-    }
-  }
-</style>
-
-<style id="hero-background-clean-v1">
-  .hero{
-    background:#fbfaf7;
-  }
-  @media (max-width:860px){
-    .hero{
-      background:transparent;
-    }
-  }
-</style>
-
-<style id="hero-spec-meta-v1">
-  .hero-philosophy-link{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-height:48px;
-    padding:0 18px;
-    color:#6d655d;
-    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
-    font-size:14px;
-    font-weight:600;
-    transition:color .18s ease;
-  }
-  .hero-philosophy-link:hover{color:#b07f43}
-  .hero-meta{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:22px;
-    margin-top:32px;
-    padding-top:22px;
-    border-top:1px solid rgba(31,26,23,.09);
-  }
-  .hero-meta-item{min-width:0}
-  .hero-meta-label{
-    display:block;
-    margin-bottom:5px;
-    color:#b2a69a;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    font-size:9px;
-    line-height:1.2;
-    font-weight:700;
-    letter-spacing:.14em;
-  }
-  .hero-meta-value{
-    display:block;
-    color:#7a7168;
-    font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
-    font-size:12px;
-    line-height:1.45;
-    font-weight:500;
-  }
-  @media (max-width:860px){
-    .hero-philosophy-link{
-      width:auto;
-      min-height:42px;
-      padding:0 8px;
-      font-size:13px;
-    }
-    .hero-meta{
-      gap:10px;
-      margin-top:22px;
-      padding-top:18px;
-    }
-    .hero-meta-label{font-size:8px;letter-spacing:.08em}
-    .hero-meta-value{font-size:10px;line-height:1.35}
-  }
-</style>
-
-<style id="header-stitch-layout-v1">
-  @media (min-width:1021px){
-    .topbar{
-      background:rgba(251,248,244,.96);
-      border-bottom:1px solid rgba(31,26,23,.08);
-    }
-    .topbar .wrap{max-width:var(--max)}
-    .topbar-inner{
-      min-height:96px;
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      gap:36px;
-      padding:0 24px;
-    }
-    .brand{
-      flex-direction:row;
-      align-items:center;
-      gap:14px;
-      padding-top:0;
-      white-space:nowrap;
-    }
-    .brand-title{
-      min-height:auto;
-      margin:0;
-      padding:0;
-      font-family:"Noto Serif KR",serif !important;
-      font-size:25px;
-      line-height:1;
-      font-weight:800;
-      color:#1b1815;
-      -webkit-text-stroke:0;
-      text-shadow:none;
-      letter-spacing:.015em;
-    }
-    .brand-title:hover{
-      color:#b88943;
-      -webkit-text-stroke:0;
-      text-shadow:none;
-    }
-    .brand-sub{
-      position:relative;
-      padding-left:14px;
-      font-family:Georgia,"Times New Roman",serif;
-      font-size:11px;
-      line-height:1;
-      color:#9b938a;
-      letter-spacing:.28em;
-      text-transform:uppercase;
-    }
-    .brand-sub::before{
-      content:"";
-      position:absolute;
-      left:0;
-      top:50%;
-      width:1px;
-      height:18px;
-      background:rgba(31,26,23,.16);
-      transform:translateY(-50%);
-    }
-    .top-tools{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:0;
-      min-width:0;
-    }
-    .top-nav-row{
-      width:auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      flex-wrap:nowrap;
-    }
-    .nav{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:nowrap;
-    }
-    .nav a{
-      padding:7px 8px;
-      border-radius:0;
-      background:transparent;
-      color:#3e3934;
-      font-family:"Noto Sans KR",sans-serif !important;
-      font-size:14px;
-      line-height:1;
-      font-weight:600;
-      letter-spacing:.01em;
-    }
-    .nav a:hover{
-      background:transparent;
-      color:#b88943;
-    }
-    .nav-contact-link{display:none !important}
-    .header-inquiry{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      min-width:112px;
-      height:40px;
-      padding:0 18px;
-      border:1px solid rgba(31,26,23,.72);
-      border-radius:999px;
-      background:rgba(255,255,255,.22);
-      color:#2b2724;
-      font-family:"Noto Sans KR",sans-serif !important;
-      font-size:12px;
-      font-weight:600;
-      letter-spacing:.01em;
-      transition:color .18s ease,border-color .18s ease,background .18s ease;
-    }
-    .header-inquiry:hover{
-      color:#b88943;
-      border-color:#b88943;
-      background:rgba(184,137,67,.04);
-    }
-  }
-  @media (max-width:1020px){
-    .header-inquiry{display:none}
-  }
-</style>
-
-<style id="works-filter-wide-bilingual-v1">
-  @media (min-width:681px){
-    #works .filter-bar{
-      max-width:1100px;
-      width:100%;
-      justify-content:center;
-      gap:12px;
-      margin:0 auto 34px;
-    }
-    #works .filter-btn{
-      min-height:40px;
-      padding:9px 20px;
-      border-radius:999px;
-      font-family:"Noto Sans KR",sans-serif;
-      font-size:13px;
-      font-weight:600;
-      letter-spacing:0;
-      white-space:nowrap;
-    }
-    #works .filter-en{
-      color:inherit;
-      font-weight:400;
-      opacity:.82;
-    }
-    #works .filter-btn.active .filter-en{opacity:.92}
-  }
-  @media (max-width:680px){
-    #works .filter-en{display:none}
-  }
-</style>
-
-<style id="hero-mobile-single-line-v1">
-  @media (max-width:680px){
-    #heroTitle{
-      max-width:none;
-      width:100%;
-      white-space:nowrap;
-      font-size:clamp(28px,8.6vw,36px);
-      line-height:1.08;
-      letter-spacing:-.055em;
-      text-align:center;
-    }
-    #heroTitle br{display:none}
-    #heroTitle .hero-title-accent{
-      margin-left:.18em;
-    }
-    #heroTitle .hero-title-accent::after{
-      bottom:-4px;
-      height:3px;
-    }
-  }
-</style>
-
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -2380,13 +1423,12 @@
             <a href="#note">작가 노트</a>
             <a class="future-desktop-link" href="/books.html">책 소개</a>
             <a class="future-desktop-link store-desktop-link" href="#" data-coming-soon="스토어"><span class="store-label">스토어</span><span class="store-coming">준비중</span></a>
-            <a class="nav-contact-link" href="#contact">문의</a>
+            <a href="#contact">문의</a>
             <a class="mobile-books-link" href="/books.html" aria-label="책 소개"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="13" height="17" rx="1.8" stroke-width="1.8"/><path d="M8 3.5v17M11 7h4M11 10h4" stroke-width="1.8" stroke-linecap="round"/></svg><span>책소개</span></a>
             <a class="news-desktop-link" href="#news"><span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span></a>
           </nav>
         </div>
       </div>
-    <a class="header-inquiry" href="#contact">문의하기 <span aria-hidden="true">→</span></a>
     </div>
   </header>
 
@@ -2395,28 +1437,13 @@
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow" id="heroEyebrow">木香/玄香/明香</span>
-          <h1 id="heroTitle">흙에 새긴<br><span class="hero-title-accent">금빛 마음</span></h1>
+          <h1 id="heroTitle">흙에 새긴 금빛 마음</h1>
           <p class="lead" id="heroLead">
             천 년의 침묵을 깨고 일어선 흙이여, 그대의 거친 살결 속에 금강(金剛)의 지혜를 새기노니, 천년의 흙이 금강경의 구절을 품었을 때, 비로소 마음은 깨지지 않는 그릇이 된다. 이 토혼(土魂, 옹기)을 보고 느끼는 것만으로 당신의 삶은 영겁의 자유와 복을 얻을 것이다.
           </p>
           <button id="heroReadMore" class="hero-read-more" type="button" aria-controls="heroLead" aria-expanded="false">… 더 보기</button>
           <div class="hero-actions">
-            <a class="btn primary" href="#works">작품 보기 <span aria-hidden="true">→</span></a>
-            <a class="hero-philosophy-link" href="#note">작가 철학 읽기</a>
-          </div>
-          <div class="hero-meta" aria-label="대표작 정보">
-            <div class="hero-meta-item">
-              <span class="hero-meta-label">GENRE</span>
-              <span class="hero-meta-value">토혼 (옹기각)</span>
-            </div>
-            <div class="hero-meta-item">
-              <span class="hero-meta-label">MATERIAL</span>
-              <span class="hero-meta-value">황토 · 순금박 분채</span>
-            </div>
-            <div class="hero-meta-item">
-              <span class="hero-meta-label">INSCRIPTION</span>
-              <span class="hero-meta-value">금강반야바라밀경</span>
-            </div>
+            <a class="btn primary" href="#works">작품 보기</a>
           </div>
         </div>
         <div class="hero-card">
@@ -2433,7 +1460,6 @@
             <h2 class="section-title" id="aboutSectionTitle">작가 소개</h2>
             <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
           </div>
-          <div class="about-monograph">LEE WONJU ARTIST MONOGRAPH</div>
         </div>
         <div class="about-profile">
           <article class="artist-photo-card" aria-label="작가 소개 이미지">
@@ -2441,19 +1467,9 @@
           </article>
           <div class="artist-copy">
             <div class="about-audio-row">
-              <button class="about-audio-btn" id="aboutAudioBtn" type="button" aria-pressed="false" aria-label="도슨트 오디오 가이드 재생">
-                <span class="audio-play-icon" aria-hidden="true"></span>
-                <span class="about-audio-copy">
-                  <span class="about-audio-label">도슨트 오디오 가이드</span>
-                  <span class="about-audio-status">작가 소개글 음성 해설 듣기</span>
-                </span>
-                <span class="audio-wave" aria-hidden="true">
-                  <span class="audio-wave-bar"></span>
-                  <span class="audio-wave-bar"></span>
-                  <span class="audio-wave-bar"></span>
-                  <span class="audio-wave-bar"></span>
-                  <span class="audio-wave-bar"></span>
-                </span>
+              <button class="about-audio-btn" id="aboutAudioBtn" type="button" aria-pressed="false" aria-label="작가 소개글 음성으로 듣기">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4Zm11.5-.9v7.8a5 5 0 0 0 0-7.8Zm0-3.1v2.1a7 7 0 0 1 0 9.8V19a9 9 0 0 0 0-14Z"/></svg>
+                <span class="about-audio-label">소개글 듣기</span>
               </button>
             </div>
             <article class="card">
@@ -2466,23 +1482,6 @@
                 이원주는 수묵, 서예, 전각이라는 동양 예술의 정수를 현대적 미감으로 승화시켰다는 평을 받는 작가이다. 그의 예술 세계는 지필묵(紙筆墨)이라는 평면적 매체를 넘어 옹기와 같은 입체적 ‘토혼’으로 확장되는 것이 특징이다.
               </p>
             </article>
-            <div class="discipline-grid" aria-label="작가 주요 분야">
-              <div class="discipline-card">
-                <span>DISCIPLINE 01</span>
-                <strong>서예 (書藝)</strong>
-                <p>묵직한 필선과 기운생동의 여백</p>
-              </div>
-              <div class="discipline-card">
-                <span>DISCIPLINE 02</span>
-                <strong>전각 (篆刻)</strong>
-                <p>돌과 칼의 응집된 칼끝 미학</p>
-              </div>
-              <div class="discipline-card">
-                <span>DISCIPLINE 03</span>
-                <strong>토혼 (土魂)</strong>
-                <p>옹기 표면에 아로새긴 금빛 경구</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -2498,52 +1497,38 @@
         </div>
         <div class="filter-swipe-hint" aria-hidden="true">옆으로 밀기 →</div>
         <div class="filter-bar" id="filterBar">
-          <button class="filter-btn active" type="button" data-category="전체"><span class="filter-ko">전체</span> <span class="filter-en">(All)</span></button>
-          <button class="filter-btn" type="button" data-category="필선"><span class="filter-ko">필선</span> <span class="filter-en">(Calligraphy)</span></button>
-          <button class="filter-btn" type="button" data-category="전각"><span class="filter-ko">전각</span> <span class="filter-en">(Seal)</span></button>
-          <button class="filter-btn" type="button" data-category="합죽"><span class="filter-ko">합죽</span> <span class="filter-en">(Fan Art)</span></button>
-          <button class="filter-btn" type="button" data-category="묵색"><span class="filter-ko">묵색</span> <span class="filter-en">(Ink Painting)</span></button>
-          <button class="filter-btn" type="button" data-category="기타"><span class="filter-ko">기타</span> <span class="filter-en">(Others)</span></button>
+          <button class="filter-btn active" type="button" data-category="전체">전체</button>
+          <button class="filter-btn" type="button" data-category="필선">필선</button>
+          <button class="filter-btn" type="button" data-category="전각">전각</button>
+          <button class="filter-btn" type="button" data-category="합죽">합죽</button>
+          <button class="filter-btn" type="button" data-category="묵색">묵색</button>
+          <button class="filter-btn" type="button" data-category="기타">기타</button>
         </div>
         <div class="gallery" id="galleryGrid"></div>
         <div class="pagination" id="pagination"></div>
       </div>
     </section>
 
-    <section id="note" class="statement-section">
-      <div class="wrap">
-        <div class="statement-heading">
-          <div class="statement-eyebrow">ARTIST STATEMENT</div>
-          <h2>예술 철학</h2>
-        </div>
-        <div class="statement-grid">
-          <article class="statement-quote">
-            <div class="statement-mark">“</div>
-            <p class="note-quote" id="noteQuote">“흙의 그릇 위에 금강경 구절을 손끝으로 풀어내며, 글씨가 가진 기운과 마음의 결을 작품으로 담아내고 있습니다.”</p>
-            <div class="statement-credit">나에게 · 전각가 이원주 작가노트 中</div>
-          </article>
-          <div class="statement-divider" aria-hidden="true"></div>
-          <article class="statement-panel">
-            <div class="statement-panel-mark" aria-hidden="true">刻</div>
-            <p id="noteBody">
-              저에게 서(書)·화(畫)·각(刻)은 각각 다른 언어였으나, 그 끝에서 마주한 것은 결국 ‘깨지지 않는 마음’이라는 하나의 본질이었습니다.
-            </p>
-            <div class="statement-caption"><span></span>지필묵(紙筆墨)에서 토혼(土魂)으로의 확장</div>
-          </article>
-        </div>
+    <section id="note">
+      <div class="wrap note">
+        <article class="card">
+          <p class="note-quote" id="noteQuote">“흙의 그릇 위에 금강경 구절을 손끝으로 풀어내며, 글씨가 가진 기운과 마음의 결을 작품으로 담아내고 있습니다.”</p>
+        </article>
+        <article class="card">
+          <p id="noteBody">
+            저에게 서(書)·화(畫)·각(刻)은 각각 다른 언어였으나, 그 끝에서 마주한 것은 결국 ‘깨지지 않는 마음’이라는 하나의 본질이었습니다.
+          </p>
+        </article>
       </div>
     </section>
 
     <section id="news">
       <div class="wrap">
         <div class="accordion">
-          <article class="accordion-item news-accent open" id="newsAccordion">
+          <article class="accordion-item news-accent" id="newsAccordion">
             <button class="accordion-btn" type="button" data-accordion="newsAccordion">
-              <span class="accordion-heading">
-                <span class="accordion-index">01</span>
-                <span class="accordion-title news-link-label">소식 <em>(News &amp; Exhibitions)</em> <span class="new-badge" data-news-badge>NEW</span></span>
-              </span>
-              <span class="accordion-toggle">＋</span>
+              <span class="news-link-label">소식 <span class="new-badge" data-news-badge>NEW</span></span>
+              <span>＋</span>
             </button>
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">최근 작업, 전시 준비, 업데이트 소식</p>
@@ -2563,11 +1548,8 @@
         <div class="accordion">
           <article class="accordion-item" id="contactAccordion">
             <button class="accordion-btn" type="button" data-accordion="contactAccordion">
-              <span class="accordion-heading">
-                <span class="accordion-index">02</span>
-                <span class="accordion-title">문의 <em>(Collector &amp; Exhibition Inquiry)</em></span>
-              </span>
-              <span class="accordion-toggle">＋</span>
+              <span>문의</span>
+              <span>＋</span>
             </button>
             <div class="accordion-panel">
               <p style="margin:2px 0 10px;">전시·소장·협업 문의</p>
@@ -2581,11 +1563,8 @@
 
           <article class="accordion-item" id="exhibitionAccordion">
             <button class="accordion-btn" type="button" data-accordion="exhibitionAccordion">
-              <span class="accordion-heading">
-                <span class="accordion-index">03</span>
-                <span class="accordion-title">전시 이력 <em>(Chronology)</em></span>
-              </span>
-              <span class="accordion-toggle">＋</span>
+              <span>전시 이력</span>
+              <span>＋</span>
             </button>
             <div class="accordion-panel">
               <div class="contact-list" id="exhibitionDisplayList">
@@ -2602,24 +1581,11 @@
 </main>
 
   <footer class="footer">
-    <div class="wrap footer-shell">
-      <div class="footer-top">
-        <div class="footer-brand-block">
-          <a class="footer-brand" href="#top" aria-label="페이지 맨 위로">
-            <strong>이원주</strong>
-            <span>SEAL · CALLIGRAPHY</span>
-          </a>
-          <p>한국 전통 서화각의 맥을 잇고 토혼(土魂)의 지평을 여는 예술 아카이브</p>
-        </div>
-        <nav class="footer-links" aria-label="하단 메뉴">
-          <a href="#about">작가 소개</a>
-          <a href="#contact" data-footer-contact>작품 소장</a>
-          <a href="/privacy.html">개인정보처리방침</a>
-          <a class="footer-admin" href="/admin.html">관리자 모드</a>
-        </nav>
-      </div>
-      <div class="footer-bottom">
-        <div>© <span id="year"></span> Lee Wonju. All rights reserved.</div>
+    <div class="wrap footer-bar">
+      <div>© <span id="year"></span> Lee Wonju. All rights reserved.</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap">
+        <a href="/privacy.html">Privacy</a>
+        <a class="footer-admin" href="/admin.html">관리자</a>
       </div>
     </div>
   </footer>
@@ -2670,7 +1636,6 @@
     });
     const aboutAudioBtn = document.getElementById('aboutAudioBtn');
     const aboutAudioLabel = aboutAudioBtn?.querySelector('.about-audio-label');
-    const aboutAudioStatus = aboutAudioBtn?.querySelector('.about-audio-status');
     const aboutBgmUrl = 'https://pherh2oisbugqyou.public.blob.vercel-storage.com/tatamusic-documentary-documentary-music-595125.mp3';
     const aboutBgmBaseVolume = 0.08;
     let aboutAudio = null;
@@ -2679,8 +1644,7 @@
     function resetAboutAudioButton(){
       if(!aboutAudioBtn) return;
       aboutAudioBtn.setAttribute('aria-pressed','false');
-      if(aboutAudioLabel) aboutAudioLabel.textContent = '도슨트 오디오 가이드';
-      if(aboutAudioStatus) aboutAudioStatus.textContent = '작가 소개글 음성 해설 듣기';
+      if(aboutAudioLabel) aboutAudioLabel.textContent = '소개글 듣기';
     }
 
     function ensureAboutBgm(){
@@ -2765,8 +1729,7 @@
           }
 
           aboutAudioBtn.setAttribute('aria-pressed','true');
-          if(aboutAudioLabel) aboutAudioLabel.textContent = '도슨트 오디오 가이드';
-          if(aboutAudioStatus) aboutAudioStatus.textContent = '재생 중 · 누르면 중지';
+          if(aboutAudioLabel) aboutAudioLabel.textContent = '듣기 중지';
         }catch(error){
           releaseAboutAudioSession();
         }
@@ -2973,33 +1936,17 @@
         const index = works.findIndex(item => item._sourceType === work._sourceType && item._sourceIndex === work._sourceIndex);
         const thumb = getGalleryImageUrl(work.thumb || work.large || '');
         const shortDesc = truncateText(work.desc, 68);
-        const archiveNo = String(index + 1).padStart(2,'0');
         return `
         <article class="work" data-index="${index}">
-          <div class="work-img" style="background-image:url('${cssImageUrl(thumb)}')">
-            <span class="work-badge">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</span>
-          </div>
+          <div class="work-img" style="background-image:url('${cssImageUrl(thumb)}')"></div>
           <div class="work-body">
             <h3 class="work-title">${escapeHtml(work.title)}</h3>
             <div class="work-meta">${escapeHtml(work.category)} · ${escapeHtml(work.year)}</div>
             <p class="work-text" title="${escapeHtml(work.desc)}">${escapeHtml(shortDesc)}</p>
           </div>
-          <div class="work-footer">
-            <span class="work-archive">Archive #${archiveNo}</span>
-            <button class="work-inquiry" type="button">작품 문의 →</button>
-          </div>
         </article>`;
       }).join('');
       qsa('.work').forEach(card => card.addEventListener('click', () => openViewer(Number(card.dataset.index))));
-      qsa('.work-inquiry').forEach(btn => {
-        btn.addEventListener('click', event => {
-          event.stopPropagation();
-          const item = qs('#contactAccordion');
-          const section = qs('#contact');
-          if(item) item.classList.add('open');
-          if(section) section.scrollIntoView({behavior:'smooth', block:'start'});
-        });
-      });
       if(!pagination) return;
       if(totalPages <= 1){
         pagination.innerHTML = '';
@@ -3063,18 +2010,7 @@
 
     function applyAboutContentToPage(data){
       if(qs('#heroEyebrow')) qs('#heroEyebrow').textContent = data.heroEyebrow || qs('#heroEyebrow').textContent;
-      if(qs('#heroTitle')){
-        let nextHeroTitle = data.heroTitle || qs('#heroTitle').innerHTML;
-        const plainHeroTitle = String(nextHeroTitle)
-          .replace(/<br\s*\/?>/gi, ' ')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/\s+/g, ' ')
-          .trim();
-        if(plainHeroTitle === '흙에 새긴 금빛 마음'){
-          nextHeroTitle = '흙에 새긴<br><span class="hero-title-accent">금빛 마음</span>';
-        }
-        qs('#heroTitle').innerHTML = nextHeroTitle;
-      }
+      if(qs('#heroTitle')) qs('#heroTitle').innerHTML = data.heroTitle || qs('#heroTitle').innerHTML;
       if(qs('#heroLead')) qs('#heroLead').textContent = data.heroLead || qs('#heroLead').textContent;
       if(qs('#heroCaption')) qs('#heroCaption').textContent = data.heroCaption || qs('#heroCaption').textContent;
       if(qs('#aboutSectionCopy')) qs('#aboutSectionCopy').textContent = data.aboutSectionCopy || qs('#aboutSectionCopy').textContent;
@@ -3147,7 +2083,7 @@
         if(!exhibitionRes.error) renderListItems('#exhibitionDisplayList', dbRowsToLines(exhibitionRes.data));
         if(!newsRes.error){
           const newsLines = dbRowsToLines(newsRes.data);
-          renderListItems('#newsDisplayList', newsLines.slice(0,3));
+          renderListItems('#newsDisplayList', newsLines);
           updateNewsBadges(newsLines);
         }
         if(!settingsRes.error){
@@ -3349,18 +2285,6 @@
         });
       });
     }
-    function bindFooterLinks(){
-      qsa('[data-footer-contact]').forEach(link => {
-        link.addEventListener('click', event => {
-          event.preventDefault();
-          const item = qs('#contactAccordion');
-          const section = qs('#contact');
-          if(item) item.classList.add('open');
-          if(section) section.scrollIntoView({behavior:'smooth', block:'start'});
-        });
-      });
-    }
-
     function bindToTopBadge(){
       const badge = qs('#toTopBadge');
       const footer = qs('.footer');
@@ -3426,7 +2350,6 @@
     bindCleanHashLinks();
     bindComingSoonMenu();
     bindAccordions();
-    bindFooterLinks();
     if(document.readyState === 'loading'){
       document.addEventListener('DOMContentLoaded', bindToTopBadge);
     }else{
