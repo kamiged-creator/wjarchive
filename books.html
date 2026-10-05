@@ -247,10 +247,7 @@
         history.pushState({page:next},'',url.pathname+url.search);
       }
 
-      const hero=document.querySelector('.hero');
-      const top=document.querySelector('.top');
-      const y=(hero?.getBoundingClientRect().bottom||0)+window.scrollY-(top?.offsetHeight||0)+1;
-      window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+      window.scrollTo({top:0,behavior:'smooth'});
     }
 
     function render(realBooks=[],sampleBooks=defaultSamples,sampleHidden=false){
