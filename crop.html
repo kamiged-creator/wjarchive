@@ -442,7 +442,7 @@
     <header class="topbar">
       <div class="title">
         <h1>이미지 크롭 편집</h1>
-        <p class="sub">작품 이미지를 원본 비율로 1600px 너비 파일로 저장합니다.</p>
+        <p class="sub">작품 이미지는 원본 비율 또는 책표지 4:5 비율로 저장할 수 있습니다.</p>
       </div>
       <div class="top-actions">
         <button class="btn secondary" type="button" id="resetViewBtn" disabled>화면 맞춤</button>
@@ -499,6 +499,13 @@
           <div class="group">
             <div class="row">
               <div class="field">
+                <label for="outputModeSelect">출력 용도</label>
+                <select id="outputModeSelect">
+                  <option value="original">원본 비율</option>
+                  <option value="book-cover">책표지 4:5</option>
+                </select>
+              </div>
+              <div class="field">
                 <label for="formatSelect">형식</label>
                 <select id="formatSelect">
                   <option value="image/webp">WebP</option>
@@ -538,7 +545,7 @@
           <div class="preview-box">
             <div class="label-row">
               <b>결과 미리보기</b>
-              <span>원본 비율</span>
+              <span id="previewRatioLabel">원본 비율</span>
             </div>
             <img class="preview" id="previewImg" alt="크롭 결과 미리보기" hidden />
             <div class="empty-preview" id="emptyPreview">아직 만든 결과가 없습니다.</div>
@@ -581,6 +588,7 @@
       sequenceMeta: document.getElementById('sequenceMeta'),
       zoomRange: document.getElementById('zoomRange'),
       zoomValue: document.getElementById('zoomValue'),
+      outputModeSelect: document.getElementById('outputModeSelect'),
       formatSelect: document.getElementById('formatSelect'),
       qualityInput: document.getElementById('qualityInput'),
       widthInput: document.getElementById('widthInput'),
@@ -599,6 +607,7 @@
       uploadBtn: document.getElementById('uploadBtn'),
       copyUrlBtn: document.getElementById('copyUrlBtn'),
       resultMeta: document.getElementById('resultMeta'),
+      previewRatioLabel: document.getElementById('previewRatioLabel'),
       uploadUrlOutput: document.getElementById('uploadUrlOutput'),
       urlBadges: document.getElementById('urlBadges'),
       authOverlay: document.getElementById('authOverlay'),
@@ -780,11 +789,15 @@
 
     function getOutputSize(){
       const width = clamp(Number(els.widthInput.value) || 1600, 320, 4000);
-      const height = state.naturalWidth && state.naturalHeight
-        ? Math.round(width * state.naturalHeight / state.naturalWidth)
-        : Math.round(width / aspect);
+      const isBookCover = els.outputModeSelect?.value === 'book-cover';
+      const height = isBookCover
+        ? Math.round(width / aspect)
+        : (state.naturalWidth && state.naturalHeight
+            ? Math.round(width * state.naturalHeight / state.naturalWidth)
+            : Math.round(width / aspect));
       els.widthInput.value = width;
       els.heightOutput.value = height;
+      if (els.previewRatioLabel) els.previewRatioLabel.textContent = isBookCover ? '책표지 4:5' : '원본 비율';
       return { width, height };
     }
 
@@ -1135,7 +1148,17 @@
 
       outCtx.fillStyle = '#fff';
       outCtx.fillRect(0, 0, width, height);
-      outCtx.drawImage(state.image, 0, 0, state.naturalWidth, state.naturalHeight, 0, 0, width, height);
+
+      if (els.outputModeSelect?.value === 'book-cover'){
+        const displayScale = state.baseScale * state.zoom;
+        const sx = clamp((state.crop.x - state.offsetX) / displayScale, 0, state.naturalWidth);
+        const sy = clamp((state.crop.y - state.offsetY) / displayScale, 0, state.naturalHeight);
+        const sw = Math.min(state.crop.w / displayScale, state.naturalWidth - sx);
+        const sh = Math.min(state.crop.h / displayScale, state.naturalHeight - sy);
+        outCtx.drawImage(state.image, sx, sy, sw, sh, 0, 0, width, height);
+      } else {
+        outCtx.drawImage(state.image, 0, 0, state.naturalWidth, state.naturalHeight, 0, 0, width, height);
+      }
 
       const type = els.formatSelect.value;
       const quality = clamp(Number(els.qualityInput.value) || 0.85, 0.1, 1);
@@ -1151,7 +1174,8 @@
 
     function getResultFileName(){
       const stamp = state.batchStamp || createBatchStamp();
-      return `${state.fileName}-${stamp}-${formatSequence(getCurrentSequence())}-full-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
+      const suffix = els.outputModeSelect?.value === 'book-cover' ? 'book-cover' : 'full';
+      return `${state.fileName}-${stamp}-${formatSequence(getCurrentSequence())}-${suffix}-${getOutputSize().width}.${extensionFor(els.formatSelect.value)}`;
     }
 
     function makePreview(){
@@ -1359,6 +1383,15 @@
     els.widthInput.addEventListener('change', () => {
       getOutputSize();
       clearResult();
+    });
+    els.outputModeSelect.addEventListener('change', () => {
+      getOutputSize();
+      clearResult();
+      if (state.image){
+        rememberUndo();
+        fitImage(els.outputModeSelect.value === 'book-cover' ? 'cover' : 'contain', true);
+        draw();
+      }
     });
     els.formatSelect.addEventListener('change', clearResult);
     els.qualityInput.addEventListener('change', clearResult);
