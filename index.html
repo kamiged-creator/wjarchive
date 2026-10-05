@@ -2328,6 +2328,28 @@
   }
 </style>
 
+<style id="hero-mobile-single-line-v1">
+  @media (max-width:680px){
+    #heroTitle{
+      max-width:none;
+      width:100%;
+      white-space:nowrap;
+      font-size:clamp(28px,8.6vw,36px);
+      line-height:1.08;
+      letter-spacing:-.055em;
+      text-align:center;
+    }
+    #heroTitle br{display:none}
+    #heroTitle .hero-title-accent{
+      margin-left:.18em;
+    }
+    #heroTitle .hero-title-accent::after{
+      bottom:-4px;
+      height:3px;
+    }
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
