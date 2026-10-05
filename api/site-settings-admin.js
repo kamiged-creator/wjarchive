@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const { supabaseAdminRequest } = require('../lib/supabase-admin');
 
-const ALLOWED_SECTIONS = new Set(['hero', 'about', 'note', 'popup', 'books']);
+const ALLOWED_SECTIONS = new Set(['hero', 'about', 'note', 'popup', 'books', 'papers']);
 const HOMEPAGE_SECTIONS = new Set(['hero', 'about', 'note']);
 
 function normalize(value) {
@@ -152,12 +152,12 @@ module.exports = async function handler(req, res) {
     }
 
     const rows = await db(
-      'site_settings?select=key,value&key=in.(hero,about,note,popup,books,homepage_backups)',
+      'site_settings?select=key,value&key=in.(hero,about,note,popup,books,papers,homepage_backups)',
       { method: 'GET' }
     );
 
     const rowMap = Object.fromEntries((rows || []).map(row => [row.key, valueObject(row.value)]));
-    const labels = { hero: '상단', about: '작가소개', note: '작가노트', popup: '팝업', books: '책소개' };
+    const labels = { hero: '상단', about: '작가소개', note: '작가노트', popup: '팝업', books: '책소개', papers: '논문' };
     const currentSectionValue = rowMap[section] || {};
 
     if (!hasBaseValue) {
