@@ -169,17 +169,47 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    let resolvedValue = value;
+
     if (!sameValue(currentSectionValue, baseValue)) {
-      res.status(409).json({
-        ok: false,
-        code: 'STALE_ADMIN_STATE',
-        message: '다른 기기나 창에서 더 최신 내용이 저장되었습니다. 현재 저장은 취소했습니다. 새로고침 후 최신 내용을 확인해 주세요.'
-      });
-      return;
+      if (section === 'papers') {
+        const currentItems = Array.isArray(currentSectionValue.items) ? currentSectionValue.items : [];
+        const baseItems = Array.isArray(baseValue.items) ? baseValue.items : [];
+        const requestedItems = Array.isArray(value.items) ? value.items : [];
+
+        const keyOf = item => JSON.stringify(canonicalize(item));
+        const currentKeys = currentItems.map(keyOf);
+        const baseKeys = baseItems.map(keyOf);
+        const requestedKeys = requestedItems.map(keyOf);
+
+        const addedItems = requestedItems.filter(item => !baseKeys.includes(keyOf(item)));
+        const removedKeys = baseItems
+          .filter(item => !requestedKeys.includes(keyOf(item)))
+          .map(keyOf);
+
+        const mergedItems = currentItems
+          .filter(item => !removedKeys.includes(keyOf(item)));
+
+        for (const item of addedItems) {
+          const itemKey = keyOf(item);
+          if (!mergedItems.some(existing => keyOf(existing) === itemKey)) {
+            mergedItems.push(item);
+          }
+        }
+
+        resolvedValue = { ...currentSectionValue, ...value, items: mergedItems };
+      } else {
+        res.status(409).json({
+          ok: false,
+          code: 'STALE_ADMIN_STATE',
+          message: '다른 기기나 창에서 더 최신 내용이 저장되었습니다. 현재 저장은 취소했습니다. 새로고침 후 최신 내용을 확인해 주세요.'
+        });
+        return;
+      }
     }
 
     let items = [];
-    let payload = [{ key: section, value }];
+    let payload = [{ key: section, value: resolvedValue }];
 
     if (HOMEPAGE_SECTIONS.has(section)) {
       const current = {
