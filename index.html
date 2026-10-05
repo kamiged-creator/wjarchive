@@ -131,62 +131,7 @@
       box-shadow:0 2px 8px rgba(31,26,23,.06);
     }
     .mobile-extra-trigger span{display:block;width:18px;height:2px;border-radius:999px;background:currentColor}
-    .mobile-extra-trigger.guide-glow{
-      animation:mobileMenuGuideGlow 1.15s ease-in-out 2;
-    }
-    @keyframes mobileMenuGuideGlow{
-      0%,100%{
-        border-color:rgba(111,86,63,.28);
-        box-shadow:0 2px 8px rgba(31,26,23,.06);
-      }
-      50%{
-        border-color:rgba(184,149,106,.72);
-        box-shadow:0 0 0 2px rgba(184,149,106,.16),0 0 12px rgba(184,149,106,.30);
-      }
-    }
-    .mobile-menu-guide{
-      display:none;
-      position:absolute;
-      right:8px;
-      top:calc(100% + 8px);
-      z-index:55;
-      width:16px;
-      height:21px;
-      pointer-events:none;
-      filter:drop-shadow(0 2px 5px rgba(58,49,43,.16));
-    }
-    .mobile-menu-guide::before{
-      content:"";
-      position:absolute;
-      left:50%;
-      top:2px;
-      width:4px;
-      height:14px;
-      border-radius:999px;
-      background:#3A312B;
-      transform:translateX(-50%);
-    }
-    .mobile-menu-guide::after{
-      content:"";
-      position:absolute;
-      left:50%;
-      top:0;
-      width:9px;
-      height:9px;
-      border-top:3px solid #3A312B;
-      border-left:3px solid #3A312B;
-      transform:translateX(-50%) rotate(45deg);
-      border-radius:2px;
-    }
-    .mobile-menu-guide.show{
-      display:block;
-      animation:mobileMenuArrowNudge 1s ease-in-out infinite;
-    }
-    @keyframes mobileMenuArrowNudge{
-      0%,100%{transform:translateY(3px)}
-      50%{transform:translateY(-2px)}
-    }
-    .mobile-extra-menu{
+.mobile-extra-menu{
       position:absolute;right:0;top:calc(100% + 8px);z-index:45;
       width:158px;padding:8px;border:1px solid var(--line);border-radius:16px;
       background:rgba(255,253,249,.98);box-shadow:0 16px 36px rgba(31,26,23,.14);
@@ -867,8 +812,7 @@
       .brand-mobile-actions{display:flex!important;align-items:center;gap:8px;flex:0 0 auto}
       .mobile-extra-wrap{display:block!important;position:relative;flex:0 0 auto;top:4px}
       .mobile-extra-trigger{display:flex!important;visibility:visible!important;opacity:1!important;flex:0 0 36px}
-      .mobile-menu-guide.show{display:block}
-      .news-desktop-link{display:none !important}
+.news-desktop-link{display:none !important}
       .accordion-btn{
         padding:16px 18px 8px;
         font-size:22px;
@@ -1450,8 +1394,7 @@
               <button class="mobile-extra-trigger" id="mobileExtraTrigger" type="button" aria-label="추가 메뉴 열기" aria-expanded="false">
                 <span></span><span></span><span></span>
               </button>
-              <div class="mobile-menu-guide" id="mobileMenuGuide" aria-hidden="true"></div>
-              <div class="mobile-extra-menu" id="mobileExtraMenu" aria-label="추가 메뉴">
+<div class="mobile-extra-menu" id="mobileExtraMenu" aria-label="추가 메뉴">
                 <a class="mobile-extra-item" href="/books.html"><span>책 소개</span><small>보기</small></a>
                 <button class="mobile-extra-item" type="button" data-coming-soon="스토어"><span>스토어</span><small>준비중</small></button>
               </div>
@@ -2272,26 +2215,8 @@
     function bindComingSoonMenu(){
       const wrap = qs('#mobileExtraWrap');
       const trigger = qs('#mobileExtraTrigger');
-      const guide = qs('#mobileMenuGuide');
       const toast = qs('#comingSoonToast');
-      const guideStorageKey = 'wjarchive:mobileMenuGuide:v2';
       let toastTimer = null;
-
-      if(guide){
-        let alreadySeen = false;
-        try{ alreadySeen = localStorage.getItem(guideStorageKey) === 'seen'; }catch(err){}
-        if(!alreadySeen){
-          guide.classList.add('show');
-          trigger?.classList.add('guide-glow');
-        }
-      }
-
-      const dismissGuide = () => {
-        if(!guide) return;
-        guide.classList.remove('show');
-        trigger?.classList.remove('guide-glow');
-        try{ localStorage.setItem(guideStorageKey, 'seen'); }catch(err){}
-      };
 
       const closeMenu = () => {
         if(!wrap || !trigger) return;
@@ -2301,7 +2226,6 @@
 
       trigger?.addEventListener('click', (event) => {
         event.stopPropagation();
-        dismissGuide();
         const isOpen = wrap.classList.toggle('open');
         trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       });
