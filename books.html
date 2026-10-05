@@ -20,6 +20,11 @@
     .hero{padding:36px 0 24px;border-bottom:1px solid var(--line)}
     .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:800;text-transform:uppercase}
     h1{margin:7px 0 8px;font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:38px;font-weight:500;letter-spacing:-.055em}
+    .section-nav{display:flex;align-items:center;gap:10px;margin:7px 0 8px}
+    .section-nav h1{margin:0}
+    .section-nav .divider{color:rgba(31,26,23,.28);font-size:26px;font-weight:300}
+    .section-nav a{font-family:"Noto Serif KR","Nanum Myeongjo",serif;font-size:28px;font-weight:500;letter-spacing:-.045em;color:var(--muted);transition:color .18s ease}
+    .section-nav a:hover{color:var(--accent)}
     .hero-summary{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
     .hero p{margin:0;color:var(--muted);line-height:1.75;font-size:15px}
     .book-count{flex:0 0 auto;color:var(--accent);font-size:13px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
@@ -59,6 +64,9 @@
       .wrap{padding:0 14px}.topin{height:58px}.hero{padding:14px 0 12px}
       .eyebrow{margin-bottom:2px}
       h1{font-size:34px;margin:2px 0 0}
+      .section-nav{gap:8px;margin:2px 0 0}
+      .section-nav a{font-size:24px}
+      .section-nav .divider{font-size:22px}
       .hero-summary{gap:10px;align-items:baseline}
       .hero p{margin-top:6px}
       .book-count{font-size:12px}
@@ -91,7 +99,11 @@
   <main class="wrap">
     <section class="hero">
       <div class="eyebrow">Book · Story</div>
-      <h1>책 소개</h1>
+      <div class="section-nav" aria-label="책과 논문">
+        <h1>책 소개</h1>
+        <span class="divider">·</span>
+        <a href="/papers.html">논문</a>
+      </div>
       <div class="hero-summary">
         <p>작품과 글에 담긴 이야기를 책으로 이어갑니다.</p>
         <span class="book-count" id="bookCount" aria-live="polite">4권+</span>
