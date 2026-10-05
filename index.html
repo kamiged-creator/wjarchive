@@ -1442,6 +1442,144 @@
   }
 </style>
 
+<style id="artist-statement-ui-v1">
+  #note.statement-section{
+    position:relative;
+    overflow:hidden;
+    padding:86px 0 92px;
+    background:#23211d;
+    color:#f5efe6;
+  }
+  #note.statement-section::after{
+    content:"刻";
+    position:absolute;
+    right:-12px;
+    bottom:-90px;
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:310px;
+    line-height:1;
+    color:rgba(255,255,255,.035);
+    pointer-events:none;
+  }
+  #note .statement-heading{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    margin-bottom:54px;
+  }
+  #note .statement-eyebrow{
+    color:#c79a5a;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.32em;
+  }
+  #note .statement-heading h2{
+    margin:8px 0 0;
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:34px;
+    line-height:1.25;
+    font-weight:500;
+    letter-spacing:-.035em;
+  }
+  #note .statement-grid{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-columns:minmax(0,1.12fr) 1px minmax(0,.88fr);
+    gap:54px;
+    align-items:stretch;
+  }
+  #note .statement-divider{background:rgba(255,255,255,.09)}
+  #note .statement-quote{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-width:0;
+    padding:4px 0;
+  }
+  #note .statement-mark{
+    height:42px;
+    color:#c79a5a;
+    font-family:Georgia,serif;
+    font-size:58px;
+    line-height:1;
+  }
+  #note .note-quote{
+    margin:16px 0 26px;
+    color:#fffaf2;
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:clamp(25px,2.35vw,34px);
+    line-height:1.48;
+    letter-spacing:-.035em;
+    font-weight:500;
+  }
+  #note .statement-credit{
+    color:#aaa298;
+    font-size:12px;
+    letter-spacing:.04em;
+  }
+  #note .statement-panel{
+    position:relative;
+    align-self:center;
+    padding:26px 28px 22px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:12px;
+    background:rgba(255,255,255,.055);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  }
+  #note .statement-panel-mark{
+    position:absolute;
+    top:16px;
+    right:18px;
+    color:#c79a5a;
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:24px;
+    opacity:.9;
+  }
+  #note .statement-panel p{
+    margin:0;
+    padding-right:32px;
+    color:#d7d0c6;
+    font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+    font-size:16px;
+    line-height:1.78;
+  }
+  #note .statement-caption{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:22px;
+    color:#b9b1a5;
+    font-size:12px;
+  }
+  #note .statement-caption span{
+    display:block;
+    width:34px;
+    height:1px;
+    background:#c79a5a;
+    flex:0 0 auto;
+  }
+  @media (max-width:1020px){
+    #note .statement-grid{grid-template-columns:1fr;gap:28px}
+    #note .statement-divider{height:1px;width:100%}
+    #note .statement-panel{align-self:stretch}
+  }
+  @media (max-width:680px){
+    #note.statement-section{padding:54px 0 58px}
+    #note.statement-section::after{font-size:190px;right:-28px;bottom:-48px}
+    #note .statement-heading{margin-bottom:34px}
+    #note .statement-eyebrow{font-size:10px;letter-spacing:.25em}
+    #note .statement-heading h2{font-size:29px}
+    #note .statement-grid{gap:24px}
+    #note .statement-mark{height:34px;font-size:48px}
+    #note .note-quote{margin:10px 0 18px;font-size:24px;line-height:1.5}
+    #note .statement-credit{font-size:11px}
+    #note .statement-panel{padding:22px 20px 18px;border-radius:14px}
+    #note .statement-panel p{padding-right:26px;font-size:15px;line-height:1.78}
+    #note .statement-caption{margin-top:18px;font-size:11px}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -1558,16 +1696,27 @@
       </div>
     </section>
 
-    <section id="note">
-      <div class="wrap note">
-        <article class="card">
-          <p class="note-quote" id="noteQuote">“흙의 그릇 위에 금강경 구절을 손끝으로 풀어내며, 글씨가 가진 기운과 마음의 결을 작품으로 담아내고 있습니다.”</p>
-        </article>
-        <article class="card">
-          <p id="noteBody">
-            저에게 서(書)·화(畫)·각(刻)은 각각 다른 언어였으나, 그 끝에서 마주한 것은 결국 ‘깨지지 않는 마음’이라는 하나의 본질이었습니다.
-          </p>
-        </article>
+    <section id="note" class="statement-section">
+      <div class="wrap">
+        <div class="statement-heading">
+          <div class="statement-eyebrow">ARTIST STATEMENT</div>
+          <h2>예술 철학</h2>
+        </div>
+        <div class="statement-grid">
+          <article class="statement-quote">
+            <div class="statement-mark">“</div>
+            <p class="note-quote" id="noteQuote">“흙의 그릇 위에 금강경 구절을 손끝으로 풀어내며, 글씨가 가진 기운과 마음의 결을 작품으로 담아내고 있습니다.”</p>
+            <div class="statement-credit">나에게 · 전각가 이원주 작가노트 中</div>
+          </article>
+          <div class="statement-divider" aria-hidden="true"></div>
+          <article class="statement-panel">
+            <div class="statement-panel-mark" aria-hidden="true">刻</div>
+            <p id="noteBody">
+              저에게 서(書)·화(畫)·각(刻)은 각각 다른 언어였으나, 그 끝에서 마주한 것은 결국 ‘깨지지 않는 마음’이라는 하나의 본질이었습니다.
+            </p>
+            <div class="statement-caption"><span></span>지필묵(紙筆墨)에서 토혼(土魂)으로의 확장</div>
+          </article>
+        </div>
       </div>
     </section>
 
