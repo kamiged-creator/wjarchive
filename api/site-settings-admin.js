@@ -187,15 +187,14 @@ module.exports = async function handler(req, res) {
           .filter(item => !requestedKeys.includes(keyOf(item)))
           .map(keyOf);
 
-        const mergedItems = currentItems
-          .filter(item => !removedKeys.includes(keyOf(item)));
-
-        for (const item of addedItems) {
-          const itemKey = keyOf(item);
-          if (!mergedItems.some(existing => keyOf(existing) === itemKey)) {
-            mergedItems.push(item);
-          }
-        }
+        const addedKeys = addedItems.map(keyOf);
+        const mergedItems = [
+          ...addedItems,
+          ...currentItems.filter(item => {
+            const itemKey = keyOf(item);
+            return !removedKeys.includes(itemKey) && !addedKeys.includes(itemKey);
+          })
+        ];
 
         resolvedValue = { ...currentSectionValue, ...value, items: mergedItems };
       } else {
