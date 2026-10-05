@@ -1849,6 +1849,97 @@
   }
 </style>
 
+<style id="about-monograph-layout-v1">
+  @media (min-width:861px){
+    #about{padding:76px 0 82px;background:#fbfaf7}
+    #about .wrap{max-width:1240px}
+    #about .section-head{
+      display:flex;align-items:flex-end;justify-content:space-between;gap:28px;
+      margin-bottom:46px;padding-bottom:18px;border-bottom:1px solid rgba(31,26,23,.11);text-align:left;
+    }
+    #about .section-head > div:first-child::before{
+      content:"MASTER OF MODERN INK & SEAL";
+      display:block;margin-bottom:7px;color:#b08652;
+      font-size:10px;font-weight:800;letter-spacing:.26em;
+    }
+    #about .section-title{
+      margin:0;text-align:left;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+      font-size:36px;line-height:1.18;font-weight:600;letter-spacing:-.045em;
+    }
+    #about .about-monograph{
+      padding-bottom:4px;color:#9b9187;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:10px;letter-spacing:.16em;white-space:nowrap;
+    }
+    #about .about-profile{
+      grid-template-columns:minmax(360px,460px) minmax(0,1fr);
+      gap:64px;align-items:stretch;
+    }
+    #about .artist-photo-card{
+      min-height:0;border-radius:14px;border-color:rgba(31,26,23,.10);
+      box-shadow:0 18px 46px rgba(31,26,23,.09);
+    }
+    #about .artist-photo{min-height:570px;height:100%;background-position:center 16%}
+    #about .artist-copy{
+      display:flex;flex-direction:column;justify-content:center;gap:0;min-width:0;
+    }
+    #about .about-audio-row{align-self:flex-end;margin:0 0 10px}
+    #about .about-audio-btn{
+      min-height:34px;height:34px;padding:0 10px;border-radius:999px;
+      background:transparent;box-shadow:none;font-size:11px;color:#81786f;
+    }
+    #about .artist-copy .card{
+      position:relative;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;
+    }
+    #about .artist-copy .card + .card{margin-top:28px;padding-top:28px}
+    #about .artist-copy .card + .card::before{
+      content:"";position:absolute;top:0;left:0;width:46px;height:1px;background:#c8ad82;
+    }
+    #about .artist-copy .card p{
+      margin:0;color:#4f4a43;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+      font-size:17px;line-height:1.95;letter-spacing:-.015em;
+    }
+    #about #aboutParagraph1::first-letter{
+      float:left;margin:2px 8px 0 0;color:#1f1a17;font-size:42px;line-height:.9;font-weight:700;
+    }
+    #about .discipline-grid{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:34px;
+    }
+    #about .discipline-card{
+      min-height:104px;padding:18px 18px 16px;border:1px solid rgba(31,26,23,.09);
+      border-radius:9px;background:rgba(255,255,255,.52);
+    }
+    #about .discipline-card span{
+      display:block;margin-bottom:8px;color:#b08652;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:9px;letter-spacing:.09em;
+    }
+    #about .discipline-card strong{
+      display:block;color:#2c2824;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+      font-size:15px;font-weight:650;
+    }
+    #about .discipline-card p{margin:8px 0 0;color:#82796f;font-size:11px;line-height:1.5}
+  }
+  @media (max-width:860px){
+    #about .about-monograph{display:none}
+    #about .discipline-grid{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px;
+    }
+    #about .discipline-card{
+      padding:12px 9px;border:1px solid rgba(31,26,23,.09);
+      border-radius:12px;background:rgba(255,255,255,.55);
+    }
+    #about .discipline-card span{
+      display:block;margin-bottom:5px;color:#b08652;font-size:8px;letter-spacing:.04em;
+    }
+    #about .discipline-card strong{
+      display:block;font-family:"Noto Serif KR","Nanum Myeongjo",serif;
+      font-size:12px;line-height:1.35;
+    }
+    #about .discipline-card p{display:none}
+  }
+</style>
+
 </head>
 <body id="top" class="is-loading">
   <header class="topbar">
@@ -1916,6 +2007,7 @@
             <h2 class="section-title" id="aboutSectionTitle">작가 소개</h2>
             <p class="section-copy" id="aboutSectionCopy">이원주 작가의 작업 방향과 시선을 담는 소개 영역입니다.</p>
           </div>
+          <div class="about-monograph">LEE WONJU ARTIST MONOGRAPH</div>
         </div>
         <div class="about-profile">
           <article class="artist-photo-card" aria-label="작가 소개 이미지">
@@ -1938,6 +2030,23 @@
                 이원주는 수묵, 서예, 전각이라는 동양 예술의 정수를 현대적 미감으로 승화시켰다는 평을 받는 작가이다. 그의 예술 세계는 지필묵(紙筆墨)이라는 평면적 매체를 넘어 옹기와 같은 입체적 ‘토혼’으로 확장되는 것이 특징이다.
               </p>
             </article>
+            <div class="discipline-grid" aria-label="작가 주요 분야">
+              <div class="discipline-card">
+                <span>DISCIPLINE 01</span>
+                <strong>서예 (書藝)</strong>
+                <p>묵직한 필선과 기운생동의 여백</p>
+              </div>
+              <div class="discipline-card">
+                <span>DISCIPLINE 02</span>
+                <strong>전각 (篆刻)</strong>
+                <p>돌과 칼의 응집된 칼끝 미학</p>
+              </div>
+              <div class="discipline-card">
+                <span>DISCIPLINE 03</span>
+                <strong>토혼 (土魂)</strong>
+                <p>옹기 표면에 아로새긴 금빛 경구</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
