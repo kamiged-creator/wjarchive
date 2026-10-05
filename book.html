@@ -52,6 +52,7 @@
     @media(max-width:720px){
       .wrap{padding:0 18px}.topin{height:58px}.hero{padding:16px 0 16px}
       .hero h1{margin:6px 0 6px;font-size:36px;line-height:1.16;letter-spacing:-.045em}
+      .hero h1.long-title{font-size:33px;line-height:1.18}
       .hero p{line-height:1.6}
       .books{padding:14px 0 44px;gap:22px}
       .book{grid-template-columns:1fr;gap:16px;padding:14px;border-radius:20px}
@@ -140,7 +141,10 @@
       const title=book.title||'제목 미정';
       document.title=title+' | 이원주';
       const heroTitle=document.getElementById('bookHeroTitle');
-      if(heroTitle) heroTitle.textContent=title;
+      if(heroTitle){
+        heroTitle.textContent=title;
+        heroTitle.classList.toggle('long-title',title.length>=18);
+      }
 
       const prevHtml=Number.isInteger(nav.prevIndex)
         ? '<a class="prev book-step" data-book-index="'+nav.prevIndex+'" href="'+esc(nav.prevHref)+'">← 이전 책</a>'
