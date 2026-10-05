@@ -1035,10 +1035,11 @@
       }
 
       if (!state.image){
-        ctx.fillStyle = 'rgba(255,255,255,.5)';
-        ctx.font = '600 14px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,.78)';
+        ctx.font = '700 18px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('4:5 crop area', state.crop.x + state.crop.w / 2, state.crop.y + state.crop.h / 2);
+        const label = els.outputModeSelect?.value === 'book-cover' ? '책표지 4:5 영역' : '원본 비율 영역';
+        ctx.fillText(label, state.crop.x + state.crop.w / 2, state.crop.y + state.crop.h / 2);
       }
       ctx.restore();
     }
