@@ -1948,6 +1948,9 @@
         const groupStart=state.currentPage<=5?1:6;
         const groupEnd=Math.min(groupStart+4,totalPages);
         let html='';
+        if(groupStart>1){
+          html+=`<button class="page-btn next-page" type="button" data-page="${groupStart-1}">이전</button>`;
+        }
         for(let page=groupStart;page<=groupEnd;page+=1){
           html+=`<button class="page-btn ${page===state.currentPage?'active':''}" type="button" data-page="${page}">${page}</button>`;
         }
