@@ -495,27 +495,36 @@
     }
     .pinch-gesture{
       position:relative;
-      width:42px;
-      height:24px;
-      flex:0 0 42px;
+      width:52px;
+      height:30px;
+      flex:0 0 52px;
     }
     .pinch-gesture::before,
     .pinch-gesture::after{
       content:"";
       position:absolute;
-      top:7px;
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      background:#fff;
-      box-shadow:0 0 0 4px rgba(255,255,255,.16);
+      top:5px;
+      width:12px;
+      height:22px;
+      border-radius:8px 8px 6px 6px;
+      background:linear-gradient(180deg,#fff 0%,#f2eee9 100%);
+      border:1px solid rgba(255,255,255,.72);
+      box-shadow:0 0 0 3px rgba(255,255,255,.12);
       animation:pinchGuide 1.25s ease-in-out infinite;
     }
-    .pinch-gesture::before{left:15px;--pinch-x:-11px}
-    .pinch-gesture::after{right:15px;--pinch-x:11px}
+    .pinch-gesture::before{
+      left:18px;
+      --pinch-x:-13px;
+      transform-origin:bottom center;
+    }
+    .pinch-gesture::after{
+      right:18px;
+      --pinch-x:13px;
+      transform-origin:bottom center;
+    }
     @keyframes pinchGuide{
-      0%,100%{transform:translateX(0);opacity:.72}
-      50%{transform:translateX(var(--pinch-x));opacity:1}
+      0%,100%{transform:translateX(0) rotate(0deg);opacity:.75}
+      50%{transform:translateX(var(--pinch-x)) rotate(calc(var(--pinch-x) / 13 * 8deg));opacity:1}
     }
     @media (prefers-reduced-motion:reduce){
       .pinch-gesture::before,
