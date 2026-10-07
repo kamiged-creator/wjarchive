@@ -2227,12 +2227,24 @@
       }
       viewer.classList.add('open');
       document.body.classList.add('viewer-open');
+      const topBadge = qs('#toTopBadge');
+      if(topBadge){
+        topBadge.classList.remove('show');
+        topBadge.hidden = true;
+        topBadge.style.display = 'none';
+      }
       viewer.scrollTop = 0;
     }
     function closeViewer(){
       closeImageZoom();
       qs('#viewer').classList.remove('open');
       document.body.classList.remove('viewer-open');
+      const topBadge = qs('#toTopBadge');
+      if(topBadge){
+        topBadge.hidden = false;
+        topBadge.style.display = '';
+      }
+      window.dispatchEvent(new Event('scroll'));
     }
     const imageZoomState = {
       scale:1,
@@ -2464,7 +2476,11 @@
       const updateBadge = () => {
         const isMobile = window.matchMedia('(max-width: 680px)').matches;
         const footerVisible = !!footer && footer.getBoundingClientRect().top < window.innerHeight;
-        const shouldShow = window.scrollY > 500 && !(isMobile && footerVisible);
+        const viewerOpen = !!qs('#viewer')?.classList.contains('open');
+        const imageZoomOpen = !!qs('#imageZoom')?.classList.contains('open');
+        const shouldShow = window.scrollY > 500 && !(isMobile && footerVisible) && !viewerOpen && !imageZoomOpen;
+        badge.hidden = viewerOpen || imageZoomOpen;
+        badge.style.display = (viewerOpen || imageZoomOpen) ? 'none' : '';
         badge.classList.toggle('show', shouldShow);
       };
 
