@@ -436,30 +436,90 @@
       max-height:100%;
       margin:0 auto;
       cursor:grab;
-      transform:translate(-50%, -50%) scale(1);
+      transform:translate(-50%, -50%) translate3d(0,0,0) scale(1);
       transform-origin:center center;
       user-select:none;
       -webkit-user-select:none;
       -webkit-user-drag:none;
+      will-change:transform;
     }
-    .image-zoom-img.is-dragging{
-      cursor:grabbing;
-    }
+    .image-zoom-img.is-dragging{cursor:grabbing}
     .image-zoom-close{
       position:fixed;
       top:14px;
-      right:14px;
-      z-index:1;
-      min-width:46px;
+      right:auto;
+      left:calc(100vw - 76px);
+      z-index:4;
+      min-width:54px;
       height:46px;
       padding:0 14px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.22);
+      background:rgba(255,255,255,.94);
       color:#171412;
       font-weight:900;
       cursor:pointer;
-      box-shadow:0 10px 28px rgba(0,0,0,.22);
+      box-shadow:0 10px 28px rgba(0,0,0,.24);
+      white-space:nowrap;
+    }
+    .image-zoom-hint{
+      position:fixed;
+      left:50%;
+      bottom:max(26px, env(safe-area-inset-bottom, 0px));
+      z-index:3;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:11px 15px;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:999px;
+      background:rgba(20,17,15,.78);
+      color:#fff;
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:-.02em;
+      box-shadow:0 10px 28px rgba(0,0,0,.28);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform:translate(-50%,10px);
+      transition:opacity .2s ease, transform .2s ease, visibility .2s ease;
+      white-space:nowrap;
+    }
+    .image-zoom-hint.show{
+      opacity:1;
+      visibility:visible;
+      transform:translate(-50%,0);
+    }
+    .pinch-gesture{
+      position:relative;
+      width:42px;
+      height:24px;
+      flex:0 0 42px;
+    }
+    .pinch-gesture::before,
+    .pinch-gesture::after{
+      content:"";
+      position:absolute;
+      top:7px;
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:0 0 0 4px rgba(255,255,255,.16);
+      animation:pinchGuide 1.25s ease-in-out infinite;
+    }
+    .pinch-gesture::before{left:15px;--pinch-x:-11px}
+    .pinch-gesture::after{right:15px;--pinch-x:11px}
+    @keyframes pinchGuide{
+      0%,100%{transform:translateX(0);opacity:.72}
+      50%{transform:translateX(var(--pinch-x));opacity:1}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .pinch-gesture::before,
+      .pinch-gesture::after{animation:none}
     }
 
     .admin-overlay{
@@ -1612,6 +1672,10 @@
     <div class="image-zoom-stage" id="imageZoomStage">
       <img class="image-zoom-img" id="imageZoomImg" alt="확대 작품 이미지">
     </div>
+    <div class="image-zoom-hint" id="imageZoomHint" role="status" aria-live="polite">
+      <span class="pinch-gesture" aria-hidden="true"></span>
+      <span>두 손가락으로 확대·축소</span>
+    </div>
   </div>
 
   <div class="site-popup" id="sitePopup" aria-hidden="true">
@@ -2164,17 +2228,116 @@
       closeImageZoom();
       qs('#viewer').classList.remove('open');
     }
+    const imageZoomState = {
+      scale:1,
+      x:0,
+      y:0,
+      startScale:1,
+      startDistance:0,
+      startMidX:0,
+      startMidY:0,
+      startX:0,
+      startY:0,
+      dragPointerId:null,
+      dragStartX:0,
+      dragStartY:0,
+      dragBaseX:0,
+      dragBaseY:0,
+      pointers:new Map()
+    };
+    let imageZoomHintTimer = null;
+
+    function clampImageZoomScale(value){
+      return Math.min(4, Math.max(1, value));
+    }
+    function applyImageZoomTransform(){
+      const img = qs('#imageZoomImg');
+      if(!img) return;
+      img.style.transform = `translate(-50%, -50%) translate3d(${imageZoomState.x}px,${imageZoomState.y}px,0) scale(${imageZoomState.scale})`;
+      img.classList.toggle('is-dragging', imageZoomState.scale > 1 && imageZoomState.pointers.size > 0);
+    }
+    function resetImageZoomTransform(){
+      imageZoomState.scale = 1;
+      imageZoomState.x = 0;
+      imageZoomState.y = 0;
+      imageZoomState.startScale = 1;
+      imageZoomState.startDistance = 0;
+      imageZoomState.pointers.clear();
+      imageZoomState.dragPointerId = null;
+      applyImageZoomTransform();
+    }
+    function positionImageZoomClose(){
+      const zoom = qs('#imageZoom');
+      const img = qs('#imageZoomImg');
+      const button = qs('#imageZoomClose');
+      if(!zoom?.classList.contains('open') || !img || !button || !img.complete) return;
+      const rect = img.getBoundingClientRect();
+      if(!rect.width || !rect.height) return;
+      const buttonWidth = button.offsetWidth || 54;
+      const safe = 10;
+      const top = Math.max(10, rect.top + safe);
+      const left = Math.min(
+        window.innerWidth - buttonWidth - 10,
+        Math.max(10, rect.right - buttonWidth - safe)
+      );
+      button.style.top = `${top}px`;
+      button.style.left = `${left}px`;
+      button.style.right = 'auto';
+    }
+    function showImageZoomHintOnce(){
+      const hint = qs('#imageZoomHint');
+      if(!hint) return;
+      let seen = false;
+      try{ seen = localStorage.getItem('wjarchive:imageZoomHintSeen:v1') === '1'; }catch(e){}
+      if(seen) return;
+      hint.classList.add('show');
+      try{ localStorage.setItem('wjarchive:imageZoomHintSeen:v1','1'); }catch(e){}
+      if(imageZoomHintTimer) window.clearTimeout(imageZoomHintTimer);
+      imageZoomHintTimer = window.setTimeout(() => hint.classList.remove('show'), 2800);
+    }
     function openImageZoom(){
       const viewer = qs('#viewer');
       const viewerImg = qs('#viewerImg');
+      const zoom = qs('#imageZoom');
+      const zoomImg = qs('#imageZoomImg');
       if(!viewer.classList.contains('open') || viewer.classList.contains('loading') || !viewerImg.src) return;
-      qs('#imageZoomImg').src = viewerImg.currentSrc || viewerImg.src;
-      qs('#imageZoom').classList.add('open');
-      qs('#imageZoom').setAttribute('aria-hidden', 'false');
+      resetImageZoomTransform();
+      zoomImg.src = viewerImg.currentSrc || viewerImg.src;
+      zoom.classList.add('open');
+      zoom.setAttribute('aria-hidden', 'false');
+      if(zoomImg.complete){
+        requestAnimationFrame(() => {
+          positionImageZoomClose();
+          showImageZoomHintOnce();
+        });
+      }
     }
     function closeImageZoom(){
-      qs('#imageZoom').classList.remove('open');
-      qs('#imageZoom').setAttribute('aria-hidden', 'true');
+      const zoom = qs('#imageZoom');
+      const hint = qs('#imageZoomHint');
+      if(imageZoomHintTimer) window.clearTimeout(imageZoomHintTimer);
+      hint?.classList.remove('show');
+      resetImageZoomTransform();
+      zoom.classList.remove('open');
+      zoom.setAttribute('aria-hidden', 'true');
+    }
+    function imageZoomDistance(a,b){
+      return Math.hypot(a.x-b.x, a.y-b.y);
+    }
+    function imageZoomMidpoint(a,b){
+      return {x:(a.x+b.x)/2, y:(a.y+b.y)/2};
+    }
+    function startImageZoomPinch(){
+      if(imageZoomState.pointers.size < 2) return;
+      const points = Array.from(imageZoomState.pointers.values()).slice(0,2);
+      const mid = imageZoomMidpoint(points[0], points[1]);
+      imageZoomState.startDistance = Math.max(1, imageZoomDistance(points[0], points[1]));
+      imageZoomState.startScale = imageZoomState.scale;
+      imageZoomState.startMidX = mid.x;
+      imageZoomState.startMidY = mid.y;
+      imageZoomState.startX = imageZoomState.x;
+      imageZoomState.startY = imageZoomState.y;
+      qs('#imageZoomHint')?.classList.remove('show');
     }
 
     function bindAutoHideTopbar(){
@@ -2308,6 +2471,91 @@
     qs('#viewerImg').addEventListener('click', openImageZoom);
     qs('#imageZoomClose').addEventListener('click', closeImageZoom);
     qs('#imageZoom').addEventListener('click', e => { if(e.target.id === 'imageZoom') closeImageZoom(); });
+    qs('#imageZoomImg').addEventListener('load', () => {
+      resetImageZoomTransform();
+      requestAnimationFrame(() => {
+        positionImageZoomClose();
+        showImageZoomHintOnce();
+      });
+    });
+    window.addEventListener('resize', () => {
+      if(qs('#imageZoom')?.classList.contains('open') && imageZoomState.scale === 1){
+        requestAnimationFrame(positionImageZoomClose);
+      }
+    }, {passive:true});
+
+    const imageZoomStage = qs('#imageZoomStage');
+    if(imageZoomStage){
+      imageZoomStage.addEventListener('pointerdown', e => {
+        if(!qs('#imageZoom')?.classList.contains('open')) return;
+        try{ imageZoomStage.setPointerCapture(e.pointerId); }catch(err){}
+        imageZoomState.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+        if(imageZoomState.pointers.size === 2){
+          startImageZoomPinch();
+          return;
+        }
+        if(imageZoomState.pointers.size === 1){
+          imageZoomState.dragPointerId = e.pointerId;
+          imageZoomState.dragStartX = e.clientX;
+          imageZoomState.dragStartY = e.clientY;
+          imageZoomState.dragBaseX = imageZoomState.x;
+          imageZoomState.dragBaseY = imageZoomState.y;
+        }
+      });
+
+      imageZoomStage.addEventListener('pointermove', e => {
+        if(!imageZoomState.pointers.has(e.pointerId)) return;
+        imageZoomState.pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+
+        if(imageZoomState.pointers.size >= 2){
+          const points = Array.from(imageZoomState.pointers.values()).slice(0,2);
+          const distance = Math.max(1, imageZoomDistance(points[0], points[1]));
+          const mid = imageZoomMidpoint(points[0], points[1]);
+          imageZoomState.scale = clampImageZoomScale(
+            imageZoomState.startScale * (distance / imageZoomState.startDistance)
+          );
+          imageZoomState.x = imageZoomState.startX + (mid.x - imageZoomState.startMidX);
+          imageZoomState.y = imageZoomState.startY + (mid.y - imageZoomState.startMidY);
+          if(imageZoomState.scale <= 1.01){
+            imageZoomState.scale = 1;
+            imageZoomState.x = 0;
+            imageZoomState.y = 0;
+          }
+          applyImageZoomTransform();
+          e.preventDefault();
+          return;
+        }
+
+        if(imageZoomState.scale > 1 && imageZoomState.dragPointerId === e.pointerId){
+          imageZoomState.x = imageZoomState.dragBaseX + (e.clientX - imageZoomState.dragStartX);
+          imageZoomState.y = imageZoomState.dragBaseY + (e.clientY - imageZoomState.dragStartY);
+          applyImageZoomTransform();
+          e.preventDefault();
+        }
+      });
+
+      const finishImageZoomPointer = e => {
+        imageZoomState.pointers.delete(e.pointerId);
+        try{ imageZoomStage.releasePointerCapture(e.pointerId); }catch(err){}
+        if(imageZoomState.pointers.size >= 2){
+          startImageZoomPinch();
+        }else if(imageZoomState.pointers.size === 1){
+          const entry = Array.from(imageZoomState.pointers.entries())[0];
+          imageZoomState.dragPointerId = entry[0];
+          imageZoomState.dragStartX = entry[1].x;
+          imageZoomState.dragStartY = entry[1].y;
+          imageZoomState.dragBaseX = imageZoomState.x;
+          imageZoomState.dragBaseY = imageZoomState.y;
+        }else{
+          imageZoomState.dragPointerId = null;
+          if(imageZoomState.scale <= 1.01) resetImageZoomTransform();
+          else applyImageZoomTransform();
+        }
+      };
+      imageZoomStage.addEventListener('pointerup', finishImageZoomPointer);
+      imageZoomStage.addEventListener('pointercancel', finishImageZoomPointer);
+    }
+
     window.addEventListener('keydown', e => {
       if(e.key === 'Escape'){
         if(qs('#sitePopup')?.classList.contains('open')) closeSitePopup();
