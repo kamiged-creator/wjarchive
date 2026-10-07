@@ -2287,11 +2287,13 @@
     function showImageZoomHintOnce(){
       const hint = qs('#imageZoomHint');
       if(!hint) return;
-      let seen = false;
-      try{ seen = localStorage.getItem('wjarchive:imageZoomHintSeen:v2') === '1'; }catch(e){}
-      if(seen) return;
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+      let lastShown = '';
+      try{ lastShown = localStorage.getItem('wjarchive:imageZoomHintDaily:v1') || ''; }catch(e){}
+      if(lastShown === today) return;
       hint.classList.add('show');
-      try{ localStorage.setItem('wjarchive:imageZoomHintSeen:v2','1'); }catch(e){}
+      try{ localStorage.setItem('wjarchive:imageZoomHintDaily:v1', today); }catch(e){}
       if(imageZoomHintTimer) window.clearTimeout(imageZoomHintTimer);
       imageZoomHintTimer = window.setTimeout(() => hint.classList.remove('show'), 2800);
     }
