@@ -2226,11 +2226,13 @@
           : '';
       }
       viewer.classList.add('open');
+      document.body.classList.add('viewer-open');
       viewer.scrollTop = 0;
     }
     function closeViewer(){
       closeImageZoom();
       qs('#viewer').classList.remove('open');
+      document.body.classList.remove('viewer-open');
     }
     const imageZoomState = {
       scale:1,
