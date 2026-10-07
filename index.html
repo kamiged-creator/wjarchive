@@ -2297,10 +2297,10 @@
       const hint = qs('#imageZoomHint');
       if(!hint) return;
       let seen = false;
-      try{ seen = localStorage.getItem('wjarchive:imageZoomHintSeen:v1') === '1'; }catch(e){}
+      try{ seen = localStorage.getItem('wjarchive:imageZoomHintSeen:v2') === '1'; }catch(e){}
       if(seen) return;
       hint.classList.add('show');
-      try{ localStorage.setItem('wjarchive:imageZoomHintSeen:v1','1'); }catch(e){}
+      try{ localStorage.setItem('wjarchive:imageZoomHintSeen:v2','1'); }catch(e){}
       if(imageZoomHintTimer) window.clearTimeout(imageZoomHintTimer);
       imageZoomHintTimer = window.setTimeout(() => hint.classList.remove('show'), 2800);
     }
