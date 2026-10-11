@@ -261,7 +261,7 @@
 
   const KEY='bokjaksoChatSessionV1';
   const SESSIONS_KEY='bokjaksoChatSessionsV2';
-  const REMEMBER_MS=30*24*60*60*1000;
+  const REMEMBER_MS=365*24*60*60*1000;
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const THEME_KEY='bokjaksoChatThemeV1';
   const els={
@@ -691,7 +691,7 @@
     showJoin(true);
     if(code)els.roomCode.value=code;
     els.roomPassword.value='';
-    els.joinStatus.textContent='이 방은 30일 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
+    els.joinStatus.textContent='이 방은 이 기기에서 1년 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
   }
   function openFirstEntry(room){
     els.roomCode.value=String(room.code||'').toUpperCase();
