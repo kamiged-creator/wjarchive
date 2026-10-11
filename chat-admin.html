@@ -55,23 +55,23 @@
   function token(){return sessionStorage.getItem(ADMIN_KEY)||''}
   async function api(payload){
     const t=token();if(!t)throw new Error('먼저 관리자 페이지에서 로그인해 주세요.');
-    const r=await fetch('/api/chat-admin',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify(payload)});
+    const r=await fetch('/api/content-admin',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify(payload)});
     const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'처리하지 못했습니다.');return d;
   }
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   async function load(){
     try{
-      const d=await api({action:'listRooms'});
+      const d=await api({action:'chat-list-rooms'});
       if(!d.rooms.length){roomsEl.innerHTML='<div class="empty">아직 만든 채팅방이 없습니다.</div>';return}
       roomsEl.innerHTML=d.rooms.map(r=>'<div class="room"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+(r.is_active?'입장 가능':'닫힘')+'</div></div><div class="actions"><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button></div></div>').join('');
-      roomsEl.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',async()=>{await api({action:'setActive',roomId:b.dataset.toggle,isActive:b.dataset.active!=='true'});load()}));
-      roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (4자 이상)');if(!p)return;try{await api({action:'changePassword',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.')}catch(e){alert(e.message)}}));
+      roomsEl.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',async()=>{await api({action:'chat-set-active',roomId:b.dataset.toggle,isActive:b.dataset.active!=='true'});load()}));
+      roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (4자 이상)');if(!p)return;try{await api({action:'chat-change-password',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.')}catch(e){alert(e.message)}}));
     }catch(e){roomsEl.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
   }
   document.getElementById('createBtn').addEventListener('click',async()=>{
     statusEl.textContent='';
     try{
-      await api({action:'createRoom',title:document.getElementById('title').value,code:document.getElementById('code').value,password:document.getElementById('password').value});
+      await api({action:'chat-create-room',title:document.getElementById('title').value,code:document.getElementById('code').value,password:document.getElementById('password').value});
       document.getElementById('title').value='';document.getElementById('code').value='';document.getElementById('password').value='';
       statusEl.style.color='var(--ok)';statusEl.textContent='채팅방을 만들었습니다.';load();
     }catch(e){statusEl.style.color='var(--danger)';statusEl.textContent=e.message}
