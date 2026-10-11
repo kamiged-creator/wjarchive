@@ -177,8 +177,11 @@ async function handleChat(body, res) {
     });
     const after = Math.max(0, Number(body.afterId) || 0);
     const since = after > 0 ? `&id=gt.${after}` : '';
+    // Room entry must show the newest messages, not the oldest 100 in the room.
+    // Polling after a known id stays chronological for correct append order.
+    const initialHistory = after === 0;
     const messages = await supabaseRequest(
-      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.asc&limit=100`
+      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.${initialHistory ? 'desc' : 'asc'}&limit=100`
     );
     const changedSince = clean(body.changedSince);
     let deletedIds = [];
@@ -194,7 +197,7 @@ async function handleChat(body, res) {
     );
     res.status(200).json({
       ok: true,
-      messages: Array.isArray(messages) ? messages : [],
+      messages: Array.isArray(messages) ? (initialHistory ? messages.reverse() : messages) : [],
       deletedIds,
       activeCount: Array.isArray(active) ? active.length : 0,
       syncAt: now
