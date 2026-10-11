@@ -261,6 +261,23 @@ function chatPasswordHash(password, salt) {
   return crypto.scryptSync(String(password || ''), String(salt || ''), 64).toString('hex');
 }
 
+async function deleteImageKitFile(fileId) {
+  const id = normalize(fileId);
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  if (!id || !privateKey) return false;
+  try {
+    const response = await fetch(`https://api.imagekit.io/v1/files/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(privateKey + ':').toString('base64')
+      }
+    });
+    return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function handleChatAdmin(body, res) {
   const action = normalize(body.action);
 
@@ -299,6 +316,12 @@ async function handleChatAdmin(body, res) {
     if (!roomId) {
       res.status(400).json({ message: '삭제할 방 정보가 없습니다.' });
       return;
+    }
+    const images = await db(
+      `chat_messages?room_id=eq.${encodeURIComponent(roomId)}&message_type=eq.image&image_file_id=not.is.null&select=image_file_id`
+    );
+    if (Array.isArray(images) && images.length) {
+      await Promise.all(images.map(row => deleteImageKitFile(row.image_file_id)));
     }
     await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
       method: 'DELETE',
