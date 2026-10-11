@@ -75,7 +75,7 @@ async function handleChat(body, res) {
       return;
     }
 
-    const rooms = await supabaseRequest(`chat_rooms?code=eq.${encodeURIComponent(roomCode)}&is_active=eq.true&select=id,title,code,password_salt,password_hash`);
+    const rooms = await supabaseRequest(`chat_rooms?code=eq.${encodeURIComponent(roomCode)}&is_active=eq.true&is_archived=eq.false&select=id,title,code,password_salt,password_hash`);
     const room = Array.isArray(rooms) ? rooms[0] : null;
     if (!room) {
       res.status(404).json({ message: '사용할 수 있는 채팅방이 없습니다.' });
@@ -112,6 +112,12 @@ async function handleChat(body, res) {
   const member = await getChatMember(body.memberId, body.sessionToken);
   if (!member || member.is_blocked) {
     res.status(401).json({ message: member?.is_blocked ? '채팅방 이용이 제한되었습니다.' : '채팅방에 다시 입장해 주세요.' });
+    return;
+  }
+  const roomStateRows = await supabaseRequest(`chat_rooms?id=eq.${encodeURIComponent(member.room_id)}&select=is_active,is_archived&limit=1`);
+  const roomState = Array.isArray(roomStateRows) ? roomStateRows[0] : null;
+  if (!roomState || roomState.is_archived || !roomState.is_active) {
+    res.status(403).json({ message: roomState?.is_archived ? '보관된 채팅방입니다.' : '현재 닫혀 있는 채팅방입니다.' });
     return;
   }
 
