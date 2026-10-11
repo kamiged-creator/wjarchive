@@ -67,8 +67,10 @@
       body.chat-active{height:100dvh;overflow:hidden}
       .page{height:100dvh;min-height:100dvh;overflow:hidden}
       header{height:60px;flex:0 0 60px}.sub{display:none}
-      main{padding:12px 8px 14px;min-height:0;overflow:hidden}.card{border-radius:20px}
-      .join{padding:24px 18px}.chat{height:calc(100dvh - 86px);max-height:calc(100dvh - 86px);min-height:0;overflow:hidden}
+      main{width:100%;padding:10px 8px max(8px,env(safe-area-inset-bottom));margin:0;flex:1;min-height:0;overflow:hidden;display:flex}
+      .card{border-radius:20px}
+      .join{padding:24px 18px;width:100%}
+      .chat{width:100%;height:100%;max-height:none;min-height:0;overflow:hidden}
       .chat-head{align-items:flex-start;gap:10px;padding:13px 12px}
       .room-title{font-size:15px;line-height:1.25}
       .room-meta{font-size:11px;margin-top:4px}
@@ -76,7 +78,8 @@
       .invite{padding:9px 11px;font-size:11px}
       .leave{padding:8px 9px;font-size:11px}
       .delete-room{padding:7px 8px;font-size:10px}
-      .messages{padding:14px 11px}.bubble{max-width:84%}
+      .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain}.bubble{max-width:84%}
+      .composer{flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom))}
     }
     @media(max-width:390px){
       .chat-head{display:block}
