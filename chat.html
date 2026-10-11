@@ -484,7 +484,7 @@
       const remembered=getRememberedSessions();
       els.publicRooms.innerHTML=rooms.map(room=>{
         const known=Boolean(remembered[String(room.code).toUpperCase()]);
-        return '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+'</div><div class="public-room-code">#'+esc(room.code)+(known?' · 이전 입장':'')+'</div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
+        return '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+(known?' <span style="font-size:11px;color:var(--muted);font-weight:800">· 이전 입장</span>':'')+'</div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
       }).join('');
       els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
         const code=String(btn.dataset.publicRoom||'').toUpperCase();
@@ -611,7 +611,7 @@
         els.roomCodeField.style.display='none';
         els.joinCredentials.style.display='block';
         els.selectedRoom.style.display='block';
-        els.selectedRoom.textContent='초대받은 채팅방 · #'+invitedRoom;
+        els.selectedRoom.textContent='초대받은 채팅방입니다.';
         els.joinStatus.textContent='비밀번호와 닉네임을 입력해 주세요.';
       }
     }else if(!isAdmin){
