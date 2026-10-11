@@ -145,6 +145,9 @@
     .sound-toggle{flex:0 0 auto;min-height:38px;padding:6px 11px;border:1.5px solid var(--composer-line);border-radius:11px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
     .sound-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
     .sound-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .sound-volume{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;font-size:12px;font-weight:800;color:var(--text)}
+    .sound-volume select{min-height:40px;max-width:112px;padding:0 8px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--paper);color:var(--text);font-size:13px;font-weight:800;cursor:pointer}
+    .sound-volume select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     @media(max-width:560px){
       html,body{height:100%;overscroll-behavior:none}
       body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
@@ -220,7 +223,7 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
-      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
+      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><label class="sound-volume" for="soundVolumeSelect">음량 <select id="soundVolumeSelect" title="뽁짝 알림 소리 크기"><option value="30">작게</option><option value="60">보통</option><option value="100" selected>크게</option></select></label><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -276,6 +279,7 @@
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const THEME_KEY='bokjaksoChatThemeV1';
   const SOUND_KEY='bokjaksoChatSoundV1';
+  const SOUND_VOLUME_KEY='bokjaksoChatSoundVolumeV1';
   const els={
     joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
     roomCode:document.getElementById('roomCode'),roomPassword:document.getElementById('roomPassword'),
@@ -286,7 +290,7 @@
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
-    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),pushToggle:document.getElementById('pushToggle'),
+    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),soundVolumeSelect:document.getElementById('soundVolumeSelect'),pushToggle:document.getElementById('pushToggle'),
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
     adminRoomList:document.getElementById('adminRoomList'),
     adminRooms:document.getElementById('adminRooms'),
@@ -306,7 +310,20 @@
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   let soundEnabled=localStorage.getItem(SOUND_KEY)==='on';
+  const savedSoundVolume=localStorage.getItem(SOUND_VOLUME_KEY);
+  let personalSoundVolume=[30,60,100].includes(Number(savedSoundVolume))?Number(savedSoundVolume):null;
+  let defaultSoundVolume=100;
   let lastSoundAt=0;
+  function effectiveSoundVolume(){return personalSoundVolume??defaultSoundVolume}
+  function displaySoundVolume(){els.soundVolumeSelect.value=String(effectiveSoundVolume())}
+  async function loadSoundDefault(){
+    try{
+      const data=await api({action:'chat-sound-config'});
+      const level=Number(data.level);
+      if([30,60,100].includes(level))defaultSoundVolume=level;
+    }catch(error){console.warn('기본 알림 음량 불러오기 실패',error)}
+    displaySoundVolume();
+  }
   function updateSoundToggle(){
     els.soundToggle.textContent=soundEnabled?'🔔 소리 켜짐':'🔕 소리 켜기';
     els.soundToggle.setAttribute('aria-pressed',String(soundEnabled));
@@ -318,6 +335,7 @@
     const now=Date.now();
     if(!preview&&now-lastSoundAt<2500)return;
     lastSoundAt=now;
+    const volume=effectiveSoundVolume()/100;
     function fallbackChime(){
       try{
         const AudioCtx=window.AudioContext||window.webkitAudioContext;
@@ -330,7 +348,7 @@
           oscillator.type='sine';
           oscillator.frequency.value=freq;
           gain.gain.setValueAtTime(.0001,t+offset);
-          gain.gain.exponentialRampToValueAtTime(.15,t+offset+.015);
+          gain.gain.exponentialRampToValueAtTime(.22*volume,t+offset+.015);
           gain.gain.exponentialRampToValueAtTime(.0001,t+offset+.13);
           oscillator.connect(gain);gain.connect(context.destination);
           oscillator.start(t+offset);oscillator.stop(t+offset+.14);
@@ -346,7 +364,7 @@
       voice.lang='ko-KR';
       voice.rate=1.18;
       voice.pitch=1.2;
-      voice.volume=.85;
+      voice.volume=volume;
       const koreanVoice=window.speechSynthesis.getVoices().find(v=>String(v.lang).toLowerCase().startsWith('ko'));
       if(koreanVoice)voice.voice=koreanVoice;
       voice.onerror=()=>fallbackChime();
@@ -354,6 +372,7 @@
     }catch(_){fallbackChime()}
   }
   updateSoundToggle();
+  displaySoundVolume();
   function applyTheme(mode){
     const dark=mode==='dark';
     document.body.classList.toggle('dark',dark);
@@ -1002,6 +1021,13 @@
     join();
   });
   els.pushToggle.addEventListener('click',togglePhonePush);
+  els.soundVolumeSelect.addEventListener('change',()=>{
+    const level=Number(els.soundVolumeSelect.value);
+    if(![30,60,100].includes(level))return;
+    personalSoundVolume=level;
+    localStorage.setItem(SOUND_VOLUME_KEY,String(level));
+    if(soundEnabled)playBokjakSound(true);
+  });
   els.soundToggle.addEventListener('click',()=>{
     soundEnabled=!soundEnabled;
     localStorage.setItem(SOUND_KEY,soundEnabled?'on':'off');
@@ -1033,6 +1059,7 @@
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
+  loadSoundDefault();
   const isAdmin=Boolean(sessionStorage.getItem(ADMIN_KEY));
   document.body.classList.toggle('admin-mode',isAdmin);
   els.adminRoomAddBtn.classList.toggle('show',isAdmin);
