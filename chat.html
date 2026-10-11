@@ -153,7 +153,7 @@
   function clearSession(){sessionStorage.removeItem(KEY);session=null;lastId=0}
   function showChat(){
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
-    els.roomTitle.textContent=session.room.title;els.roomCodeText.textContent='#'+session.room.code;
+    els.roomTitle.textContent='복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
   }
