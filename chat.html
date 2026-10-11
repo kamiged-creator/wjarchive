@@ -93,9 +93,9 @@
     .admin-room-add.show{display:inline-flex;align-items:center;gap:4px}
     .delete-room{display:none;padding:7px 9px;color:#b33d3d;background:transparent;border-color:rgba(179,61,61,.2);font-size:11px}
     .delete-room.show{display:inline-flex}
-    .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--soft) 72%,transparent),color-mix(in srgb,var(--paper) 92%,transparent));scroll-behavior:smooth;scroll-padding-top:14px;scroll-snap-type:y proximity}
+    .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--soft) 72%,transparent),color-mix(in srgb,var(--paper) 92%,transparent));scroll-behavior:auto;scroll-padding-top:14px}
     .empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px}
-    .msg{display:flex;flex-direction:column;align-items:flex-start;margin:0 0 14px;scroll-snap-align:start}
+    .msg{display:flex;flex-direction:column;align-items:flex-start;margin:0 0 14px}
     .msg.mine{align-items:flex-end}
     .name{font-size:12px;color:var(--chat-meta);font-weight:650;margin:0 6px 5px}
     .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);border:1px solid var(--bubble-border);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55}
@@ -340,8 +340,22 @@
     if(removeRemembered)forgetCurrentRoom();
     session=null;lastId=0;lastSyncAt='';
   }
+  let followLatestAfterEntry=false;
+  function scrollToNewest(){
+    if(!els.chatCard.classList.contains('show'))return;
+    els.messages.scrollTop=els.messages.scrollHeight;
+  }
+  const entryLayoutObserver=typeof ResizeObserver==='function'
+    ? new ResizeObserver(()=>{if(followLatestAfterEntry)scrollToNewest()})
+    : null;
+  function stopEntryAutoScroll(){
+    followLatestAfterEntry=false;
+    entryLayoutObserver?.disconnect();
+  }
   function showChat(){
     document.body.classList.add('chat-active');
+    followLatestAfterEntry=true;
+    entryLayoutObserver?.disconnect();
     clearInterval(pollTimer);pollTimer=null;
     lastId=0;lastSyncAt='';
     els.messages.innerHTML='<div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div>';
@@ -351,6 +365,7 @@
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
   }
   function showJoin(preserveRemembered=false){
+    stopEntryAutoScroll();
     document.body.classList.remove('chat-active');
     clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';
     if(preserveRemembered){
@@ -415,7 +430,10 @@
         let suppressImageOpen=false;
         img.addEventListener('click',()=>{if(suppressImageOpen){suppressImageOpen=false;return}openImage(m.image_url)});
         img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openImage(m.image_url)}});
-        img.addEventListener('load',()=>trimDarkImageMargins(img,m.image_url));
+        img.addEventListener('load',()=>{
+          trimDarkImageMargins(img,m.image_url);
+          if(followLatestAfterEntry)scrollToNewest();
+        });
         if(img.complete&&img.naturalWidth)trimDarkImageMargins(img,m.image_url);
         if(mine){
           const target=wrap.querySelector('.image-bubble');
@@ -441,6 +459,7 @@
         });
       }
       els.messages.appendChild(wrap);
+      if(followLatestAfterEntry)entryLayoutObserver?.observe(wrap);
       if(m.message_type!=='image')updateLongMessage(wrap.querySelector('.bubble'));
     }
     if(nearBottom)els.messages.scrollTop=els.messages.scrollHeight;
@@ -461,7 +480,10 @@
         for(const id of data.deletedIds)document.getElementById('msg-'+id)?.remove();
       }
       if(data.syncAt)lastSyncAt=data.syncAt;
-      if(initial)els.messages.scrollTop=els.messages.scrollHeight;
+      if(initial){
+        scrollToNewest();
+        requestAnimationFrame(()=>{if(followLatestAfterEntry)scrollToNewest()});
+      }
     }catch(e){
       if(/다시 입장|제한|보관|닫혀/.test(e.message)){alert(e.message);forgetCurrentRoom();showJoin(true);loadPublicRooms()}
     }finally{busy=false}
@@ -822,6 +844,13 @@
   els.leaveBtn.addEventListener('click',leave);
   els.inviteBtn.addEventListener('click',copyInvite);
   els.deleteRoomBtn.addEventListener('click',deleteCurrentRoom);
+  // Stop forced entry scrolling as soon as a visitor starts reading older messages.
+  els.messages.addEventListener('pointerdown',stopEntryAutoScroll,{passive:true});
+  els.messages.addEventListener('touchstart',stopEntryAutoScroll,{passive:true});
+  els.messages.addEventListener('wheel',stopEntryAutoScroll,{passive:true});
+  els.messages.addEventListener('keydown',e=>{
+    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(e.key))stopEntryAutoScroll();
+  });
   els.photoBtn.addEventListener('click',()=>els.photoInput.click());
   els.photoInput.addEventListener('change',()=>{const file=els.photoInput.files?.[0];if(file)uploadPhoto(file)});
   els.imageClose.addEventListener('click',closeImage);
