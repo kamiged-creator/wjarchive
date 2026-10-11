@@ -149,6 +149,11 @@
       .invite{min-height:40px;padding:0 12px;font-size:12px}
       .leave{min-height:40px;padding:0 12px;font-size:12px}
       .delete-room{min-height:32px;padding:0 9px;font-size:10px}
+      /* On small screens admins delete rooms from the dedicated management page. */
+      .admin-mode .chat-head{min-height:62px}
+      .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
+      .admin-mode .chat-head .delete-room.show{display:none}
+      .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
       .notice{padding:7px 12px}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain}.bubble{max-width:84%}
       .chat-image{max-width:min(190px,52vw);max-height:200px}
@@ -871,6 +876,7 @@
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
   const isAdmin=Boolean(sessionStorage.getItem(ADMIN_KEY));
+  document.body.classList.toggle('admin-mode',isAdmin);
   els.adminRoomAddBtn.classList.toggle('show',isAdmin);
   if(isAdmin){
     els.joinCredentials.style.display='block';
