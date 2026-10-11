@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>관계자 채팅 관리 | 복작소</title>
+  <style>
+    :root{--bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;--line:rgba(31,26,23,.12);--accent:#8b6847;--danger:#b94b4b;--ok:#2f7d4d}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;background:linear-gradient(180deg,#fbf8f4,var(--bg));color:var(--text)}
+    button,input{font:inherit}
+    header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(255,253,249,.9);border-bottom:1px solid var(--line);position:sticky;top:0}
+    header strong{font-size:18px}.back{border:0;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}
+    main{width:min(860px,100%);margin:0 auto;padding:24px 14px 40px}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:16px}
+    h1,h2{letter-spacing:-.035em}h1{font-size:28px;margin:0 0 6px}h2{font-size:18px;margin:0 0 14px}.muted{color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid .wide{grid-column:1/-1}
+    label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+    input{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff}
+    .primary{height:46px;border:0;border-radius:12px;padding:0 16px;background:var(--text);color:#fff;font-weight:850;cursor:pointer}
+    .status{min-height:18px;margin-top:10px;font-size:12px;color:var(--danger)}
+    .room{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+    .room:first-child{border-top:0}.room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:3px}
+    .actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    .small{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 10px;font-size:11px;font-weight:750;cursor:pointer}
+    .small.danger{color:var(--danger)}.small.ok{color:var(--ok)}
+    .empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+    @media(max-width:620px){.grid{grid-template-columns:1fr}.grid .wide{grid-column:auto}.room{grid-template-columns:1fr}.actions{justify-content:flex-start}}
+  </style>
+</head>
+<body>
+<header><strong>관계자 채팅 관리</strong><button class="back" onclick="location.href='/admin.html'">관리자로 돌아가기</button></header>
+<main>
+  <section class="card">
+    <h1>채팅방 만들기</h1>
+    <div class="muted">방 코드는 관계자에게 알려주는 짧은 영문/숫자 코드이고, 비밀번호는 서버에 원문으로 저장하지 않습니다.</div>
+    <div class="grid" style="margin-top:16px">
+      <div><label for="title">방 이름</label><input id="title" placeholder="예: 복작소 관계자방"></div>
+      <div><label for="code">방 코드</label><input id="code" placeholder="예: BOKJAKSO"></div>
+      <div class="wide"><label for="password">입장 비밀번호</label><input id="password" type="password" placeholder="4자 이상"></div>
+      <div class="wide"><button class="primary" id="createBtn">채팅방 만들기</button></div>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="card">
+    <h2>채팅방 목록</h2>
+    <div id="rooms"><div class="empty">불러오는 중...</div></div>
+  </section>
+</main>
+<script>
+  const ADMIN_KEY='wjarchiveAdminAccessToken';
+  const statusEl=document.getElementById('status'),roomsEl=document.getElementById('rooms');
+  function token(){return sessionStorage.getItem(ADMIN_KEY)||''}
+  async function api(payload){
+    const t=token();if(!t)throw new Error('먼저 관리자 페이지에서 로그인해 주세요.');
+    const r=await fetch('/api/chat-admin',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify(payload)});
+    const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'처리하지 못했습니다.');return d;
+  }
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  async function load(){
+    try{
+      const d=await api({action:'listRooms'});
+      if(!d.rooms.length){roomsEl.innerHTML='<div class="empty">아직 만든 채팅방이 없습니다.</div>';return}
+      roomsEl.innerHTML=d.rooms.map(r=>'<div class="room"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+(r.is_active?'입장 가능':'닫힘')+'</div></div><div class="actions"><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button></div></div>').join('');
+      roomsEl.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',async()=>{await api({action:'setActive',roomId:b.dataset.toggle,isActive:b.dataset.active!=='true'});load()}));
+      roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (4자 이상)');if(!p)return;try{await api({action:'changePassword',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.')}catch(e){alert(e.message)}}));
+    }catch(e){roomsEl.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
+  }
+  document.getElementById('createBtn').addEventListener('click',async()=>{
+    statusEl.textContent='';
+    try{
+      await api({action:'createRoom',title:document.getElementById('title').value,code:document.getElementById('code').value,password:document.getElementById('password').value});
+      document.getElementById('title').value='';document.getElementById('code').value='';document.getElementById('password').value='';
+      statusEl.style.color='var(--ok)';statusEl.textContent='채팅방을 만들었습니다.';load();
+    }catch(e){statusEl.style.color='var(--danger)';statusEl.textContent=e.message}
+  });
+  load();
+</script>
+</body>
+</html>
