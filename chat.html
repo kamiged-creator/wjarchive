@@ -103,7 +103,7 @@
   <header>
     <div><div class="brand">복작소</div><div class="sub">채팅</div></div>
     <div style="display:flex;gap:8px;align-items:center">
-      <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 추가">＋ 채팅방 추가</button>
+      <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
       <button class="back" type="button" onclick="location.href='/'">홈으로</button>
     </div>
@@ -396,7 +396,13 @@
     els.roomPassword.value='';
     els.joinStatus.textContent='이 기기에서는 30일 동안 입장이 기억됩니다.';
   }
-  els.joinBtn.addEventListener('click',join);
+  els.joinBtn.addEventListener('click',()=>{
+    if(sessionStorage.getItem(ADMIN_KEY)){
+      location.href='/chat-admin.html?new=1';
+      return;
+    }
+    join();
+  });
   els.sendBtn.addEventListener('click',send);
   els.leaveBtn.addEventListener('click',leave);
   els.inviteBtn.addEventListener('click',copyInvite);
@@ -409,7 +415,12 @@
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
-  els.adminRoomAddBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
+  const isAdmin=Boolean(sessionStorage.getItem(ADMIN_KEY));
+  els.adminRoomAddBtn.classList.toggle('show',isAdmin);
+  if(isAdmin){
+    els.joinBtn.textContent='채팅방 만들기';
+    els.joinBtn.setAttribute('aria-label','채팅방 만들기');
+  }
   try{
     const params=new URLSearchParams(window.location.search);
     const invitedRoom=params.get('room');
