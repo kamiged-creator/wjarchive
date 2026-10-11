@@ -38,6 +38,15 @@
     .primary:hover{background:color-mix(in srgb,var(--primary) 90%,#000)}
     .primary:active{transform:translateY(1px)}
     .help{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
+    .admin-room-list{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+    .admin-room-list.show{display:block}
+    .admin-room-list h2{font-size:15px;margin:0 0 8px}
+    .admin-room-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+    .admin-room-item:first-of-type{border-top:0}
+    .admin-room-name{font-weight:800;font-size:13px}
+    .admin-room-meta{font-size:11px;color:var(--muted);margin-top:3px}
+    .admin-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 11px;font-size:11px;font-weight:800}
+    .admin-empty{padding:14px 0;color:var(--muted);font-size:12px;text-align:center}
     .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
     .chat.show{display:flex}
@@ -118,7 +127,11 @@
       <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
       <button class="primary" id="joinBtn" type="button">채팅방 입장</button>
       <div class="status" id="joinStatus"></div>
-      <div class="help">초대받지 않은 사용자는 입장할 수 없습니다.</div>
+      <div class="help" id="joinHelp">초대받지 않은 사용자는 입장할 수 없습니다.</div>
+      <div class="admin-room-list" id="adminRoomList">
+        <h2>채팅방 목록</h2>
+        <div id="adminRooms"><div class="admin-empty">불러오는 중...</div></div>
+      </div>
     </section>
 
     <section class="card chat" id="chatCard" aria-live="polite">
@@ -172,7 +185,10 @@
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     themeToggle:document.getElementById('themeToggle'),
-    adminRoomAddBtn:document.getElementById('adminRoomAddBtn')
+    adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
+    adminRoomList:document.getElementById('adminRoomList'),
+    adminRooms:document.getElementById('adminRooms'),
+    joinHelp:document.getElementById('joinHelp')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
@@ -396,6 +412,36 @@
     els.roomPassword.value='';
     els.joinStatus.textContent='이 기기에서는 30일 동안 입장이 기억됩니다.';
   }
+  async function loadAdminRooms(){
+    const token=sessionStorage.getItem(ADMIN_KEY)||'';
+    if(!token)return;
+    try{
+      const r=await fetch('/api/content-admin',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:JSON.stringify({action:'chat-list-rooms'})
+      });
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(data.message||'채팅방을 불러오지 못했습니다.');
+      const rooms=Array.isArray(data.rooms)?data.rooms:[];
+      if(!rooms.length){
+        els.adminRooms.innerHTML='<div class="admin-empty">아직 만든 채팅방이 없습니다.</div>';
+        return;
+      }
+      els.adminRooms.innerHTML=rooms.map(room=>{
+        const state=room.is_archived?'보관됨':(room.is_active?'사용 중':'닫힘');
+        const disabled=room.is_archived?' disabled':'';
+        return '<div class="admin-room-item"><div><div class="admin-room-name">'+esc(room.title||'채팅방')+'</div><div class="admin-room-meta">#'+esc(room.code)+' · '+state+'</div></div><button class="admin-room-enter" type="button" data-room-code="'+esc(room.code)+'"'+disabled+'>'+(room.is_archived?'보관됨':'입장')+'</button></div>';
+      }).join('');
+      els.adminRooms.querySelectorAll('[data-room-code]:not([disabled])').forEach(btn=>btn.addEventListener('click',()=>{
+        const url=new URL('/chat.html',location.origin);
+        url.searchParams.set('room',btn.dataset.roomCode);
+        location.href=url.toString();
+      }));
+    }catch(e){
+      els.adminRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
+    }
+  }
   els.joinBtn.addEventListener('click',()=>{
     if(sessionStorage.getItem(ADMIN_KEY)){
       location.href='/chat-admin.html?new=1';
@@ -420,6 +466,10 @@
   if(isAdmin){
     els.joinBtn.textContent='채팅방 만들기';
     els.joinBtn.setAttribute('aria-label','채팅방 만들기');
+    document.querySelectorAll('#joinCard .field').forEach(el=>el.style.display='none');
+    els.joinHelp.textContent='관리자 전용 화면입니다. 새 방을 만들거나 아래 목록에서 기존 방에 입장할 수 있습니다.';
+    els.adminRoomList.classList.add('show');
+    loadAdminRooms();
   }
   try{
     const params=new URLSearchParams(window.location.search);
