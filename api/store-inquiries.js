@@ -96,7 +96,7 @@ async function handleChat(body, res) {
   }
 
   if (action === 'chat-public-list-rooms') {
-    const rooms = await supabaseRequest('chat_rooms?is_active=eq.true&is_archived=eq.false&select=id,code,title,created_at&order=created_at.asc');
+    const rooms = await supabaseRequest('chat_rooms?is_active=eq.true&is_archived=eq.false&select=id,code,title,created_at&order=created_at.desc,id.desc');
     res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
     return;
   }
