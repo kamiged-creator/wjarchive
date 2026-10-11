@@ -47,6 +47,13 @@
     .admin-room-meta{font-size:11px;color:var(--muted);margin-top:3px}
     .admin-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 11px;font-size:11px;font-weight:800}
     .admin-empty{padding:14px 0;color:var(--muted);font-size:12px;text-align:center}
+    .public-room-list{margin:16px 0 6px;border:1px solid var(--line);border-radius:16px;padding:12px;background:color-mix(in srgb,var(--paper) 96%,transparent)}
+    .public-room-list h2{font-size:14px;margin:0 0 8px}
+    .public-room-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+    .public-room-item:first-of-type{border-top:0}
+    .public-room-name{font-size:13px;font-weight:800}
+    .public-room-code{font-size:11px;color:var(--muted);margin-top:3px}
+    .public-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 12px;font-size:11px;font-weight:800;white-space:nowrap}
     .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
     .chat.show{display:flex}
@@ -121,8 +128,12 @@
     <section class="card join" id="joinCard">
       <div class="eyebrow">PRIVATE LOUNGE</div>
       <h1>복작소 채팅방</h1>
-      <p class="lead">방 코드와 비밀번호를 받은 관계자만 입장할 수 있어요. 입장 후에는 같은 방 사람들과 대화할 수 있습니다.</p>
-      <div class="field"><label for="roomCode">방 코드</label><input id="roomCode" autocomplete="off" placeholder="예: BOKJAKSO"></div>
+      <p class="lead">원하는 채팅방을 선택한 뒤 비밀번호와 닉네임을 입력해 주세요.</p>
+      <div class="public-room-list" id="publicRoomList">
+        <h2>채팅방 목록</h2>
+        <div id="publicRooms"><div class="admin-empty">불러오는 중...</div></div>
+      </div>
+      <div class="field" id="roomCodeField"><label for="roomCode">방 코드</label><input id="roomCode" autocomplete="off" placeholder="예: BOKJAKSO"></div>
       <div class="field"><label for="roomPassword">비밀번호</label><input id="roomPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력"></div>
       <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
       <button class="primary" id="joinBtn" type="button">채팅방 입장</button>
@@ -188,7 +199,10 @@
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
     adminRoomList:document.getElementById('adminRoomList'),
     adminRooms:document.getElementById('adminRooms'),
-    joinHelp:document.getElementById('joinHelp')
+    joinHelp:document.getElementById('joinHelp'),
+    publicRoomList:document.getElementById('publicRoomList'),
+    publicRooms:document.getElementById('publicRooms'),
+    roomCodeField:document.getElementById('roomCodeField')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
@@ -422,6 +436,27 @@
     els.roomPassword.value='';
     els.joinStatus.textContent='이 기기에서는 30일 동안 입장이 기억됩니다.';
   }
+  async function loadPublicRooms(){
+    try{
+      const data=await api({action:'chat-public-list-rooms'});
+      const rooms=Array.isArray(data.rooms)?data.rooms:[];
+      if(!rooms.length){
+        els.publicRooms.innerHTML='<div class="admin-empty">현재 입장 가능한 채팅방이 없습니다.</div>';
+        return;
+      }
+      els.publicRooms.innerHTML=rooms.map(room=>
+        '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+'</div><div class="public-room-code">#'+esc(room.code)+'</div></div><button class="public-room-enter" type="button" data-public-room="'+esc(room.code)+'">입장</button></div>'
+      ).join('');
+      els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
+        els.roomCode.value=btn.dataset.publicRoom;
+        els.roomPassword.focus();
+        els.joinStatus.textContent='선택한 방의 비밀번호와 닉네임을 입력해 주세요.';
+      }));
+    }catch(e){
+      els.publicRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
+    }
+  }
+
   async function loadAdminRooms(){
     const token=sessionStorage.getItem(ADMIN_KEY)||'';
     if(!token)return;
@@ -501,15 +536,27 @@
     els.joinBtn.textContent='채팅방 만들기';
     els.joinBtn.setAttribute('aria-label','채팅방 만들기');
     document.querySelectorAll('#joinCard .field').forEach(el=>el.style.display='none');
+    els.publicRoomList.style.display='none';
     els.joinHelp.textContent='관리자 전용 화면입니다. 새 방을 만들거나 아래 목록에서 기존 방에 입장할 수 있습니다.';
     els.adminRoomList.classList.add('show');
     loadAdminRooms();
+  }else{
+    loadPublicRooms();
   }
   let invitedRoom='';
   try{
     const params=new URLSearchParams(window.location.search);
     invitedRoom=String(params.get('room')||'').toUpperCase();
-    if(invitedRoom) els.roomCode.value=invitedRoom;
+    if(invitedRoom){
+      els.roomCode.value=invitedRoom;
+      if(!isAdmin){
+        els.publicRoomList.style.display='none';
+        els.roomCodeField.style.display='none';
+        els.joinStatus.textContent='초대받은 채팅방입니다. 비밀번호와 닉네임을 입력해 주세요.';
+      }
+    }else if(!isAdmin){
+      els.roomCodeField.style.display='none';
+    }
   }catch(_){}
   try{
     const saved=JSON.parse(localStorage.getItem(KEY)||'null');
