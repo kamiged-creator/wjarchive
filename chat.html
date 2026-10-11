@@ -45,11 +45,13 @@
     .admin-room-list{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
     .admin-room-list.show{display:block}
     .admin-room-list h2{font-size:15px;margin:0 0 8px}
-    .admin-room-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+    .admin-room-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line)}
     .admin-room-item:first-of-type{border-top:0}
-    .admin-room-name{font-weight:800;font-size:13px}
-    .admin-room-meta{font-size:11px;color:var(--muted);margin-top:3px}
-    .admin-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 11px;font-size:11px;font-weight:800}
+    .admin-room-name{font-weight:850;font-size:16px;line-height:1.4}
+    .admin-room-meta{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4}
+    .admin-room-enter{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:104px;min-height:52px;border:2px solid #795738;border-radius:15px;background:#795738;color:#fff;padding:10px 16px;font-size:17px;line-height:1.2;font-weight:850;box-shadow:0 5px 13px rgba(93,64,42,.16);cursor:pointer}
+    .admin-room-enter:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .admin-room-enter:disabled{background:var(--soft);border-color:var(--line);color:var(--muted);box-shadow:none;cursor:default}
     .admin-empty{padding:14px 0;color:var(--muted);font-size:12px;text-align:center}
     .public-room-list{margin:18px 0 18px;border:2px solid var(--line);border-radius:20px;padding:16px;background:color-mix(in srgb,var(--paper) 94%,var(--primary) 6%);box-shadow:0 8px 24px rgba(0,0,0,.04)}
     .public-room-list h2{font-size:16px;margin:0 0 10px;font-weight:800;letter-spacing:-.03em}
