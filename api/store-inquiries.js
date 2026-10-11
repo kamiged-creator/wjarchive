@@ -55,6 +55,21 @@ function safeEqualHex(a, b) {
   }
 }
 
+async function deleteImageKitFile(fileId) {
+  const id = clean(fileId);
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  if (!id || !privateKey) return false;
+  try {
+    const response = await fetch(`https://api.imagekit.io/v1/files/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Basic ' + Buffer.from(privateKey + ':').toString('base64') }
+    });
+    return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
 async function getChatMember(memberId, sessionToken) {
   const id = clean(memberId);
   const hash = tokenHash(sessionToken);
@@ -152,13 +167,27 @@ async function handleChat(body, res) {
     const after = Math.max(0, Number(body.afterId) || 0);
     const since = after > 0 ? `&id=gt.${after}` : '';
     const messages = await supabaseRequest(
-      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at&order=id.asc&limit=100`
+      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.asc&limit=100`
     );
+    const changedSince = clean(body.changedSince);
+    let deletedIds = [];
+    if (changedSince) {
+      const deleted = await supabaseRequest(
+        `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=not.is.null&updated_at=gt.${encodeURIComponent(changedSince)}&select=id&order=updated_at.asc&limit=100`
+      );
+      deletedIds = Array.isArray(deleted) ? deleted.map(row => row.id) : [];
+    }
     const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
     const active = await supabaseRequest(
       `chat_members?room_id=eq.${encodeURIComponent(member.room_id)}&is_blocked=eq.false&last_seen_at=gte.${encodeURIComponent(cutoff)}&select=id`
     );
-    res.status(200).json({ ok: true, messages: Array.isArray(messages) ? messages : [], activeCount: Array.isArray(active) ? active.length : 0 });
+    res.status(200).json({
+      ok: true,
+      messages: Array.isArray(messages) ? messages : [],
+      deletedIds,
+      activeCount: Array.isArray(active) ? active.length : 0,
+      syncAt: now
+    });
     return;
   }
 
@@ -200,6 +229,40 @@ async function handleChat(body, res) {
       body: JSON.stringify({ last_seen_at: now, last_sent_at: now })
     });
     res.status(200).json({ ok: true, message: Array.isArray(inserted) ? inserted[0] : null });
+    return;
+  }
+
+  if (action === 'chat-delete-message') {
+    const messageId = Number(body.messageId);
+    if (!Number.isFinite(messageId) || messageId <= 0) {
+      res.status(400).json({ message: '삭제할 메시지 정보가 없습니다.' });
+      return;
+    }
+    const rows = await supabaseRequest(
+      `chat_messages?id=eq.${encodeURIComponent(messageId)}&room_id=eq.${encodeURIComponent(member.room_id)}&member_id=eq.${encodeURIComponent(member.id)}&deleted_at=is.null&select=id,message_type,image_file_id&limit=1`
+    );
+    const target = Array.isArray(rows) ? rows[0] : null;
+    if (!target) {
+      res.status(404).json({ message: '삭제할 수 있는 내 메시지를 찾지 못했습니다.' });
+      return;
+    }
+    if (target.message_type === 'image' && target.image_file_id) {
+      await deleteImageKitFile(target.image_file_id);
+    }
+    const now = new Date().toISOString();
+    await supabaseRequest(`chat_messages?id=eq.${encodeURIComponent(messageId)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        deleted_at: now,
+        updated_at: now,
+        body: '삭제된 메시지입니다.',
+        message_type: 'text',
+        image_url: null,
+        image_file_id: null
+      })
+    });
+    res.status(200).json({ ok: true, messageId });
     return;
   }
 
