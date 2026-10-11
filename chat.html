@@ -56,6 +56,21 @@
     .public-room-enter{min-width:72px;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:10px 14px;font-size:13px;font-weight:900;white-space:nowrap}
     .public-room-enter.selected{background:var(--primary);color:#fff}
     .join-selected{margin:0 0 14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:12px;font-weight:800;color:var(--text);display:none}
+    .entry-modal{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,20,16,.48);backdrop-filter:blur(3px)}
+    .entry-modal.show{display:flex}
+    .entry-dialog{width:min(420px,100%);background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
+    .entry-title{font-size:22px;font-weight:900;letter-spacing:-.04em;margin:0 0 6px}
+    .entry-room{margin:0 0 18px;padding:13px 14px;border:2px solid color-mix(in srgb,var(--primary) 55%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:16px;font-weight:900}
+    .entry-field{margin-top:13px}
+    .entry-field label{display:block;font-size:13px;font-weight:900;margin:0 0 7px}
+    .entry-field input{width:100%;height:54px;border:2px solid color-mix(in srgb,var(--text) 20%,var(--line));border-radius:15px;background:#fff;color:#1f1a17;padding:0 15px;font-size:16px;outline:none}
+    body.dark .entry-field input{background:#202020;color:#f2f2f2}
+    .entry-field input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 14%,transparent)}
+    .entry-actions{display:flex;gap:9px;margin-top:18px}
+    .entry-cancel,.entry-submit{height:50px;border-radius:14px;font-weight:900}
+    .entry-cancel{width:34%;border:1px solid var(--line);background:var(--paper);color:var(--muted)}
+    .entry-submit{flex:1;border:0;background:var(--primary);color:#fff}
+    .entry-status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
     .chat.show{display:flex}
@@ -173,6 +188,26 @@
     </section>
   </main>
 </div>
+
+<div class="entry-modal" id="entryModal" aria-hidden="true">
+  <div class="entry-dialog" role="dialog" aria-modal="true" aria-labelledby="entryTitle">
+    <div class="entry-title" id="entryTitle">처음 입장</div>
+    <div class="entry-room" id="entryRoomName"></div>
+    <div class="entry-field">
+      <label for="entryPassword">비밀번호</label>
+      <input id="entryPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력">
+    </div>
+    <div class="entry-field">
+      <label for="entryNickname">닉네임</label>
+      <input id="entryNickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름">
+    </div>
+    <div class="entry-actions">
+      <button class="entry-cancel" id="entryCancel" type="button">취소</button>
+      <button class="entry-submit" id="entrySubmit" type="button">입장하기</button>
+    </div>
+    <div class="entry-status" id="entryStatus"></div>
+  </div>
+</div>
 <div class="image-modal" id="imageModal" aria-hidden="true">
   <button class="image-close" id="imageClose" type="button" aria-label="닫기">×</button>
   <img id="imageModalImg" alt="채팅 이미지 크게 보기">
@@ -210,7 +245,14 @@
     publicRooms:document.getElementById('publicRooms'),
     roomCodeField:document.getElementById('roomCodeField'),
     selectedRoom:document.getElementById('selectedRoom'),
-    joinCredentials:document.getElementById('joinCredentials')
+    joinCredentials:document.getElementById('joinCredentials'),
+    entryModal:document.getElementById('entryModal'),
+    entryRoomName:document.getElementById('entryRoomName'),
+    entryPassword:document.getElementById('entryPassword'),
+    entryNickname:document.getElementById('entryNickname'),
+    entrySubmit:document.getElementById('entrySubmit'),
+    entryCancel:document.getElementById('entryCancel'),
+    entryStatus:document.getElementById('entryStatus')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
@@ -473,6 +515,40 @@
     els.roomPassword.value='';
     els.joinStatus.textContent='이 방은 30일 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
   }
+  function openFirstEntry(room){
+    els.roomCode.value=String(room.code||'').toUpperCase();
+    els.entryRoomName.textContent=room.title||'채팅방';
+    els.entryPassword.value='';
+    els.entryNickname.value='';
+    els.entryStatus.textContent='';
+    els.entryModal.classList.add('show');
+    els.entryModal.setAttribute('aria-hidden','false');
+    setTimeout(()=>els.entryPassword.focus(),50);
+  }
+  function closeFirstEntry(){
+    els.entryModal.classList.remove('show');
+    els.entryModal.setAttribute('aria-hidden','true');
+  }
+  async function submitFirstEntry(){
+    els.entryStatus.textContent='';
+    const password=els.entryPassword.value;
+    const nickname=els.entryNickname.value.trim();
+    if(!password){els.entryStatus.textContent='비밀번호를 입력해 주세요.';els.entryPassword.focus();return}
+    if(!nickname){els.entryStatus.textContent='닉네임을 입력해 주세요.';els.entryNickname.focus();return}
+    els.entrySubmit.disabled=true;
+    try{
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname});
+      session={room:data.room,member:data.member,sessionToken:data.sessionToken};
+      saveSession();
+      closeFirstEntry();
+      showChat();
+    }catch(e){
+      els.entryStatus.textContent=e.message||'입장하지 못했습니다.';
+    }finally{
+      els.entrySubmit.disabled=false;
+    }
+  }
+
   async function loadPublicRooms(){
     try{
       const data=await api({action:'chat-public-list-rooms'});
@@ -495,18 +571,8 @@
           showChat();
           return;
         }
-        els.publicRooms.querySelectorAll('[data-public-room]').forEach(b=>b.classList.remove('selected'));
-        btn.classList.add('selected');
-        els.roomCode.value=code;
         const room=rooms.find(r=>String(r.code).toUpperCase()===code);
-        els.selectedRoom.style.display='block';
-        els.selectedRoom.textContent='선택한 방 · '+(room?.title||code);
-        els.joinCredentials.style.display='block';
-        els.joinStatus.textContent='처음 입장하는 방입니다. 비밀번호와 닉네임을 입력해 주세요.';
-        setTimeout(()=>{
-          els.joinCredentials.scrollIntoView({behavior:'smooth',block:'nearest'});
-          els.roomPassword.focus();
-        },50);
+        if(room)openFirstEntry(room);
       }));
     }catch(e){
       els.publicRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
@@ -565,6 +631,11 @@
       els.adminRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
     }
   }
+  els.entryCancel.addEventListener('click',closeFirstEntry);
+  els.entrySubmit.addEventListener('click',submitFirstEntry);
+  els.entryModal.addEventListener('click',e=>{if(e.target===els.entryModal)closeFirstEntry()});
+  els.entryPassword.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();els.entryNickname.focus()}});
+  els.entryNickname.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitFirstEntry()}});
   els.joinBtn.addEventListener('click',()=>{
     if(sessionStorage.getItem(ADMIN_KEY)){
       location.href='/chat-admin.html?new=1';
@@ -598,6 +669,7 @@
     els.adminRoomList.classList.add('show');
     loadAdminRooms();
   }else{
+    els.joinCredentials.style.display='none';
     loadPublicRooms();
   }
   let invitedRoom='';
