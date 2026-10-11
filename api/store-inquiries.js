@@ -81,6 +81,12 @@ async function getChatMember(memberId, sessionToken) {
 async function handleChat(body, res) {
   const action = clean(body.action);
 
+  if (action === 'chat-public-list-rooms') {
+    const rooms = await supabaseRequest('chat_rooms?is_active=eq.true&is_archived=eq.false&select=id,code,title,created_at&order=created_at.asc');
+    res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
+    return;
+  }
+
   if (action === 'chat-join') {
     const roomCode = clean(body.roomCode).toUpperCase().replace(/\s+/g, '');
     const password = String(body.password || '');
