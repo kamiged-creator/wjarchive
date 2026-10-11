@@ -260,6 +260,9 @@ async function handleHideWork(body, res) {
 function chatPasswordHash(password, salt) {
   return crypto.scryptSync(String(password || ''), String(salt || ''), 64).toString('hex');
 }
+function chatTokenHash(token) {
+  return crypto.createHash('sha256').update(String(token || '')).digest('hex');
+}
 
 async function deleteImageKitFile(fileId) {
   const id = normalize(fileId);
@@ -308,6 +311,39 @@ async function handleChatAdmin(body, res) {
       })
     });
     res.status(200).json({ ok: true, room: Array.isArray(room) ? room[0] : null });
+    return;
+  }
+
+  if (action === 'chat-admin-enter-room') {
+    const roomId = normalize(body.roomId);
+    if (!roomId) {
+      res.status(400).json({ message: '입장할 방 정보가 없습니다.' });
+      return;
+    }
+    const rooms = await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}&is_active=eq.true&is_archived=eq.false&select=id,code,title&limit=1`);
+    const room = Array.isArray(rooms) ? rooms[0] : null;
+    if (!room) {
+      res.status(404).json({ message: '현재 입장할 수 없는 채팅방입니다.' });
+      return;
+    }
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const members = await db('chat_members?select=id,room_id,nickname', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        room_id: room.id,
+        nickname: '관리자',
+        token_hash: chatTokenHash(sessionToken),
+        last_seen_at: new Date().toISOString()
+      })
+    });
+    const member = Array.isArray(members) ? members[0] : null;
+    res.status(200).json({
+      ok: true,
+      room,
+      member: { id: member.id, nickname: member.nickname },
+      sessionToken
+    });
     return;
   }
 
