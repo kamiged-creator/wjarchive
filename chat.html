@@ -207,16 +207,19 @@
       lastId=Math.max(lastId,Number(m.id)||0);
       const mine=session&&m.member_id===session.member.id;
       const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'');wrap.id='msg-'+m.id;
-      const tools=mine?'<div class="msg-tools"><button class="msg-delete" type="button" data-delete-message="'+m.id+'">삭제</button></div>':'';
       if(m.message_type==='image'&&m.image_url){
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>'+tools;
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
         const img=wrap.querySelector('.chat-image');
-        img.addEventListener('click',()=>openImage(m.image_url));
+        let suppressImageOpen=false;
+        img.addEventListener('click',()=>{if(suppressImageOpen){suppressImageOpen=false;return}openImage(m.image_url)});
+        if(mine){
+          const target=wrap.querySelector('.image-bubble');
+          attachLongPressDelete(target,m.id,()=>{suppressImageOpen=true});
+        }
       }else{
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>'+tools;
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        if(mine)attachLongPressDelete(wrap.querySelector('.bubble'),m.id);
       }
-      const delBtn=wrap.querySelector('[data-delete-message]');
-      if(delBtn)delBtn.addEventListener('click',()=>deleteMyMessage(m.id));
       els.messages.appendChild(wrap);
     }
     if(nearBottom)els.messages.scrollTop=els.messages.scrollHeight;
@@ -249,9 +252,37 @@
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
     }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
   }
+  function attachLongPressDelete(target,messageId,onLongPress){
+    if(!target)return;
+    let timer=null,startX=0,startY=0,longPressed=false;
+    const clear=()=>{
+      if(timer){clearTimeout(timer);timer=null}
+      target.classList.remove('pressing');
+    };
+    target.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      startX=e.clientX;startY=e.clientY;longPressed=false;
+      timer=setTimeout(async()=>{
+        timer=null;longPressed=true;target.classList.add('pressing');
+        if(navigator.vibrate)navigator.vibrate(35);
+        onLongPress?.();
+        await deleteMyMessage(messageId);
+        clear();
+      },650);
+    });
+    target.addEventListener('pointermove',e=>{
+      if(Math.abs(e.clientX-startX)>10||Math.abs(e.clientY-startY)>10)clear();
+    });
+    target.addEventListener('pointerup',clear);
+    target.addEventListener('pointercancel',clear);
+    target.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')clear()});
+    target.addEventListener('contextmenu',e=>{
+      if(session){e.preventDefault();onLongPress?.();deleteMyMessage(messageId)}
+    });
+  }
   async function deleteMyMessage(messageId){
     if(!session)return;
-    if(!confirm('이 메시지를 삭제할까요?'))return;
+    if(!confirm('선택한 메시지만 삭제할까요?'))return;
     try{
       await api({action:'chat-delete-message',memberId:session.member.id,sessionToken:session.sessionToken,messageId});
       document.getElementById('msg-'+messageId)?.remove();
