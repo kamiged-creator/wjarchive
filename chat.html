@@ -106,7 +106,7 @@
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function fmtTime(value){try{return new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit'}).format(new Date(value))}catch(_){return ''}}
   async function api(payload){
-    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const r=await fetch('/api/store-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(data.message||'요청에 실패했습니다.');
     return data;
@@ -138,7 +138,7 @@
   async function loadMessages(initial){
     if(!session||busy)return;busy=true;
     try{
-      const data=await api({action:'list',memberId:session.member.id,sessionToken:session.sessionToken,afterId:initial?0:lastId});
+      const data=await api({action:'chat-list',memberId:session.member.id,sessionToken:session.sessionToken,afterId:initial?0:lastId});
       els.activeCount.textContent=data.activeCount||1;appendMessages(data.messages);
       if(initial)els.messages.scrollTop=els.messages.scrollHeight;
     }catch(e){
@@ -148,7 +148,7 @@
   async function join(){
     els.joinStatus.textContent='';els.joinBtn.disabled=true;
     try{
-      const data=await api({action:'join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:els.nickname.value});
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:els.nickname.value});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
     }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
   }
@@ -156,12 +156,12 @@
     const message=els.messageInput.value.trim();if(!message||!session)return;
     els.sendBtn.disabled=true;
     try{
-      const data=await api({action:'send',memberId:session.member.id,sessionToken:session.sessionToken,message});
+      const data=await api({action:'chat-send',memberId:session.member.id,sessionToken:session.sessionToken,message});
       els.messageInput.value='';appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
     }catch(e){alert(e.message)}finally{els.sendBtn.disabled=false;els.messageInput.focus()}
   }
   async function leave(){
-    try{if(session)await api({action:'leave',memberId:session.member.id,sessionToken:session.sessionToken})}catch(_){}
+    try{if(session)await api({action:'chat-leave',memberId:session.member.id,sessionToken:session.sessionToken})}catch(_){}
     showJoin();
   }
   els.joinBtn.addEventListener('click',join);
