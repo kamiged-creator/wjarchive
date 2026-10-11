@@ -328,7 +328,14 @@
     try{
       const data=await api({action:'chat-send',memberId:session.member.id,sessionToken:session.sessionToken,message});
       els.messageInput.value='';appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
-    }catch(e){alert(e.message)}finally{els.sendBtn.disabled=false;els.messageInput.focus()}
+    }catch(e){alert(e.message)}finally{
+      els.sendBtn.disabled=false;
+      if(window.matchMedia && window.matchMedia('(pointer:coarse)').matches){
+        els.messageInput.blur();
+      }else{
+        els.messageInput.focus();
+      }
+    }
   }
   function openImage(url){
     els.imageModalImg.src=url;els.imageModal.classList.add('show');els.imageModal.setAttribute('aria-hidden','false');
