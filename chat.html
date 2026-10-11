@@ -44,9 +44,18 @@
     .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.55}
     .mine .bubble{background:#2a2521;color:#fff;border-color:#2a2521;border-radius:16px 16px 4px 16px}
     .time{font-size:10px;color:#9b9188;margin:4px 6px 0}
-    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--paper)}
+    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--paper);align-items:flex-end}
     .composer textarea{flex:1;resize:none;max-height:112px;min-height:46px;border:1px solid var(--line);border-radius:14px;padding:11px 12px;outline:none}
-    .send{width:72px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:850}
+    .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
+    .photo:disabled,.send:disabled{opacity:.55;cursor:wait}
+    .send{width:72px;height:46px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:850}
+    .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
+    .mine .image-bubble{border-radius:16px 16px 4px 16px}
+    .chat-image{display:block;width:min(320px,68vw);max-height:360px;object-fit:cover;border-radius:12px;cursor:zoom-in}
+    .image-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,17,15,.88)}
+    .image-modal.show{display:flex}
+    .image-modal img{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:14px}
+    .image-close{position:absolute;top:16px;right:16px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.9);font-size:24px;line-height:1}
     .notice{padding:9px 14px;background:#fff8ec;border-bottom:1px solid rgba(139,104,71,.12);font-size:11px;color:#7f674f}
     @media(max-width:560px){
       header{height:60px}.sub{display:none}
@@ -86,11 +95,17 @@
       <div class="notice">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
+        <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        <button class="photo" id="photoBtn" type="button" aria-label="사진 올리기" title="사진 올리기">＋</button>
         <textarea id="messageInput" rows="1" maxlength="1000" placeholder="메시지 입력"></textarea>
         <button class="send" id="sendBtn" type="button">전송</button>
       </div>
     </section>
   </main>
+</div>
+<div class="image-modal" id="imageModal" aria-hidden="true">
+  <button class="image-close" id="imageClose" type="button" aria-label="닫기">×</button>
+  <img id="imageModalImg" alt="채팅 이미지 크게 보기">
 </div>
 <script>
   const KEY='bokjaksoChatSessionV1';
@@ -100,7 +115,9 @@
     nickname:document.getElementById('nickname'),joinBtn:document.getElementById('joinBtn'),joinStatus:document.getElementById('joinStatus'),
     roomTitle:document.getElementById('roomTitle'),roomCodeText:document.getElementById('roomCodeText'),activeCount:document.getElementById('activeCount'),
     messages:document.getElementById('messages'),emptyState:document.getElementById('emptyState'),
-    messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn')
+    messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn'),
+    photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
+    imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose')
   };
   let session=null,lastId=0,pollTimer=null,busy=false;
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -130,7 +147,13 @@
       lastId=Math.max(lastId,Number(m.id)||0);
       const mine=session&&m.member_id===session.member.id;
       const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'');wrap.id='msg-'+m.id;
-      wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>';
+      if(m.message_type==='image'&&m.image_url){
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        const img=wrap.querySelector('.chat-image');
+        img.addEventListener('click',()=>openImage(m.image_url));
+      }else{
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>';
+      }
       els.messages.appendChild(wrap);
     }
     if(nearBottom)els.messages.scrollTop=els.messages.scrollHeight;
@@ -160,6 +183,51 @@
       els.messageInput.value='';appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
     }catch(e){alert(e.message)}finally{els.sendBtn.disabled=false;els.messageInput.focus()}
   }
+  function openImage(url){
+    els.imageModalImg.src=url;els.imageModal.classList.add('show');els.imageModal.setAttribute('aria-hidden','false');
+  }
+  function closeImage(){
+    els.imageModal.classList.remove('show');els.imageModal.setAttribute('aria-hidden','true');els.imageModalImg.src='';
+  }
+  async function compressImage(file){
+    if(!file.type.startsWith('image/')) throw new Error('이미지 파일만 올릴 수 있어요.');
+    if(file.size>12*1024*1024) throw new Error('사진은 12MB 이하만 올릴 수 있어요.');
+    const bitmap=await createImageBitmap(file);
+    const max=1600;
+    const scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.82));
+    if(!blob) throw new Error('사진을 처리하지 못했습니다.');
+    return new File([blob],'chat-'+Date.now()+'.webp',{type:'image/webp'});
+  }
+  async function uploadPhoto(file){
+    if(!session)return;
+    els.photoBtn.disabled=true;els.sendBtn.disabled=true;
+    try{
+      const prepared=await compressImage(file);
+      const auth=await api({action:'chat-image-auth',memberId:session.member.id,sessionToken:session.sessionToken});
+      const form=new FormData();
+      form.append('file',prepared);
+      form.append('fileName',prepared.name);
+      form.append('publicKey',auth.publicKey);
+      form.append('signature',auth.signature);
+      form.append('expire',String(auth.expire));
+      form.append('token',auth.token);
+      form.append('folder',auth.folder);
+      form.append('useUniqueFileName','true');
+      const r=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+      const uploaded=await r.json().catch(()=>({}));
+      if(!r.ok||!uploaded.url||!uploaded.fileId) throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
+      const sent=await api({
+        action:'chat-send',memberId:session.member.id,sessionToken:session.sessionToken,
+        messageType:'image',message:'사진',imageUrl:uploaded.url,imageFileId:uploaded.fileId
+      });
+      appendMessages(sent.message?[sent.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
+    }catch(e){alert(e.message||'사진 업로드에 실패했습니다.')}
+    finally{els.photoInput.value='';els.photoBtn.disabled=false;els.sendBtn.disabled=false}
+  }
   async function leave(){
     try{if(session)await api({action:'chat-leave',memberId:session.member.id,sessionToken:session.sessionToken})}catch(_){}
     showJoin();
@@ -167,6 +235,10 @@
   els.joinBtn.addEventListener('click',join);
   els.sendBtn.addEventListener('click',send);
   els.leaveBtn.addEventListener('click',leave);
+  els.photoBtn.addEventListener('click',()=>els.photoInput.click());
+  els.photoInput.addEventListener('change',()=>{const file=els.photoInput.files?.[0];if(file)uploadPhoto(file)});
+  els.imageClose.addEventListener('click',closeImage);
+  els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   try{
     const params=new URLSearchParams(window.location.search);
