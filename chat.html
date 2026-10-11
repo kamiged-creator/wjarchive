@@ -107,7 +107,8 @@
     .send{width:72px;height:46px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:850}
     .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
     .mine .image-bubble{border-radius:16px 16px 4px 16px}
-    .chat-image{display:block;width:min(320px,68vw);max-height:360px;object-fit:cover;border-radius:12px;cursor:zoom-in}
+    .chat-image{display:block;max-width:min(220px,65vw);max-height:240px;width:auto;height:auto;object-fit:contain;border-radius:12px;cursor:zoom-in}
+    .chat-image:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .image-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,17,15,.88)}
     .image-modal.show{display:flex}
     .image-modal img{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:14px}
@@ -132,6 +133,7 @@
       .delete-room{min-height:32px;padding:0 9px;font-size:10px}
       .notice{padding:7px 12px}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain}.bubble{max-width:84%}
+      .chat-image{max-width:min(190px,52vw);max-height:200px}
       .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
     }
   </style>
@@ -343,10 +345,11 @@
       const mine=session&&m.member_id===session.member.id;
       const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'');wrap.id='msg-'+m.id;
       if(m.message_type==='image'&&m.image_url){
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진 - 선택하면 크게 볼 수 있습니다" title="사진 크게 보기" role="button" tabindex="0" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
         const img=wrap.querySelector('.chat-image');
         let suppressImageOpen=false;
         img.addEventListener('click',()=>{if(suppressImageOpen){suppressImageOpen=false;return}openImage(m.image_url)});
+        img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openImage(m.image_url)}});
         if(mine){
           const target=wrap.querySelector('.image-bubble');
           attachLongPressDelete(target,m.id,()=>{suppressImageOpen=true});
