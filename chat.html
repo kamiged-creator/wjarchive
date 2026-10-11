@@ -475,6 +475,11 @@
         changedSince:initial?'':lastSyncAt
       });
       els.activeCount.textContent=data.activeCount||1;
+      if(typeof data.roomTitle==='string'&&data.roomTitle&&data.roomTitle!==session.room.title){
+        session.room.title=data.roomTitle;
+        els.roomTitle.textContent=data.roomTitle;
+        saveSession();
+      }
       appendMessages(data.messages);
       if(Array.isArray(data.deletedIds)){
         for(const id of data.deletedIds)document.getElementById('msg-'+id)?.remove();
