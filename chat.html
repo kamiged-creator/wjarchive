@@ -63,9 +63,12 @@
     .image-close{position:absolute;top:16px;right:16px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.9);font-size:24px;line-height:1}
     .notice{padding:9px 14px;background:#fff8ec;border-bottom:1px solid rgba(139,104,71,.12);font-size:11px;color:#7f674f}
     @media(max-width:560px){
-      header{height:60px}.sub{display:none}
-      main{padding:12px 8px 14px}.card{border-radius:20px}
-      .join{padding:24px 18px}.chat{height:calc(100vh - 86px);min-height:0}
+      html,body{height:100%;overscroll-behavior:none}
+      body.chat-active{height:100dvh;overflow:hidden}
+      .page{height:100dvh;min-height:100dvh;overflow:hidden}
+      header{height:60px;flex:0 0 60px}.sub{display:none}
+      main{padding:12px 8px 14px;min-height:0;overflow:hidden}.card{border-radius:20px}
+      .join{padding:24px 18px}.chat{height:calc(100dvh - 86px);max-height:calc(100dvh - 86px);min-height:0;overflow:hidden}
       .chat-head{align-items:flex-start;gap:10px;padding:13px 12px}
       .room-title{font-size:15px;line-height:1.25}
       .room-meta{font-size:11px;margin-top:4px}
@@ -152,12 +155,14 @@
   function saveSession(){sessionStorage.setItem(KEY,JSON.stringify(session))}
   function clearSession(){sessionStorage.removeItem(KEY);session=null;lastId=0}
   function showChat(){
+    document.body.classList.add('chat-active');
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
     els.roomTitle.textContent='복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
   }
   function showJoin(){
+    document.body.classList.remove('chat-active');
     clearInterval(pollTimer);pollTimer=null;els.chatCard.classList.remove('show');els.joinCard.style.display='block';clearSession();
   }
   function appendMessages(items){
