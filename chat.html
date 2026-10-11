@@ -55,6 +55,10 @@
     .public-room-code{font-size:12px;color:var(--muted);margin-top:4px}
     .public-room-enter{min-width:72px;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:10px 14px;font-size:13px;font-weight:750;white-space:nowrap}
     .public-room-enter.selected{background:var(--primary);color:#fff}
+    .room-pagination{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;flex-wrap:wrap}
+    .room-page-btn{min-width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);font-size:12px;font-weight:750;padding:0 10px}
+    .room-page-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+    .room-page-btn:disabled{opacity:.38;cursor:default}
     .join-selected{margin:0 0 14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:12px;font-weight:800;color:var(--text);display:none}
     .entry-modal{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,20,16,.48);backdrop-filter:blur(3px)}
     .entry-modal.show{display:flex}
@@ -558,22 +562,53 @@
         return;
       }
       const remembered=getRememberedSessions();
-      els.publicRooms.innerHTML=rooms.map(room=>{
-        const known=Boolean(remembered[String(room.code).toUpperCase()]);
-        return '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+(known?' <span style="font-size:11px;color:var(--muted);font-weight:800">· 이전 입장</span>':'')+'</div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
-      }).join('');
-      els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
-        const code=String(btn.dataset.publicRoom||'').toUpperCase();
-        const known=rememberedFor(code);
-        if(known){
-          session={room:known.room,member:known.member,sessionToken:known.sessionToken};
-          saveSession();
-          showChat();
-          return;
+      const PAGE_SIZE=5;
+      let page=1;
+      const totalPages=Math.max(1,Math.ceil(rooms.length/PAGE_SIZE));
+
+      const render=()=>{
+        if(page>totalPages)page=totalPages;
+        const slice=rooms.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
+        const rows=slice.map(room=>{
+          const known=Boolean(remembered[String(room.code).toUpperCase()]);
+          return '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+(known?' <span style="font-size:11px;color:var(--muted);font-weight:800">· 이전 입장</span>':'')+'</div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
+        }).join('');
+
+        let pager='';
+        if(totalPages>1){
+          let nums='';
+          for(let i=1;i<=totalPages;i++){
+            nums+='<button class="room-page-btn'+(i===page?' active':'')+'" type="button" data-page="'+i+'">'+i+'</button>';
+          }
+          pager='<div class="room-pagination"><button class="room-page-btn" type="button" data-prev '+(page===1?'disabled':'')+'>‹</button>'+nums+'<button class="room-page-btn" type="button" data-next '+(page===totalPages?'disabled':'')+'>›</button></div>';
         }
-        const room=rooms.find(r=>String(r.code).toUpperCase()===code);
-        if(room)openFirstEntry(room);
-      }));
+        els.publicRooms.innerHTML=rows+pager;
+
+        els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
+          const code=String(btn.dataset.publicRoom||'').toUpperCase();
+          const known=rememberedFor(code);
+          if(known){
+            session={room:known.room,member:known.member,sessionToken:known.sessionToken};
+            saveSession();
+            showChat();
+            return;
+          }
+          const room=rooms.find(r=>String(r.code).toUpperCase()===code);
+          if(room)openFirstEntry(room);
+        }));
+
+        els.publicRooms.querySelectorAll('[data-page]').forEach(btn=>btn.addEventListener('click',()=>{
+          page=Number(btn.dataset.page)||1;
+          render();
+        }));
+        els.publicRooms.querySelector('[data-prev]')?.addEventListener('click',()=>{
+          if(page>1){page--;render()}
+        });
+        els.publicRooms.querySelector('[data-next]')?.addEventListener('click',()=>{
+          if(page<totalPages){page++;render()}
+        });
+      };
+      render();
     }catch(e){
       els.publicRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
     }
