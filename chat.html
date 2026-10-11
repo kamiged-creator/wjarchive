@@ -218,6 +218,9 @@
   }
   function showChat(){
     document.body.classList.add('chat-active');
+    clearInterval(pollTimer);pollTimer=null;
+    lastId=0;lastSyncAt='';
+    els.messages.innerHTML='<div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div>';
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
     els.roomTitle.textContent='복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
