@@ -14,6 +14,7 @@
       --notice:#fff8ec;--notice-text:#7f674f;--msg-bg:#fff;--mine-bg:#2a2521;--field-bg:#fff;--primary:#a67c52;
       --composer-bg:#fff8ef;--composer-input:#fffefa;--composer-line:rgba(139,104,71,.19);
       --chat-meta:#60564d;--bubble-border:#d0c2b4;--admin-bubble:#efddca;--admin-border:#c8a888;--admin-ink:#30251d;
+      --scroll-thumb:#b6a28f;--scroll-track:#eee7df;
     }
     body.dark{
       --bg:#111111;--paper:#171717;--text:#f2f2f2;--muted:#a9a9a9;
@@ -21,6 +22,7 @@
       --notice:#1d1d1d;--notice-text:#d0d0d0;--msg-bg:#242424;--mine-bg:#9f7148;--field-bg:#1f1f1f;--primary:#b68456;
       --composer-bg:#1a1a1a;--composer-input:#242424;--composer-line:rgba(255,255,255,.16);
       --chat-meta:#c8bbae;--bubble-border:#66605a;--admin-bubble:#48382b;--admin-border:#977653;--admin-ink:#fff1e2;
+      --scroll-thumb:#79624e;--scroll-track:#262320;
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--text);background:linear-gradient(180deg,var(--paper),var(--bg));transition:background .2s ease,color .2s ease}
@@ -104,6 +106,14 @@
     .delete-room{display:none;padding:7px 9px;color:#b33d3d;background:transparent;border-color:rgba(179,61,61,.2);font-size:11px}
     .delete-room.show{display:inline-flex}
     .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--soft) 72%,transparent),color-mix(in srgb,var(--paper) 92%,transparent));scroll-behavior:auto;scroll-padding-top:14px}
+    /* Replace the bright Windows scrollbars with slim, theme-matched scroll indicators. */
+    .messages,.text-modal-body{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
+    .messages::-webkit-scrollbar,.text-modal-body::-webkit-scrollbar{width:7px}
+    .messages::-webkit-scrollbar-track,.text-modal-body::-webkit-scrollbar-track{background:var(--scroll-track)}
+    .messages::-webkit-scrollbar-thumb,.text-modal-body::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:10px;border:1px solid var(--scroll-track)}
+    /* Keep text input scrolling functional, but hide distracting default arrows. */
+    .composer textarea{scrollbar-width:none;-ms-overflow-style:none}
+    .composer textarea::-webkit-scrollbar{display:none}
     .empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px}
     .msg{display:flex;flex-direction:column;align-items:flex-start;margin:0 0 14px}
     .msg.mine{align-items:flex-end}
@@ -177,7 +187,8 @@
       .admin-mode .chat-head .delete-room.show{display:none}
       .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
       .notice{padding:7px 12px}
-      .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain}.bubble{max-width:84%}
+      .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
+      .messages::-webkit-scrollbar{display:none}
       .chat-image{max-width:min(190px,52vw);max-height:200px}
       .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
     }
