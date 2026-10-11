@@ -298,6 +298,11 @@ async function handleChatAdmin(body, res) {
       res.status(400).json({ message: '방 코드는 3자 이상, 비밀번호는 4자 이상으로 입력해 주세요.' });
       return;
     }
+    const existing = await db(`chat_rooms?code=eq.${encodeURIComponent(code)}&select=id,code&limit=1`);
+    if (Array.isArray(existing) && existing.length) {
+      res.status(409).json({ message: '이미 사용 중인 방 코드입니다. 다른 방 코드를 입력해 주세요.' });
+      return;
+    }
     const salt = crypto.randomBytes(16).toString('hex');
     const room = await db('chat_rooms?select=id,code,title,is_active,created_at', {
       method: 'POST',
