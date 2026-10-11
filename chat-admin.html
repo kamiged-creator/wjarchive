@@ -20,15 +20,23 @@
     input{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff}
     .primary{height:46px;border:0;border-radius:12px;padding:0 16px;background:var(--text);color:#fff;font-weight:850;cursor:pointer}
     .status{min-height:18px;margin-top:10px;font-size:12px;color:var(--danger)}
-    .room{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
-    .room:first-child{border-top:0}.room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:3px}
-    .actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-    .small{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 10px;font-size:11px;font-weight:750;cursor:pointer}
-    .small.danger{color:var(--danger)}.small.ok{color:var(--ok)}
-    .empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
-    .section-label{margin:18px 0 6px;font-size:12px;font-weight:850;color:var(--muted);letter-spacing:.04em}
-    .archived-room{opacity:.72}
-    .small.edit{border-color:rgba(139,104,71,.45);color:#735337;background:#fffaf3}
+    .room{display:block;margin:12px 0;padding:18px;border:1.5px solid #d7c9bb;border-radius:18px;background:#fffdfa;box-shadow:0 4px 12px rgba(31,26,23,.04)}
+    .room-title{font-size:19px;line-height:1.4;font-weight:850;overflow-wrap:anywhere}
+    .room-meta{font-size:13px;line-height:1.4;color:#5d5248;font-weight:650;margin-top:5px}
+    .actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:15px}
+    .secondary-actions{grid-template-columns:repeat(3,minmax(0,1fr));padding-top:13px;border-top:1px solid #e6dbcf;margin-top:13px}
+    .small{display:flex;justify-content:center;align-items:center;min-height:48px;width:100%;border:1.5px solid #c9bbae;border-radius:12px;background:#fff;color:#302821;padding:10px 8px;font-size:14px;font-weight:800;line-height:1.25;cursor:pointer;white-space:normal;word-break:keep-all;text-align:center}
+    .small:hover{filter:brightness(.97)}
+    .small:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .small:disabled{opacity:.55;cursor:wait}
+    .small.enter{background:#795738;border-color:#795738;color:#fff}
+    .small.edit{background:#f0dfc9;border-color:#ad8860;color:#51371f}
+    .small.manage{background:#faf6f1;border-color:#c9bbae;color:#51463c}
+    .small.danger{background:#fff1ee;border-color:#c89088;color:#953e38}
+    .small.ok{background:#edf8f0;border-color:#91b89b;color:#225e39}
+    .empty{padding:24px;text-align:center;color:#65594f;font-size:14px}
+    .section-label{margin:25px 0 10px;font-size:15px;font-weight:850;color:#584538;letter-spacing:.02em}
+    .archived-room{background:#faf7f3}
     .title-status{font-size:13px;color:#326846;min-height:0;margin:-6px 0 12px;font-weight:700}
     .title-status:empty{display:none}
     .rename-panel{grid-column:1/-1;padding:14px;background:#faf4eb;border:1px solid rgba(139,104,71,.25);border-radius:15px}
@@ -41,7 +49,18 @@
     .rename-cancel{background:#fff;color:var(--text);border:1px solid var(--line)}
     .rename-feedback{font-size:13px;color:var(--danger);min-height:0;margin-top:8px}
     .rename-feedback:empty{display:none}
-    @media(max-width:620px){.grid{grid-template-columns:1fr}.grid .wide{grid-column:auto}.room{grid-template-columns:1fr}.actions{justify-content:flex-start}}
+    @media(max-width:620px){
+      .grid{grid-template-columns:1fr}
+      .grid .wide{grid-column:auto}
+      main{padding:16px 10px 32px}
+      .card{padding:17px 14px}
+      .room{padding:16px 12px;margin:12px 0}
+      .actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+      .secondary-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+      .small{min-height:48px;font-size:14px;padding:9px 6px}
+      .secondary-actions .small{font-size:13px}
+    }
+    @media(max-width:350px){.secondary-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body>
@@ -91,11 +110,14 @@
         const archived=!!r.is_archived;
         const editTitleButton='<button class="small edit" type="button" data-edit-title="'+esc(r.id)+'">제목 수정</button>';
         const state=archived?'보관됨':(r.is_active?'입장 가능':'닫힘');
-        const actionButtons=archived
-          ? editTitleButton+'<button class="small ok" data-archive="'+r.id+'" data-archived="true">복원</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">완전 삭제</button>'
-          : '<button class="small" data-enter="'+r.id+'">입장</button>'+editTitleButton+'<button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small" data-archive="'+r.id+'" data-archived="false">보관</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button>';
+        const mainButtons=archived
+          ? editTitleButton+'<button class="small ok" data-archive="'+r.id+'" data-archived="true">복원</button>'
+          : '<button class="small enter" data-enter="'+r.id+'">입장</button>'+editTitleButton+'<button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button>';
+        const manageButtons=archived
+          ? '<button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">완전 삭제</button>'
+          : '<button class="small '+(r.is_active?'manage':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small manage" data-archive="'+r.id+'" data-archived="false">보관</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button>';
         const editPanel='<div class="rename-panel" hidden><label>새 채팅방 제목<input class="rename-input" type="text" maxlength="50" autocomplete="off" aria-label="새 채팅방 제목"></label><div class="rename-actions"><button class="rename-save" type="button" data-save-title>저장</button><button class="rename-cancel" type="button" data-cancel-title>취소</button></div><div class="rename-feedback" role="alert"></div></div>';
-        return '<div class="room '+(archived?'archived-room':'')+'"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+state+'</div></div><div class="actions">'+actionButtons+'</div>'+editPanel+'</div>';
+        return '<div class="room '+(archived?'archived-room':'')+'"><div class="room-info"><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+state+'</div></div><div class="actions primary-actions">'+mainButtons+'</div><div class="actions secondary-actions">'+manageButtons+'</div>'+editPanel+'</div>';
       };
       const active=d.rooms.filter(r=>!r.is_archived), archived=d.rooms.filter(r=>r.is_archived);
       roomsEl.innerHTML=
