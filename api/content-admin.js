@@ -284,6 +284,32 @@ async function deleteImageKitFile(fileId) {
 async function handleChatAdmin(body, res) {
   const action = normalize(body.action);
 
+  if (action === 'chat-get-sound-config') {
+    const settings = await db('site_settings?key=eq.chat_sound_default_volume&select=value&limit=1');
+    const saved = Number(Array.isArray(settings) ? settings[0]?.value?.level : 0);
+    res.status(200).json({ ok: true, level: [30, 60, 100].includes(saved) ? saved : 100 });
+    return;
+  }
+
+  if (action === 'chat-set-sound-config') {
+    const level = Number(body.level);
+    if (![30, 60, 100].includes(level)) {
+      res.status(400).json({ message: '알림 음량은 작게, 보통, 크게 중에서 선택해 주세요.' });
+      return;
+    }
+    await db('site_settings?on_conflict=key', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({
+        key: 'chat_sound_default_volume',
+        value: { level },
+        updated_at: new Date().toISOString()
+      })
+    });
+    res.status(200).json({ ok: true, level });
+    return;
+  }
+
   if (action === 'chat-list-rooms') {
     const rooms = await db('chat_rooms?select=id,code,title,is_active,is_archived,archived_at,created_at,updated_at,last_activity_at&order=created_at.desc');
     res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
