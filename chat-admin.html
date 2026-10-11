@@ -28,6 +28,19 @@
     .empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
     .section-label{margin:18px 0 6px;font-size:12px;font-weight:850;color:var(--muted);letter-spacing:.04em}
     .archived-room{opacity:.72}
+    .small.edit{border-color:rgba(139,104,71,.45);color:#735337;background:#fffaf3}
+    .title-status{font-size:13px;color:#326846;min-height:0;margin:-6px 0 12px;font-weight:700}
+    .title-status:empty{display:none}
+    .rename-panel{grid-column:1/-1;padding:14px;background:#faf4eb;border:1px solid rgba(139,104,71,.25);border-radius:15px}
+    .rename-panel[hidden]{display:none}
+    .rename-panel label{font-size:14px}
+    .rename-panel input{font-size:16px;margin-top:7px;border-color:rgba(139,104,71,.3)}
+    .rename-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+    .rename-actions button{min-height:44px;padding:0 18px;border-radius:12px;font-size:14px;font-weight:800}
+    .rename-save{background:var(--accent);color:white;border:1px solid var(--accent)}
+    .rename-cancel{background:#fff;color:var(--text);border:1px solid var(--line)}
+    .rename-feedback{font-size:13px;color:var(--danger);min-height:0;margin-top:8px}
+    .rename-feedback:empty{display:none}
     @media(max-width:620px){.grid{grid-template-columns:1fr}.grid .wide{grid-column:auto}.room{grid-template-columns:1fr}.actions{justify-content:flex-start}}
   </style>
 </head>
@@ -47,12 +60,13 @@
 
   <section class="card">
     <h2>채팅방 목록</h2>
+    <div class="title-status" id="titleUpdateStatus" role="status" aria-live="polite"></div>
     <div id="rooms"><div class="empty">불러오는 중...</div></div>
   </section>
 </main>
 <script>
   const ADMIN_KEY='wjarchiveAdminAccessToken';
-  const statusEl=document.getElementById('status'),roomsEl=document.getElementById('rooms');
+  const statusEl=document.getElementById('status'),roomsEl=document.getElementById('rooms'),titleUpdateStatus=document.getElementById('titleUpdateStatus');
   function token(){return sessionStorage.getItem(ADMIN_KEY)||''}
   async function api(payload){
     const t=token();if(!t)throw new Error('먼저 관리자 페이지에서 로그인해 주세요.');
@@ -75,16 +89,68 @@
       if(!d.rooms.length){roomsEl.innerHTML='<div class="empty">아직 만든 채팅방이 없습니다.</div>';return}
       const rowHtml=r=>{
         const archived=!!r.is_archived;
+        const editTitleButton='<button class="small edit" type="button" data-edit-title="'+esc(r.id)+'">제목 수정</button>';
         const state=archived?'보관됨':(r.is_active?'입장 가능':'닫힘');
         const actionButtons=archived
-          ? '<button class="small ok" data-archive="'+r.id+'" data-archived="true">복원</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">완전 삭제</button>'
-          : '<button class="small" data-enter="'+r.id+'">입장</button><button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small" data-archive="'+r.id+'" data-archived="false">보관</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button>';
-        return '<div class="room '+(archived?'archived-room':'')+'"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+state+'</div></div><div class="actions">'+actionButtons+'</div></div>';
+          ? editTitleButton+'<button class="small ok" data-archive="'+r.id+'" data-archived="true">복원</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">완전 삭제</button>'
+          : '<button class="small" data-enter="'+r.id+'">입장</button>'+editTitleButton+'<button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small" data-archive="'+r.id+'" data-archived="false">보관</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button>';
+        const editPanel='<div class="rename-panel" hidden><label>새 채팅방 제목<input class="rename-input" type="text" maxlength="50" autocomplete="off" aria-label="새 채팅방 제목"></label><div class="rename-actions"><button class="rename-save" type="button" data-save-title>저장</button><button class="rename-cancel" type="button" data-cancel-title>취소</button></div><div class="rename-feedback" role="alert"></div></div>';
+        return '<div class="room '+(archived?'archived-room':'')+'"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+state+'</div></div><div class="actions">'+actionButtons+'</div>'+editPanel+'</div>';
       };
       const active=d.rooms.filter(r=>!r.is_archived), archived=d.rooms.filter(r=>r.is_archived);
       roomsEl.innerHTML=
         '<div class="section-label">사용 중</div>'+(active.length?active.map(rowHtml).join(''):'<div class="empty">사용 중인 채팅방이 없습니다.</div>')+
         '<div class="section-label">보관함</div>'+(archived.length?archived.map(rowHtml).join(''):'<div class="empty">보관된 채팅방이 없습니다.</div>');
+      roomsEl.querySelectorAll('[data-edit-title]').forEach(b=>b.addEventListener('click',()=>{
+        titleUpdateStatus.textContent='';
+        const row=b.closest('.room');
+        const panel=row?.querySelector('.rename-panel');
+        const room=d.rooms.find(item=>String(item.id)===String(b.dataset.editTitle));
+        if(!panel||!room)return;
+        roomsEl.querySelectorAll('.rename-panel').forEach(item=>item.hidden=true);
+        const input=panel.querySelector('.rename-input');
+        const feedback=panel.querySelector('.rename-feedback');
+        feedback.textContent='';
+        input.value=room.title||'';
+        panel.hidden=false;
+        input.focus();
+        input.select();
+      }));
+      roomsEl.querySelectorAll('[data-cancel-title]').forEach(b=>b.addEventListener('click',()=>{
+        b.closest('.rename-panel').hidden=true;
+      }));
+      roomsEl.querySelectorAll('[data-save-title]').forEach(b=>b.addEventListener('click',async()=>{
+        const panel=b.closest('.rename-panel');
+        const row=b.closest('.room');
+        const editButton=row.querySelector('[data-edit-title]');
+        const room=d.rooms.find(item=>String(item.id)===String(editButton?.dataset.editTitle));
+        const input=panel.querySelector('.rename-input');
+        const feedback=panel.querySelector('.rename-feedback');
+        const title=input.value.trim();
+        feedback.textContent='';
+        if(!room)return;
+        if(!title||title.length>50){
+          feedback.textContent='제목은 1~50자로 입력해 주세요.';
+          input.focus();
+          return;
+        }
+        if(title===room.title){panel.hidden=true;return}
+        b.disabled=true;
+        try{
+          await api({action:'chat-rename-room',roomId:room.id,expectedTitle:room.title,title});
+          titleUpdateStatus.textContent='채팅방 제목이 수정되었습니다.';
+          await load();
+        }catch(e){
+          feedback.textContent=e.message||'제목을 저장하지 못했습니다.';
+          if(e.message&&e.message.includes('다른 관리자')){
+            titleUpdateStatus.textContent='방 이름이 다른 관리자에 의해 변경되었을 수 있습니다.';
+          }
+        }finally{b.disabled=false}
+      }));
+      roomsEl.querySelectorAll('.rename-input').forEach(input=>input.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){e.preventDefault();input.closest('.rename-panel').querySelector('[data-save-title]').click()}
+        if(e.key==='Escape'){input.closest('.rename-panel').querySelector('[data-cancel-title]').click()}
+      }));
       roomsEl.querySelectorAll('[data-enter]').forEach(b=>b.addEventListener('click',async()=>{
         b.disabled=true;
         try{
