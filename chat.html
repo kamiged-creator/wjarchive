@@ -137,11 +137,13 @@
       </div>
       <div class="field" id="roomCodeField"><label for="roomCode">방 코드</label><input id="roomCode" autocomplete="off" placeholder="예: BOKJAKSO"></div>
       <div class="join-selected" id="selectedRoom"></div>
-      <div class="field"><label for="roomPassword">비밀번호</label><input id="roomPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력"></div>
-      <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
-      <button class="primary" id="joinBtn" type="button">채팅방 입장</button>
-      <div class="status" id="joinStatus"></div>
-      <div class="help" id="joinHelp">초대받지 않은 사용자는 입장할 수 없습니다.</div>
+      <div id="joinCredentials" style="display:none">
+        <div class="field"><label for="roomPassword">비밀번호</label><input id="roomPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력"></div>
+        <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
+        <button class="primary" id="joinBtn" type="button">선택한 방 입장</button>
+        <div class="status" id="joinStatus"></div>
+        <div class="help" id="joinHelp">방마다 비밀번호가 다를 수 있습니다.</div>
+      </div>
       <div class="admin-room-list" id="adminRoomList">
         <h2>채팅방 목록</h2>
         <div id="adminRooms"><div class="admin-empty">불러오는 중...</div></div>
@@ -186,6 +188,7 @@
   window.visualViewport?.addEventListener('scroll',syncViewportHeight,{passive:true});
 
   const KEY='bokjaksoChatSessionV1';
+  const SESSIONS_KEY='bokjaksoChatSessionsV2';
   const REMEMBER_MS=30*24*60*60*1000;
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const THEME_KEY='bokjaksoChatThemeV1';
@@ -227,12 +230,41 @@
     if(!r.ok) throw new Error(data.message||'요청에 실패했습니다.');
     return data;
   }
+  function getRememberedSessions(){
+    let map={};
+    try{
+      map=JSON.parse(localStorage.getItem(SESSIONS_KEY)||'{}')||{};
+      const now=Date.now();
+      for(const [code,s] of Object.entries(map)){
+        if(!s?.expiresAt||s.expiresAt<=now||!s?.member?.id||!s?.sessionToken||!s?.room?.id) delete map[code];
+      }
+      const legacy=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(legacy?.expiresAt>Date.now()&&legacy?.room?.code&&legacy?.member?.id&&legacy?.sessionToken){
+        map[String(legacy.room.code).toUpperCase()]=legacy;
+        localStorage.removeItem(KEY);
+      }
+      localStorage.setItem(SESSIONS_KEY,JSON.stringify(map));
+    }catch(_){map={}}
+    return map;
+  }
+  function rememberedFor(code){
+    return getRememberedSessions()[String(code||'').toUpperCase()]||null;
+  }
   function saveSession(){
     const saved={...session,expiresAt:Date.now()+REMEMBER_MS};
-    localStorage.setItem(KEY,JSON.stringify(saved));
+    const map=getRememberedSessions();
+    map[String(session.room.code||'').toUpperCase()]=saved;
+    localStorage.setItem(SESSIONS_KEY,JSON.stringify(map));
   }
-  function clearSession(){
-    localStorage.removeItem(KEY);
+  function forgetCurrentRoom(){
+    if(session?.room?.code){
+      const map=getRememberedSessions();
+      delete map[String(session.room.code).toUpperCase()];
+      localStorage.setItem(SESSIONS_KEY,JSON.stringify(map));
+    }
+  }
+  function clearSession(removeRemembered=false){
+    if(removeRemembered)forgetCurrentRoom();
     session=null;lastId=0;lastSyncAt='';
   }
   function showChat(){
@@ -298,7 +330,7 @@
       if(data.syncAt)lastSyncAt=data.syncAt;
       if(initial)els.messages.scrollTop=els.messages.scrollHeight;
     }catch(e){
-      if(/다시 입장|제한/.test(e.message)){alert(e.message);showJoin()}
+      if(/다시 입장|제한|보관|닫혀/.test(e.message)){alert(e.message);forgetCurrentRoom();showJoin(true);loadPublicRooms()}
     }finally{busy=false}
   }
   async function join(){
@@ -439,7 +471,7 @@
     showJoin(true);
     if(code)els.roomCode.value=code;
     els.roomPassword.value='';
-    els.joinStatus.textContent='이 기기에서는 30일 동안 입장이 기억됩니다.';
+    els.joinStatus.textContent='이 방은 30일 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
   }
   async function loadPublicRooms(){
     try{
@@ -449,18 +481,28 @@
         els.publicRooms.innerHTML='<div class="admin-empty">현재 입장 가능한 채팅방이 없습니다.</div>';
         return;
       }
-      els.publicRooms.innerHTML=rooms.map(room=>
-        '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+'</div><div class="public-room-code">#'+esc(room.code)+'</div></div><button class="public-room-enter" type="button" data-public-room="'+esc(room.code)+'">입장</button></div>'
-      ).join('');
+      const remembered=getRememberedSessions();
+      els.publicRooms.innerHTML=rooms.map(room=>{
+        const known=Boolean(remembered[String(room.code).toUpperCase()]);
+        return '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+'</div><div class="public-room-code">#'+esc(room.code)+(known?' · 이전 입장':'')+'</div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
+      }).join('');
       els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
+        const code=String(btn.dataset.publicRoom||'').toUpperCase();
+        const known=rememberedFor(code);
+        if(known){
+          session={room:known.room,member:known.member,sessionToken:known.sessionToken};
+          saveSession();
+          showChat();
+          return;
+        }
         els.publicRooms.querySelectorAll('[data-public-room]').forEach(b=>b.classList.remove('selected'));
         btn.classList.add('selected');
-        els.roomCode.value=btn.dataset.publicRoom;
-        const room=rooms.find(r=>String(r.code)===String(btn.dataset.publicRoom));
+        els.roomCode.value=code;
+        const room=rooms.find(r=>String(r.code).toUpperCase()===code);
         els.selectedRoom.style.display='block';
-        els.selectedRoom.textContent='선택한 방 · '+(room?.title||btn.dataset.publicRoom);
+        els.selectedRoom.textContent='선택한 방 · '+(room?.title||code);
         els.joinCredentials.style.display='block';
-        els.joinStatus.textContent='이 방의 비밀번호와 닉네임을 입력해 주세요.';
+        els.joinStatus.textContent='처음 입장하는 방입니다. 비밀번호와 닉네임을 입력해 주세요.';
         setTimeout(()=>{
           els.joinCredentials.scrollIntoView({behavior:'smooth',block:'nearest'});
           els.roomPassword.focus();
@@ -511,8 +553,8 @@
             sessionToken:data.sessionToken,
             expiresAt:Date.now()+REMEMBER_MS
           };
-          localStorage.setItem(KEY,JSON.stringify(saved));
           session={room:data.room,member:data.member,sessionToken:data.sessionToken};
+          saveSession();
           showChat();
         }catch(e){
           alert(e.message||'채팅방에 입장하지 못했습니다.');
@@ -577,20 +619,13 @@
     }
   }catch(_){}
   try{
-    const saved=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(saved?.expiresAt&&saved.expiresAt<=Date.now()){
-      localStorage.removeItem(KEY);
-    }else if(saved?.member?.id&&saved?.sessionToken&&saved?.room?.id){
-      const savedCode=String(saved.room.code||'').toUpperCase();
-      if(!invitedRoom||savedCode===invitedRoom){
+    getRememberedSessions();
+    if(invitedRoom){
+      const saved=rememberedFor(invitedRoom);
+      if(saved){
         session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken};
+        saveSession();
         showChat();
-      }else{
-        // A different room was explicitly requested; never reopen the remembered room.
-        session=null;
-        lastId=0;
-        lastSyncAt='';
-        els.roomPassword.value='';
       }
     }
   }catch(_){clearSession()}
