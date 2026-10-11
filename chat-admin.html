@@ -26,6 +26,8 @@
     .small{border:1px solid var(--line);border-radius:999px;background:#fff;padding:7px 10px;font-size:11px;font-weight:750;cursor:pointer}
     .small.danger{color:var(--danger)}.small.ok{color:var(--ok)}
     .empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+    .section-label{margin:18px 0 6px;font-size:12px;font-weight:850;color:var(--muted);letter-spacing:.04em}
+    .archived-room{opacity:.72}
     @media(max-width:620px){.grid{grid-template-columns:1fr}.grid .wide{grid-column:auto}.room{grid-template-columns:1fr}.actions{justify-content:flex-start}}
   </style>
 </head>
@@ -63,9 +65,21 @@
     try{
       const d=await api({action:'chat-list-rooms'});
       if(!d.rooms.length){roomsEl.innerHTML='<div class="empty">아직 만든 채팅방이 없습니다.</div>';return}
-      roomsEl.innerHTML=d.rooms.map(r=>'<div class="room"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+(r.is_active?'입장 가능':'닫힘')+'</div></div><div class="actions"><button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button></div></div>').join('');
+      const rowHtml=r=>{
+        const archived=!!r.is_archived;
+        const state=archived?'보관됨':(r.is_active?'입장 가능':'닫힘');
+        const actionButtons=archived
+          ? '<button class="small ok" data-archive="'+r.id+'" data-archived="true">복원</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">완전 삭제</button>'
+          : '<button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button><button class="small '+(r.is_active?'danger':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small" data-archive="'+r.id+'" data-archived="false">보관</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button>';
+        return '<div class="room '+(archived?'archived-room':'')+'"><div><div class="room-title">'+esc(r.title)+'</div><div class="room-meta">#'+esc(r.code)+' · '+state+'</div></div><div class="actions">'+actionButtons+'</div></div>';
+      };
+      const active=d.rooms.filter(r=>!r.is_archived), archived=d.rooms.filter(r=>r.is_archived);
+      roomsEl.innerHTML=
+        '<div class="section-label">사용 중</div>'+(active.length?active.map(rowHtml).join(''):'<div class="empty">사용 중인 채팅방이 없습니다.</div>')+
+        '<div class="section-label">보관함</div>'+(archived.length?archived.map(rowHtml).join(''):'<div class="empty">보관된 채팅방이 없습니다.</div>');
       roomsEl.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{const url=new URL('/chat.html',window.location.origin);url.searchParams.set('room',b.dataset.copy);const text=url.toString();try{await navigator.clipboard.writeText(text);alert('초대 링크를 복사했습니다.\n비밀번호는 따로 전달해 주세요.')}catch(_){prompt('아래 초대 링크를 복사해 주세요.',text)}}));
-      roomsEl.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',async()=>{const title=decodeURIComponent(b.dataset.title||'채팅방');const ok=confirm('['+title+'] 방을 삭제할까요?\n삭제하면 이 방의 대화와 참여 기록도 함께 삭제되며 복구할 수 없습니다.');if(!ok)return;try{await api({action:'chat-delete-room',roomId:b.dataset.delete});alert('채팅방을 삭제했습니다.');load()}catch(e){alert(e.message)}}));
+      roomsEl.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',async()=>{const title=decodeURIComponent(b.dataset.title||'채팅방');const ok=confirm('['+title+'] 방을 완전히 삭제할까요?\n삭제하면 이 방의 대화와 참여 기록도 함께 삭제되며 복구할 수 없습니다.');if(!ok)return;try{await api({action:'chat-delete-room',roomId:b.dataset.delete});alert('채팅방을 삭제했습니다.');load()}catch(e){alert(e.message)}}));
+      roomsEl.querySelectorAll('[data-archive]').forEach(b=>b.addEventListener('click',async()=>{const restoring=b.dataset.archived==='true';const msg=restoring?'이 채팅방을 다시 사용할까요?':'이 채팅방을 보관할까요?\n보관 중에는 일반 사용자가 입장할 수 없습니다.';if(!confirm(msg))return;try{await api({action:'chat-set-archived',roomId:b.dataset.archive,isArchived:!restoring});alert(restoring?'채팅방을 복원했습니다.':'채팅방을 보관했습니다.');load()}catch(e){alert(e.message)}}));
       roomsEl.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',async()=>{await api({action:'chat-set-active',roomId:b.dataset.toggle,isActive:b.dataset.active!=='true'});load()}));
       roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (4자 이상)');if(!p)return;try{await api({action:'chat-change-password',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.')}catch(e){alert(e.message)}}));
     }catch(e){roomsEl.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
