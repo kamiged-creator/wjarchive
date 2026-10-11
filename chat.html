@@ -105,7 +105,7 @@
     .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--composer-line);border-radius:14px;background:var(--composer-input);color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
     .photo:disabled,.send:disabled{opacity:.55;cursor:wait}
     .send{width:72px;height:46px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:850}
-    .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
+    .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:var(--composer-input);border:1px solid var(--composer-line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
     .mine .image-bubble{border-radius:16px 16px 4px 16px}
     .chat-image{display:block;max-width:min(220px,65vw);max-height:240px;width:auto;height:auto;object-fit:contain;border-radius:12px;cursor:zoom-in}
     .chat-image:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
@@ -350,6 +350,8 @@
         let suppressImageOpen=false;
         img.addEventListener('click',()=>{if(suppressImageOpen){suppressImageOpen=false;return}openImage(m.image_url)});
         img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openImage(m.image_url)}});
+        img.addEventListener('load',()=>trimDarkImageMargins(img,m.image_url));
+        if(img.complete&&img.naturalWidth)trimDarkImageMargins(img,m.image_url);
         if(mine){
           const target=wrap.querySelector('.image-bubble');
           attachLongPressDelete(target,m.id,()=>{suppressImageOpen=true});
@@ -439,6 +441,59 @@
       }else{
         els.messageInput.focus();
       }
+    }
+  }
+  // Only the small chat preview is cleaned. Tapping it always opens the untouched original image.
+  // Preserve artwork, text and dark photos: remove only consistent near-black outer bands.
+  async function trimDarkImageMargins(img,originalUrl){
+    if(img.dataset.trimAttempted)return;
+    img.dataset.trimAttempted='1';
+    if(!img.naturalWidth||!img.naturalHeight||img.naturalWidth/img.naturalHeight>.72)return;
+    let bitmap;
+    try{
+      const response=await fetch(originalUrl,{mode:'cors'});
+      if(!response.ok)return;
+      bitmap=await createImageBitmap(await response.blob());
+      const w=Math.min(320,bitmap.width),h=Math.round(w*bitmap.height/bitmap.width);
+      if(w<40||h<80)return;
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      if(!ctx)return;
+      ctx.drawImage(bitmap,0,0,w,h);
+      const pixels=ctx.getImageData(0,0,w,h).data;
+      const darkAt=(x,y)=>{
+        const i=(y*w+x)*4;
+        return pixels[i+3]>230&&pixels[i]<48&&pixels[i+1]<48&&pixels[i+2]<48;
+      };
+      const rowIsMatte=y=>{
+        let n=0,dark=0;
+        for(let x=0;x<w;x+=4){n++;if(darkAt(x,y))dark++}
+        return dark/n>.93;
+      };
+      let top=0,bottom=h;
+      while(top<Math.floor(h*.22)&&rowIsMatte(top))top++;
+      while(bottom>Math.ceil(h*.78)&&rowIsMatte(bottom-1))bottom--;
+      const colIsMatte=x=>{
+        let n=0,dark=0;
+        for(let y=top;y<bottom;y+=4){n++;if(darkAt(x,y))dark++}
+        return n>0&&dark/n>.94;
+      };
+      let left=0,right=w;
+      while(left<Math.floor(w*.16)&&colIsMatte(left))left++;
+      while(right>Math.ceil(w*.84)&&colIsMatte(right-1))right--;
+      if(top+h-bottom+left+w-right<8||right-left<40||bottom-top<50)return;
+      const preview=document.createElement('canvas');preview.width=right-left;preview.height=bottom-top;
+      preview.getContext('2d').drawImage(canvas,left,top,preview.width,preview.height,0,0,preview.width,preview.height);
+      preview.toBlob(blob=>{
+        if(!blob||!img.isConnected)return;
+        const url=URL.createObjectURL(blob);
+        img.addEventListener('load',()=>URL.revokeObjectURL(url),{once:true});
+        img.src=url;
+      },'image/webp',.86);
+    }catch(_){
+      // A photo host without CORS support still displays the original preview normally.
+    }finally{
+      if(bitmap)bitmap.close();
     }
   }
   function openImage(url){
