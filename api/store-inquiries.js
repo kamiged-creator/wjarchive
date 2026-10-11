@@ -95,6 +95,11 @@ async function handleChat(body, res) {
       res.status(400).json({ message: '방 코드, 비밀번호, 닉네임을 입력해 주세요.' });
       return;
     }
+    // Keep the dedicated administrator display name distinguishable from visitor accounts.
+    if (nickname === '관리자') {
+      res.status(400).json({ message: '관리자는 사용할 수 없는 닉네임입니다. 다른 이름을 입력해 주세요.' });
+      return;
+    }
 
     const rooms = await supabaseRequest(`chat_rooms?code=eq.${encodeURIComponent(roomCode)}&is_active=eq.true&is_archived=eq.false&select=id,title,code,password_salt,password_hash`);
     const room = Array.isArray(rooms) ? rooms[0] : null;
