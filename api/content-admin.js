@@ -294,6 +294,20 @@ async function handleChatAdmin(body, res) {
     return;
   }
 
+  if (action === 'chat-delete-room') {
+    const roomId = normalize(body.roomId);
+    if (!roomId) {
+      res.status(400).json({ message: '삭제할 방 정보가 없습니다.' });
+      return;
+    }
+    await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
+      method: 'DELETE',
+      headers: { Prefer: 'return=minimal' }
+    });
+    res.status(200).json({ ok: true });
+    return;
+  }
+
   if (action === 'chat-set-active') {
     const roomId = normalize(body.roomId);
     if (!roomId) {
