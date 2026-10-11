@@ -28,13 +28,13 @@
     .card{background:color-mix(in srgb,var(--paper) 96%,transparent);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
     .join{padding:28px 22px}
     .eyebrow{font-size:11px;font-weight:850;letter-spacing:.16em;color:var(--accent)}
-    h1{font-size:30px;margin:8px 0 8px;letter-spacing:-.04em}
+    h1{font-size:30px;margin:8px 0 8px;letter-spacing:-.04em;font-weight:800}
     .lead{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.7}
     .field{margin-top:13px}
     .field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}
     .field input{width:100%;height:48px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--text);padding:0 14px;outline:none}
     .field input:focus{border-color:rgba(139,104,71,.55);box-shadow:0 0 0 3px rgba(139,104,71,.09)}
-    .primary{width:100%;height:50px;margin-top:18px;border:0;border-radius:14px;background:var(--primary);color:#fff;font-weight:800;box-shadow:0 8px 18px rgba(139,104,71,.14);transition:background .18s ease,transform .12s ease}
+    .primary{width:100%;height:50px;margin-top:18px;border:0;border-radius:14px;background:var(--primary);color:#fff;font-weight:750;box-shadow:0 8px 18px rgba(139,104,71,.14);transition:background .18s ease,transform .12s ease}
     .primary:hover{background:color-mix(in srgb,var(--primary) 90%,#000)}
     .primary:active{transform:translateY(1px)}
     .help{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
@@ -48,26 +48,26 @@
     .admin-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 11px;font-size:11px;font-weight:800}
     .admin-empty{padding:14px 0;color:var(--muted);font-size:12px;text-align:center}
     .public-room-list{margin:18px 0 18px;border:2px solid var(--line);border-radius:20px;padding:16px;background:color-mix(in srgb,var(--paper) 94%,var(--primary) 6%);box-shadow:0 8px 24px rgba(0,0,0,.04)}
-    .public-room-list h2{font-size:16px;margin:0 0 10px;font-weight:900;letter-spacing:-.03em}
+    .public-room-list h2{font-size:16px;margin:0 0 10px;font-weight:800;letter-spacing:-.03em}
     .public-room-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
     .public-room-item:first-of-type{border-top:0}
-    .public-room-name{font-size:15px;font-weight:900;letter-spacing:-.02em}
+    .public-room-name{font-size:15px;font-weight:750;letter-spacing:-.02em}
     .public-room-code{font-size:12px;color:var(--muted);margin-top:4px}
-    .public-room-enter{min-width:72px;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:10px 14px;font-size:13px;font-weight:900;white-space:nowrap}
+    .public-room-enter{min-width:72px;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:10px 14px;font-size:13px;font-weight:750;white-space:nowrap}
     .public-room-enter.selected{background:var(--primary);color:#fff}
     .join-selected{margin:0 0 14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:12px;font-weight:800;color:var(--text);display:none}
     .entry-modal{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,20,16,.48);backdrop-filter:blur(3px)}
     .entry-modal.show{display:flex}
     .entry-dialog{width:min(420px,100%);background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
-    .entry-title{font-size:22px;font-weight:900;letter-spacing:-.04em;margin:0 0 6px}
-    .entry-room{margin:0 0 18px;padding:13px 14px;border:2px solid color-mix(in srgb,var(--primary) 55%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:16px;font-weight:900}
+    .entry-title{font-size:22px;font-weight:800;letter-spacing:-.04em;margin:0 0 6px}
+    .entry-room{margin:0 0 18px;padding:13px 14px;border:2px solid color-mix(in srgb,var(--primary) 55%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:16px;font-weight:750}
     .entry-field{margin-top:13px}
-    .entry-field label{display:block;font-size:13px;font-weight:900;margin:0 0 7px}
-    .entry-field input{width:100%;height:54px;border:2px solid color-mix(in srgb,var(--text) 20%,var(--line));border-radius:15px;background:#fff;color:#1f1a17;padding:0 15px;font-size:16px;outline:none}
+    .entry-field label{display:block;font-size:13px;font-weight:700;margin:0 0 7px}
+    .entry-field input{width:100%;height:54px;border:2px solid color-mix(in srgb,var(--text) 20%,var(--line));border-radius:15px;background:#fff;color:#1f1a17;padding:0 15px;font-size:16px;font-weight:500;outline:none}
     body.dark .entry-field input{background:#202020;color:#f2f2f2}
     .entry-field input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 14%,transparent)}
     .entry-actions{display:flex;gap:9px;margin-top:18px}
-    .entry-cancel,.entry-submit{height:50px;border-radius:14px;font-weight:900}
+    .entry-cancel,.entry-submit{height:50px;border-radius:14px;font-weight:750}
     .entry-cancel{width:34%;border:1px solid var(--line);background:var(--paper);color:var(--muted)}
     .entry-submit{flex:1;border:0;background:var(--primary);color:#fff}
     .entry-status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
