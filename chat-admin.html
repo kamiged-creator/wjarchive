@@ -103,11 +103,26 @@
   }
   document.getElementById('createBtn').addEventListener('click',async()=>{
     statusEl.textContent='';
+    const btn=document.getElementById('createBtn');
+    btn.disabled=true;
     try{
-      await api({action:'chat-create-room',title:document.getElementById('title').value,code:document.getElementById('code').value,password:document.getElementById('password').value});
-      document.getElementById('title').value='';document.getElementById('code').value='';document.getElementById('password').value='';
-      statusEl.style.color='var(--ok)';statusEl.textContent='채팅방을 만들었습니다.';load();
-    }catch(e){statusEl.style.color='var(--danger)';statusEl.textContent=e.message}
+      const created=await api({action:'chat-create-room',title:document.getElementById('title').value,code:document.getElementById('code').value,password:document.getElementById('password').value});
+      const roomId=created.room?.id;
+      if(!roomId)throw new Error('채팅방은 만들었지만 입장 정보를 확인하지 못했습니다.');
+      const entered=await api({action:'chat-admin-enter-room',roomId});
+      const saved={
+        room:entered.room,
+        member:entered.member,
+        sessionToken:entered.sessionToken,
+        expiresAt:Date.now()+30*24*60*60*1000
+      };
+      localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
+      location.href='/chat.html';
+    }catch(e){
+      btn.disabled=false;
+      statusEl.style.color='var(--danger)';
+      statusEl.textContent=e.message;
+    }
   });
   load();
 </script>
