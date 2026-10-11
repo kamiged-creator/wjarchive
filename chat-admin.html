@@ -102,6 +102,31 @@
     return (base+suffix).slice(0,16);
   }
 
+  // Save the administrator session for the selected room, then open that room directly.
+  function enterAdminChat(entered){
+    const code=String(entered?.room?.code||'').trim().toUpperCase();
+    if(!code||!entered?.member?.id||!entered?.sessionToken){
+      throw new Error('채팅방 입장 정보를 확인하지 못했습니다.');
+    }
+    const saved={
+      room:entered.room,
+      member:entered.member,
+      sessionToken:entered.sessionToken,
+      expiresAt:Date.now()+30*24*60*60*1000
+    };
+    const key='bokjaksoChatSessionsV2';
+    let remembered={};
+    try{
+      remembered=JSON.parse(localStorage.getItem(key)||'{}')||{};
+      if(Array.isArray(remembered)||typeof remembered!=='object')remembered={};
+    }catch(_){remembered={}}
+    remembered[code]=saved;
+    localStorage.setItem(key,JSON.stringify(remembered));
+    // Keep compatibility with the chat page's legacy-session migration.
+    localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
+    location.href='/chat.html?room='+encodeURIComponent(code);
+  }
+
   async function load(){
     try{
       const d=await api({action:'chat-list-rooms'});
@@ -177,14 +202,7 @@
         b.disabled=true;
         try{
           const data=await api({action:'chat-admin-enter-room',roomId:b.dataset.enter});
-          const saved={
-            room:data.room,
-            member:data.member,
-            sessionToken:data.sessionToken,
-            expiresAt:Date.now()+30*24*60*60*1000
-          };
-          localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
-          location.href='/chat.html';
+          enterAdminChat(data);
         }catch(e){
           alert(e.message||'채팅방에 입장하지 못했습니다.');
           b.disabled=false;
@@ -210,14 +228,7 @@
       const roomId=created.room?.id;
       if(!roomId)throw new Error('채팅방은 만들었지만 입장 정보를 확인하지 못했습니다.');
       const entered=await api({action:'chat-admin-enter-room',roomId});
-      const saved={
-        room:entered.room,
-        member:entered.member,
-        sessionToken:entered.sessionToken,
-        expiresAt:Date.now()+30*24*60*60*1000
-      };
-      localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
-      location.href='/chat.html';
+      enterAdminChat(entered);
     }catch(e){
       btn.disabled=false;
       statusEl.style.color='var(--danger)';
