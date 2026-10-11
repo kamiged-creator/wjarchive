@@ -154,6 +154,7 @@
   window.visualViewport?.addEventListener('scroll',syncViewportHeight,{passive:true});
 
   const KEY='bokjaksoChatSessionV1';
+  const REMEMBER_MS=30*24*60*60*1000;
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const THEME_KEY='bokjaksoChatThemeV1';
   const els={
@@ -185,8 +186,14 @@
     if(!r.ok) throw new Error(data.message||'요청에 실패했습니다.');
     return data;
   }
-  function saveSession(){sessionStorage.setItem(KEY,JSON.stringify(session))}
-  function clearSession(){sessionStorage.removeItem(KEY);session=null;lastId=0}
+  function saveSession(){
+    const saved={...session,expiresAt:Date.now()+REMEMBER_MS};
+    localStorage.setItem(KEY,JSON.stringify(saved));
+  }
+  function clearSession(){
+    localStorage.removeItem(KEY);
+    session=null;lastId=0;lastSyncAt='';
+  }
   function showChat(){
     document.body.classList.add('chat-active');
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
@@ -194,9 +201,14 @@
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
   }
-  function showJoin(){
+  function showJoin(preserveRemembered=false){
     document.body.classList.remove('chat-active');
-    clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';clearSession();
+    clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';
+    if(preserveRemembered){
+      session=null;lastId=0;
+    }else{
+      clearSession();
+    }
   }
   function appendMessages(items){
     if(!Array.isArray(items)||!items.length)return;
@@ -372,8 +384,11 @@
     }catch(e){alert(e.message||'채팅방 삭제에 실패했습니다.')}
   }
   async function leave(){
-    try{if(session)await api({action:'chat-leave',memberId:session.member.id,sessionToken:session.sessionToken})}catch(_){}
-    showJoin();
+    const code=session?.room?.code||'';
+    showJoin(true);
+    if(code)els.roomCode.value=code;
+    els.roomPassword.value='';
+    els.joinStatus.textContent='이 기기에서는 30일 동안 입장이 기억됩니다.';
   }
   els.joinBtn.addEventListener('click',join);
   els.sendBtn.addEventListener('click',send);
@@ -393,8 +408,13 @@
     if(invitedRoom) els.roomCode.value=String(invitedRoom).toUpperCase();
   }catch(_){}
   try{
-    const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');
-    if(saved?.member?.id&&saved?.sessionToken&&saved?.room?.id){session=saved;showChat()}
+    const saved=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(saved?.expiresAt&&saved.expiresAt<=Date.now()){
+      localStorage.removeItem(KEY);
+    }else if(saved?.member?.id&&saved?.sessionToken&&saved?.room?.id){
+      session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken};
+      showChat();
+    }
   }catch(_){clearSession()}
 </script>
 </body>
