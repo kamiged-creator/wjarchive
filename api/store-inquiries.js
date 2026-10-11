@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { supabaseAdminRequest } = require('../lib/supabase-admin');
+const { getVapidKeys, validSubscription, sendChatPush } = require('../lib/chat-push');
 const allowedOrigins = new Set([
   'https://wjarchive.vercel.app',
   'https://ycuve.com',
@@ -81,6 +82,12 @@ async function getChatMember(memberId, sessionToken) {
 async function handleChat(body, res) {
   const action = clean(body.action);
 
+  if (action === 'chat-push-config') {
+    const { publicKey } = await getVapidKeys();
+    res.status(200).json({ ok: true, publicKey });
+    return;
+  }
+
   if (action === 'chat-public-list-rooms') {
     const rooms = await supabaseRequest('chat_rooms?is_active=eq.true&is_archived=eq.false&select=id,code,title,created_at&order=created_at.asc');
     res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
@@ -140,10 +147,68 @@ async function handleChat(body, res) {
     res.status(401).json({ message: member?.is_blocked ? '채팅방 이용이 제한되었습니다.' : '채팅방에 다시 입장해 주세요.' });
     return;
   }
-  const roomStateRows = await supabaseRequest(`chat_rooms?id=eq.${encodeURIComponent(member.room_id)}&select=is_active,is_archived,title&limit=1`);
+  const roomStateRows = await supabaseRequest(`chat_rooms?id=eq.${encodeURIComponent(member.room_id)}&select=is_active,is_archived,title,code&limit=1`);
   const roomState = Array.isArray(roomStateRows) ? roomStateRows[0] : null;
   if (!roomState || roomState.is_archived || !roomState.is_active) {
     res.status(403).json({ message: roomState?.is_archived ? '보관된 채팅방입니다.' : '현재 닫혀 있는 채팅방입니다.' });
+    return;
+  }
+
+  if (action === 'chat-push-subscribe') {
+    const subscription=body.subscription;
+    if(!validSubscription(subscription)){
+      res.status(400).json({message:'휴대폰 푸시 알림 정보가 올바르지 않습니다.'});
+      return;
+    }
+    const record={
+      room_id:member.room_id,
+      member_id:member.id,
+      endpoint:subscription.endpoint,
+      subscription:{
+        endpoint:subscription.endpoint,
+        expirationTime:subscription.expirationTime??null,
+        keys:{p256dh:subscription.keys.p256dh,auth:subscription.keys.auth}
+      },
+      updated_at:new Date().toISOString()
+    };
+    await supabaseRequest('chat_push_subscriptions?on_conflict=room_id,endpoint',{
+      method:'POST',
+      headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(record)
+    });
+    res.status(200).json({ok:true});
+    return;
+  }
+
+  if (action === 'chat-push-status') {
+    const endpoint=clean(body.endpoint);
+    if(!endpoint || endpoint.length>2048){
+      res.status(200).json({ok:true,subscribed:false});
+      return;
+    }
+    const registered=await supabaseRequest(
+      'chat_push_subscriptions?room_id=eq.'+encodeURIComponent(member.room_id)+
+      '&member_id=eq.'+encodeURIComponent(member.id)+
+      '&endpoint=eq.'+encodeURIComponent(endpoint)+'&select=id&limit=1'
+    );
+    res.status(200).json({ok:true,subscribed:Array.isArray(registered)&&registered.length>0});
+    return;
+  }
+
+  if (action === 'chat-push-unsubscribe') {
+    const endpoint=clean(body.endpoint);
+    if(!endpoint||endpoint.length>2048){
+      res.status(400).json({message:'해제할 알림 정보를 찾지 못했습니다.'});
+      return;
+    }
+    await supabaseRequest(
+      'chat_push_subscriptions?room_id=eq.'+encodeURIComponent(member.room_id)+
+      '&member_id=eq.'+encodeURIComponent(member.id)+
+      '&endpoint=eq.'+encodeURIComponent(endpoint),{
+        method:'DELETE',headers:{Prefer:'return=minimal'}
+      }
+    );
+    res.status(200).json({ok:true});
     return;
   }
 
@@ -242,6 +307,13 @@ async function handleChat(body, res) {
       method: 'PATCH',
       headers: { Prefer: 'return=minimal' },
       body: JSON.stringify({ last_seen_at: now, last_sent_at: now })
+    });
+    await sendChatPush({
+      roomId:member.room_id,
+      roomCode:roomState.code,
+      roomTitle:roomState.title,
+      senderMemberId:member.id,
+      senderNickname:member.nickname
     });
     res.status(200).json({ ok: true, message: Array.isArray(inserted) ? inserted[0] : null });
     return;
