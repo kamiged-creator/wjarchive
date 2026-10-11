@@ -282,7 +282,7 @@ async function handleChatAdmin(body, res) {
   const action = normalize(body.action);
 
   if (action === 'chat-list-rooms') {
-    const rooms = await db('chat_rooms?select=id,code,title,is_active,created_at,updated_at&order=created_at.desc');
+    const rooms = await db('chat_rooms?select=id,code,title,is_active,is_archived,archived_at,created_at,updated_at,last_activity_at&order=created_at.desc');
     res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
     return;
   }
@@ -326,6 +326,27 @@ async function handleChatAdmin(body, res) {
     await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
       method: 'DELETE',
       headers: { Prefer: 'return=minimal' }
+    });
+    res.status(200).json({ ok: true });
+    return;
+  }
+
+  if (action === 'chat-set-archived') {
+    const roomId = normalize(body.roomId);
+    const isArchived = Boolean(body.isArchived);
+    if (!roomId) {
+      res.status(400).json({ message: '방 정보가 없습니다.' });
+      return;
+    }
+    await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        is_archived: isArchived,
+        archived_at: isArchived ? new Date().toISOString() : null,
+        is_active: !isArchived,
+        updated_at: new Date().toISOString()
+      })
     });
     res.status(200).json({ ok: true });
     return;
