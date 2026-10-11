@@ -256,6 +256,105 @@ async function handleHideWork(body, res) {
   res.status(200).json({ ok: true, message: '작품을 숨김 처리했습니다.' });
 }
 
+
+function chatPasswordHash(password, salt) {
+  return crypto.scryptSync(String(password || ''), String(salt || ''), 64).toString('hex');
+}
+
+async function handleChatAdmin(body, res) {
+  const action = normalize(body.action);
+
+  if (action === 'chat-list-rooms') {
+    const rooms = await db('chat_rooms?select=id,code,title,is_active,created_at,updated_at&order=created_at.desc');
+    res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
+    return;
+  }
+
+  if (action === 'chat-create-room') {
+    const code = normalize(body.code).toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 24);
+    const title = normalize(body.title).slice(0, 50);
+    const password = String(body.password || '');
+    if (code.length < 3 || !title || password.length < 4) {
+      res.status(400).json({ message: '방 코드는 3자 이상, 비밀번호는 4자 이상으로 입력해 주세요.' });
+      return;
+    }
+    const salt = crypto.randomBytes(16).toString('hex');
+    const room = await db('chat_rooms?select=id,code,title,is_active,created_at', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        code,
+        title,
+        password_salt: salt,
+        password_hash: chatPasswordHash(password, salt),
+        is_active: true
+      })
+    });
+    res.status(200).json({ ok: true, room: Array.isArray(room) ? room[0] : null });
+    return;
+  }
+
+  if (action === 'chat-set-active') {
+    const roomId = normalize(body.roomId);
+    if (!roomId) {
+      res.status(400).json({ message: '방 정보가 없습니다.' });
+      return;
+    }
+    await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ is_active: Boolean(body.isActive), updated_at: new Date().toISOString() })
+    });
+    res.status(200).json({ ok: true });
+    return;
+  }
+
+  if (action === 'chat-change-password') {
+    const roomId = normalize(body.roomId);
+    const password = String(body.password || '');
+    if (!roomId || password.length < 4) {
+      res.status(400).json({ message: '새 비밀번호는 4자 이상으로 입력해 주세요.' });
+      return;
+    }
+    const salt = crypto.randomBytes(16).toString('hex');
+    await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        password_salt: salt,
+        password_hash: chatPasswordHash(password, salt),
+        updated_at: new Date().toISOString()
+      })
+    });
+    res.status(200).json({ ok: true });
+    return;
+  }
+
+  if (action === 'chat-list-members') {
+    const roomId = normalize(body.roomId);
+    const members = await db(`chat_members?room_id=eq.${encodeURIComponent(roomId)}&select=id,nickname,is_blocked,joined_at,last_seen_at&order=joined_at.desc&limit=300`);
+    res.status(200).json({ ok: true, members: Array.isArray(members) ? members : [] });
+    return;
+  }
+
+  if (action === 'chat-set-blocked') {
+    const memberId = normalize(body.memberId);
+    if (!memberId) {
+      res.status(400).json({ message: '회원 정보가 없습니다.' });
+      return;
+    }
+    await db(`chat_members?id=eq.${encodeURIComponent(memberId)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({ is_blocked: Boolean(body.isBlocked) })
+    });
+    res.status(200).json({ ok: true });
+    return;
+  }
+
+  res.status(400).json({ message: '지원하지 않는 채팅 관리자 요청입니다.' });
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -275,6 +374,7 @@ module.exports = async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const action = normalize(body.action);
 
+    if (action.startsWith('chat-')) return await handleChatAdmin(body, res);
     if (action === 'replace-lists') return await handleReplaceLists(body, res);
     if (action === 'save-work') return await handleSaveWork(body, res);
     if (action === 'hide-work') return await handleHideWork(body, res);
