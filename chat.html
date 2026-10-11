@@ -47,13 +47,15 @@
     .admin-room-meta{font-size:11px;color:var(--muted);margin-top:3px}
     .admin-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 11px;font-size:11px;font-weight:800}
     .admin-empty{padding:14px 0;color:var(--muted);font-size:12px;text-align:center}
-    .public-room-list{margin:16px 0 6px;border:1px solid var(--line);border-radius:16px;padding:12px;background:color-mix(in srgb,var(--paper) 96%,transparent)}
-    .public-room-list h2{font-size:14px;margin:0 0 8px}
-    .public-room-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+    .public-room-list{margin:18px 0 18px;border:2px solid var(--line);border-radius:20px;padding:16px;background:color-mix(in srgb,var(--paper) 94%,var(--primary) 6%);box-shadow:0 8px 24px rgba(0,0,0,.04)}
+    .public-room-list h2{font-size:16px;margin:0 0 10px;font-weight:900;letter-spacing:-.03em}
+    .public-room-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
     .public-room-item:first-of-type{border-top:0}
-    .public-room-name{font-size:13px;font-weight:800}
-    .public-room-code{font-size:11px;color:var(--muted);margin-top:3px}
-    .public-room-enter{border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);padding:8px 12px;font-size:11px;font-weight:800;white-space:nowrap}
+    .public-room-name{font-size:15px;font-weight:900;letter-spacing:-.02em}
+    .public-room-code{font-size:12px;color:var(--muted);margin-top:4px}
+    .public-room-enter{min-width:72px;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:10px 14px;font-size:13px;font-weight:900;white-space:nowrap}
+    .public-room-enter.selected{background:var(--primary);color:#fff}
+    .join-selected{margin:0 0 14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:12px;font-weight:800;color:var(--text);display:none}
     .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
     .chat.show{display:flex}
@@ -128,12 +130,13 @@
     <section class="card join" id="joinCard">
       <div class="eyebrow">PRIVATE LOUNGE</div>
       <h1>복작소 채팅방</h1>
-      <p class="lead">원하는 채팅방을 선택한 뒤 비밀번호와 닉네임을 입력해 주세요.</p>
+      <p class="lead">입장할 채팅방을 먼저 선택해 주세요. 비밀번호와 닉네임은 아래에서 입력합니다.</p>
       <div class="public-room-list" id="publicRoomList">
         <h2>채팅방 목록</h2>
         <div id="publicRooms"><div class="admin-empty">불러오는 중...</div></div>
       </div>
       <div class="field" id="roomCodeField"><label for="roomCode">방 코드</label><input id="roomCode" autocomplete="off" placeholder="예: BOKJAKSO"></div>
+      <div class="join-selected" id="selectedRoom"></div>
       <div class="field"><label for="roomPassword">비밀번호</label><input id="roomPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력"></div>
       <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
       <button class="primary" id="joinBtn" type="button">채팅방 입장</button>
@@ -202,7 +205,8 @@
     joinHelp:document.getElementById('joinHelp'),
     publicRoomList:document.getElementById('publicRoomList'),
     publicRooms:document.getElementById('publicRooms'),
-    roomCodeField:document.getElementById('roomCodeField')
+    roomCodeField:document.getElementById('roomCodeField'),
+    selectedRoom:document.getElementById('selectedRoom')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
@@ -448,9 +452,14 @@
         '<div class="public-room-item"><div><div class="public-room-name">'+esc(room.title||'채팅방')+'</div><div class="public-room-code">#'+esc(room.code)+'</div></div><button class="public-room-enter" type="button" data-public-room="'+esc(room.code)+'">입장</button></div>'
       ).join('');
       els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
+        els.publicRooms.querySelectorAll('[data-public-room]').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
         els.roomCode.value=btn.dataset.publicRoom;
+        const room=rooms.find(r=>String(r.code)===String(btn.dataset.publicRoom));
+        els.selectedRoom.style.display='block';
+        els.selectedRoom.textContent='선택한 방 · '+(room?.title||btn.dataset.publicRoom);
         els.roomPassword.focus();
-        els.joinStatus.textContent='선택한 방의 비밀번호와 닉네임을 입력해 주세요.';
+        els.joinStatus.textContent='비밀번호와 닉네임을 입력하면 선택한 방으로 들어갑니다.';
       }));
     }catch(e){
       els.publicRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
