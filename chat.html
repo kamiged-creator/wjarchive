@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>관계자 채팅 | 복작소</title>
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#fbf8f4">
   <style>
     :root{
       --bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;
@@ -133,7 +135,12 @@
     .text-modal-meta{flex:0 0 auto;padding:16px 20px 8px;color:var(--chat-meta);font-size:14px;font-weight:650}
     .text-modal-body{flex:1;min-height:0;overflow-y:auto;padding:8px 20px max(28px,env(safe-area-inset-bottom));font-size:19px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;overscroll-behavior:contain}
     .text-modal-close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-    .notice{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 14px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
+    .notice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
+    .notice-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
+    .push-toggle{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--composer-input);color:var(--admin-ink);font-size:12px;font-weight:850;cursor:pointer}
+    .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);color:var(--admin-ink)}
+    .push-toggle:disabled{opacity:.6;cursor:wait}
+    .push-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .notice-copy{min-width:0;line-height:1.5}
     .sound-toggle{flex:0 0 auto;min-height:38px;padding:6px 11px;border:1.5px solid var(--composer-line);border-radius:11px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
     .sound-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
@@ -213,7 +220,7 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
-      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="새 메시지 알림 소리 켜기">🔕 알림 켜기</button></div>
+      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -279,7 +286,7 @@
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
-    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),
+    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),pushToggle:document.getElementById('pushToggle'),
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
     adminRoomList:document.getElementById('adminRoomList'),
     adminRooms:document.getElementById('adminRooms'),
@@ -301,7 +308,7 @@
   let soundEnabled=localStorage.getItem(SOUND_KEY)==='on';
   let lastSoundAt=0;
   function updateSoundToggle(){
-    els.soundToggle.textContent=soundEnabled?'🔔 알림 켜짐':'🔕 알림 켜기';
+    els.soundToggle.textContent=soundEnabled?'🔔 소리 켜짐':'🔕 소리 켜기';
     els.soundToggle.setAttribute('aria-pressed',String(soundEnabled));
     els.soundToggle.setAttribute('aria-label',soundEnabled?'복작 알림 소리 끄기':'복작 알림 소리 켜기');
     els.soundToggle.title=soundEnabled?'새 메시지 알림 소리 끄기':'새 메시지 알림 소리 켜기';
@@ -364,6 +371,89 @@
     if(!r.ok) throw new Error(data.message||'요청에 실패했습니다.');
     return data;
   }
+  let pushEnabled=false,pushBusy=false;
+  function pushAvailable(){
+    return window.isSecureContext && ('serviceWorker' in navigator) &&
+      ('PushManager' in window) && ('Notification' in window);
+  }
+  function updatePushButton(){
+    els.pushToggle.textContent=pushBusy?'처리 중…':(pushEnabled?'🔔 휴대폰 알림 켜짐':'📱 휴대폰 알림 받기');
+    els.pushToggle.setAttribute('aria-pressed',String(pushEnabled));
+    els.pushToggle.setAttribute('aria-label',pushEnabled?'휴대폰 푸시 알림 해제':'휴대폰 푸시 알림 받기');
+    els.pushToggle.disabled=pushBusy;
+  }
+  function vapidKeyBytes(base64){
+    const encoded=base64.replace(/-/g,'+').replace(/_/g,'/');
+    const decoded=atob(encoded.padEnd(Math.ceil(encoded.length/4)*4,'='));
+    return Uint8Array.from(decoded,char=>char.charCodeAt(0));
+  }
+  async function refreshPushState(){
+    const memberId=session?.member?.id;
+    pushEnabled=false;
+    if(!memberId||!pushAvailable()){updatePushButton();return}
+    try{
+      const worker=await navigator.serviceWorker.getRegistration('/');
+      const current=await worker?.pushManager.getSubscription();
+      if(current && session?.member?.id===memberId){
+        const response=await api({action:'chat-push-status',memberId,sessionToken:session.sessionToken,endpoint:current.endpoint});
+        pushEnabled=Boolean(response.subscribed);
+      }
+    }catch(error){console.warn('알림 상태 확인 실패',error)}
+    updatePushButton();
+  }
+  async function togglePhonePush(){
+    if(!session||pushBusy)return;
+    if(!pushAvailable()){
+      alert('이 브라우저는 휴대폰 푸시 알림을 지원하지 않습니다. 안드로이드에서는 크롬으로 복작소를 열어주세요.');
+      return;
+    }
+    if(/iPhone|iPad|iPod/i.test(navigator.userAgent)&&!navigator.standalone){
+      alert('아이폰에서는 Safari의 공유 버튼을 눌러 홈 화면에 복작소를 추가한 뒤, 그 아이콘에서 열어 알림을 켜주세요.');
+      return;
+    }
+    const memberId=session.member.id,sessionToken=session.sessionToken;
+    // Request permission directly from the click gesture, before any network await.
+    let permission=Notification.permission;
+    if(!pushEnabled){
+      if(permission==='denied'){
+        alert('휴대폰 설정에서 이 사이트의 알림이 차단되어 있습니다. 브라우저 알림 설정에서 복작소를 허용해 주세요.');
+        return;
+      }
+      if(permission!=='granted'){
+        permission=await Notification.requestPermission();
+        if(permission!=='granted'){
+          alert('알림이 허용되지 않았습니다. 허용한 뒤 다시 시도해 주세요.');
+          return;
+        }
+      }
+    }
+    pushBusy=true;updatePushButton();
+    try{
+      const registration=await navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'});
+      await navigator.serviceWorker.ready;
+      let subscription=await registration.pushManager.getSubscription();
+      if(pushEnabled){
+        if(subscription){
+          await api({action:'chat-push-unsubscribe',memberId,sessionToken,endpoint:subscription.endpoint});
+        }
+        pushEnabled=false;
+        alert('이 채팅방의 휴대폰 알림을 해제했습니다.');
+      }else{
+        if(!subscription){
+          const config=await api({action:'chat-push-config'});
+          subscription=await registration.pushManager.subscribe({
+            userVisibleOnly:true,applicationServerKey:vapidKeyBytes(config.publicKey)
+          });
+        }
+        await api({action:'chat-push-subscribe',memberId,sessionToken,subscription:subscription.toJSON()});
+        pushEnabled=true;
+        alert('휴대폰 알림을 켰습니다. 복작소를 닫아도 새 메시지를 받도록 설정했어요.');
+      }
+    }catch(error){
+      alert('휴대폰 알림 설정에 실패했습니다. '+(error.message||'브라우저 설정을 확인해 주세요.'));
+    }finally{pushBusy=false;updatePushButton()}
+  }
+  updatePushButton();
   function getRememberedSessions(){
     let map={};
     try{
@@ -424,6 +514,7 @@
     els.roomTitle.textContent=session.room.title||'복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
+    refreshPushState();
   }
   function showJoin(preserveRemembered=false){
     stopEntryAutoScroll();
@@ -910,6 +1001,7 @@
     }
     join();
   });
+  els.pushToggle.addEventListener('click',togglePhonePush);
   els.soundToggle.addEventListener('click',()=>{
     soundEnabled=!soundEnabled;
     localStorage.setItem(SOUND_KEY,soundEnabled?'on':'off');
