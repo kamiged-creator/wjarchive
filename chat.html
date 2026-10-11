@@ -167,7 +167,7 @@
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     themeToggle:document.getElementById('themeToggle')
   };
-  let session=null,lastId=0,pollTimer=null,busy=false;
+  let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
     const dark=mode==='dark';
     document.body.classList.toggle('dark',dark);
@@ -196,7 +196,7 @@
   }
   function showJoin(){
     document.body.classList.remove('chat-active');
-    clearInterval(pollTimer);pollTimer=null;els.chatCard.classList.remove('show');els.joinCard.style.display='block';clearSession();
+    clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';clearSession();
   }
   function appendMessages(items){
     if(!Array.isArray(items)||!items.length)return;
@@ -207,13 +207,16 @@
       lastId=Math.max(lastId,Number(m.id)||0);
       const mine=session&&m.member_id===session.member.id;
       const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'');wrap.id='msg-'+m.id;
+      const tools=mine?'<div class="msg-tools"><button class="msg-delete" type="button" data-delete-message="'+m.id+'">삭제</button></div>':'';
       if(m.message_type==='image'&&m.image_url){
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>'+tools;
         const img=wrap.querySelector('.chat-image');
         img.addEventListener('click',()=>openImage(m.image_url));
       }else{
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>'+tools;
       }
+      const delBtn=wrap.querySelector('[data-delete-message]');
+      if(delBtn)delBtn.addEventListener('click',()=>deleteMyMessage(m.id));
       els.messages.appendChild(wrap);
     }
     if(nearBottom)els.messages.scrollTop=els.messages.scrollHeight;
@@ -221,8 +224,19 @@
   async function loadMessages(initial){
     if(!session||busy)return;busy=true;
     try{
-      const data=await api({action:'chat-list',memberId:session.member.id,sessionToken:session.sessionToken,afterId:initial?0:lastId});
-      els.activeCount.textContent=data.activeCount||1;appendMessages(data.messages);
+      const data=await api({
+        action:'chat-list',
+        memberId:session.member.id,
+        sessionToken:session.sessionToken,
+        afterId:initial?0:lastId,
+        changedSince:initial?'':lastSyncAt
+      });
+      els.activeCount.textContent=data.activeCount||1;
+      appendMessages(data.messages);
+      if(Array.isArray(data.deletedIds)){
+        for(const id of data.deletedIds)document.getElementById('msg-'+id)?.remove();
+      }
+      if(data.syncAt)lastSyncAt=data.syncAt;
       if(initial)els.messages.scrollTop=els.messages.scrollHeight;
     }catch(e){
       if(/다시 입장|제한/.test(e.message)){alert(e.message);showJoin()}
@@ -234,6 +248,14 @@
       const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:els.nickname.value});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
     }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
+  }
+  async function deleteMyMessage(messageId){
+    if(!session)return;
+    if(!confirm('이 메시지를 삭제할까요?'))return;
+    try{
+      await api({action:'chat-delete-message',memberId:session.member.id,sessionToken:session.sessionToken,messageId});
+      document.getElementById('msg-'+messageId)?.remove();
+    }catch(e){alert(e.message||'메시지를 삭제하지 못했습니다.')}
   }
   async function send(){
     const message=els.messageInput.value.trim();if(!message||!session)return;
