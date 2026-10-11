@@ -169,6 +169,11 @@
   els.leaveBtn.addEventListener('click',leave);
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   try{
+    const params=new URLSearchParams(window.location.search);
+    const invitedRoom=params.get('room');
+    if(invitedRoom) els.roomCode.value=String(invitedRoom).toUpperCase();
+  }catch(_){}
+  try{
     const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');
     if(saved?.member?.id&&saved?.sessionToken&&saved?.room?.id){session=saved;showChat()}
   }catch(_){clearSession()}
