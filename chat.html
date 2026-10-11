@@ -35,7 +35,9 @@
     .chat.show{display:flex}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
     .room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:2px}
-    .leave{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:12px;font-weight:750}
+    .head-actions{display:flex;gap:7px;align-items:center}
+    .leave,.invite{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:12px;font-weight:750}
+    .invite{color:var(--accent);background:#fffaf5}
     .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,rgba(234,223,210,.35),rgba(255,253,249,.55));scroll-behavior:smooth}
     .empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px}
     .msg{display:flex;flex-direction:column;align-items:flex-start;margin:0 0 14px}
@@ -90,7 +92,10 @@
           <div class="room-title" id="roomTitle">관계자 채팅방</div>
           <div class="room-meta"><span id="roomCodeText"></span> · 현재 접속 <span id="activeCount">1</span>명</div>
         </div>
-        <button class="leave" id="leaveBtn" type="button">나가기</button>
+        <div class="head-actions">
+          <button class="invite" id="inviteBtn" type="button">초대하기</button>
+          <button class="leave" id="leaveBtn" type="button">나가기</button>
+        </div>
       </div>
       <div class="notice">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
@@ -115,7 +120,7 @@
     nickname:document.getElementById('nickname'),joinBtn:document.getElementById('joinBtn'),joinStatus:document.getElementById('joinStatus'),
     roomTitle:document.getElementById('roomTitle'),roomCodeText:document.getElementById('roomCodeText'),activeCount:document.getElementById('activeCount'),
     messages:document.getElementById('messages'),emptyState:document.getElementById('emptyState'),
-    messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn'),
+    messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn'),inviteBtn:document.getElementById('inviteBtn'),
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose')
   };
@@ -228,6 +233,18 @@
     }catch(e){alert(e.message||'사진 업로드에 실패했습니다.')}
     finally{els.photoInput.value='';els.photoBtn.disabled=false;els.sendBtn.disabled=false}
   }
+  async function copyInvite(){
+    if(!session)return;
+    const url=new URL('/chat.html',window.location.origin);
+    url.searchParams.set('room',session.room.code);
+    const text=url.toString();
+    try{
+      await navigator.clipboard.writeText(text);
+      alert('초대 링크를 복사했습니다.\n비밀번호는 따로 전달해 주세요.');
+    }catch(_){
+      prompt('아래 초대 링크를 복사해 주세요.',text);
+    }
+  }
   async function leave(){
     try{if(session)await api({action:'chat-leave',memberId:session.member.id,sessionToken:session.sessionToken})}catch(_){}
     showJoin();
@@ -235,6 +252,7 @@
   els.joinBtn.addEventListener('click',join);
   els.sendBtn.addEventListener('click',send);
   els.leaveBtn.addEventListener('click',leave);
+  els.inviteBtn.addEventListener('click',copyInvite);
   els.photoBtn.addEventListener('click',()=>els.photoInput.click());
   els.photoInput.addEventListener('change',()=>{const file=els.photoInput.files?.[0];if(file)uploadPhoto(file)});
   els.imageClose.addEventListener('click',closeImage);
