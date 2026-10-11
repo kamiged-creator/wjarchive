@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>관계자 채팅 | 복작소</title>
+  <style>
+    :root{
+      --bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;
+      --line:rgba(31,26,23,.12);--accent:#8b6847;--soft:#eadfd2;--shadow:0 24px 60px rgba(31,26,23,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--text);background:linear-gradient(180deg,#fbf8f4,var(--bg))}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    .page{min-height:100vh;display:flex;flex-direction:column}
+    header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:rgba(255,253,249,.88);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+    .brand{font-weight:850;letter-spacing:-.03em}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .back{border:0;background:transparent;color:var(--muted);font-weight:700}
+    main{width:min(720px,100%);margin:0 auto;padding:24px 14px 28px;flex:1}
+    .card{background:rgba(255,253,249,.94);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
+    .join{padding:28px 22px}
+    .eyebrow{font-size:11px;font-weight:850;letter-spacing:.16em;color:var(--accent)}
+    h1{font-size:30px;margin:8px 0 8px;letter-spacing:-.04em}
+    .lead{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.7}
+    .field{margin-top:13px}
+    .field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}
+    .field input{width:100%;height:48px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:0 14px;outline:none}
+    .field input:focus{border-color:rgba(139,104,71,.55);box-shadow:0 0 0 3px rgba(139,104,71,.09)}
+    .primary{width:100%;height:50px;margin-top:18px;border:0;border-radius:14px;background:var(--text);color:#fff;font-weight:800}
+    .help{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
+    .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
+    .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
+    .chat.show{display:flex}
+    .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .leave{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:12px;font-weight:750}
+    .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,rgba(234,223,210,.35),rgba(255,253,249,.55));scroll-behavior:smooth}
+    .empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px}
+    .msg{display:flex;flex-direction:column;align-items:flex-start;margin:0 0 14px}
+    .msg.mine{align-items:flex-end}
+    .name{font-size:11px;color:var(--muted);margin:0 6px 4px}
+    .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.55}
+    .mine .bubble{background:#2a2521;color:#fff;border-color:#2a2521;border-radius:16px 16px 4px 16px}
+    .time{font-size:10px;color:#9b9188;margin:4px 6px 0}
+    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--paper)}
+    .composer textarea{flex:1;resize:none;max-height:112px;min-height:46px;border:1px solid var(--line);border-radius:14px;padding:11px 12px;outline:none}
+    .send{width:72px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:850}
+    .notice{padding:9px 14px;background:#fff8ec;border-bottom:1px solid rgba(139,104,71,.12);font-size:11px;color:#7f674f}
+    @media(max-width:560px){
+      header{height:60px}.sub{display:none}
+      main{padding:12px 8px 14px}.card{border-radius:20px}
+      .join{padding:24px 18px}.chat{height:calc(100vh - 86px);min-height:0}
+      .messages{padding:14px 11px}.bubble{max-width:84%}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div><div class="brand">복작소</div><div class="sub">관계자 전용 채팅</div></div>
+    <button class="back" type="button" onclick="location.href='/'">홈으로</button>
+  </header>
+  <main>
+    <section class="card join" id="joinCard">
+      <div class="eyebrow">PRIVATE LOUNGE</div>
+      <h1>관계자 채팅방</h1>
+      <p class="lead">방 코드와 비밀번호를 받은 관계자만 입장할 수 있어요. 입장 후에는 같은 방 사람들과 대화할 수 있습니다.</p>
+      <div class="field"><label for="roomCode">방 코드</label><input id="roomCode" autocomplete="off" placeholder="예: BOKJAKSO"></div>
+      <div class="field"><label for="roomPassword">비밀번호</label><input id="roomPassword" type="password" autocomplete="current-password" placeholder="비밀번호 입력"></div>
+      <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
+      <button class="primary" id="joinBtn" type="button">채팅방 입장</button>
+      <div class="status" id="joinStatus"></div>
+      <div class="help">초대받지 않은 사용자는 입장할 수 없습니다.</div>
+    </section>
+
+    <section class="card chat" id="chatCard" aria-live="polite">
+      <div class="chat-head">
+        <div>
+          <div class="room-title" id="roomTitle">관계자 채팅방</div>
+          <div class="room-meta"><span id="roomCodeText"></span> · 현재 접속 <span id="activeCount">1</span>명</div>
+        </div>
+        <button class="leave" id="leaveBtn" type="button">나가기</button>
+      </div>
+      <div class="notice">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</div>
+      <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
+      <div class="composer">
+        <textarea id="messageInput" rows="1" maxlength="1000" placeholder="메시지 입력"></textarea>
+        <button class="send" id="sendBtn" type="button">전송</button>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+  const KEY='bokjaksoChatSessionV1';
+  const els={
+    joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
+    roomCode:document.getElementById('roomCode'),roomPassword:document.getElementById('roomPassword'),
+    nickname:document.getElementById('nickname'),joinBtn:document.getElementById('joinBtn'),joinStatus:document.getElementById('joinStatus'),
+    roomTitle:document.getElementById('roomTitle'),roomCodeText:document.getElementById('roomCodeText'),activeCount:document.getElementById('activeCount'),
+    messages:document.getElementById('messages'),emptyState:document.getElementById('emptyState'),
+    messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn')
+  };
+  let session=null,lastId=0,pollTimer=null,busy=false;
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function fmtTime(value){try{return new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit'}).format(new Date(value))}catch(_){return ''}}
+  async function api(payload){
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.message||'요청에 실패했습니다.');
+    return data;
+  }
+  function saveSession(){sessionStorage.setItem(KEY,JSON.stringify(session))}
+  function clearSession(){sessionStorage.removeItem(KEY);session=null;lastId=0}
+  function showChat(){
+    els.joinCard.style.display='none';els.chatCard.classList.add('show');
+    els.roomTitle.textContent=session.room.title;els.roomCodeText.textContent='#'+session.room.code;
+    loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
+  }
+  function showJoin(){
+    clearInterval(pollTimer);pollTimer=null;els.chatCard.classList.remove('show');els.joinCard.style.display='block';clearSession();
+  }
+  function appendMessages(items){
+    if(!Array.isArray(items)||!items.length)return;
+    const empty=document.getElementById('emptyState');if(empty)empty.remove();
+    const nearBottom=els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<90;
+    for(const m of items){
+      if(document.getElementById('msg-'+m.id))continue;
+      lastId=Math.max(lastId,Number(m.id)||0);
+      const mine=session&&m.member_id===session.member.id;
+      const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'');wrap.id='msg-'+m.id;
+      wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble">'+esc(m.body)+'</div><div class="time">'+fmtTime(m.created_at)+'</div>';
+      els.messages.appendChild(wrap);
+    }
+    if(nearBottom)els.messages.scrollTop=els.messages.scrollHeight;
+  }
+  async function loadMessages(initial){
+    if(!session||busy)return;busy=true;
+    try{
+      const data=await api({action:'list',memberId:session.member.id,sessionToken:session.sessionToken,afterId:initial?0:lastId});
+      els.activeCount.textContent=data.activeCount||1;appendMessages(data.messages);
+      if(initial)els.messages.scrollTop=els.messages.scrollHeight;
+    }catch(e){
+      if(/다시 입장|제한/.test(e.message)){alert(e.message);showJoin()}
+    }finally{busy=false}
+  }
+  async function join(){
+    els.joinStatus.textContent='';els.joinBtn.disabled=true;
+    try{
+      const data=await api({action:'join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:els.nickname.value});
+      session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
+    }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
+  }
+  async function send(){
+    const message=els.messageInput.value.trim();if(!message||!session)return;
+    els.sendBtn.disabled=true;
+    try{
+      const data=await api({action:'send',memberId:session.member.id,sessionToken:session.sessionToken,message});
+      els.messageInput.value='';appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
+    }catch(e){alert(e.message)}finally{els.sendBtn.disabled=false;els.messageInput.focus()}
+  }
+  async function leave(){
+    try{if(session)await api({action:'leave',memberId:session.member.id,sessionToken:session.sessionToken})}catch(_){}
+    showJoin();
+  }
+  els.joinBtn.addEventListener('click',join);
+  els.sendBtn.addEventListener('click',send);
+  els.leaveBtn.addEventListener('click',leave);
+  els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  try{
+    const saved=JSON.parse(sessionStorage.getItem(KEY)||'null');
+    if(saved?.member?.id&&saved?.sessionToken&&saved?.room?.id){session=saved;showChat()}
+  }catch(_){clearSession()}
+</script>
+</body>
+</html>
