@@ -56,6 +56,20 @@
     .rename-cancel{background:#fff;color:var(--text);border:1px solid var(--line)}
     .rename-feedback{font-size:13px;color:var(--danger);min-height:0;margin-top:8px}
     .rename-feedback:empty{display:none}
+
+    .volume-card{border:2px solid #d0bfac;background:#fffefa;box-shadow:0 4px 14px rgba(66,44,30,.05)}
+    .volume-card h2{font-size:20px;margin-bottom:7px}
+    .volume-card .muted{font-size:14px;line-height:1.6;color:#5b4a3d}
+    .volume-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}
+    .volume-choice{min-height:52px;border:2px solid #cbb8a3;border-radius:13px;background:#fff;color:#473628;font-size:16px;font-weight:850;cursor:pointer}
+    .volume-choice[aria-pressed="true"]{background:#795738;border-color:#795738;color:#fff;box-shadow:0 4px 12px rgba(91,57,35,.14)}
+    .volume-choice:focus-visible{outline:3px solid #b58d64;outline-offset:2px}
+    .volume-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+    .volume-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-size:15px;font-weight:850;cursor:pointer}
+    .volume-preview{border:1.5px solid #bba48b;background:#fff;color:#513d2c}
+    .volume-feedback{min-height:20px;margin-top:12px;color:#3b6549;font-size:13px;font-weight:750}
+    .volume-feedback.error{color:var(--danger)}
+
     @media(max-width:620px){
       .grid{grid-template-columns:1fr}
       .grid .wide{grid-column:auto}
@@ -84,6 +98,22 @@
     <div class="status" id="status"></div>
   </section>
 
+
+  <section class="card volume-card">
+    <h2>🔔 ‘뽁짝’ 기본 알림 음량</h2>
+    <p class="muted">관리자는 새 방문자의 기본 소리를 설정할 수 있어요. 방문자가 직접 고른 음량은 그 기기에서 우선 적용됩니다.</p>
+    <div class="volume-options" role="group" aria-label="관리자 기본 알림 음량">
+      <button class="volume-choice" type="button" data-default-volume="30" aria-pressed="false">작게 30%</button>
+      <button class="volume-choice" type="button" data-default-volume="60" aria-pressed="false">보통 60%</button>
+      <button class="volume-choice" type="button" data-default-volume="100" aria-pressed="true">크게 100%</button>
+    </div>
+    <div class="volume-actions">
+      <button class="primary" type="button" id="volumeSave">기본 음량 저장</button>
+      <button class="volume-preview" type="button" id="volumePreview">▶ 소리 미리 듣기</button>
+    </div>
+    <div class="volume-feedback" role="status" aria-live="polite" id="volumeFeedback"></div>
+  </section>
+
   <section class="card">
     <h2>채팅방 목록</h2>
     <div class="title-status" id="titleUpdateStatus" role="status" aria-live="polite"></div>
@@ -100,6 +130,74 @@
     const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'처리하지 못했습니다.');return d;
   }
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+  let selectedVolume=100;
+  const volumeFeedback=document.getElementById('volumeFeedback');
+  function chooseVolume(level){
+    if(![30,60,100].includes(level))return;
+    selectedVolume=level;
+    document.querySelectorAll('[data-default-volume]').forEach(b=>{
+      b.setAttribute('aria-pressed',String(Number(b.dataset.defaultVolume)===level));
+    });
+  }
+  async function loadSoundSettings(){
+    try{
+      const response=await api({action:'chat-get-sound-config'});
+      chooseVolume(Number(response.level));
+      volumeFeedback.textContent='';
+    }catch(error){
+      volumeFeedback.classList.add('error');
+      volumeFeedback.textContent='설정을 불러오지 못했어. '+(error.message||'');
+    }
+  }
+  function previewBokjak(level){
+    const volume=level/100;
+    function chime(){
+      try{
+        const Ctx=window.AudioContext||window.webkitAudioContext;
+        if(!Ctx)return;
+        const ctx=new Ctx(),t=ctx.currentTime;
+        [[0,640],[.14,860]].forEach(([offset,freq])=>{
+          const osc=ctx.createOscillator(),gain=ctx.createGain();
+          osc.type='sine';osc.frequency.value=freq;
+          gain.gain.setValueAtTime(.0001,t+offset);
+          gain.gain.exponentialRampToValueAtTime(.22*volume,t+offset+.015);
+          gain.gain.exponentialRampToValueAtTime(.0001,t+offset+.13);
+          osc.connect(gain);gain.connect(ctx.destination);
+          osc.start(t+offset);osc.stop(t+offset+.14);
+        });
+        setTimeout(()=>ctx.close().catch(()=>{}),700);
+      }catch(_){}
+    }
+    try{
+      if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){chime();return}
+      const u=new SpeechSynthesisUtterance('뽁짝');
+      u.lang='ko-KR';u.rate=1.18;u.pitch=1.2;u.volume=volume;
+      const korean=window.speechSynthesis.getVoices().find(v=>String(v.lang).toLowerCase().startsWith('ko'));
+      if(korean)u.voice=korean;
+      u.onerror=chime;
+      window.speechSynthesis.speak(u);
+    }catch(_){chime()}
+  }
+  document.querySelectorAll('[data-default-volume]').forEach(b=>b.addEventListener('click',()=>{
+    chooseVolume(Number(b.dataset.defaultVolume));
+    volumeFeedback.classList.remove('error');
+    volumeFeedback.textContent='저장 버튼을 누르면 새 기본 음량이 적용돼.';
+  }));
+  document.getElementById('volumePreview').addEventListener('click',()=>previewBokjak(selectedVolume));
+  document.getElementById('volumeSave').addEventListener('click',async()=>{
+    const button=document.getElementById('volumeSave');
+    button.disabled=true;
+    volumeFeedback.classList.remove('error');volumeFeedback.textContent='저장 중…';
+    try{
+      await api({action:'chat-set-sound-config',level:selectedVolume});
+      volumeFeedback.textContent='기본 알림 음량 '+selectedVolume+'% 저장 완료!';
+    }catch(error){
+      volumeFeedback.classList.add('error');
+      volumeFeedback.textContent=error.message||'저장하지 못했습니다.';
+    }finally{button.disabled=false}
+  });
+
   function makeRoomCode(title){
     const cleaned=String(title||'').trim().toUpperCase()
       .replace(/[^A-Z0-9가-힣]+/g,'')
@@ -242,6 +340,7 @@
       statusEl.textContent=e.message;
     }
   });
+  loadSoundSettings();
   load();
 </script>
 </body>
