@@ -206,7 +206,8 @@
     publicRoomList:document.getElementById('publicRoomList'),
     publicRooms:document.getElementById('publicRooms'),
     roomCodeField:document.getElementById('roomCodeField'),
-    selectedRoom:document.getElementById('selectedRoom')
+    selectedRoom:document.getElementById('selectedRoom'),
+    joinCredentials:document.getElementById('joinCredentials')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
@@ -458,8 +459,12 @@
         const room=rooms.find(r=>String(r.code)===String(btn.dataset.publicRoom));
         els.selectedRoom.style.display='block';
         els.selectedRoom.textContent='선택한 방 · '+(room?.title||btn.dataset.publicRoom);
-        els.roomPassword.focus();
-        els.joinStatus.textContent='비밀번호와 닉네임을 입력하면 선택한 방으로 들어갑니다.';
+        els.joinCredentials.style.display='block';
+        els.joinStatus.textContent='이 방의 비밀번호와 닉네임을 입력해 주세요.';
+        setTimeout(()=>{
+          els.joinCredentials.scrollIntoView({behavior:'smooth',block:'nearest'});
+          els.roomPassword.focus();
+        },50);
       }));
     }catch(e){
       els.publicRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
@@ -542,6 +547,7 @@
   const isAdmin=Boolean(sessionStorage.getItem(ADMIN_KEY));
   els.adminRoomAddBtn.classList.toggle('show',isAdmin);
   if(isAdmin){
+    els.joinCredentials.style.display='block';
     els.joinBtn.textContent='채팅방 만들기';
     els.joinBtn.setAttribute('aria-label','채팅방 만들기');
     document.querySelectorAll('#joinCard .field').forEach(el=>el.style.display='none');
@@ -561,7 +567,10 @@
       if(!isAdmin){
         els.publicRoomList.style.display='none';
         els.roomCodeField.style.display='none';
-        els.joinStatus.textContent='초대받은 채팅방입니다. 비밀번호와 닉네임을 입력해 주세요.';
+        els.joinCredentials.style.display='block';
+        els.selectedRoom.style.display='block';
+        els.selectedRoom.textContent='초대받은 채팅방 · #'+invitedRoom;
+        els.joinStatus.textContent='비밀번호와 닉네임을 입력해 주세요.';
       }
     }else if(!isAdmin){
       els.roomCodeField.style.display='none';
