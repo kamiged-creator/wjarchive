@@ -222,7 +222,7 @@
     lastId=0;lastSyncAt='';
     els.messages.innerHTML='<div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div>';
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
-    els.roomTitle.textContent='복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
+    els.roomTitle.textContent=session.room.title||'복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
   }
@@ -483,18 +483,28 @@
     els.adminRoomList.classList.add('show');
     loadAdminRooms();
   }
+  let invitedRoom='';
   try{
     const params=new URLSearchParams(window.location.search);
-    const invitedRoom=params.get('room');
-    if(invitedRoom) els.roomCode.value=String(invitedRoom).toUpperCase();
+    invitedRoom=String(params.get('room')||'').toUpperCase();
+    if(invitedRoom) els.roomCode.value=invitedRoom;
   }catch(_){}
   try{
     const saved=JSON.parse(localStorage.getItem(KEY)||'null');
     if(saved?.expiresAt&&saved.expiresAt<=Date.now()){
       localStorage.removeItem(KEY);
     }else if(saved?.member?.id&&saved?.sessionToken&&saved?.room?.id){
-      session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken};
-      showChat();
+      const savedCode=String(saved.room.code||'').toUpperCase();
+      if(!invitedRoom||savedCode===invitedRoom){
+        session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken};
+        showChat();
+      }else{
+        // A different room was explicitly requested; never reopen the remembered room.
+        session=null;
+        lastId=0;
+        lastSyncAt='';
+        els.roomPassword.value='';
+      }
     }
   }catch(_){clearSession()}
 </script>
