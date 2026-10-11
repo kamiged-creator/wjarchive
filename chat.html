@@ -133,7 +133,11 @@
     .text-modal-meta{flex:0 0 auto;padding:16px 20px 8px;color:var(--chat-meta);font-size:14px;font-weight:650}
     .text-modal-body{flex:1;min-height:0;overflow-y:auto;padding:8px 20px max(28px,env(safe-area-inset-bottom));font-size:19px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;overscroll-behavior:contain}
     .text-modal-close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-    .notice{padding:9px 14px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
+    .notice{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 14px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
+    .notice-copy{min-width:0;line-height:1.5}
+    .sound-toggle{flex:0 0 auto;min-height:38px;padding:6px 11px;border:1.5px solid var(--composer-line);border-radius:11px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+    .sound-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
+    .sound-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     @media(max-width:560px){
       html,body{height:100%;overscroll-behavior:none}
       body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
@@ -209,7 +213,7 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
-      <div class="notice">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</div>
+      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="새 메시지 알림 소리 켜기">🔕 알림 켜기</button></div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -264,6 +268,7 @@
   const REMEMBER_MS=365*24*60*60*1000;
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const THEME_KEY='bokjaksoChatThemeV1';
+  const SOUND_KEY='bokjaksoChatSoundV1';
   const els={
     joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
     roomCode:document.getElementById('roomCode'),roomPassword:document.getElementById('roomPassword'),
@@ -274,7 +279,7 @@
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
-    themeToggle:document.getElementById('themeToggle'),
+    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
     adminRoomList:document.getElementById('adminRoomList'),
     adminRooms:document.getElementById('adminRooms'),
@@ -293,6 +298,55 @@
     entryStatus:document.getElementById('entryStatus')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
+  let soundEnabled=localStorage.getItem(SOUND_KEY)==='on';
+  let lastSoundAt=0;
+  function updateSoundToggle(){
+    els.soundToggle.textContent=soundEnabled?'🔔 알림 켜짐':'🔕 알림 켜기';
+    els.soundToggle.setAttribute('aria-pressed',String(soundEnabled));
+    els.soundToggle.setAttribute('aria-label',soundEnabled?'복작 알림 소리 끄기':'복작 알림 소리 켜기');
+    els.soundToggle.title=soundEnabled?'새 메시지 알림 소리 끄기':'새 메시지 알림 소리 켜기';
+  }
+  function playBokjakSound(preview=false){
+    if(!soundEnabled||(!preview&&document.visibilityState==='hidden'))return;
+    const now=Date.now();
+    if(!preview&&now-lastSoundAt<2500)return;
+    lastSoundAt=now;
+    function fallbackChime(){
+      try{
+        const AudioCtx=window.AudioContext||window.webkitAudioContext;
+        if(!AudioCtx)return;
+        const context=new AudioCtx();
+        if(context.state==='suspended')context.resume().catch(()=>{});
+        const t=context.currentTime;
+        [[0,640],[.14,860]].forEach(([offset,freq])=>{
+          const oscillator=context.createOscillator(),gain=context.createGain();
+          oscillator.type='sine';
+          oscillator.frequency.value=freq;
+          gain.gain.setValueAtTime(.0001,t+offset);
+          gain.gain.exponentialRampToValueAtTime(.15,t+offset+.015);
+          gain.gain.exponentialRampToValueAtTime(.0001,t+offset+.13);
+          oscillator.connect(gain);gain.connect(context.destination);
+          oscillator.start(t+offset);oscillator.stop(t+offset+.14);
+        });
+        setTimeout(()=>context.close().catch(()=>{}),700);
+      }catch(_){}
+    }
+    try{
+      if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
+        fallbackChime();return;
+      }
+      const voice=new SpeechSynthesisUtterance('뽁짝');
+      voice.lang='ko-KR';
+      voice.rate=1.18;
+      voice.pitch=1.2;
+      voice.volume=.85;
+      const koreanVoice=window.speechSynthesis.getVoices().find(v=>String(v.lang).toLowerCase().startsWith('ko'));
+      if(koreanVoice)voice.voice=koreanVoice;
+      voice.onerror=()=>fallbackChime();
+      window.speechSynthesis.speak(voice);
+    }catch(_){fallbackChime()}
+  }
+  updateSoundToggle();
   function applyTheme(mode){
     const dark=mode==='dark';
     document.body.classList.toggle('dark',dark);
@@ -488,6 +542,10 @@
         saveSession();
       }
       appendMessages(data.messages);
+      // No alert for the initial history or our own messages. Only newly received messages.
+      if(!initial&&Array.isArray(data.messages)&&data.messages.some(m=>String(m.member_id)!==String(session.member.id))){
+        playBokjakSound();
+      }
       if(Array.isArray(data.deletedIds)){
         for(const id of data.deletedIds)document.getElementById('msg-'+id)?.remove();
       }
@@ -851,6 +909,12 @@
       return;
     }
     join();
+  });
+  els.soundToggle.addEventListener('click',()=>{
+    soundEnabled=!soundEnabled;
+    localStorage.setItem(SOUND_KEY,soundEnabled?'on':'off');
+    updateSoundToggle();
+    if(soundEnabled)playBokjakSound(true);
   });
   els.sendBtn.addEventListener('click',send);
   els.leaveBtn.addEventListener('click',leave);
