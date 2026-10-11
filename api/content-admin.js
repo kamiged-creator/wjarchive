@@ -319,6 +319,30 @@ async function handleChatAdmin(body, res) {
     return;
   }
 
+  if (action === 'chat-rename-room') {
+    const roomId = normalize(body.roomId);
+    const title = normalize(body.title);
+    const expectedTitle = String(body.expectedTitle ?? '');
+    if (!roomId || !title || title.length > 50) {
+      res.status(400).json({ message: '방 이름은 1~50자로 입력해 주세요.' });
+      return;
+    }
+    const updated = await db(
+      `chat_rooms?id=eq.${encodeURIComponent(roomId)}&title=eq.${encodeURIComponent(expectedTitle)}&select=id,code,title`,
+      {
+        method: 'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({ title, updated_at: new Date().toISOString() })
+      }
+    );
+    if (!Array.isArray(updated) || !updated.length) {
+      res.status(409).json({ message: '다른 관리자에게서 방 이름이 변경되었거나 방이 없습니다. 목록을 새로 불러와 주세요.' });
+      return;
+    }
+    res.status(200).json({ ok: true, room: updated[0] });
+    return;
+  }
+
   if (action === 'chat-admin-enter-room') {
     const roomId = normalize(body.roomId);
     if (!roomId) {
