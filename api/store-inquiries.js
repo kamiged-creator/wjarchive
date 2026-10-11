@@ -82,6 +82,13 @@ async function getChatMember(memberId, sessionToken) {
 async function handleChat(body, res) {
   const action = clean(body.action);
 
+  if (action === 'chat-sound-config') {
+    const settings = await supabaseRequest('site_settings?key=eq.chat_sound_default_volume&select=value&limit=1');
+    const saved = Number(Array.isArray(settings) ? settings[0]?.value?.level : 0);
+    res.status(200).json({ ok: true, level: [30, 60, 100].includes(saved) ? saved : 100 });
+    return;
+  }
+
   if (action === 'chat-push-config') {
     const { publicKey } = await getVapidKeys();
     res.status(200).json({ ok: true, publicKey });
