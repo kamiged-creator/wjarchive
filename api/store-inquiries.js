@@ -115,6 +115,27 @@ async function handleChat(body, res) {
     return;
   }
 
+  if (action === 'chat-image-auth') {
+    const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+    if (!privateKey) {
+      res.status(503).json({ message: '이미지 업로드 설정을 확인해 주세요.' });
+      return;
+    }
+    const token = crypto.randomUUID();
+    const expire = Math.floor(Date.now() / 1000) + 10 * 60;
+    const signature = crypto.createHmac('sha1', privateKey).update(token + expire).digest('hex');
+    res.status(200).json({
+      ok: true,
+      token,
+      expire,
+      signature,
+      publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
+      uploadEndpoint: 'https://upload.imagekit.io/api/v1/files/upload',
+      folder: `/bokjakso-chat/${member.room_id}`
+    });
+    return;
+  }
+
   if (action === 'chat-list') {
     const now = new Date().toISOString();
     await supabaseRequest(`chat_members?id=eq.${encodeURIComponent(member.id)}`, {
@@ -125,7 +146,7 @@ async function handleChat(body, res) {
     const after = Math.max(0, Number(body.afterId) || 0);
     const since = after > 0 ? `&id=gt.${after}` : '';
     const messages = await supabaseRequest(
-      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}${since}&select=id,member_id,nickname,body,created_at&order=id.asc&limit=100`
+      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at&order=id.asc&limit=100`
     );
     const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
     const active = await supabaseRequest(
@@ -136,9 +157,16 @@ async function handleChat(body, res) {
   }
 
   if (action === 'chat-send') {
+    const messageType = clean(body.messageType) === 'image' ? 'image' : 'text';
     const message = clean(body.message).slice(0, 1000);
-    if (!message) {
+    const imageUrl = clean(body.imageUrl).slice(0, 2000);
+    const imageFileId = clean(body.imageFileId).slice(0, 300);
+    if (messageType === 'text' && !message) {
       res.status(400).json({ message: '메시지를 입력해 주세요.' });
+      return;
+    }
+    if (messageType === 'image' && (!imageUrl || !imageFileId || !/^https:\/\//i.test(imageUrl))) {
+      res.status(400).json({ message: '이미지 정보가 올바르지 않습니다.' });
       return;
     }
     const lastSent = member.last_sent_at ? new Date(member.last_sent_at).getTime() : 0;
@@ -146,14 +174,17 @@ async function handleChat(body, res) {
       res.status(429).json({ message: '메시지를 너무 빠르게 보내고 있어요.' });
       return;
     }
-    const inserted = await supabaseRequest('chat_messages?select=id,member_id,nickname,body,created_at', {
+    const inserted = await supabaseRequest('chat_messages?select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at', {
       method: 'POST',
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         room_id: member.room_id,
         member_id: member.id,
         nickname: member.nickname,
-        body: message
+        body: messageType === 'image' ? (message || '사진') : message,
+        message_type: messageType,
+        image_url: messageType === 'image' ? imageUrl : null,
+        image_file_id: messageType === 'image' ? imageFileId : null
       })
     });
     const now = new Date().toISOString();
