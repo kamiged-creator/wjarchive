@@ -10,11 +10,13 @@
       --bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;
       --line:rgba(31,26,23,.12);--accent:#8b6847;--soft:#eadfd2;--shadow:0 24px 60px rgba(31,26,23,.12);
       --notice:#fff8ec;--notice-text:#7f674f;--msg-bg:#fff;--mine-bg:#2a2521;--field-bg:#fff;--primary:#a67c52;
+      --composer-bg:#fff8ef;--composer-input:#fffefa;--composer-line:rgba(139,104,71,.19);
     }
     body.dark{
       --bg:#111111;--paper:#171717;--text:#f2f2f2;--muted:#a9a9a9;
       --line:rgba(255,255,255,.10);--accent:#b68456;--soft:#222222;--shadow:0 24px 60px rgba(0,0,0,.42);
       --notice:#1d1d1d;--notice-text:#d0d0d0;--msg-bg:#242424;--mine-bg:#9f7148;--field-bg:#1f1f1f;--primary:#b68456;
+      --composer-bg:#1a1a1a;--composer-input:#242424;--composer-line:rgba(255,255,255,.16);
     }
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--text);background:linear-gradient(180deg,var(--paper),var(--bg));transition:background .2s ease,color .2s ease}
@@ -97,9 +99,10 @@
     .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.55}
     .mine .bubble{background:var(--mine-bg);color:#fff;border-color:var(--mine-bg);border-radius:16px 16px 4px 16px}
     .time{font-size:10px;color:#9b9188;margin:4px 6px 0}
-    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--paper);align-items:flex-end}
-    .composer textarea{flex:1;resize:none;max-height:112px;min-height:46px;border:1px solid var(--line);border-radius:14px;padding:11px 12px;outline:none;background:var(--field-bg);color:var(--text)}
-    .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
+    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--composer-line);background:var(--composer-bg);align-items:flex-end}
+    .composer textarea{flex:1;resize:none;max-height:112px;min-height:46px;border:1px solid var(--composer-line);border-radius:14px;padding:11px 12px;outline:none;background:var(--composer-input);color:var(--text)}
+    .composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent)}
+    .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--composer-line);border-radius:14px;background:var(--composer-input);color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
     .photo:disabled,.send:disabled{opacity:.55;cursor:wait}
     .send{width:72px;height:46px;border:0;border-radius:14px;background:var(--accent);color:#fff;font-weight:850}
     .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);border:1px solid var(--line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
@@ -127,7 +130,7 @@
       .leave{padding:8px 9px;font-size:11px}
       .delete-room{padding:7px 8px;font-size:10px}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain}.bubble{max-width:84%}
-      .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--paper)}
+      .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
     }
     @media(max-width:390px){
       .chat-head{display:block}
