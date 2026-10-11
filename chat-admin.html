@@ -36,10 +36,9 @@
 <main>
   <section class="card">
     <h1>채팅방 만들기</h1>
-    <div class="muted">방 코드는 관계자에게 알려주는 짧은 영문/숫자 코드이고, 비밀번호는 서버에 원문으로 저장하지 않습니다.</div>
+    <div class="muted">방 이름과 입장 비밀번호만 입력하면 됩니다. 방 코드는 자동으로 생성됩니다.</div>
     <div class="grid" style="margin-top:16px">
-      <div><label for="title">방 이름</label><input id="title" placeholder="예: 복작소 관계자방"></div>
-      <div><label for="code">방 코드</label><input id="code" placeholder="예: BOKJAKSO"></div>
+      <div class="wide"><label for="title">방 이름</label><input id="title" placeholder="예: 복작소 관계자방"></div>
       <div class="wide"><label for="password">입장 비밀번호</label><input id="password" type="password" placeholder="4자 이상"></div>
       <div class="wide"><button class="primary" id="createBtn">채팅방 만들기</button></div>
     </div>
@@ -61,6 +60,15 @@
     const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'처리하지 못했습니다.');return d;
   }
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function makeRoomCode(title){
+    const cleaned=String(title||'').trim().toUpperCase()
+      .replace(/[^A-Z0-9가-힣]+/g,'')
+      .slice(0,8);
+    const base=cleaned||'ROOM';
+    const suffix=Date.now().toString(36).slice(-5).toUpperCase();
+    return (base+suffix).slice(0,16);
+  }
+
   async function load(){
     try{
       const d=await api({action:'chat-list-rooms'});
@@ -106,7 +114,11 @@
     const btn=document.getElementById('createBtn');
     btn.disabled=true;
     try{
-      const created=await api({action:'chat-create-room',title:document.getElementById('title').value,code:document.getElementById('code').value,password:document.getElementById('password').value});
+      const title=document.getElementById('title').value.trim();
+      const password=document.getElementById('password').value;
+      if(!title)throw new Error('방 이름을 입력해 주세요.');
+      const code=makeRoomCode(title);
+      const created=await api({action:'chat-create-room',title,code,password});
       const roomId=created.room?.id;
       if(!roomId)throw new Error('채팅방은 만들었지만 입장 정보를 확인하지 못했습니다.');
       const entered=await api({action:'chat-admin-enter-room',roomId});
