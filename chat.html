@@ -22,7 +22,7 @@
     button{cursor:pointer}
     .page{min-height:100vh;display:flex;flex-direction:column}
     header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
-    .brand{font-weight:850;letter-spacing:-.03em}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .brand{font-weight:850;letter-spacing:-.03em;cursor:pointer}.sub{font-size:12px;color:var(--muted);margin-top:2px}
     .back{border:0;background:transparent;color:var(--muted);font-weight:700}
     main{width:min(720px,100%);margin:0 auto;padding:24px 14px 28px;flex:1}
     .card{background:color-mix(in srgb,var(--paper) 96%,transparent);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
@@ -110,7 +110,7 @@
 <body>
 <div class="page">
   <header>
-    <div><div class="brand">복작소</div><div class="sub">채팅</div></div>
+    <div><div class="brand" id="brandHome" role="link" tabindex="0" aria-label="복작소 홈으로">복작소</div><div class="sub">채팅</div></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
@@ -457,6 +457,8 @@
   els.photoInput.addEventListener('change',()=>{const file=els.photoInput.files?.[0];if(file)uploadPhoto(file)});
   els.imageClose.addEventListener('click',closeImage);
   els.themeToggle.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
+  document.getElementById('brandHome').addEventListener('click',()=>{location.href='/'});
+  document.getElementById('brandHome').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();location.href='/'}});
   els.adminRoomAddBtn.addEventListener('click',()=>{location.href='/chat-admin.html?new=1'});
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
