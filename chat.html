@@ -64,8 +64,8 @@
     .notice{padding:9px 14px;background:#fff8ec;border-bottom:1px solid rgba(139,104,71,.12);font-size:11px;color:#7f674f}
     @media(max-width:560px){
       html,body{height:100%;overscroll-behavior:none}
-      body.chat-active{height:100dvh;overflow:hidden}
-      .page{height:100dvh;min-height:100dvh;overflow:hidden}
+      body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
+      .page{height:var(--app-height,100dvh);min-height:var(--app-height,100dvh);overflow:hidden}
       header{height:60px;flex:0 0 60px}.sub{display:none}
       main{width:100%;padding:10px 8px max(8px,env(safe-area-inset-bottom));margin:0;flex:1;min-height:0;overflow:hidden;display:flex}
       .card{border-radius:20px}
@@ -79,7 +79,7 @@
       .leave{padding:8px 9px;font-size:11px}
       .delete-room{padding:7px 8px;font-size:10px}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain}.bubble{max-width:84%}
-      .composer{flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom))}
+      .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--paper)}
     }
     @media(max-width:390px){
       .chat-head{display:block}
@@ -134,6 +134,15 @@
   <img id="imageModalImg" alt="채팅 이미지 크게 보기">
 </div>
 <script>
+  function syncViewportHeight(){
+    const h=window.visualViewport?.height||window.innerHeight;
+    document.documentElement.style.setProperty('--app-height',Math.round(h)+'px');
+  }
+  syncViewportHeight();
+  window.addEventListener('resize',syncViewportHeight,{passive:true});
+  window.visualViewport?.addEventListener('resize',syncViewportHeight,{passive:true});
+  window.visualViewport?.addEventListener('scroll',syncViewportHeight,{passive:true});
+
   const KEY='bokjaksoChatSessionV1';
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const els={
