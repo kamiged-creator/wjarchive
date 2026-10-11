@@ -48,6 +48,8 @@
     .invite{padding:9px 13px;color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:0 7px 16px rgba(139,104,71,.16)}
     .leave{padding:8px 10px;background:var(--paper);color:var(--muted)}
     .theme-toggle{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;padding:0;background:var(--paper);color:var(--muted);font-size:18px;font-weight:700;line-height:1;white-space:nowrap}
+    .admin-room-add{display:none;border:1px solid var(--line);border-radius:999px;padding:9px 12px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap}
+    .admin-room-add.show{display:inline-flex;align-items:center;gap:4px}
     .delete-room{display:none;padding:7px 9px;color:#b33d3d;background:transparent;border-color:rgba(179,61,61,.2);font-size:11px}
     .delete-room.show{display:inline-flex}
     .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--soft) 72%,transparent),color-mix(in srgb,var(--paper) 92%,transparent));scroll-behavior:smooth}
@@ -101,6 +103,7 @@
   <header>
     <div><div class="brand">복작소</div><div class="sub">채팅</div></div>
     <div style="display:flex;gap:8px;align-items:center">
+      <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 추가">＋ 채팅방 추가</button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
       <button class="back" type="button" onclick="location.href='/'">홈으로</button>
     </div>
@@ -168,7 +171,8 @@
     messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn'),inviteBtn:document.getElementById('inviteBtn'),deleteRoomBtn:document.getElementById('deleteRoomBtn'),
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
-    themeToggle:document.getElementById('themeToggle')
+    themeToggle:document.getElementById('themeToggle'),
+    adminRoomAddBtn:document.getElementById('adminRoomAddBtn')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
   function applyTheme(mode){
@@ -401,9 +405,11 @@
   els.photoInput.addEventListener('change',()=>{const file=els.photoInput.files?.[0];if(file)uploadPhoto(file)});
   els.imageClose.addEventListener('click',closeImage);
   els.themeToggle.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
+  els.adminRoomAddBtn.addEventListener('click',()=>{location.href='/chat-admin.html?new=1'});
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
+  els.adminRoomAddBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
   try{
     const params=new URLSearchParams(window.location.search);
     const invitedRoom=params.get('room');
