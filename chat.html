@@ -1145,7 +1145,7 @@
       if(avatarPreviewObjectUrl)URL.revokeObjectURL(avatarPreviewObjectUrl);
       avatarPreviewObjectUrl=URL.createObjectURL(file);
       paintAvatar(preview,avatarPreviewObjectUrl);
-      els.profileStatus.textContent='사진 저장을 누르면 채팅방에 적용돼요.';
+      els.profileStatus.textContent='프로필 저장을 누르면 모든 채팅방에 적용돼요.';
     }
   }
   async function compressAvatarFile(file){
@@ -1162,34 +1162,55 @@
       return new File([blob],'profile-'+Date.now()+'.webp',{type:'image/webp'});
     }finally{bitmap.close?.()}
   }
-  async function saveAvatarPhoto(file){
-    if(!session||profileWorking)throw new Error('현재 프로필을 저장할 수 없습니다.');
-    profileWorking=true;els.profileSaveBtn.disabled=true;els.profileRemoveBtn.disabled=true;
+  async function uploadSharedProfilePhoto(file){
+    if(!sharedProfile)throw new Error('먼저 프로필을 만들어 주세요.');
+    const prepared=await compressAvatarFile(file);
+    const auth=await api({action:'chat-profile-image-auth',...sharedCredentials()});
+    const form=new FormData();
+    form.append('file',prepared);
+    form.append('fileName',prepared.name);
+    form.append('publicKey',auth.publicKey);
+    form.append('signature',auth.signature);
+    form.append('expire',String(auth.expire));
+    form.append('token',auth.token);
+    form.append('folder',auth.folder);
+    form.append('useUniqueFileName','true');
+    const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+    const uploaded=await response.json().catch(()=>({}));
+    if(!response.ok||!uploaded.fileId)throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
+    return uploaded.fileId;
+  }
+  async function saveSharedProfileChanges(nickname,file=null,removePhoto=false){
+    if(profileWorking)throw new Error('이미 프로필을 저장 중입니다.');
+    const name=String(nickname||'').trim().slice(0,20);
+    if(!name||name==='관리자')throw new Error('닉네임을 입력해 주세요. 관리자 이름은 사용할 수 없습니다.');
+    profileWorking=true;
+    els.profileSaveBtn.disabled=true;
+    els.profileRemoveBtn.disabled=true;
     try{
-      const prepared=await compressAvatarFile(file);
-      const memberId=session.member.id,sessionToken=session.sessionToken;
-      const auth=await api({action:'chat-image-auth',purpose:'avatar',memberId,sessionToken});
-      const form=new FormData();
-      form.append('file',prepared);
-      form.append('fileName',prepared.name);
-      form.append('publicKey',auth.publicKey);
-      form.append('signature',auth.signature);
-      form.append('expire',String(auth.expire));
-      form.append('token',auth.token);
-      form.append('folder',auth.folder);
-      form.append('useUniqueFileName','true');
-      const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
-      const uploaded=await response.json().catch(()=>({}));
-      if(!response.ok||!uploaded.fileId)throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
-      const updated=await api({action:'chat-update-profile',memberId,sessionToken,avatarFileId:uploaded.fileId});
-      if(!session||session.member.id!==memberId)throw new Error('채팅방이 변경됐습니다.');
-      updateMyAvatar(updated.avatarUrl);
-      paintAvatar(els.profilePreview,updated.avatarUrl);
-      els.profileStatus.textContent='프로필 사진이 저장됐어요.';
+      await ensureSharedProfile(name);
+      const payload={action:'chat-profile-save',...sharedCredentials(),nickname:name};
+      if(removePhoto)payload.avatarFileId='';
+      else if(file)payload.avatarFileId=await uploadSharedProfilePhoto(file);
+      const result=await api(payload);
+      storeSharedProfile(result.profile);
+      if(session){
+        session.member.nickname=session.member.nickname==='관리자'?'관리자':result.profile.nickname;
+        session.member.profile_id=sharedProfile.id;
+        updateMyAvatar(result.profile.avatar_url||null);
+      }
+      paintAvatar(els.profilePreview,result.profile.avatar_url||null);
+      els.profileStatus.textContent='모든 채팅방에서 사용할 프로필을 저장했어요.';
     }finally{
-      profileWorking=false;els.profileSaveBtn.disabled=false;els.profileRemoveBtn.disabled=false;
+      profileWorking=false;
+      els.profileSaveBtn.disabled=false;
+      els.profileRemoveBtn.disabled=false;
     }
   }
+  async function saveAvatarPhoto(file){
+    await saveSharedProfileChanges(sharedProfile?.nickname||session?.member?.nickname||'',file);
+  }
+  let profileEditorReturnFocus=null;
   function closeProfileEditor(){
     if(profileWorking)return;
     els.profileModal.classList.remove('show');
@@ -1197,17 +1218,22 @@
     profileAvatarChoice=null;
     els.profileFile.value='';
     if(avatarPreviewObjectUrl){URL.revokeObjectURL(avatarPreviewObjectUrl);avatarPreviewObjectUrl=null}
-    els.profileBtn.focus();
+    (profileEditorReturnFocus||els.sharedProfileBtn).focus();
+    profileEditorReturnFocus=null;
   }
   function openProfileEditor(){
-    if(!session)return;
+    profileEditorReturnFocus=document.activeElement;
     els.profileStatus.textContent='';
     profileAvatarChoice=null;
     els.profileFile.value='';
-    paintAvatar(els.profilePreview,session.member.avatar_url||null);
+    const saved=Object.values(getRememberedSessions()).find(item=>item.member?.nickname!=='관리자');
+    els.profileNameInput.value=sharedProfile?.nickname||
+      (session?.member?.nickname!=='관리자'?session?.member?.nickname:'')||
+      saved?.member?.nickname||'';
+    paintAvatar(els.profilePreview,sharedProfile?.avatar_url||session?.member?.avatar_url||null);
     els.profileModal.classList.add('show');
     els.profileModal.setAttribute('aria-hidden','false');
-    els.profilePickBtn.focus();
+    els.profileNameInput.focus();
   }
   async function submitFirstEntry(){
     els.entryStatus.textContent='';
@@ -1363,22 +1389,21 @@
   els.profilePickBtn.addEventListener('click',()=>{if(!profileWorking)els.profileFile.click()});
   els.profileFile.addEventListener('change',()=>selectAvatarFile(els.profileFile,els.profilePreview,'edit'));
   els.profileSaveBtn.addEventListener('click',async()=>{
-    if(!profileAvatarChoice){els.profileStatus.textContent='변경할 사진을 먼저 선택해 주세요.';return}
-    els.profileStatus.textContent='사진 저장 중…';
-    try{await saveAvatarPhoto(profileAvatarChoice);profileAvatarChoice=null}
-    catch(error){els.profileStatus.textContent=error.message||'프로필 사진 저장에 실패했습니다.'}
+    if(profileWorking)return;
+    els.profileStatus.textContent='프로필 저장 중…';
+    try{
+      await saveSharedProfileChanges(els.profileNameInput.value,profileAvatarChoice);
+      profileAvatarChoice=null;
+    }catch(error){els.profileStatus.textContent=error.message||'프로필을 저장하지 못했습니다.'}
   });
   els.profileRemoveBtn.addEventListener('click',async()=>{
-    if(!session||profileWorking)return;
-    profileWorking=true;els.profileRemoveBtn.disabled=true;els.profileSaveBtn.disabled=true;
+    if(profileWorking)return;
+    els.profileStatus.textContent='기본 아이콘으로 변경 중…';
     try{
-      const result=await api({action:'chat-update-profile',memberId:session.member.id,sessionToken:session.sessionToken,avatarFileId:''});
-      updateMyAvatar(result.avatarUrl);
-      paintAvatar(els.profilePreview,null);
+      await saveSharedProfileChanges(els.profileNameInput.value,null,true);
       profileAvatarChoice=null;
-      els.profileStatus.textContent='기본 프로필 아이콘으로 변경했어요.';
-    }catch(error){els.profileStatus.textContent=error.message||'사진을 삭제하지 못했습니다.'}
-    finally{profileWorking=false;els.profileRemoveBtn.disabled=false;els.profileSaveBtn.disabled=false}
+      els.profileStatus.textContent='모든 채팅방의 프로필 사진을 기본 아이콘으로 바꿨어요.';
+    }catch(error){els.profileStatus.textContent=error.message||'프로필 사진을 변경하지 못했습니다.'}
   });
   els.profileCancelBtn.addEventListener('click',closeProfileEditor);
   els.profileModal.addEventListener('click',event=>{if(event.target===els.profileModal)closeProfileEditor()});
