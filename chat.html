@@ -1018,12 +1018,19 @@
   async function loadMessages(initial){
     if(!session||busy)return;busy=true;
     try{
+      // Include members already visible in the chat so newly changed profile photos
+      // refresh without anyone needing to send another message.
+      const visibleMemberIds=[...new Set(Array.from(
+        els.messages.querySelectorAll('.msg-avatar[data-member-id]'),
+        avatar=>avatar.dataset.memberId
+      ).filter(Boolean))].slice(-100);
       const data=await api({
         action:'chat-list',
         memberId:session.member.id,
         sessionToken:session.sessionToken,
         afterId:initial?0:lastId,
-        changedSince:initial?'':lastSyncAt
+        changedSince:initial?'':lastSyncAt,
+        visibleMemberIds
       });
       els.activeCount.textContent=data.activeCount||1;
       if(typeof data.roomTitle==='string'&&data.roomTitle&&data.roomTitle!==session.room.title){
