@@ -225,6 +225,29 @@ async function handleChat(body, res) {
     return;
   }
 
+  // Only return the latest non-deleted message DATE for active public rooms.
+  // Limit each request to the five rooms currently visible in the page.
+  if (action === 'chat-public-last-activity') {
+    const ids = [...new Set((Array.isArray(body.roomIds) ? body.roomIds : [])
+      .filter(id => typeof id === 'string' && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 5);
+    if (!ids.length) {
+      res.status(200).json({ok:true,latest:[]});return;
+    }
+    const activeRooms = await supabaseRequest(
+      'chat_rooms?id=in.(' + ids.map(id => encodeURIComponent(id)).join(',') + ')' +
+      '&is_active=eq.true&is_archived=eq.false&select=id'
+    );
+    const latest = await Promise.all((Array.isArray(activeRooms) ? activeRooms : []).map(async room => {
+      const messages = await supabaseRequest(
+        'chat_messages?room_id=eq.' + encodeURIComponent(room.id) +
+        '&deleted_at=is.null&select=created_at&order=created_at.desc&limit=1'
+      );
+      return {roomId:room.id,lastMessageAt:Array.isArray(messages) ? (messages[0]?.created_at||null) : null};
+    }));
+    res.status(200).json({ok:true,latest});
+    return;
+  }
+
   if (action === 'chat-join') {
     const roomCode = clean(body.roomCode).toUpperCase().replace(/\s+/g, '');
     const password = String(body.password || '');
