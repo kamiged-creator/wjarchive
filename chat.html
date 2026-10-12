@@ -399,6 +399,46 @@
     entryStatus:document.getElementById('entryStatus')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
+  const memberAvatars=new Map();
+  let entryAvatarChoice=null,profileAvatarChoice=null,profileWorking=false,avatarPreviewObjectUrl=null,entryPreviewObjectUrl=null;
+  function paintAvatar(target,url){
+    if(!target)return;
+    target.replaceChildren();
+    if(typeof url==='string'&&/^https:\/\//i.test(url)){
+      const img=document.createElement('img');
+      img.alt='';img.loading='lazy';
+      img.onerror=()=>{if(img.parentElement===target)target.textContent='👤'};
+      img.src=url;
+      target.appendChild(img);
+    }else{target.textContent='👤'}
+  }
+  function refreshMemberAvatars(memberId){
+    const url=memberAvatars.get(String(memberId))||null;
+    els.messages.querySelectorAll('.msg-avatar').forEach(avatar=>{
+      if(avatar.dataset.memberId===String(memberId))paintAvatar(avatar,url);
+    });
+    if(session&&String(session.member.id)===String(memberId)){
+      paintAvatar(els.myAvatarIcon,url);
+    }
+  }
+  function applyProfileRows(rows){
+    if(!Array.isArray(rows))return;
+    for(const profile of rows){
+      if(!profile?.id)continue;
+      const id=String(profile.id),url=profile.avatar_url||null;
+      if(memberAvatars.get(id)!==url){
+        memberAvatars.set(id,url);
+        refreshMemberAvatars(id);
+      }
+    }
+  }
+  function updateMyAvatar(url){
+    if(!session)return;
+    session.member.avatar_url=url||null;
+    memberAvatars.set(String(session.member.id),url||null);
+    refreshMemberAvatars(session.member.id);
+    saveSession();
+  }
   let soundEnabled=localStorage.getItem(SOUND_KEY)==='on';
   const savedSoundVolume=localStorage.getItem(SOUND_VOLUME_KEY);
   let personalSoundVolume=[30,60,100].includes(Number(savedSoundVolume))?Number(savedSoundVolume):null;
@@ -622,6 +662,9 @@
     entryLayoutObserver?.disconnect();
   }
   function showChat(){
+    memberAvatars.clear();
+    if(session?.member?.id)memberAvatars.set(String(session.member.id),session.member.avatar_url||null);
+    paintAvatar(els.myAvatarIcon,session?.member?.avatar_url||null);
     document.body.classList.add('chat-active');
     followLatestAfterEntry=true;
     entryLayoutObserver?.disconnect();
@@ -728,6 +771,12 @@
           setTimeout(()=>{suppressTextOpen=false},2000);
         });
       }
+      // Keep the sender's portrait beside the existing text/photo message.
+      const content=document.createElement('div');content.className='msg-content';
+      while(wrap.firstChild)content.appendChild(wrap.firstChild);
+      const avatar=document.createElement('span');avatar.className='msg-avatar';avatar.dataset.memberId=String(m.member_id);
+      paintAvatar(avatar,memberAvatars.get(String(m.member_id))||null);
+      wrap.append(avatar,content);
       els.messages.appendChild(wrap);
       if(followLatestAfterEntry)entryLayoutObserver?.observe(wrap);
       if(m.message_type!=='image')updateLongMessage(wrap.querySelector('.bubble'));
@@ -749,6 +798,10 @@
         session.room.title=data.roomTitle;
         els.roomTitle.textContent=data.roomTitle;
         saveSession();
+      }
+      applyProfileRows(data.profiles);
+      if(session&&data.myAvatarUrl!==undefined&&session.member.avatar_url!==data.myAvatarUrl){
+        updateMyAvatar(data.myAvatarUrl);
       }
       appendMessages(data.messages);
       // No alert for the initial history or our own messages. Only newly received messages.
