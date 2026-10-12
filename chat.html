@@ -475,6 +475,7 @@
   const memberAvatars=new Map();
   const memberNames=new Map();
   let entryAvatarChoice=null,profileAvatarChoice=null,profileWorking=false,avatarPreviewObjectUrl=null,entryPreviewObjectUrl=null;
+  let lastUploadedProfilePhoto=null; // Retry saving without uploading a duplicate on ImageKit.
   function paintAvatar(target,url){
     if(!target)return;
     target.replaceChildren();
@@ -1166,6 +1167,7 @@
       paintAvatar(preview,entryPreviewObjectUrl);
     }else{
       profileAvatarChoice=file;
+      lastUploadedProfilePhoto=null;
       if(avatarPreviewObjectUrl)URL.revokeObjectURL(avatarPreviewObjectUrl);
       avatarPreviewObjectUrl=URL.createObjectURL(file);
       paintAvatar(preview,avatarPreviewObjectUrl);
@@ -1188,6 +1190,9 @@
   }
   async function uploadSharedProfilePhoto(file){
     if(!sharedProfile)throw new Error('먼저 프로필을 만들어 주세요.');
+    if(lastUploadedProfilePhoto?.file===file&&lastUploadedProfilePhoto.profileId===sharedProfile.id){
+      return lastUploadedProfilePhoto.fileId;
+    }
     const prepared=await compressAvatarFile(file);
     const auth=await api({action:'chat-profile-image-auth',...sharedCredentials()});
     const form=new FormData();
@@ -1202,6 +1207,7 @@
     const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
     const uploaded=await response.json().catch(()=>({}));
     if(!response.ok||!uploaded.fileId)throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
+    lastUploadedProfilePhoto={file,profileId:sharedProfile.id,fileId:uploaded.fileId};
     return uploaded.fileId;
   }
   async function saveSharedProfileChanges(nickname,file=null,removePhoto=false){
@@ -1218,6 +1224,7 @@
       else if(file)payload.avatarFileId=await uploadSharedProfilePhoto(file);
       const result=await api(payload);
       storeSharedProfile(result.profile);
+      lastUploadedProfilePhoto=null;
       if(session){
         session.member.nickname=session.member.nickname==='관리자'?'관리자':result.profile.nickname;
         session.member.profile_id=sharedProfile.id;
@@ -1418,6 +1425,7 @@
     try{
       await saveSharedProfileChanges(els.profileNameInput.value,profileAvatarChoice);
       profileAvatarChoice=null;
+      closeProfileEditor();
     }catch(error){els.profileStatus.textContent=error.message||'프로필을 저장하지 못했습니다.'}
   });
   els.profileRemoveBtn.addEventListener('click',async()=>{
