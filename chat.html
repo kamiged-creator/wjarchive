@@ -473,6 +473,7 @@
     }catch(error){console.warn('공통 프로필 확인 실패',error)}
   }
   const memberAvatars=new Map();
+  const memberNames=new Map();
   let entryAvatarChoice=null,profileAvatarChoice=null,profileWorking=false,avatarPreviewObjectUrl=null,entryPreviewObjectUrl=null;
   function paintAvatar(target,url){
     if(!target)return;
@@ -502,6 +503,15 @@
       if(memberAvatars.get(id)!==url){
         memberAvatars.set(id,url);
         refreshMemberAvatars(id);
+      }
+      if(profile.nickname&&memberNames.get(id)!==profile.nickname){
+        memberNames.set(id,profile.nickname);
+        els.messages.querySelectorAll('.msg').forEach(row=>{
+          if(row.dataset.memberId===id){
+            const label=row.querySelector('.name');
+            if(label)label.textContent=profile.nickname;
+          }
+        });
       }
     }
   }
@@ -736,7 +746,11 @@
   }
   function showChat(){
     memberAvatars.clear();
-    if(session?.member?.id)memberAvatars.set(String(session.member.id),session.member.avatar_url||null);
+    memberNames.clear();
+    if(session?.member?.id){
+      memberAvatars.set(String(session.member.id),session.member.avatar_url||null);
+      memberNames.set(String(session.member.id),session.member.nickname||'');
+    }
     paintAvatar(els.myAvatarIcon,session?.member?.avatar_url||null);
     document.body.classList.add('chat-active');
     followLatestAfterEntry=true;
@@ -810,9 +824,10 @@
       lastId=Math.max(lastId,Number(m.id)||0);
       const mine=session&&m.member_id===session.member.id;
       const isAdminMessage=String(m.nickname||'').trim()==='관리자';
-      const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'')+(isAdminMessage?' admin':'');wrap.id='msg-'+m.id;
+      const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'')+(isAdminMessage?' admin':'');wrap.id='msg-'+m.id;wrap.dataset.memberId=String(m.member_id);
+      const displayName=memberNames.get(String(m.member_id))||m.nickname;
       if(m.message_type==='image'&&m.image_url){
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진 - 선택하면 크게 볼 수 있습니다" title="사진 크게 보기" role="button" tabindex="0" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        wrap.innerHTML='<div class="name">'+esc(displayName)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진 - 선택하면 크게 볼 수 있습니다" title="사진 크게 보기" role="button" tabindex="0" loading="lazy"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
         const img=wrap.querySelector('.chat-image');
         let suppressImageOpen=false;
         img.addEventListener('click',()=>{if(suppressImageOpen){suppressImageOpen=false;return}openImage(m.image_url)});
@@ -827,12 +842,12 @@
           attachLongPressDelete(target,m.id,()=>{suppressImageOpen=true});
         }
       }else{
-        wrap.innerHTML='<div class="name">'+esc(m.nickname)+'</div><div class="bubble"><div class="message-text">'+esc(m.body)+'</div><span class="read-more" aria-hidden="true">… 전체보기</span></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        wrap.innerHTML='<div class="name">'+esc(displayName)+'</div><div class="bubble"><div class="message-text">'+esc(m.body)+'</div><span class="read-more" aria-hidden="true">… 전체보기</span></div><div class="time">'+fmtTime(m.created_at)+'</div>';
         const bubble=wrap.querySelector('.bubble');
         let suppressTextOpen=false;
         const showLongText=()=>{
           if(suppressTextOpen){suppressTextOpen=false;return}
-          if(bubble.classList.contains('is-truncated'))openTextMessage(m.body,m.nickname,m.created_at,bubble);
+          if(bubble.classList.contains('is-truncated'))openTextMessage(m.body,memberNames.get(String(m.member_id))||m.nickname,m.created_at,bubble);
         };
         bubble.addEventListener('click',showLongText);
         bubble.addEventListener('keydown',e=>{
