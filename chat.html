@@ -32,6 +32,7 @@
     button{cursor:pointer}
     .page{min-height:100vh;display:flex;flex-direction:column}
     header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;width:100%;height:100%;min-width:0}
     .brand{font-weight:850;letter-spacing:-.03em;cursor:pointer}.sub{font-size:12px;color:var(--muted);margin-top:2px}
     .back{border:0;background:transparent;color:var(--muted);font-weight:700}
     /* Match the moon and avatar: clean, recognizable home button without a word label. */
@@ -291,6 +292,9 @@
     body.dark .chat .composer textarea::placeholder{color:#B8ADA1;opacity:1}
     /* Desktop typography: retain clear hierarchy without blocky extra-bold lettering. */
     @media(min-width:561px){
+      /* The desktop header follows the same 720px / 14px grid as main and chat. */
+      header{padding:0}
+      .header-inner{width:min(720px,100%);margin:0 auto;padding:0 14px}
       html,body{font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
       .brand{font-weight:750;letter-spacing:-.025em}
       h1{font-weight:750;letter-spacing:-.035em}
@@ -354,12 +358,14 @@
 <body>
 <div class="page">
   <header>
+    <div class="header-inner">
     <div><div class="brand" id="brandHome" role="link" tabindex="0" aria-label="복작소 홈으로">복작소</div><div class="sub">채팅</div></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
       <button class="header-profile-btn" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="프로필 및 채팅 설정 열기" title="프로필 및 채팅 설정"><span class="header-avatar" id="headerAvatarIcon">👤</span></button>
       <button class="back home-shortcut" type="button" onclick="location.href='/'" aria-label="복작소 홈으로 이동" title="복작소 홈으로 이동"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-7h6v7"></path></svg></button>
+    </div>
     </div>
   </header>
   <main>
