@@ -59,7 +59,7 @@ function safeEqualHex(a, b) {
 async function deleteImageKitFile(fileId) {
   const id = clean(fileId);
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
-  if (!id || !privateKey) return false;
+  if (!/^[A-Za-z0-9_-]{10,100}$/.test(id) || !privateKey) return false;
   try {
     const response = await fetch(`https://api.imagekit.io/v1/files/${encodeURIComponent(id)}`, {
       method: 'DELETE',
@@ -86,6 +86,49 @@ async function verifiedAvatarFromImageKit(fileId, roomId, profileId = null) {
       !['image','IMAGE'].includes(String(file.fileType || '')) ||
       Number(file.size || 0) > 2 * 1024 * 1024) return null;
   return imageUrl;
+}
+
+// Chat messages must reference a genuine ImageKit image uploaded for this room/member.
+// Treat a client-provided ImageKit file ID and URL as untrusted.
+async function getChatImageDetails(fileId) {
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  if (!privateKey || !/^[A-Za-z0-9_-]{10,100}$/.test(String(fileId || ''))) return null;
+  try {
+    const response = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId) + '/details', {
+      headers: { Authorization: 'Basic ' + Buffer.from(privateKey + ':').toString('base64') }
+    });
+    if (!response.ok) return null;
+    const file = await response.json();
+    if (!file || !['image', 'IMAGE'].includes(String(file.fileType || '')) ||
+        !Number.isFinite(Number(file.size)) || Number(file.size) <= 0 ||
+        Number(file.size) > 12 * 1024 * 1024 ||
+        !/^https:\/\//i.test(String(file.url || ''))) return null;
+    return { path: String(file.filePath || ''), url: String(file.url) };
+  } catch (_) {
+    return null;
+  }
+}
+function isMemberChatImage(filePath, roomId, memberId) {
+  return filePath.startsWith('/bokjakso-chat/' + roomId + '/members/' + memberId + '/messages/');
+}
+function isLegacyRoomImage(filePath, roomId) {
+  // Older chat images were uploaded directly to the room root, not to per-member folders.
+  const prefix = '/bokjakso-chat/' + roomId + '/';
+  if (!filePath.startsWith(prefix)) return false;
+  const name = filePath.slice(prefix.length);
+  return Boolean(name) && !name.includes('/') && /^chat-[\w.-]+\.(webp|png|jpg|jpeg)$/i.test(name);
+}
+async function deleteOwnedChatImage(fileId, roomId, memberId, storedUrl, deletedMessageId) {
+  const file = await getChatImageDetails(fileId);
+  if (!file || file.url !== String(storedUrl || '') ||
+      !(isMemberChatImage(file.path, roomId, memberId) || isLegacyRoomImage(file.path, roomId))) {
+    return false;
+  }
+  // Avoid deleting an image still referenced by another message, including historic duplicates.
+  const references = await supabaseRequest('chat_messages?image_file_id=eq.' + encodeURIComponent(fileId) +
+    '&id=neq.' + encodeURIComponent(deletedMessageId) + '&select=id&limit=1');
+  if (Array.isArray(references) && references.length) return false;
+  return deleteImageKitFile(fileId);
 }
 
 async function getSharedChatProfile(profileId, profileToken) {
@@ -432,7 +475,9 @@ async function handleChat(body, res) {
       signature,
       publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
       uploadEndpoint: 'https://upload.imagekit.io/api/v1/files/upload',
-      folder: `/bokjakso-chat/${member.room_id}${clean(body.purpose) === 'avatar' ? '/avatars' : ''}`
+      folder: clean(body.purpose) === 'avatar'
+        ? `/bokjakso-chat/${member.room_id}/avatars`
+        : `/bokjakso-chat/${member.room_id}/members/${member.id}/messages`
     });
     return;
   }
@@ -498,15 +543,28 @@ async function handleChat(body, res) {
   if (action === 'chat-send') {
     const messageType = clean(body.messageType) === 'image' ? 'image' : 'text';
     const message = clean(body.message).slice(0, 1000);
-    const imageUrl = clean(body.imageUrl).slice(0, 2000);
+    const submittedImageUrl = clean(body.imageUrl).slice(0, 2000);
     const imageFileId = clean(body.imageFileId).slice(0, 300);
+    let imageUrl = '';
     if (messageType === 'text' && !message) {
       res.status(400).json({ message: '메시지를 입력해 주세요.' });
       return;
     }
-    if (messageType === 'image' && (!imageUrl || !imageFileId || !/^https:\/\//i.test(imageUrl))) {
-      res.status(400).json({ message: '이미지 정보가 올바르지 않습니다.' });
-      return;
+    if (messageType === 'image') {
+      const image = await getChatImageDetails(imageFileId);
+      if (!image || !isMemberChatImage(image.path, member.room_id, member.id) ||
+          image.url !== submittedImageUrl) {
+        res.status(400).json({ message: '업로드한 사진을 확인할 수 없습니다. 사진을 다시 올려 주세요.' });
+        return;
+      }
+      // An image file may be attached to only one message, preventing ID reuse.
+      const existing = await supabaseRequest('chat_messages?image_file_id=eq.' +
+        encodeURIComponent(imageFileId) + '&select=id&limit=1');
+      if (Array.isArray(existing) && existing.length) {
+        res.status(409).json({ message: '이미 등록된 사진입니다. 다시 올려 주세요.' });
+        return;
+      }
+      imageUrl = image.url;
     }
     const lastSent = member.last_sent_at ? new Date(member.last_sent_at).getTime() : 0;
     if (lastSent && Date.now() - lastSent < 700) {
@@ -550,15 +608,12 @@ async function handleChat(body, res) {
       return;
     }
     const rows = await supabaseRequest(
-      `chat_messages?id=eq.${encodeURIComponent(messageId)}&room_id=eq.${encodeURIComponent(member.room_id)}&member_id=eq.${encodeURIComponent(member.id)}&deleted_at=is.null&select=id,message_type,image_file_id&limit=1`
+      `chat_messages?id=eq.${encodeURIComponent(messageId)}&room_id=eq.${encodeURIComponent(member.room_id)}&member_id=eq.${encodeURIComponent(member.id)}&deleted_at=is.null&select=id,message_type,image_file_id,image_url&limit=1`
     );
     const target = Array.isArray(rows) ? rows[0] : null;
     if (!target) {
       res.status(404).json({ message: '삭제할 수 있는 내 메시지를 찾지 못했습니다.' });
       return;
-    }
-    if (target.message_type === 'image' && target.image_file_id) {
-      await deleteImageKitFile(target.image_file_id);
     }
     const now = new Date().toISOString();
     await supabaseRequest(`chat_messages?id=eq.${encodeURIComponent(messageId)}`, {
@@ -573,6 +628,15 @@ async function handleChat(body, res) {
         image_file_id: null
       })
     });
+    // Soft-delete the message first; only delete the remote file after checking ownership.
+    if (target.message_type === 'image' && target.image_file_id) {
+      try {
+        await deleteOwnedChatImage(target.image_file_id, member.room_id, member.id,
+          target.image_url, messageId);
+      } catch (_) {
+        // Remote cleanup must never resurrect or expose a deleted message.
+      }
+    }
     res.status(200).json({ ok: true, messageId });
     return;
   }
