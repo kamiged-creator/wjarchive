@@ -760,11 +760,24 @@
   function resizeMessageInput(){
     const input=els.messageInput;
     const wasNearBottom=els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<90;
+    // Preserve the user's scroll position if they are editing an earlier sentence.
+    const previousScrollTop=input.scrollTop;
+    const caretAtEnd=input.selectionStart===input.value.length&&input.selectionEnd===input.value.length;
     input.style.height='46px';
     const required=input.scrollHeight+2; // scrollHeight excludes the 1px top/bottom borders
-    input.style.height=Math.min(94,Math.max(46,required))+'px';
-    input.style.overflowY=required>94?'auto':'hidden';
-    if(!input.value)input.scrollTop=0;
+    const maxHeight=94; // three 24px text lines, plus 20px padding and 2px border
+    input.style.height=Math.min(maxHeight,Math.max(46,required))+'px';
+    const overflowing=required>maxHeight;
+    input.style.overflowY=overflowing?'auto':'hidden';
+    if(!input.value||!overflowing){
+      input.scrollTop=0;
+    }else if(caretAtEnd){
+      // Align the bottom of the last line with the padding.
+      // Android Chrome otherwise leaves a partially clipped line at the top.
+      input.scrollTop=Math.max(0,input.scrollHeight-input.clientHeight);
+    }else{
+      input.scrollTop=previousScrollTop;
+    }
     if(wasNearBottom)els.messages.scrollTop=els.messages.scrollHeight;
   }
   async function send(){
@@ -1123,6 +1136,7 @@
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('input',resizeMessageInput);
   window.addEventListener('resize',resizeMessageInput,{passive:true});
+  window.visualViewport?.addEventListener('resize',resizeMessageInput,{passive:true});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
   loadSoundDefault();
