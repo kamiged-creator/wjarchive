@@ -7,6 +7,8 @@
   <title>관계자 채팅 | 복작소</title>
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#fbf8f4">
+  <!-- Refined Korean UI typeface with browser/system-font fallback. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">
   <style>
     :root{
       --bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;
@@ -287,6 +289,24 @@
     body.dark .chat .composer{background:#1c1a18;border-top-color:#52483f;box-shadow:0 -3px 12px rgba(0,0,0,.13)}
     body.dark .chat .composer textarea,body.dark .chat .photo{background:#292521;border-color:#584d41}
     body.dark .chat .composer textarea::placeholder{color:#B8ADA1;opacity:1}
+    /* Desktop typography: retain clear hierarchy without blocky extra-bold lettering. */
+    @media(min-width:561px){
+      html,body{font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+      .brand{font-weight:750;letter-spacing:-.025em}
+      h1{font-weight:750;letter-spacing:-.035em}
+      .eyebrow{font-weight:700}
+      .shared-profile-info strong{font-weight:700}
+      .public-room-list h2,.admin-room-list h2{font-weight:720}
+      .public-room-name,.admin-room-name{font-weight:680}
+      .public-room-enter,.admin-room-enter,.entered-badge{font-weight:700}
+      .entry-title,.profile-dialog h2,.profile-view-dialog h2{font-weight:740;letter-spacing:-.025em}
+      .entry-room,.profile-view-name{font-weight:690}
+      .profile-hint{font-weight:400;line-height:1.75}
+      .profile-name-field,.profile-name-field label,.entry-field label{font-weight:650}
+      .profile-pick-button,.profile-actions button,.profile-delete-row .profile-delete-btn,.profile-view-actions button{font-weight:680}
+      .field label,.primary,.room-title,.settings-profile-name{font-weight:700}
+      .lead{letter-spacing:-.005em}
+    }
     @media(max-width:560px){
       html,body{height:100%;overscroll-behavior:none}
       body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
