@@ -95,6 +95,7 @@
     .public-room-item>div:first-child{min-width:0;padding-left:10px}
     /* Long titles use one line with an ellipsis; retain the prior-entry badge. */
     .public-room-title-row{display:flex;align-items:center;gap:5px;min-width:0}
+    .public-room-title-row::before{content:"";display:block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#A9825A;margin-right:3px}
     .public-room-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:750;letter-spacing:-.02em;line-height:1.45}
     .public-room-title-row .entered-badge{flex:0 0 auto;margin-left:0}
     .public-room-last{font-size:11px;line-height:1.3;color:var(--muted);margin-top:3px;white-space:nowrap}
