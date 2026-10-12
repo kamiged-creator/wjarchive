@@ -71,7 +71,7 @@ async function deleteImageKitFile(fileId) {
   }
 }
 
-async function verifiedAvatarFromImageKit(fileId, roomId) {
+async function verifiedAvatarFromImageKit(fileId, roomId, profileId = null) {
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
   if (!privateKey || !/^[\w-]{10,100}$/.test(fileId)) return null;
   const response = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId), {
@@ -79,7 +79,7 @@ async function verifiedAvatarFromImageKit(fileId, roomId) {
   });
   if (!response.ok) return null;
   const file = await response.json();
-  const folder = '/bokjakso-chat/' + roomId + '/avatars/';
+  const folder = profileId ? '/bokjakso-chat-profiles/' + profileId + '/' : '/bokjakso-chat/' + roomId + '/avatars/';
   const imageUrl = String(file.url || '');
   if (!String(file.filePath || '').startsWith(folder) ||
       !/^https:\/\//i.test(imageUrl) ||
@@ -88,16 +88,97 @@ async function verifiedAvatarFromImageKit(fileId, roomId) {
   return imageUrl;
 }
 
+async function getSharedChatProfile(profileId, profileToken) {
+  const id = clean(profileId);
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !profileToken || typeof profileToken !== 'string') return null;
+  const rows = await supabaseRequest('chat_profiles?id=eq.' + encodeURIComponent(id) +
+    '&token_hash=eq.' + tokenHash(profileToken) + '&select=id,nickname,avatar_url,avatar_file_id&limit=1');
+  return Array.isArray(rows) ? rows[0] : null;
+}
+
 async function getChatMember(memberId, sessionToken) {
   const id = clean(memberId);
   const hash = tokenHash(sessionToken);
   if (!id || !sessionToken) return null;
-  const rows = await supabaseRequest(`chat_members?id=eq.${encodeURIComponent(id)}&token_hash=eq.${hash}&select=id,room_id,nickname,is_blocked,last_seen_at,last_sent_at,avatar_url,avatar_file_id`);
+  const rows = await supabaseRequest(`chat_members?id=eq.${encodeURIComponent(id)}&token_hash=eq.${hash}&select=id,room_id,nickname,is_blocked,last_seen_at,last_sent_at,avatar_url,avatar_file_id,profile_id`);
   return Array.isArray(rows) ? rows[0] : null;
 }
 
 async function handleChat(body, res) {
   const action = clean(body.action);
+
+  // A saved profile belongs to this browser's private profile token, not to a room.
+  if (action === 'chat-profile-create') {
+    const nickname = clean(body.nickname).slice(0,20);
+    if (!nickname || nickname === '관리자') {
+      res.status(400).json({message:'프로필 닉네임을 입력해 주세요. 관리자 이름은 사용할 수 없습니다.'});return;
+    }
+    const profileToken = crypto.randomBytes(32).toString('hex');
+    const source = await getChatMember(body.sourceMemberId, body.sourceSessionToken);
+    const values = {nickname,token_hash:tokenHash(profileToken)};
+    if (source && !source.is_blocked) {
+      values.avatar_url=source.avatar_url||null;
+      values.avatar_file_id=source.avatar_file_id||null;
+    }
+    const saved = await supabaseRequest('chat_profiles?select=id,nickname,avatar_url', {
+      method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(values)
+    });
+    const profile = saved?.[0];
+    if(!profile){res.status(500).json({message:'프로필을 만들지 못했습니다.'});return}
+    res.status(200).json({ok:true,profile,profileToken});
+    return;
+  }
+
+  if (action === 'chat-profile-read' || action === 'chat-profile-save' || action === 'chat-profile-image-auth') {
+    const profile = await getSharedChatProfile(body.profileId, body.profileToken);
+    if (!profile) {res.status(401).json({message:'프로필을 확인할 수 없습니다. 다시 만들어 주세요.'});return}
+
+    if (action === 'chat-profile-read') {
+      res.status(200).json({ok:true,profile:{id:profile.id,nickname:profile.nickname,avatar_url:profile.avatar_url||null}});
+      return;
+    }
+    if (action === 'chat-profile-image-auth') {
+      const privateKey=process.env.IMAGEKIT_PRIVATE_KEY;
+      if(!privateKey){res.status(503).json({message:'사진 업로드 설정을 확인해 주세요.'});return}
+      const token=crypto.randomUUID(),expire=Math.floor(Date.now()/1000)+600;
+      const signature=crypto.createHmac('sha1',privateKey).update(token+expire).digest('hex');
+      res.status(200).json({ok:true,token,expire,signature,
+        publicKey:'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
+        uploadEndpoint:'https://upload.imagekit.io/api/v1/files/upload',
+        folder:'/bokjakso-chat-profiles/'+profile.id});
+      return;
+    }
+
+    const changeNickname=Object.prototype.hasOwnProperty.call(body,'nickname');
+    const changePhoto=Object.prototype.hasOwnProperty.call(body,'avatarFileId');
+    const nextNickname=changeNickname?clean(body.nickname).slice(0,20):profile.nickname;
+    if(!nextNickname||nextNickname==='관리자'){
+      res.status(400).json({message:'올바른 닉네임을 입력해 주세요.'});return;
+    }
+    let avatarUrl=profile.avatar_url||null,avatarFileId=profile.avatar_file_id||null;
+    if(changePhoto){
+      avatarFileId=clean(body.avatarFileId).slice(0,150)||null;
+      avatarUrl=avatarFileId?await verifiedAvatarFromImageKit(avatarFileId,null,profile.id):null;
+      if(avatarFileId&&!avatarUrl){res.status(400).json({message:'프로필 사진을 확인하지 못했습니다.'});return}
+    }
+    const modified=await supabaseRequest('chat_profiles?id=eq.'+encodeURIComponent(profile.id)+
+      '&select=id,nickname,avatar_url',{
+        method:'PATCH',headers:{Prefer:'return=representation'},
+        body:JSON.stringify({nickname:nextNickname,avatar_url:avatarUrl,avatar_file_id:avatarFileId,updated_at:new Date().toISOString()})
+    });
+    // Keep all rooms connected to this profile in sync without changing admin role names.
+    await supabaseRequest('chat_members?profile_id=eq.'+encodeURIComponent(profile.id),{
+      method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({avatar_url:avatarUrl,avatar_file_id:avatarFileId})
+    });
+    await supabaseRequest('chat_members?profile_id=eq.'+encodeURIComponent(profile.id)+'&nickname=neq.'+encodeURIComponent('관리자'),{
+      method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({nickname:nextNickname})
+    });
+    if(changePhoto&&profile.avatar_file_id&&profile.avatar_file_id!==avatarFileId) {
+      await deleteImageKitFile(profile.avatar_file_id);
+    }
+    res.status(200).json({ok:true,profile:modified?.[0]||{id:profile.id,nickname:nextNickname,avatar_url:avatarUrl}});
+    return;
+  }
 
   if (action === 'chat-sound-config') {
     const settings = await supabaseRequest('site_settings?key=eq.chat_sound_default_volume&select=value&limit=1');
@@ -121,7 +202,13 @@ async function handleChat(body, res) {
   if (action === 'chat-join') {
     const roomCode = clean(body.roomCode).toUpperCase().replace(/\s+/g, '');
     const password = String(body.password || '');
-    const nickname = clean(body.nickname).slice(0, 20);
+    const requestedNickname = clean(body.nickname).slice(0, 20);
+    const profile = body.profileId || body.profileToken
+      ? await getSharedChatProfile(body.profileId,body.profileToken) : null;
+    if ((body.profileId || body.profileToken) && !profile) {
+      res.status(401).json({message:'저장된 프로필을 확인할 수 없습니다. 다시 설정해 주세요.'});return;
+    }
+    const nickname = profile?.nickname || requestedNickname;
     if (!roomCode || !password || !nickname) {
       res.status(400).json({ message: '방 코드, 비밀번호, 닉네임을 입력해 주세요.' });
       return;
@@ -146,12 +233,15 @@ async function handleChat(body, res) {
     }
 
     const sessionToken = crypto.randomBytes(32).toString('hex');
-    const members = await supabaseRequest('chat_members?select=id,room_id,nickname,avatar_url', {
+    const members = await supabaseRequest('chat_members?select=id,room_id,nickname,avatar_url,profile_id', {
       method: 'POST',
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         room_id: room.id,
         nickname,
+        profile_id:profile?.id||null,
+        avatar_url:profile?.avatar_url||null,
+        avatar_file_id:profile?.avatar_file_id||null,
         token_hash: tokenHash(sessionToken),
         last_seen_at: new Date().toISOString()
       })
@@ -175,6 +265,20 @@ async function handleChat(body, res) {
   const roomState = Array.isArray(roomStateRows) ? roomStateRows[0] : null;
   if (!roomState || roomState.is_archived || !roomState.is_active) {
     res.status(403).json({ message: roomState?.is_archived ? '보관된 채팅방입니다.' : '현재 닫혀 있는 채팅방입니다.' });
+    return;
+  }
+
+  if (action === 'chat-profile-link') {
+    const profile = await getSharedChatProfile(body.profileId,body.profileToken);
+    if(!profile){res.status(401).json({message:'프로필을 확인할 수 없습니다.'});return}
+    const adminMember=member.nickname==='관리자';
+    const updated=await supabaseRequest('chat_members?id=eq.'+encodeURIComponent(member.id)+
+      '&room_id=eq.'+encodeURIComponent(member.room_id)+'&select=id,nickname,avatar_url,profile_id',{
+      method:'PATCH',headers:{Prefer:'return=representation'},
+      body:JSON.stringify({profile_id:profile.id,nickname:adminMember?'관리자':profile.nickname,
+        avatar_url:profile.avatar_url||null,avatar_file_id:profile.avatar_file_id||null})
+    });
+    res.status(200).json({ok:true,member:updated?.[0]||null});
     return;
   }
 
