@@ -198,8 +198,8 @@
     .text-modal-close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .notice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
     .notice-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
-    .notice-actions .sound-toggle{order:1}
-    .notice-actions .profile-shortcut{order:2;flex:0 0 auto;margin:0;min-height:38px;padding:4px 9px 4px 5px;white-space:nowrap}
+    .notice-actions .profile-shortcut{order:1;flex:0 0 auto;margin:0;min-height:38px;padding:4px 9px 4px 5px;white-space:nowrap}
+    .notice-actions .sound-toggle{order:2}
     .notice-actions .sound-volume{order:3}
     .notice-actions .push-toggle{order:4}
     .push-toggle{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--composer-input);color:var(--admin-ink);font-size:12px;font-weight:850;cursor:pointer}
@@ -210,14 +210,12 @@
     .sound-toggle{flex:0 0 auto;min-height:38px;padding:6px 11px;border:1.5px solid var(--composer-line);border-radius:11px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
     .sound-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
     .sound-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-    .sound-volume{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;font-size:12px;font-weight:800;color:var(--text)}
-    .volume-fold{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-height:40px;border:1px solid var(--admin-border);border-radius:9px;background:var(--paper);color:var(--text);font-size:12px;font-weight:850;padding:0 7px;white-space:nowrap;cursor:pointer}
-    .volume-fold::after{content:'▴';display:inline-block;font-size:20px;line-height:1;color:var(--accent);font-weight:900}
-    .sound-volume.is-collapsed .volume-fold::after{content:'▾'}
-    .volume-fold:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
-    .sound-volume.is-collapsed select{display:none}
-    .sound-volume select{min-height:40px;max-width:112px;padding:0 8px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--paper);color:var(--text);font-size:13px;font-weight:800;cursor:pointer}
-    .sound-volume select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    /* Compact two-step volume control: arrow up / arrow down on one vertical axis. */
+    .sound-volume{display:inline-flex;flex-direction:column;align-items:stretch;justify-content:center;flex:0 0 32px;width:32px;height:40px;border:1.5px solid var(--admin-border);border-radius:10px;background:var(--paper);overflow:hidden}
+    .volume-step{display:flex;align-items:center;justify-content:center;width:100%;height:50%;min-height:0;padding:0;border:0;background:transparent;color:var(--accent);font-size:15px;font-weight:900;line-height:1;cursor:pointer;touch-action:manipulation}
+    .volume-step+.volume-step{border-top:1px solid var(--line)}
+    .volume-step:disabled{opacity:.33;cursor:default}
+    .volume-step:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;z-index:1}
     @media(max-width:560px){
       html,body{height:100%;overscroll-behavior:none}
       body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
@@ -232,10 +230,8 @@
       .chat-head>div:first-child{min-width:0}
       .room-title{font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .room-meta{font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      /* One compact sound/profile/volume/phone-notification row saves chat height. */
-      .notice-actions .profile-shortcut{order:2;min-height:38px;height:38px;margin:0;padding:3px 5px 3px 3px;font-size:10px;gap:3px;border-radius:11px}
-      .notice-actions .profile-shortcut .profile-icon{width:20px;height:20px;flex:0 0 20px}
-      .notice-actions .profile-shortcut{font-size:0;width:39px;padding:3px;justify-content:center}
+      /* One compact profile / sound / vertical volume / phone notification row. */
+      .notice-actions .profile-shortcut{order:1;min-height:38px;height:38px;margin:0;width:39px;padding:3px;font-size:0;justify-content:center;border-radius:11px}
       .notice-actions .profile-shortcut .profile-icon{width:27px;height:27px;flex-basis:27px;font-size:17px}
       .notice-actions .profile-shortcut img{object-fit:cover}
       .head-actions{gap:6px;max-width:160px;flex-wrap:wrap;justify-content:flex-end}
@@ -250,11 +246,9 @@
       /* Restore the original compact single-line notification layout. */
       .notice{padding:7px 10px}
       .notice-actions{display:flex;align-items:center;justify-content:space-between;gap:4px;flex-wrap:nowrap;margin-left:0;width:100%}
-      .notice-actions .sound-toggle{order:1;min-height:38px;padding:5px 5px;font-size:11px;white-space:nowrap}
-      .notice-actions .sound-volume{order:3;display:inline-flex;align-items:center;gap:2px;min-width:0;font-size:11px;white-space:nowrap}
-      .notice-actions .volume-fold{min-height:38px;padding:0 4px;font-size:11px}
-      .notice-actions .volume-fold::after{font-size:18px}
-      .notice-actions .sound-volume select{flex:0 1 auto;min-width:0;max-width:66px;min-height:38px;padding:0 3px;font-size:11px}
+      .notice-actions .sound-toggle{order:2;min-height:38px;padding:5px 5px;font-size:11px;white-space:nowrap}
+      .notice-actions .sound-volume{order:3;flex:0 0 32px;width:32px;height:38px}
+      .notice-actions .volume-step{font-size:14px}
       .notice-actions .push-toggle{order:4;flex:0 0 auto;width:auto;min-height:38px;padding:5px 5px;font-size:11px;border-color:var(--admin-border);background:var(--composer-input);color:var(--admin-ink)}
       .notice-actions .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
@@ -318,7 +312,7 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
-      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button><div class="sound-volume"><button class="volume-fold" id="volumeFoldBtn" type="button" aria-controls="soundVolumeSelect" aria-expanded="true" title="음량 접기">음량</button><select id="soundVolumeSelect" aria-label="뽁짝 알림 소리 크기" title="뽁짝 알림 소리 크기"><option value="30">작게</option><option value="60">보통</option><option value="100" selected>크게</option></select></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
+      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><div class="sound-volume" role="group" aria-label="채팅 알림 음량 조절"><button class="volume-step" id="volumeUpBtn" type="button" aria-label="알림 소리 키우기" title="알림 소리 키우기">▲</button><button class="volume-step" id="volumeDownBtn" type="button" aria-label="알림 소리 줄이기" title="알림 소리 줄이기">▼</button></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -415,7 +409,6 @@
   const THEME_KEY='bokjaksoChatThemeV1';
   const SOUND_KEY='bokjaksoChatSoundV1';
   const SOUND_VOLUME_KEY='bokjaksoChatSoundVolumeV1';
-  const VOLUME_FOLD_KEY='bokjaksoChatVolumeFoldV1';
   const SHARED_PROFILE_KEY='bokjaksoChatSharedProfileV1';
   const els={
     joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
@@ -428,7 +421,7 @@
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
-    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),soundVolumeSelect:document.getElementById('soundVolumeSelect'),volumeFoldBtn:document.getElementById('volumeFoldBtn'),pushToggle:document.getElementById('pushToggle'),
+    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),volumeUpBtn:document.getElementById('volumeUpBtn'),volumeDownBtn:document.getElementById('volumeDownBtn'),pushToggle:document.getElementById('pushToggle'),
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
     adminRoomList:document.getElementById('adminRoomList'),
     adminRooms:document.getElementById('adminRooms'),
@@ -559,18 +552,28 @@
   const savedSoundVolume=localStorage.getItem(SOUND_VOLUME_KEY);
   let personalSoundVolume=[30,60,100].includes(Number(savedSoundVolume))?Number(savedSoundVolume):null;
   let defaultSoundVolume=100;
-  let volumeCollapsed=localStorage.getItem(VOLUME_FOLD_KEY)==='yes';
-  function updateVolumeFold(){
-    els.volumeFoldBtn.closest('.sound-volume').classList.toggle('is-collapsed',volumeCollapsed);
-    els.volumeFoldBtn.textContent='음량';
-    els.volumeFoldBtn.title=volumeCollapsed?'음량 펼치기':'음량 접기';
-    els.volumeFoldBtn.setAttribute('aria-label',volumeCollapsed?'음량 펼치기':'음량 접기');
-    els.volumeFoldBtn.setAttribute('aria-expanded',String(!volumeCollapsed));
-  }
-  updateVolumeFold();
   let lastSoundAt=0;
   function effectiveSoundVolume(){return personalSoundVolume??defaultSoundVolume}
-  function displaySoundVolume(){els.soundVolumeSelect.value=String(effectiveSoundVolume())}
+  const volumeLevels=[30,60,100];
+  function displaySoundVolume(){
+    const idx=volumeLevels.indexOf(effectiveSoundVolume());
+    const levelNames=['작게','보통','크게'];
+    const name=levelNames[Math.max(0,idx)];
+    els.volumeUpBtn.disabled=idx>=2;
+    els.volumeDownBtn.disabled=idx<=0;
+    els.volumeUpBtn.title='소리 키우기 · 현재 '+name;
+    els.volumeDownBtn.title='소리 줄이기 · 현재 '+name;
+  }
+  function stepSoundVolume(direction){
+    const idx=volumeLevels.indexOf(effectiveSoundVolume());
+    const next=Math.max(0,Math.min(2,idx+direction));
+    if(next===idx)return;
+    personalSoundVolume=volumeLevels[next];
+    localStorage.setItem(SOUND_VOLUME_KEY,String(personalSoundVolume));
+    displaySoundVolume();
+    if(soundEnabled)playBokjakSound(true);
+  }
+  displaySoundVolume();
   async function loadSoundDefault(){
     try{
       const data=await api({action:'chat-sound-config'});
@@ -1523,18 +1526,8 @@
     join();
   });
   els.pushToggle.addEventListener('click',togglePhonePush);
-  els.volumeFoldBtn.addEventListener('click',()=>{
-    volumeCollapsed=!volumeCollapsed;
-    localStorage.setItem(VOLUME_FOLD_KEY,volumeCollapsed?'yes':'no');
-    updateVolumeFold();
-  });
-  els.soundVolumeSelect.addEventListener('change',()=>{
-    const level=Number(els.soundVolumeSelect.value);
-    if(![30,60,100].includes(level))return;
-    personalSoundVolume=level;
-    localStorage.setItem(SOUND_VOLUME_KEY,String(level));
-    if(soundEnabled)playBokjakSound(true);
-  });
+  els.volumeUpBtn.addEventListener('click',()=>stepSoundVolume(1));
+  els.volumeDownBtn.addEventListener('click',()=>stepSoundVolume(-1));
   els.soundToggle.addEventListener('click',()=>{
     soundEnabled=!soundEnabled;
     localStorage.setItem(SOUND_KEY,soundEnabled?'on':'off');
