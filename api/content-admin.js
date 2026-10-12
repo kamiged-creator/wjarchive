@@ -267,7 +267,7 @@ function chatTokenHash(token) {
 async function deleteImageKitFile(fileId) {
   const id = normalize(fileId);
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
-  if (!id || !privateKey) return false;
+  if (!/^[A-Za-z0-9_-]{10,100}$/.test(id) || !privateKey) return false;
   try {
     const response = await fetch(`https://api.imagekit.io/v1/files/${encodeURIComponent(id)}`, {
       method: 'DELETE',
@@ -276,6 +276,28 @@ async function deleteImageKitFile(fileId) {
       }
     });
     return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
+// Never trust image_file_id from a message record when deleting an entire room.
+// In particular, historical messages may contain unverified IDs.
+async function deleteImageFromVerifiedRoom(fileId, roomId, imageUrl) {
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  if (!privateKey || !/^[A-Za-z0-9_-]{10,100}$/.test(String(fileId || ''))) return false;
+  try {
+    const response = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId) + '/details', {
+      headers: { Authorization: 'Basic ' + Buffer.from(privateKey + ':').toString('base64') }
+    });
+    if (!response.ok) return false;
+    const file = await response.json();
+    const path = String(file.filePath || '');
+    const prefix = '/bokjakso-chat/' + roomId + '/';
+    const subpath = path.startsWith(prefix) ? path.slice(prefix.length) : '';
+    if (!subpath || subpath.startsWith('avatars/') || subpath.includes('/avatars/') ||
+        !['image', 'IMAGE'].includes(String(file.fileType || '')) ||
+        String(file.url || '') !== String(imageUrl || '')) return false;
+    return deleteImageKitFile(fileId);
   } catch (_) {
     return false;
   }
@@ -409,10 +431,12 @@ async function handleChatAdmin(body, res) {
       return;
     }
     const images = await db(
-      `chat_messages?room_id=eq.${encodeURIComponent(roomId)}&message_type=eq.image&image_file_id=not.is.null&select=image_file_id`
+      `chat_messages?room_id=eq.${encodeURIComponent(roomId)}&message_type=eq.image&image_file_id=not.is.null&select=image_file_id,image_url`
     );
     if (Array.isArray(images) && images.length) {
-      await Promise.all(images.map(row => deleteImageKitFile(row.image_file_id)));
+      await Promise.all(images.map(row => deleteImageFromVerifiedRoom(
+        row.image_file_id, roomId, row.image_url
+      )));
     }
     await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
       method: 'DELETE',
