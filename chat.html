@@ -418,6 +418,54 @@
     entryStatus:document.getElementById('entryStatus')
   };
   let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
+  let sharedProfile=null;
+  try{
+    const stored=JSON.parse(localStorage.getItem(SHARED_PROFILE_KEY)||'null');
+    if(stored?.id&&stored?.token)sharedProfile=stored;
+  }catch(_){}
+  function sharedCredentials(){
+    return sharedProfile ? {profileId:sharedProfile.id,profileToken:sharedProfile.token} : {};
+  }
+  function refreshSharedProfileCard(){
+    paintAvatar(els.sharedProfileAvatar,sharedProfile?.avatar_url||null);
+    els.sharedProfileName.textContent=sharedProfile?.nickname||'내 프로필 만들기';
+    els.sharedProfileHelp.textContent=sharedProfile?'모든 채팅방 공통 · 눌러서 수정':'닉네임·사진 한 번 설정, 모든 방에서 사용';
+    if(els.nickname&&sharedProfile)els.nickname.value=sharedProfile.nickname;
+  }
+  function storeSharedProfile(profile,token){
+    sharedProfile={id:profile.id,token:token||sharedProfile?.token,
+      nickname:profile.nickname,avatar_url:profile.avatar_url||null};
+    localStorage.setItem(SHARED_PROFILE_KEY,JSON.stringify(sharedProfile));
+    refreshSharedProfileCard();
+  }
+  async function ensureSharedProfile(nickname){
+    if(sharedProfile)return sharedProfile;
+    const value=String(nickname||'').trim().slice(0,20);
+    if(!value||value==='관리자')throw new Error('프로필 닉네임을 입력해 주세요.');
+    const source=session||(Object.values(getRememberedSessions()).find(item=>item.member?.nickname!=='관리자')||null);
+    const result=await api({action:'chat-profile-create',nickname:value,
+      sourceMemberId:source?.member?.id||'',sourceSessionToken:source?.sessionToken||''});
+    storeSharedProfile(result.profile,result.profileToken);
+    return sharedProfile;
+  }
+  async function syncSharedProfileToRoom(){
+    if(!session||!sharedProfile)return;
+    const currentId=session.member.id,currentToken=session.sessionToken,profileId=sharedProfile.id;
+    const data=await api({action:'chat-profile-link',memberId:currentId,sessionToken:currentToken,...sharedCredentials()});
+    if(!session||session.member.id!==currentId||sharedProfile?.id!==profileId)return;
+    if(data.member){
+      session.member.nickname=data.member.nickname||session.member.nickname;
+      session.member.profile_id=profileId;
+      updateMyAvatar(data.member.avatar_url||null);
+    }
+  }
+  async function refreshSavedSharedProfile(){
+    if(!sharedProfile)return;
+    try{
+      const data=await api({action:'chat-profile-read',...sharedCredentials()});
+      if(sharedProfile?.id===data.profile.id)storeSharedProfile(data.profile);
+    }catch(error){console.warn('공통 프로필 확인 실패',error)}
+  }
   const memberAvatars=new Map();
   let entryAvatarChoice=null,profileAvatarChoice=null,profileWorking=false,avatarPreviewObjectUrl=null,entryPreviewObjectUrl=null;
   function paintAvatar(target,url){
@@ -694,6 +742,7 @@
     els.roomTitle.textContent=session.room.title||'복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);pollTimer=setInterval(()=>loadMessages(false),3000);
+    if(sharedProfile)syncSharedProfileToRoom().catch(error=>console.warn('공통 프로필 동기화 실패',error));
     refreshPushState();
   }
   function showJoin(preserveRemembered=false){
@@ -1059,13 +1108,15 @@
     els.joinStatus.textContent='이 방은 이 기기에서 1년 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
   }
   function openFirstEntry(room){
+    els.entryAvatarPick.closest('.entry-field').style.display=sharedProfile?'none':'';
+    els.entryNickname.readOnly=Boolean(sharedProfile);
     els.entryAvatarFile.value='';
     entryAvatarChoice=null;
     paintAvatar(els.entryAvatarPreview,null);
     els.roomCode.value=String(room.code||'').toUpperCase();
     els.entryRoomName.textContent=room.title||'채팅방';
     els.entryPassword.value='';
-    els.entryNickname.value='';
+    els.entryNickname.value=sharedProfile?.nickname||'';
     els.entryStatus.textContent='';
     els.entryModal.classList.add('show');
     els.entryModal.setAttribute('aria-hidden','false');
@@ -1166,13 +1217,23 @@
     if(!nickname){els.entryStatus.textContent='닉네임을 입력해 주세요.';els.entryNickname.focus();return}
     els.entrySubmit.disabled=true;
     try{
-      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname});
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname,...sharedCredentials()});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};
       saveSession();
       const chosenPhoto=entryAvatarChoice;
       closeFirstEntry();
       showChat();
-      if(chosenPhoto)saveAvatarPhoto(chosenPhoto).catch(err=>alert('채팅방 입장은 완료했지만 프로필 사진을 올리지 못했습니다. 내 프로필에서 다시 시도해 주세요. '+(err.message||'')));
+      if(!sharedProfile){
+        (async()=>{
+          try{
+            await ensureSharedProfile(nickname);
+            await syncSharedProfileToRoom();
+            if(chosenPhoto)await saveAvatarPhoto(chosenPhoto);
+          }catch(error){console.warn('공통 프로필 초기 설정 실패',error)}
+        })();
+      }else if(chosenPhoto){
+        saveAvatarPhoto(chosenPhoto).catch(error=>console.warn('프로필 사진 적용 실패',error));
+      }
     }catch(e){
       els.entryStatus.textContent=e.message||'입장하지 못했습니다.';
     }finally{
@@ -1297,6 +1358,7 @@
   }
   els.entryAvatarPick.addEventListener('click',()=>els.entryAvatarFile.click());
   els.entryAvatarFile.addEventListener('change',()=>selectAvatarFile(els.entryAvatarFile,els.entryAvatarPreview,'entry'));
+  els.sharedProfileBtn.addEventListener('click',openProfileEditor);
   els.profileBtn.addEventListener('click',openProfileEditor);
   els.profilePickBtn.addEventListener('click',()=>{if(!profileWorking)els.profileFile.click()});
   els.profileFile.addEventListener('change',()=>selectAvatarFile(els.profileFile,els.profilePreview,'edit'));
@@ -1380,6 +1442,8 @@
   window.visualViewport?.addEventListener('resize',resizeMessageInput,{passive:true});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
+  refreshSharedProfileCard();
+  refreshSavedSharedProfile();
   loadSoundDefault();
   const isAdmin=Boolean(sessionStorage.getItem(ADMIN_KEY));
   document.body.classList.toggle('admin-mode',isAdmin);
