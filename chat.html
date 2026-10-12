@@ -153,6 +153,9 @@
     .text-modal-close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .notice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
     .notice-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
+    .notice-actions .sound-toggle{order:1}
+    .notice-actions .sound-volume{order:2}
+    .notice-actions .push-toggle{order:3}
     .push-toggle{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--composer-input);color:var(--admin-ink);font-size:12px;font-weight:850;cursor:pointer}
     .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);color:var(--admin-ink)}
     .push-toggle:disabled{opacity:.6;cursor:wait}
@@ -186,7 +189,15 @@
       .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
       .admin-mode .chat-head .delete-room.show{display:none}
       .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
-      .notice{padding:7px 12px}
+      /* Keep the push permission action prominent, while separating in-chat sound settings. */
+      .notice{display:block;padding:9px 12px 11px}
+      .notice-copy{display:block;font-size:11px;line-height:1.5;margin-bottom:9px}
+      .notice-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-left:0;width:100%}
+      .notice-actions .push-toggle{order:0;grid-column:1/-1;grid-row:1;min-width:0;width:100%;min-height:44px;font-size:14px;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--paper));color:var(--text)}
+      .notice-actions .push-toggle[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+      .notice-actions .sound-toggle{order:0;grid-column:1;grid-row:2;min-width:0;width:100%;min-height:44px;font-size:13px;white-space:nowrap}
+      .notice-actions .sound-volume{order:0;grid-column:2;grid-row:2;display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;font-size:13px;white-space:nowrap}
+      .notice-actions .sound-volume select{flex:1;min-width:0;max-width:114px;min-height:44px;font-size:13px}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
       .messages::-webkit-scrollbar{display:none}
       .chat-image{max-width:min(190px,52vw);max-height:200px}
@@ -240,7 +251,7 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
-      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><label class="sound-volume" for="soundVolumeSelect">음량 <select id="soundVolumeSelect" title="뽁짝 알림 소리 크기"><option value="30">작게</option><option value="60">보통</option><option value="100" selected>크게</option></select></label><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
+      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><label class="sound-volume" for="soundVolumeSelect">음량 <select id="soundVolumeSelect" title="뽁짝 알림 소리 크기"><option value="30">작게</option><option value="60">보통</option><option value="100" selected>크게</option></select></label></div></div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
