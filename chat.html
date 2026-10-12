@@ -103,6 +103,30 @@
     .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
     .chat.show{display:flex}
+    /* The right-edge settings drawer sits over the chat rather than consuming message height. */
+    .chat{position:relative;isolation:isolate}
+    .chat-edge-tab{position:absolute;right:0;top:96px;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:42px;height:70px;padding:4px 2px;border:1px solid var(--admin-border);border-right:0;border-radius:13px 0 0 13px;background:var(--accent);color:#fff;box-shadow:-3px 3px 14px rgba(25,20,16,.15);cursor:pointer;touch-action:manipulation}
+    .chat-edge-tab .edge-icon{font-size:21px;line-height:1.1}
+    .chat-edge-tab .edge-label{font-size:12px;font-weight:850}
+    .chat-edge-tab:focus-visible,.chat-edge-close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .chat-edge-backdrop{position:absolute;inset:0;z-index:18;background:rgba(25,20,16,.38);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
+    .chat-edge-panel{position:absolute;top:0;right:0;bottom:0;z-index:19;width:min(330px,calc(100% - 44px));min-width:0;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);color:var(--text);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(25,20,16,.18);transform:translateX(105%);visibility:hidden;pointer-events:none;transition:transform .22s ease,visibility .22s}
+    .chat.edge-open .chat-edge-tab{visibility:hidden;pointer-events:none}
+    .chat.edge-open .chat-edge-backdrop{opacity:1;visibility:visible;pointer-events:auto}
+    .chat.edge-open .chat-edge-panel{transform:translateX(0);visibility:visible;pointer-events:auto}
+    .chat-edge-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--line)}
+    .chat-edge-panel-head strong{font-size:20px;font-weight:850}
+    .chat-edge-close{min-height:44px;padding:0 12px;border-radius:12px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);font-size:14px;font-weight:800}
+    .chat-edge-panel .notice{display:block;position:static;z-index:auto;padding:16px;background:transparent;border:0;font-size:13px}
+    .chat-edge-panel .notice-copy{display:block;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--soft);line-height:1.65;color:var(--muted)}
+    .chat-edge-panel .notice-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;width:100%;margin:17px 0 0}
+    .chat-edge-panel .notice-actions .profile-shortcut{order:1;grid-column:1/-1;display:flex;min-height:52px;width:100%;margin:0;padding:6px 12px;gap:10px;justify-content:flex-start;border-radius:14px;font-size:15px;font-weight:850}
+    .chat-edge-panel .profile-shortcut .profile-icon{width:36px;height:36px;flex:0 0 36px;font-size:20px}
+    .chat-edge-panel .notice-actions .sound-toggle{order:2;min-height:48px;width:100%;padding:8px 5px;font-size:13px}
+    .chat-edge-panel .notice-actions .sound-volume{order:3;min-height:48px;width:100%}
+    .chat-edge-panel .volume-menu-toggle{height:48px;width:100%;font-size:14px}
+    .chat-edge-panel .notice-actions .push-toggle{order:4;grid-column:1/-1;min-height:50px;width:100%;font-size:14px}
+    @media(prefers-reduced-motion:reduce){.chat-edge-backdrop,.chat-edge-panel{transition:none}}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
     .room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:2px}
     .profile-shortcut{display:inline-flex;align-items:center;gap:5px;margin-top:5px;min-height:30px;border:1px solid var(--admin-border);border-radius:999px;background:var(--paper);color:var(--text);padding:3px 9px 3px 5px;font-size:11px;font-weight:800;cursor:pointer}
@@ -234,10 +258,10 @@
       .chat-head>div:first-child{min-width:0}
       .room-title{font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .room-meta{font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      /* One compact profile / sound / vertical volume / phone notification row. */
-      .notice-actions .profile-shortcut{order:1;min-height:38px;height:38px;margin:0;width:39px;padding:3px;font-size:0;justify-content:center;border-radius:11px}
-      .notice-actions .profile-shortcut .profile-icon{width:27px;height:27px;flex-basis:27px;font-size:17px}
-      .notice-actions .profile-shortcut img{object-fit:cover}
+      /* Edge tab remains easy to spot and touch without taking chat height. */
+      .chat-edge-tab{top:80px;width:40px;height:66px}
+      .chat-edge-panel .notice-actions .profile-shortcut{height:52px;font-size:15px;padding:6px 12px;justify-content:flex-start}
+      .chat-edge-panel .notice-actions .profile-shortcut .profile-icon{width:36px;height:36px;flex-basis:36px;font-size:20px}
       .head-actions{gap:6px;max-width:160px;flex-wrap:wrap;justify-content:flex-end}
       .invite{min-height:40px;padding:0 12px;font-size:12px}
       .leave{min-height:40px;padding:0 12px;font-size:12px}
@@ -247,14 +271,13 @@
       .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
       .admin-mode .chat-head .delete-room.show{display:none}
       .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
-      /* Restore the original compact single-line notification layout. */
-      .notice{padding:6px 10px;gap:6px}
-      .notice-actions{display:flex;align-items:center;justify-content:space-between;gap:4px;flex-wrap:nowrap;margin-left:0;width:100%}
-      .notice-actions .sound-toggle{order:2;min-height:38px;padding:5px 5px;font-size:11px;white-space:nowrap}
-      .notice-actions .sound-volume{order:3;flex:0 0 auto;width:auto;height:38px}
-      .notice-actions .volume-menu-toggle{height:38px;min-width:49px;padding:0 7px;font-size:11px}
-      .notice-actions .push-toggle{order:4;flex:0 0 auto;width:auto;min-height:38px;padding:5px 5px;font-size:11px;border-color:var(--admin-border);background:var(--composer-input);color:var(--admin-ink)}
-      .notice-actions .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
+      .chat-edge-panel .notice{padding:15px 12px;gap:0}
+      .chat-edge-panel .notice-actions{display:grid;align-items:stretch;justify-content:stretch;gap:10px;flex-wrap:initial;margin:17px 0 0;width:100%}
+      .chat-edge-panel .notice-actions .sound-toggle{min-height:48px;padding:8px 5px;font-size:13px}
+      .chat-edge-panel .notice-actions .sound-volume{width:100%;height:48px}
+      .chat-edge-panel .volume-menu-toggle{min-width:0;width:100%;height:48px;padding:0 8px;font-size:14px}
+      .chat-edge-panel .notice-actions .push-toggle{min-height:50px;width:100%;padding:8px 5px;font-size:13px}
+      .chat-edge-panel .notice-actions .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
       .msg-content{max-width:calc(92% - 42px)}
       .msg .bubble,.msg .image-bubble{max-width:100%}
@@ -316,7 +339,12 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
+      <button class="chat-edge-tab" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="채팅 설정 열기" title="채팅 설정 열기"><span class="edge-icon" aria-hidden="true">⚙</span><span class="edge-label" aria-hidden="true">설정</span></button>
+      <div class="chat-edge-backdrop" id="chatEdgeBackdrop" aria-hidden="true"></div>
+      <aside class="chat-edge-panel" id="chatEdgePanel" role="dialog" aria-modal="true" aria-label="채팅 설정" aria-hidden="true" inert>
+        <div class="chat-edge-panel-head"><strong>채팅 설정</strong><button class="chat-edge-close" id="chatEdgeClose" type="button">닫기 ×</button></div>
       <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><div class="sound-volume" id="soundVolumeControl"><button class="volume-menu-toggle" id="volumeMenuBtn" type="button" aria-controls="volumeMenu" aria-expanded="false" aria-haspopup="true" title="알림 음량 선택">음량</button><div class="volume-menu" id="volumeMenu" role="group" aria-label="알림 음량"><button type="button" class="volume-choice" data-volume="30" aria-checked="false" role="radio">작게</button><button type="button" class="volume-choice" data-volume="60" aria-checked="false" role="radio">보통</button><button type="button" class="volume-choice" data-volume="100" aria-checked="true" role="radio">크게</button></div></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
+      </aside>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -441,6 +469,7 @@
     entryNickname:document.getElementById('entryNickname'),
     entryAvatarPick:document.getElementById('entryAvatarPick'),entryAvatarFile:document.getElementById('entryAvatarFile'),entryAvatarPreview:document.getElementById('entryAvatarPreview'),
     profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),
+    chatEdgeTab:document.getElementById('chatEdgeTab'),chatEdgePanel:document.getElementById('chatEdgePanel'),chatEdgeBackdrop:document.getElementById('chatEdgeBackdrop'),chatEdgeClose:document.getElementById('chatEdgeClose'),
     profileViewModal:document.getElementById('profileViewModal'),profileViewPhoto:document.getElementById('profileViewPhoto'),profileViewName:document.getElementById('profileViewName'),profileViewHint:document.getElementById('profileViewHint'),profileViewEdit:document.getElementById('profileViewEdit'),profileViewClose:document.getElementById('profileViewClose'),
     profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
     entrySubmit:document.getElementById('entrySubmit'),
@@ -1478,8 +1507,35 @@
   }
   els.entryAvatarPick.addEventListener('click',()=>els.entryAvatarFile.click());
   els.entryAvatarFile.addEventListener('change',()=>selectAvatarFile(els.entryAvatarFile,els.entryAvatarPreview,'entry'));
+  let chatEdgeOpened=false;
+  function setChatEdgeOpen(open,restoreFocus=true){
+    chatEdgeOpened=Boolean(open);
+    els.chatCard.classList.toggle('edge-open',chatEdgeOpened);
+    els.chatEdgeTab.setAttribute('aria-expanded',String(chatEdgeOpened));
+    els.chatEdgeTab.setAttribute('aria-label',chatEdgeOpened?'채팅 설정 닫기':'채팅 설정 열기');
+    els.chatEdgePanel.setAttribute('aria-hidden',String(!chatEdgeOpened));
+    els.chatEdgePanel.inert=!chatEdgeOpened;
+    if(chatEdgeOpened){
+      els.chatEdgeClose.focus({preventScroll:true});
+    }else{
+      closeVolumeMenu();
+      if(restoreFocus)els.chatEdgeTab.focus({preventScroll:true});
+    }
+  }
+  els.chatEdgeTab.addEventListener('click',()=>setChatEdgeOpen(true));
+  els.chatEdgeClose.addEventListener('click',()=>setChatEdgeOpen(false));
+  els.chatEdgeBackdrop.addEventListener('click',()=>setChatEdgeOpen(false));
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&chatEdgeOpened&&!els.profileViewModal.classList.contains('show')&&!els.profileModal.classList.contains('show')){
+      event.preventDefault();
+      setChatEdgeOpen(false);
+    }
+  });
   els.sharedProfileBtn.addEventListener('click',openProfileEditor);
-  els.profileBtn.addEventListener('click',openProfileView);
+  els.profileBtn.addEventListener('click',()=>{
+    setChatEdgeOpen(false);
+    openProfileView();
+  });
   els.profileViewPhoto.addEventListener('click',()=>{
     const url=sharedProfile?.avatar_url||session?.member?.avatar_url||null;
     if(url)openImage(url);
