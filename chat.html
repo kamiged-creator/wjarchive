@@ -165,6 +165,9 @@
     .sound-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
     .sound-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     .sound-volume{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;font-size:12px;font-weight:800;color:var(--text)}
+    .volume-fold{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border:0;background:transparent;color:var(--text);font-size:12px;font-weight:850;padding:0 2px;white-space:nowrap;cursor:pointer}
+    .volume-fold:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+    .sound-volume.is-collapsed select{display:none}
     .sound-volume select{min-height:40px;max-width:112px;padding:0 8px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--paper);color:var(--text);font-size:13px;font-weight:800;cursor:pointer}
     .sound-volume select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     @media(max-width:560px){
@@ -189,15 +192,15 @@
       .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
       .admin-mode .chat-head .delete-room.show{display:none}
       .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
-      /* Keep the push permission action prominent, while separating in-chat sound settings. */
-      .notice{display:block;padding:9px 12px 11px}
-      .notice-copy{display:block;font-size:11px;line-height:1.5;margin-bottom:9px}
-      .notice-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-left:0;width:100%}
-      .notice-actions .push-toggle{order:0;grid-column:1/-1;grid-row:1;min-width:0;width:100%;min-height:44px;font-size:14px;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--paper));color:var(--text)}
-      .notice-actions .push-toggle[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-      .notice-actions .sound-toggle{order:0;grid-column:1;grid-row:2;min-width:0;width:100%;min-height:44px;font-size:13px;white-space:nowrap}
-      .notice-actions .sound-volume{order:0;grid-column:2;grid-row:2;display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;font-size:13px;white-space:nowrap}
-      .notice-actions .sound-volume select{flex:1;min-width:0;max-width:114px;min-height:44px;font-size:13px}
+      /* Restore the original compact single-line notification layout. */
+      .notice{padding:7px 10px}
+      .notice-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin-left:auto;width:auto}
+      .notice-actions .sound-toggle{order:1;min-height:38px;padding:5px 7px;font-size:11px;white-space:nowrap}
+      .notice-actions .sound-volume{order:2;display:inline-flex;align-items:center;gap:3px;min-width:0;font-size:11px;white-space:nowrap}
+      .notice-actions .volume-fold{min-height:38px;padding:0 1px;font-size:11px}
+      .notice-actions .sound-volume select{flex:0 1 auto;min-width:0;max-width:74px;min-height:38px;padding:0 4px;font-size:11px}
+      .notice-actions .push-toggle{order:3;flex:0 0 auto;width:auto;min-height:38px;padding:5px 7px;font-size:11px;border-color:var(--admin-border);background:var(--composer-input);color:var(--admin-ink)}
+      .notice-actions .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
       .messages::-webkit-scrollbar{display:none}
       .chat-image{max-width:min(190px,52vw);max-height:200px}
@@ -251,7 +254,7 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
-      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><label class="sound-volume" for="soundVolumeSelect">음량 <select id="soundVolumeSelect" title="뽁짝 알림 소리 크기"><option value="30">작게</option><option value="60">보통</option><option value="100" selected>크게</option></select></label></div></div>
+      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><div class="sound-volume"><button class="volume-fold" id="volumeFoldBtn" type="button" aria-controls="soundVolumeSelect" aria-expanded="true" title="음량 접기">음량 ▴</button><select id="soundVolumeSelect" aria-label="뽁짝 알림 소리 크기" title="뽁짝 알림 소리 크기"><option value="30">작게</option><option value="60">보통</option><option value="100" selected>크게</option></select></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
@@ -308,6 +311,7 @@
   const THEME_KEY='bokjaksoChatThemeV1';
   const SOUND_KEY='bokjaksoChatSoundV1';
   const SOUND_VOLUME_KEY='bokjaksoChatSoundVolumeV1';
+  const VOLUME_FOLD_KEY='bokjaksoChatVolumeFoldV1';
   const els={
     joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
     roomCode:document.getElementById('roomCode'),roomPassword:document.getElementById('roomPassword'),
@@ -318,7 +322,7 @@
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
     textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
-    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),soundVolumeSelect:document.getElementById('soundVolumeSelect'),pushToggle:document.getElementById('pushToggle'),
+    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),soundVolumeSelect:document.getElementById('soundVolumeSelect'),volumeFoldBtn:document.getElementById('volumeFoldBtn'),pushToggle:document.getElementById('pushToggle'),
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
     adminRoomList:document.getElementById('adminRoomList'),
     adminRooms:document.getElementById('adminRooms'),
@@ -341,6 +345,15 @@
   const savedSoundVolume=localStorage.getItem(SOUND_VOLUME_KEY);
   let personalSoundVolume=[30,60,100].includes(Number(savedSoundVolume))?Number(savedSoundVolume):null;
   let defaultSoundVolume=100;
+  let volumeCollapsed=localStorage.getItem(VOLUME_FOLD_KEY)==='yes';
+  function updateVolumeFold(){
+    els.volumeFoldBtn.closest('.sound-volume').classList.toggle('is-collapsed',volumeCollapsed);
+    els.volumeFoldBtn.textContent=volumeCollapsed?'음량 ▾':'음량 ▴';
+    els.volumeFoldBtn.title=volumeCollapsed?'음량 펼치기':'음량 접기';
+    els.volumeFoldBtn.setAttribute('aria-label',volumeCollapsed?'음량 펼치기':'음량 접기');
+    els.volumeFoldBtn.setAttribute('aria-expanded',String(!volumeCollapsed));
+  }
+  updateVolumeFold();
   let lastSoundAt=0;
   function effectiveSoundVolume(){return personalSoundVolume??defaultSoundVolume}
   function displaySoundVolume(){els.soundVolumeSelect.value=String(effectiveSoundVolume())}
@@ -1052,6 +1065,11 @@
     join();
   });
   els.pushToggle.addEventListener('click',togglePhonePush);
+  els.volumeFoldBtn.addEventListener('click',()=>{
+    volumeCollapsed=!volumeCollapsed;
+    localStorage.setItem(VOLUME_FOLD_KEY,volumeCollapsed?'yes':'no');
+    updateVolumeFold();
+  });
   els.soundVolumeSelect.addEventListener('change',()=>{
     const level=Number(els.soundVolumeSelect.value);
     if(![30,60,100].includes(level))return;
