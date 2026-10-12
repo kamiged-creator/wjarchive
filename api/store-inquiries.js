@@ -129,7 +129,7 @@ async function handleChat(body, res) {
     return;
   }
 
-  if (action === 'chat-profile-read' || action === 'chat-profile-save' || action === 'chat-profile-image-auth') {
+  if (action === 'chat-profile-read' || action === 'chat-profile-save' || action === 'chat-profile-image-auth' || action === 'chat-profile-delete') {
     const profile = await getSharedChatProfile(body.profileId, body.profileToken);
     if (!profile) {res.status(401).json({message:'프로필을 확인할 수 없습니다. 다시 만들어 주세요.'});return}
 
@@ -137,6 +137,32 @@ async function handleChat(body, res) {
       res.status(200).json({ok:true,profile:{id:profile.id,nickname:profile.nickname,avatar_url:profile.avatar_url||null}});
       return;
     }
+    if (action === 'chat-profile-delete') {
+      // The shared profile is removed, but individual room memberships,
+      // message history and invitation/room credentials must remain untouched.
+      // Detach room references before deleting the profile to avoid FK issues.
+      await supabaseRequest('chat_members?profile_id=eq.' + encodeURIComponent(profile.id), {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({
+          profile_id: null,
+          avatar_url: null,
+          avatar_file_id: null
+        })
+      });
+      await supabaseRequest('chat_profiles?id=eq.' + encodeURIComponent(profile.id) +
+        '&token_hash=eq.' + tokenHash(body.profileToken), {
+        method: 'DELETE',
+        headers: { Prefer: 'return=minimal' }
+      });
+      // Removing a photo is independent of preserving the user's chat messages.
+      const imageRemoved = profile.avatar_file_id
+        ? await deleteImageKitFile(profile.avatar_file_id)
+        : true;
+      res.status(200).json({ok:true, imageRemoved});
+      return;
+    }
+
     if (action === 'chat-profile-image-auth') {
       const privateKey=process.env.IMAGEKIT_PRIVATE_KEY;
       if(!privateKey){res.status(503).json({message:'사진 업로드 설정을 확인해 주세요.'});return}
