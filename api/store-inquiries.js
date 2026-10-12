@@ -429,13 +429,21 @@ async function handleChat(body, res) {
     const messages = await supabaseRequest(
       `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.${initialHistory ? 'desc' : 'asc'}&limit=100`
     );
-    // Only expose avatar photos for members in the same authenticated room.
-    const membersInMessages = [...new Set((Array.isArray(messages) ? messages : []).map(m => m.member_id).filter(Boolean))];
+    // Profile changes must reach already-displayed messages even when no new
+    // messages arrive. Never trust client member IDs without room scoping.
+    const visibleMemberIds = Array.isArray(body.visibleMemberIds)
+      ? body.visibleMemberIds.filter(id => typeof id === 'string' &&
+          /^[0-9a-f-]{36}$/i.test(id)).slice(0, 100)
+      : [];
+    const membersToRefresh = [...new Set([
+      ...(Array.isArray(messages) ? messages : []).map(m => m.member_id).filter(Boolean),
+      ...visibleMemberIds
+    ])];
     let profiles = [];
-    if (membersInMessages.length) {
+    if (membersToRefresh.length) {
       profiles = await supabaseRequest(
         'chat_members?room_id=eq.' + encodeURIComponent(member.room_id) +
-        '&id=in.(' + membersInMessages.map(id => encodeURIComponent(id)).join(',') + ')' +
+        '&id=in.(' + membersToRefresh.map(id => encodeURIComponent(id)).join(',') + ')' +
         '&select=id,avatar_url,nickname'
       );
     }
