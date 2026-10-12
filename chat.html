@@ -86,7 +86,9 @@
     .public-room-list h2{font-size:16px;margin:0 0 10px;font-weight:800;letter-spacing:-.03em}
     .public-room-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 10px;border-top:1px solid var(--line)}
     .public-room-item:first-of-type{border-top:0}
-    .public-room-name{font-size:15px;font-weight:750;letter-spacing:-.02em}
+    /* Reserve a fixed slot for the entrance button even with very long room titles. */
+    .public-room-item>div:first-child{flex:1 1 0;min-width:0}
+    .public-room-name{font-size:15px;font-weight:750;letter-spacing:-.02em;line-height:1.45;overflow-wrap:anywhere}
     .public-room-code{font-size:12px;color:var(--muted);margin-top:4px}
     .public-room-enter{display:inline-flex;flex:0 0 94px;align-items:center;justify-content:center;width:94px;height:44px;box-sizing:border-box;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:0 6px;font-size:13px;font-weight:750;white-space:nowrap;cursor:pointer}
     .public-room-enter.selected{background:var(--primary);color:#fff}
