@@ -32,6 +32,12 @@
     header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
     .brand{font-weight:850;letter-spacing:-.03em;cursor:pointer}.sub{font-size:12px;color:var(--muted);margin-top:2px}
     .back{border:0;background:transparent;color:var(--muted);font-weight:700}
+    /* A single round avatar in the top bar replaces the floating edge settings tab. */
+    .header-profile-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;padding:2px;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--text);cursor:pointer;overflow:hidden;box-shadow:0 1px 4px rgba(25,20,16,.05)}
+    body.chat-active .header-profile-btn{display:inline-flex}
+    .header-profile-btn .header-avatar{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;font-size:20px;background:var(--soft)}
+    .header-profile-btn .header-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .header-profile-btn:focus-visible,.chat-edge-close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     main{width:min(720px,100%);margin:0 auto;padding:24px 14px 28px;flex:1}
     .card{background:color-mix(in srgb,var(--paper) 96%,transparent);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
     .join{padding:28px 22px}
@@ -103,15 +109,10 @@
     .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
     .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
     .chat.show{display:flex}
-    /* The right-edge settings drawer sits over the chat rather than consuming message height. */
+    /* Settings still slide over the chat, opened from the header avatar. */
     .chat{position:relative;isolation:isolate}
-    .chat-edge-tab{position:absolute;right:-6px;top:122px;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:42px;height:62px;padding:4px 7px 4px 2px;border:1px solid color-mix(in srgb,#388555 18%,transparent);border-right:0;border-radius:13px 0 0 13px;background:color-mix(in srgb,#b7d7bd 30%,transparent);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);color:var(--text);text-shadow:0 1px 2px var(--paper);box-shadow:none;cursor:pointer;touch-action:manipulation}
-    .chat-edge-tab .edge-icon{font-size:20px;line-height:1.1}
-    .chat-edge-tab .edge-label{font-size:12px;font-weight:850}
-    .chat-edge-tab:focus-visible,.chat-edge-close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     .chat-edge-backdrop{position:absolute;inset:0;z-index:18;background:rgba(25,20,16,.38);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
     .chat-edge-panel{position:absolute;top:0;right:0;bottom:0;z-index:19;width:min(330px,calc(100% - 44px));min-width:0;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);color:var(--text);border-left:1px solid var(--line);box-shadow:-12px 0 32px rgba(25,20,16,.18);transform:translateX(105%);visibility:hidden;pointer-events:none;transition:transform .22s ease,visibility .22s}
-    .chat.edge-open .chat-edge-tab{visibility:hidden;pointer-events:none}
     .chat.edge-open .chat-edge-backdrop{opacity:1;visibility:visible;pointer-events:auto}
     .chat.edge-open .chat-edge-panel{transform:translateX(0);visibility:visible;pointer-events:auto}
     .chat-edge-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 16px 14px;border-bottom:1px solid var(--line)}
@@ -268,8 +269,9 @@
       .chat-head>div:first-child{min-width:0}
       .room-title{font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .room-meta{font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      /* Edge tab remains easy to spot and touch without taking chat height. */
-      .chat-edge-tab{top:106px;right:-6px;width:40px;height:60px}
+      /* Profile photo lives in the existing header row without adding height. */
+      .header-profile-btn{width:36px;height:36px;flex-basis:36px}
+      .header-profile-btn .header-avatar{font-size:18px}
       .chat-edge-panel .notice-actions .profile-shortcut{height:52px;font-size:15px;padding:6px 12px;justify-content:flex-start}
       .chat-edge-panel .notice-actions .profile-shortcut .profile-icon{width:36px;height:36px;flex-basis:36px;font-size:20px}
       .head-actions{gap:6px;max-width:160px;flex-wrap:wrap;justify-content:flex-end}
@@ -305,6 +307,7 @@
     <div style="display:flex;gap:8px;align-items:center">
       <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
+      <button class="header-profile-btn" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="프로필 및 채팅 설정 열기" title="프로필 및 채팅 설정"><span class="header-avatar" id="headerAvatarIcon">👤</span></button>
       <button class="back" type="button" onclick="location.href='/'">홈으로</button>
     </div>
   </header>
@@ -350,7 +353,6 @@
         </div>
       </div>
       <div class="chat-safety-reminder" role="note"><span>⚠️ 계좌번호·비밀번호 등 개인정보를 올리지 마세요.</span></div>
-      <button class="chat-edge-tab" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="채팅 설정 열기" title="채팅 설정 열기"><span class="edge-icon" aria-hidden="true">⚙</span><span class="edge-label" aria-hidden="true">설정</span></button>
       <div class="chat-edge-backdrop" id="chatEdgeBackdrop" aria-hidden="true"></div>
       <aside class="chat-edge-panel" id="chatEdgePanel" role="dialog" aria-modal="true" aria-label="채팅 설정" aria-hidden="true" inert>
         <div class="chat-edge-panel-head"><strong>채팅 설정</strong><button class="chat-edge-close" id="chatEdgeClose" type="button">닫기 ×</button></div>
@@ -482,7 +484,7 @@
     entryNickname:document.getElementById('entryNickname'),
     entryAvatarPick:document.getElementById('entryAvatarPick'),entryAvatarFile:document.getElementById('entryAvatarFile'),entryAvatarPreview:document.getElementById('entryAvatarPreview'),
     profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),
-    chatEdgeTab:document.getElementById('chatEdgeTab'),chatEdgePanel:document.getElementById('chatEdgePanel'),chatEdgeBackdrop:document.getElementById('chatEdgeBackdrop'),chatEdgeClose:document.getElementById('chatEdgeClose'),
+    chatEdgeTab:document.getElementById('chatEdgeTab'),headerAvatarIcon:document.getElementById('headerAvatarIcon'),chatEdgePanel:document.getElementById('chatEdgePanel'),chatEdgeBackdrop:document.getElementById('chatEdgeBackdrop'),chatEdgeClose:document.getElementById('chatEdgeClose'),
     profileViewModal:document.getElementById('profileViewModal'),profileViewPhoto:document.getElementById('profileViewPhoto'),profileViewName:document.getElementById('profileViewName'),profileViewHint:document.getElementById('profileViewHint'),profileViewEdit:document.getElementById('profileViewEdit'),profileViewClose:document.getElementById('profileViewClose'),
     profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileDeleteBtn:document.getElementById('profileDeleteBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
     entrySubmit:document.getElementById('entrySubmit'),
@@ -503,6 +505,7 @@
     els.sharedProfileName.textContent=sharedProfile?.nickname||'내 프로필 만들기';
     els.sharedProfileHelp.textContent=sharedProfile?'모든 채팅방 공통 · 눌러서 수정':'닉네임·사진 한 번 설정, 모든 방에서 사용';
     if(els.nickname&&sharedProfile)els.nickname.value=sharedProfile.nickname;
+    if(!session)paintAvatar(els.headerAvatarIcon,sharedProfile?.avatar_url||null);
   }
   function storeSharedProfile(profile,token){
     sharedProfile={id:profile.id,token:token||sharedProfile?.token,
@@ -566,6 +569,7 @@
     });
     if(session&&String(session.member.id)===String(memberId)){
       paintAvatar(els.myAvatarIcon,url);
+      paintAvatar(els.headerAvatarIcon,url);
     }
   }
   function applyProfileRows(rows){
@@ -839,6 +843,7 @@
       memberNames.set(String(session.member.id),session.member.nickname||'');
     }
     paintAvatar(els.myAvatarIcon,session?.member?.avatar_url||null);
+    paintAvatar(els.headerAvatarIcon,session?.member?.avatar_url||sharedProfile?.avatar_url||null);
     document.body.classList.add('chat-active');
     followLatestAfterEntry=true;
     entryLayoutObserver?.disconnect();
@@ -853,6 +858,7 @@
     refreshPushState();
   }
   function showJoin(preserveRemembered=false){
+    if(els.chatCard.classList.contains('edge-open'))setChatEdgeOpen(false,false);
     stopEntryAutoScroll();
     document.body.classList.remove('chat-active');
     clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';
@@ -1529,7 +1535,7 @@
     chatEdgeOpened=Boolean(open);
     els.chatCard.classList.toggle('edge-open',chatEdgeOpened);
     els.chatEdgeTab.setAttribute('aria-expanded',String(chatEdgeOpened));
-    els.chatEdgeTab.setAttribute('aria-label',chatEdgeOpened?'채팅 설정 닫기':'채팅 설정 열기');
+    els.chatEdgeTab.setAttribute('aria-label',chatEdgeOpened?'프로필 및 채팅 설정 닫기':'프로필 및 채팅 설정 열기');
     els.chatEdgePanel.setAttribute('aria-hidden',String(!chatEdgeOpened));
     els.chatEdgePanel.inert=!chatEdgeOpened;
     if(chatEdgeOpened){
@@ -1539,7 +1545,7 @@
       if(restoreFocus)els.chatEdgeTab.focus({preventScroll:true});
     }
   }
-  els.chatEdgeTab.addEventListener('click',()=>setChatEdgeOpen(true));
+  els.chatEdgeTab.addEventListener('click',()=>setChatEdgeOpen(!chatEdgeOpened));
   els.chatEdgeClose.addEventListener('click',()=>setChatEdgeOpen(false));
   els.chatEdgeBackdrop.addEventListener('click',()=>setChatEdgeOpen(false));
   document.addEventListener('keydown',event=>{
