@@ -274,6 +274,13 @@
     .volume-choice{height:40px;width:100%;border:0;border-radius:9px;background:transparent;color:var(--text);font-size:14px;font-weight:750;cursor:pointer;white-space:nowrap}
     .volume-choice[aria-checked="true"]{background:var(--admin-bubble);color:var(--admin-ink);font-weight:900}
     .volume-choice[aria-checked="true"]::before{content:'✓ ';color:var(--accent)}
+    /* Dark-mode chat only: clear visual layers without changing any message bubble colors. */
+    body.dark .chat{background:#1c1b1a;border-color:#484039;box-shadow:0 0 0 1px rgba(255,255,255,.035),0 14px 40px rgba(0,0,0,.30)}
+    body.dark .chat .chat-head{background:#1d1b19;border-bottom-color:#494139}
+    body.dark .chat .chat-safety-reminder{background:#29231d;color:#e7d7c4;border-bottom-color:#524437}
+    body.dark .chat .messages{background:linear-gradient(180deg,#25221f 0%,#292521 100%)}
+    body.dark .chat .composer{background:#1c1a18;border-top-color:#52483f;box-shadow:0 -3px 12px rgba(0,0,0,.13)}
+    body.dark .chat .composer textarea,body.dark .chat .photo{background:#292521;border-color:#584d41}
     @media(max-width:560px){
       html,body{height:100%;overscroll-behavior:none}
       body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
