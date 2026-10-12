@@ -1616,6 +1616,8 @@
       refreshSharedProfileCard();
       els.profileNameInput.value='';
       paintAvatar(els.profilePreview,null);
+      // Allow the editor to close after the confirmed server deletion.
+      profileWorking=false;
       closeProfileEditor();
       alert(response.imageRemoved===false
         ? '공통 프로필은 삭제됐지만 서버에서 이미지 파일 삭제는 확인하지 못했습니다. 채팅 기록은 남아 있어요.'
