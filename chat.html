@@ -128,6 +128,9 @@
     .chat-edge-panel .notice-actions .push-toggle{order:4;grid-column:1/-1;min-height:50px;width:100%;font-size:14px}
     @media(prefers-reduced-motion:reduce){.chat-edge-backdrop,.chat-edge-panel{transition:none}}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+    /* Always-visible safety reminder stays compact; extended guidance remains in settings. */
+    .chat-safety-reminder{display:flex;align-items:center;min-height:29px;padding:5px 14px;border-bottom:1px solid var(--line);background:var(--notice);color:var(--notice-text);font-size:12px;line-height:1.45;font-weight:650}
+    .chat-safety-reminder span{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:2px}
     .profile-shortcut{display:inline-flex;align-items:center;gap:5px;margin-top:5px;min-height:30px;border:1px solid var(--admin-border);border-radius:999px;background:var(--paper);color:var(--text);padding:3px 9px 3px 5px;font-size:11px;font-weight:800;cursor:pointer}
     .profile-shortcut .profile-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--soft);overflow:hidden}
@@ -255,6 +258,7 @@
       .join::-webkit-scrollbar{display:none}
       .chat{width:100%;height:100%;max-height:none;min-height:0;overflow:hidden}
       .chat-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px 12px}
+      .chat-safety-reminder{min-height:27px;padding:4px 10px;font-size:11px}
       .chat-head>div:first-child{min-width:0}
       .room-title{font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .room-meta{font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -339,11 +343,12 @@
           <button class="leave" id="leaveBtn" type="button">나가기</button>
         </div>
       </div>
+      <div class="chat-safety-reminder" role="note"><span>⚠️ 계좌번호·비밀번호 등 개인정보를 올리지 마세요.</span></div>
       <button class="chat-edge-tab" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="채팅 설정 열기" title="채팅 설정 열기"><span class="edge-icon" aria-hidden="true">⚙</span><span class="edge-label" aria-hidden="true">설정</span></button>
       <div class="chat-edge-backdrop" id="chatEdgeBackdrop" aria-hidden="true"></div>
       <aside class="chat-edge-panel" id="chatEdgePanel" role="dialog" aria-modal="true" aria-label="채팅 설정" aria-hidden="true" inert>
         <div class="chat-edge-panel-head"><strong>채팅 설정</strong><button class="chat-edge-close" id="chatEdgeClose" type="button">닫기 ×</button></div>
-      <div class="notice"><span class="notice-copy">민감한 개인정보·비밀번호·금융정보는 채팅방에 올리지 않는 것을 권장합니다.</span><div class="notice-actions"><button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><div class="sound-volume" id="soundVolumeControl"><button class="volume-menu-toggle" id="volumeMenuBtn" type="button" aria-controls="volumeMenu" aria-expanded="false" aria-haspopup="true" title="알림 음량 선택">음량</button><div class="volume-menu" id="volumeMenu" role="group" aria-label="알림 음량"><button type="button" class="volume-choice" data-volume="30" aria-checked="false" role="radio">작게</button><button type="button" class="volume-choice" data-volume="60" aria-checked="false" role="radio">보통</button><button type="button" class="volume-choice" data-volume="100" aria-checked="true" role="radio">크게</button></div></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
+      <div class="notice"><span class="notice-copy">계좌번호·비밀번호·주민등록번호·금융정보 등 민감한 개인정보는 채팅방에 올리지 마세요.</span><div class="notice-actions"><button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><div class="sound-volume" id="soundVolumeControl"><button class="volume-menu-toggle" id="volumeMenuBtn" type="button" aria-controls="volumeMenu" aria-expanded="false" aria-haspopup="true" title="알림 음량 선택">음량</button><div class="volume-menu" id="volumeMenu" role="group" aria-label="알림 음량"><button type="button" class="volume-choice" data-volume="30" aria-checked="false" role="radio">작게</button><button type="button" class="volume-choice" data-volume="60" aria-checked="false" role="radio">보통</button><button type="button" class="volume-choice" data-volume="100" aria-checked="true" role="radio">크게</button></div></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
       </aside>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
