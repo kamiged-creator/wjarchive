@@ -122,16 +122,22 @@
     .chat-edge-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px 12px;border-bottom:1px solid var(--line)}
     .chat-edge-panel-head strong{font-size:18px;font-weight:850}
     .chat-edge-close{min-height:44px;padding:0 12px;border-radius:12px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);font-size:14px;font-weight:800}
-    .chat-edge-panel .notice{display:block;position:static;z-index:auto;padding:12px 14px 14px;background:transparent;border:0;font-size:13px}
-    .chat-edge-panel .notice-copy{display:block;padding:10px 11px;border-radius:12px;border:1px solid var(--line);background:var(--soft);line-height:1.6;color:var(--muted)}
-    .chat-edge-panel .notice-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%;margin:12px 0 0}
-    .chat-edge-panel .notice-actions .profile-shortcut{order:1;grid-column:1/-1;display:flex;min-height:52px;width:100%;margin:0;padding:6px 12px;gap:10px;justify-content:flex-start;border-radius:14px;font-size:15px;font-weight:850}
-    .chat-edge-panel .profile-shortcut .profile-icon{width:36px;height:36px;flex:0 0 36px;font-size:20px}
-    .chat-edge-panel .notice-actions .sound-toggle{order:2;min-height:48px;width:100%;padding:8px 5px;font-size:13px}
-    .chat-edge-panel .notice-actions .sound-volume{order:3;min-height:48px;width:100%}
-    .chat-edge-panel .volume-menu-toggle{height:48px;width:100%;font-size:14px}
+    /* Centered round identity and one compact row of accessible settings controls. */
+    .chat-settings-content{padding:18px 14px 18px;text-align:center}
+    .chat-settings-identity{display:flex;flex-direction:column;align-items:center;gap:5px}
+    .chat-edge-panel .profile-shortcut{display:flex;align-items:center;justify-content:center;width:84px;height:84px;min-height:84px;margin:0;padding:3px;border:2px solid var(--admin-border);border-radius:50%;background:var(--paper);overflow:hidden;cursor:pointer}
+    .chat-edge-panel .profile-shortcut .profile-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:var(--soft);font-size:36px;overflow:hidden}
+    .chat-edge-panel .profile-shortcut .profile-icon img{width:100%;height:100%;object-fit:cover}
+    .settings-profile-name{font-size:16px;font-weight:850;color:var(--text);max-width:100%;overflow-wrap:anywhere}
+    .settings-profile-hint{font-size:11px;color:var(--muted);line-height:1.4}
+    .chat-edge-panel .settings-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;margin-top:18px}
+    .chat-edge-panel .settings-actions .sound-volume{display:flex;min-width:0;width:100%;align-items:stretch}
+    .chat-edge-panel .setting-action{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;width:100%;height:65px;min-height:65px;margin:0;padding:7px 2px;border:1.5px solid var(--admin-border);border-radius:13px;background:var(--paper);color:var(--text);font-size:12px;line-height:1.2;font-weight:800;white-space:nowrap}
+    .chat-edge-panel .setting-action svg{width:22px;height:22px;flex:0 0 22px}
+    .chat-edge-panel .setting-action[aria-pressed="true"]{background:var(--admin-bubble);color:var(--admin-ink);border-color:var(--admin-border)}
+    .chat-edge-panel .setting-action:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     .chat-edge-panel .volume-menu{top:auto;bottom:calc(100% + 6px)}
-    .chat-edge-panel .notice-actions .push-toggle{order:4;grid-column:1/-1;min-height:50px;width:100%;font-size:14px}
+    .chat-edge-panel .volume-menu-toggle{height:65px}
     @media(prefers-reduced-motion:reduce){.chat-edge-backdrop,.chat-edge-panel{transition:none}}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
     /* Always-visible safety reminder stays compact; extended guidance remains in settings. */
@@ -288,13 +294,11 @@
       .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
       .admin-mode .chat-head .delete-room.show{display:none}
       .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
-      .chat-edge-panel .notice{padding:12px 12px 14px;gap:0}
-      .chat-edge-panel .notice-actions{display:grid;align-items:stretch;justify-content:stretch;gap:8px;flex-wrap:initial;margin:12px 0 0;width:100%}
-      .chat-edge-panel .notice-actions .sound-toggle{min-height:48px;padding:8px 5px;font-size:13px}
-      .chat-edge-panel .notice-actions .sound-volume{width:100%;height:48px}
-      .chat-edge-panel .volume-menu-toggle{min-width:0;width:100%;height:48px;padding:0 8px;font-size:14px}
-      .chat-edge-panel .notice-actions .push-toggle{min-height:50px;width:100%;padding:8px 5px;font-size:13px}
-      .chat-edge-panel .notice-actions .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
+      .chat-settings-content{padding:16px 12px 17px}
+      .chat-edge-panel .settings-actions{gap:6px;margin-top:16px}
+      .chat-edge-panel .setting-action{height:62px;min-height:62px;font-size:11px;padding:6px 2px}
+      .chat-edge-panel .volume-menu-toggle{height:62px}
+      .chat-edge-panel .profile-shortcut{width:78px;height:78px;min-height:78px}
       .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
       .msg-content{max-width:calc(92% - 42px)}
       .msg .bubble,.msg .image-bubble{max-width:100%}
@@ -361,7 +365,21 @@
       <div class="chat-edge-backdrop" id="chatEdgeBackdrop" aria-hidden="true"></div>
       <aside class="chat-edge-panel" id="chatEdgePanel" role="dialog" aria-modal="true" aria-label="채팅 설정" aria-hidden="true" inert>
         <div class="chat-edge-panel-head"><strong>채팅 설정</strong><button class="chat-edge-close" id="chatEdgeClose" type="button">닫기 ×</button></div>
-      <div class="notice"><span class="notice-copy">계좌번호·비밀번호·주민등록번호·금융정보 등 민감한 개인정보는 채팅방에 올리지 마세요.</span><div class="notice-actions"><button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button><button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리">🔕 소리 켜기</button><div class="sound-volume" id="soundVolumeControl"><button class="volume-menu-toggle" id="volumeMenuBtn" type="button" aria-controls="volumeMenu" aria-expanded="false" aria-haspopup="true" title="알림 음량 선택">음량</button><div class="volume-menu" id="volumeMenu" role="group" aria-label="알림 음량"><button type="button" class="volume-choice" data-volume="30" aria-checked="false" role="radio">작게</button><button type="button" class="volume-choice" data-volume="60" aria-checked="false" role="radio">보통</button><button type="button" class="volume-choice" data-volume="100" aria-checked="true" role="radio">크게</button></div></div><button class="push-toggle" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기">📱 휴대폰 알림 받기</button></div></div>
+      <div class="chat-settings-content">
+        <div class="chat-settings-identity">
+          <button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기 및 수정" title="프로필 보기·수정"><span class="profile-icon" id="myAvatarIcon">👤</span></button>
+          <div class="settings-profile-name" id="settingsProfileName">내 프로필</div>
+          <div class="settings-profile-hint">사진을 눌러 수정·삭제</div>
+        </div>
+        <div class="settings-actions" aria-label="채팅 알림 설정">
+          <button class="sound-toggle setting-action" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span id="soundToggleLabel">소리</span></button>
+          <div class="sound-volume" id="soundVolumeControl">
+            <button class="volume-menu-toggle setting-action" id="volumeMenuBtn" type="button" aria-controls="volumeMenu" aria-expanded="false" aria-haspopup="true" title="알림 음량 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"></path><path d="M15 9a5 5 0 0 1 0 6"></path><path d="M18 6a9 9 0 0 1 0 12"></path></svg><span>음량</span></button>
+            <div class="volume-menu" id="volumeMenu" role="group" aria-label="알림 음량"><button type="button" class="volume-choice" data-volume="30" aria-checked="false" role="radio">작게</button><button type="button" class="volume-choice" data-volume="60" aria-checked="false" role="radio">보통</button><button type="button" class="volume-choice" data-volume="100" aria-checked="true" role="radio">크게</button></div>
+          </div>
+          <button class="push-toggle setting-action" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M11 18h2"></path></svg><span id="pushToggleLabel">알림</span></button>
+        </div>
+      </div>
       </aside>
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
@@ -488,7 +506,7 @@
     entryPassword:document.getElementById('entryPassword'),
     entryNickname:document.getElementById('entryNickname'),
     entryAvatarPick:document.getElementById('entryAvatarPick'),entryAvatarFile:document.getElementById('entryAvatarFile'),entryAvatarPreview:document.getElementById('entryAvatarPreview'),
-    profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),
+    profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),settingsProfileName:document.getElementById('settingsProfileName'),soundToggleLabel:document.getElementById('soundToggleLabel'),pushToggleLabel:document.getElementById('pushToggleLabel'),
     chatEdgeTab:document.getElementById('chatEdgeTab'),headerAvatarIcon:document.getElementById('headerAvatarIcon'),chatEdgePanel:document.getElementById('chatEdgePanel'),chatEdgeBackdrop:document.getElementById('chatEdgeBackdrop'),chatEdgeClose:document.getElementById('chatEdgeClose'),
     profileViewModal:document.getElementById('profileViewModal'),profileViewPhoto:document.getElementById('profileViewPhoto'),profileViewName:document.getElementById('profileViewName'),profileViewHint:document.getElementById('profileViewHint'),profileViewEdit:document.getElementById('profileViewEdit'),profileViewClose:document.getElementById('profileViewClose'),
     profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileDeleteBtn:document.getElementById('profileDeleteBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
@@ -511,6 +529,7 @@
     els.sharedProfileHelp.textContent=sharedProfile?'모든 채팅방 공통 · 눌러서 수정':'닉네임·사진 한 번 설정, 모든 방에서 사용';
     if(els.nickname&&sharedProfile)els.nickname.value=sharedProfile.nickname;
     if(!session)paintAvatar(els.headerAvatarIcon,sharedProfile?.avatar_url||null);
+    els.settingsProfileName.textContent=sharedProfile?.nickname||session?.member?.nickname||'내 프로필';
   }
   function storeSharedProfile(profile,token){
     sharedProfile={id:profile.id,token:token||sharedProfile?.token,
@@ -643,7 +662,7 @@
     displaySoundVolume();
   }
   function updateSoundToggle(){
-    els.soundToggle.textContent=soundEnabled?'🔔 소리 켜짐':'🔕 소리 켜기';
+    els.soundToggleLabel.textContent=soundEnabled?'소리 켜짐':'소리 꺼짐';
     els.soundToggle.setAttribute('aria-pressed',String(soundEnabled));
     els.soundToggle.setAttribute('aria-label',soundEnabled?'복작 알림 소리 끄기':'복작 알림 소리 켜기');
     els.soundToggle.title=soundEnabled?'새 메시지 알림 소리 끄기':'새 메시지 알림 소리 켜기';
@@ -714,7 +733,7 @@
       ('PushManager' in window) && ('Notification' in window);
   }
   function updatePushButton(){
-    els.pushToggle.textContent=pushBusy?'처리 중…':(pushEnabled?'🔔 휴대폰 알림 켜짐':'📱 휴대폰 알림 받기');
+    els.pushToggleLabel.textContent=pushBusy?'처리 중…':(pushEnabled?'알림 켜짐':'알림 받기');
     els.pushToggle.setAttribute('aria-pressed',String(pushEnabled));
     els.pushToggle.setAttribute('aria-label',pushEnabled?'휴대폰 푸시 알림 해제':'휴대폰 푸시 알림 받기');
     els.pushToggle.disabled=pushBusy;
@@ -849,6 +868,7 @@
     }
     paintAvatar(els.myAvatarIcon,session?.member?.avatar_url||null);
     paintAvatar(els.headerAvatarIcon,session?.member?.avatar_url||sharedProfile?.avatar_url||null);
+    els.settingsProfileName.textContent=session?.member?.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session?.member?.nickname||'내 프로필');
     document.body.classList.add('chat-active');
     followLatestAfterEntry=true;
     entryLayoutObserver?.disconnect();
