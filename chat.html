@@ -1581,7 +1581,7 @@
   });
   els.sharedProfileBtn.addEventListener('click',openProfileEditor);
   els.profileBtn.addEventListener('click',()=>{
-    setChatEdgeOpen(false);
+    // Keep chat settings behind the profile dialog so Close returns here.
     openProfileView();
   });
   els.profileViewPhoto.addEventListener('click',()=>{
