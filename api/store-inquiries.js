@@ -71,11 +71,28 @@ async function deleteImageKitFile(fileId) {
   }
 }
 
+async function verifiedAvatarFromImageKit(fileId, roomId) {
+  const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
+  if (!privateKey || !/^[\w-]{10,100}$/.test(fileId)) return null;
+  const response = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId), {
+    headers: { Authorization: 'Basic ' + Buffer.from(privateKey + ':').toString('base64') }
+  });
+  if (!response.ok) return null;
+  const file = await response.json();
+  const folder = '/bokjakso-chat/' + roomId + '/avatars/';
+  const imageUrl = String(file.url || '');
+  if (!String(file.filePath || '').startsWith(folder) ||
+      !/^https:\/\//i.test(imageUrl) ||
+      !['image','IMAGE'].includes(String(file.fileType || '')) ||
+      Number(file.size || 0) > 2 * 1024 * 1024) return null;
+  return imageUrl;
+}
+
 async function getChatMember(memberId, sessionToken) {
   const id = clean(memberId);
   const hash = tokenHash(sessionToken);
   if (!id || !sessionToken) return null;
-  const rows = await supabaseRequest(`chat_members?id=eq.${encodeURIComponent(id)}&token_hash=eq.${hash}&select=id,room_id,nickname,is_blocked,last_seen_at,last_sent_at`);
+  const rows = await supabaseRequest(`chat_members?id=eq.${encodeURIComponent(id)}&token_hash=eq.${hash}&select=id,room_id,nickname,is_blocked,last_seen_at,last_sent_at,avatar_url,avatar_file_id`);
   return Array.isArray(rows) ? rows[0] : null;
 }
 
@@ -129,7 +146,7 @@ async function handleChat(body, res) {
     }
 
     const sessionToken = crypto.randomBytes(32).toString('hex');
-    const members = await supabaseRequest('chat_members?select=id,room_id,nickname', {
+    const members = await supabaseRequest('chat_members?select=id,room_id,nickname,avatar_url', {
       method: 'POST',
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
@@ -143,7 +160,7 @@ async function handleChat(body, res) {
     res.status(200).json({
       ok: true,
       room: { id: room.id, title: room.title, code: room.code },
-      member: { id: member.id, nickname: member.nickname },
+      member: { id: member.id, nickname: member.nickname, avatar_url: member.avatar_url || null },
       sessionToken
     });
     return;
@@ -219,6 +236,33 @@ async function handleChat(body, res) {
     return;
   }
 
+  if (action === 'chat-update-profile') {
+    const avatarFileId = clean(body.avatarFileId).slice(0, 150);
+    // An empty file ID removes the optional photo and restores the default icon.
+    let avatarUrl = null;
+    if (avatarFileId) {
+      avatarUrl = await verifiedAvatarFromImageKit(avatarFileId, member.room_id);
+      if (!avatarUrl) {
+        res.status(400).json({ message: '프로필 사진을 확인하지 못했습니다. 다시 올려 주세요.' });
+        return;
+      }
+    }
+    const updated = await supabaseRequest(
+      'chat_members?id=eq.' + encodeURIComponent(member.id) + '&room_id=eq.' + encodeURIComponent(member.room_id) + '&select=id,avatar_url,avatar_file_id',
+      { method: 'PATCH', headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({ avatar_url: avatarUrl, avatar_file_id: avatarFileId || null }) }
+    );
+    if (!Array.isArray(updated) || !updated.length) {
+      res.status(404).json({ message: '프로필을 저장하지 못했습니다.' });
+      return;
+    }
+    if (member.avatar_file_id && member.avatar_file_id !== avatarFileId) {
+      await deleteImageKitFile(member.avatar_file_id);
+    }
+    res.status(200).json({ ok: true, avatarUrl });
+    return;
+  }
+
   if (action === 'chat-image-auth') {
     const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
     if (!privateKey) {
@@ -235,7 +279,7 @@ async function handleChat(body, res) {
       signature,
       publicKey: 'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
       uploadEndpoint: 'https://upload.imagekit.io/api/v1/files/upload',
-      folder: `/bokjakso-chat/${member.room_id}`
+      folder: `/bokjakso-chat/${member.room_id}${clean(body.purpose) === 'avatar' ? '/avatars' : ''}`
     });
     return;
   }
@@ -255,6 +299,16 @@ async function handleChat(body, res) {
     const messages = await supabaseRequest(
       `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.${initialHistory ? 'desc' : 'asc'}&limit=100`
     );
+    // Only expose avatar photos for members in the same authenticated room.
+    const membersInMessages = [...new Set((Array.isArray(messages) ? messages : []).map(m => m.member_id).filter(Boolean))];
+    let profiles = [];
+    if (membersInMessages.length) {
+      profiles = await supabaseRequest(
+        'chat_members?room_id=eq.' + encodeURIComponent(member.room_id) +
+        '&id=in.(' + membersInMessages.map(id => encodeURIComponent(id)).join(',') + ')' +
+        '&select=id,avatar_url'
+      );
+    }
     const changedSince = clean(body.changedSince);
     let deletedIds = [];
     if (changedSince) {
@@ -273,6 +327,8 @@ async function handleChat(body, res) {
       deletedIds,
       activeCount: Array.isArray(active) ? active.length : 0,
       roomTitle: roomState.title,
+      profiles: Array.isArray(profiles) ? profiles : [],
+      myAvatarUrl: member.avatar_url || null,
       syncAt: now
     });
     return;
