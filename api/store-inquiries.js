@@ -410,7 +410,7 @@ async function handleChat(body, res) {
       profiles = await supabaseRequest(
         'chat_members?room_id=eq.' + encodeURIComponent(member.room_id) +
         '&id=in.(' + membersInMessages.map(id => encodeURIComponent(id)).join(',') + ')' +
-        '&select=id,avatar_url'
+        '&select=id,avatar_url,nickname'
       );
     }
     const changedSince = clean(body.changedSince);
