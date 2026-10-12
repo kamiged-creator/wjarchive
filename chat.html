@@ -109,6 +109,20 @@
     .profile-shortcut .profile-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--soft);overflow:hidden}
     .profile-shortcut img,.profile-preview img{width:100%;height:100%;object-fit:cover;display:block}
     .profile-shortcut:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .profile-view-modal{position:fixed;inset:0;z-index:124;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(25,20,16,.55);backdrop-filter:blur(3px)}
+    .profile-view-modal.show{display:flex}
+    .profile-view-dialog{width:min(400px,100%);max-height:90dvh;overflow-y:auto;border:1px solid var(--line);border-radius:24px;padding:24px 18px 20px;background:var(--paper);color:var(--text);text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.24)}
+    .profile-view-dialog h2{margin:0 0 19px;font-size:23px;font-weight:850}
+    .profile-view-photo{display:flex;align-items:center;justify-content:center;width:200px;height:200px;max-width:60vw;max-height:60vw;aspect-ratio:1;margin:0 auto 14px;padding:0;border:3px solid var(--admin-border);border-radius:50%;background:var(--soft);color:var(--text);font-size:76px;overflow:hidden;cursor:zoom-in}
+    .profile-view-photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .profile-view-photo:disabled{cursor:default}
+    .profile-view-photo:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+    .profile-view-name{font-size:22px;font-weight:850;overflow-wrap:anywhere}
+    .profile-view-hint{min-height:20px;margin:8px 0 18px;font-size:13px;color:var(--muted)}
+    .profile-view-actions{display:flex;gap:10px;justify-content:center}
+    .profile-view-actions button{flex:1;min-height:52px;border-radius:14px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);font-weight:850;font-size:16px}
+    .profile-view-actions .profile-view-edit{background:var(--accent);border-color:var(--accent);color:#fff}
+    .profile-view-actions button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .profile-modal{position:fixed;inset:0;z-index:125;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(25,20,16,.5)}
     .profile-modal.show{display:flex}
     .profile-dialog{width:min(420px,100%);max-height:90dvh;overflow:auto;border-radius:22px;border:1px solid var(--line);padding:20px;background:var(--paper);box-shadow:0 22px 60px rgba(0,0,0,.23)}
@@ -170,7 +184,7 @@
     .mine .image-bubble{border-radius:16px 16px 4px 16px}
     .chat-image{display:block;max-width:min(220px,65vw);max-height:240px;width:auto;height:auto;object-fit:contain;border-radius:12px;cursor:zoom-in}
     .chat-image:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-    .image-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,17,15,.88)}
+    .image-modal{position:fixed;inset:0;z-index:140;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,17,15,.88)}
     .image-modal.show{display:flex}
     .image-modal img{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:14px}
     .image-close{position:absolute;top:16px;right:16px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.9);font-size:24px;line-height:1}
@@ -291,7 +305,7 @@
         <div>
           <div class="room-title-line"><div class="room-title" id="roomTitle">복작소 채팅방</div><span class="room-presence" aria-label="현재 채팅방에 입장 중">입장 중</span></div>
           <div class="room-meta"><span id="roomCodeText"></span> · 현재 접속 <span id="activeCount">1</span>명</div>
-          <button class="profile-shortcut" id="profileBtn" type="button" title="내 프로필 사진 설정"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button>
+          <button class="profile-shortcut" id="profileBtn" type="button" title="내 프로필 보기"><span class="profile-icon" id="myAvatarIcon">👤</span> 내 프로필</button>
         </div>
         <div class="head-actions">
           <button class="invite" id="inviteBtn" type="button">초대하기</button>
@@ -336,6 +350,18 @@
       <button class="entry-submit" id="entrySubmit" type="button">입장하기</button>
     </div>
     <div class="entry-status" id="entryStatus"></div>
+  </div>
+</div>
+<div class="profile-view-modal" id="profileViewModal" aria-hidden="true">
+  <div class="profile-view-dialog" role="dialog" aria-modal="true" aria-labelledby="profileViewTitle" aria-describedby="profileViewHint">
+    <h2 id="profileViewTitle">내 프로필</h2>
+    <button class="profile-view-photo" id="profileViewPhoto" type="button" aria-label="프로필 사진 크게 보기" title="사진을 누르면 더 크게 볼 수 있어요">👤</button>
+    <div class="profile-view-name" id="profileViewName">내 프로필</div>
+    <p class="profile-view-hint" id="profileViewHint">사진을 누르면 더 크게 볼 수 있어요.</p>
+    <div class="profile-view-actions">
+      <button class="profile-view-edit" id="profileViewEdit" type="button">프로필 수정</button>
+      <button id="profileViewClose" type="button">닫기</button>
+    </div>
   </div>
 </div>
 <div class="profile-modal" id="profileModal" aria-hidden="true">
@@ -413,6 +439,7 @@
     entryNickname:document.getElementById('entryNickname'),
     entryAvatarPick:document.getElementById('entryAvatarPick'),entryAvatarFile:document.getElementById('entryAvatarFile'),entryAvatarPreview:document.getElementById('entryAvatarPreview'),
     profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),
+    profileViewModal:document.getElementById('profileViewModal'),profileViewPhoto:document.getElementById('profileViewPhoto'),profileViewName:document.getElementById('profileViewName'),profileViewHint:document.getElementById('profileViewHint'),profileViewEdit:document.getElementById('profileViewEdit'),profileViewClose:document.getElementById('profileViewClose'),
     profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
     entrySubmit:document.getElementById('entrySubmit'),
     entryCancel:document.getElementById('entryCancel'),
@@ -1241,6 +1268,26 @@
   async function saveAvatarPhoto(file){
     await saveSharedProfileChanges(sharedProfile?.nickname||session?.member?.nickname||'',file);
   }
+  let profileViewReturnFocus=null;
+  function openProfileView(){
+    if(!session)return;
+    profileViewReturnFocus=document.activeElement;
+    const url=sharedProfile?.avatar_url||session.member.avatar_url||null;
+    paintAvatar(els.profileViewPhoto,url);
+    const name=session.member.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session.member.nickname);
+    els.profileViewName.textContent=name||'내 프로필';
+    els.profileViewPhoto.disabled=!url;
+    els.profileViewHint.textContent=url?'사진을 누르면 더 크게 볼 수 있어요.':'사진을 등록하려면 프로필 수정을 눌러 주세요.';
+    els.profileViewModal.classList.add('show');
+    els.profileViewModal.setAttribute('aria-hidden','false');
+    (url?els.profileViewPhoto:els.profileViewEdit).focus();
+  }
+  function closeProfileView(restoreFocus=true){
+    els.profileViewModal.classList.remove('show');
+    els.profileViewModal.setAttribute('aria-hidden','true');
+    if(restoreFocus&&profileViewReturnFocus?.isConnected)profileViewReturnFocus.focus();
+    profileViewReturnFocus=null;
+  }
   let profileEditorReturnFocus=null;
   function closeProfileEditor(){
     if(profileWorking)return;
@@ -1416,7 +1463,25 @@
   els.entryAvatarPick.addEventListener('click',()=>els.entryAvatarFile.click());
   els.entryAvatarFile.addEventListener('change',()=>selectAvatarFile(els.entryAvatarFile,els.entryAvatarPreview,'entry'));
   els.sharedProfileBtn.addEventListener('click',openProfileEditor);
-  els.profileBtn.addEventListener('click',openProfileEditor);
+  els.profileBtn.addEventListener('click',openProfileView);
+  els.profileViewPhoto.addEventListener('click',()=>{
+    const url=sharedProfile?.avatar_url||session?.member?.avatar_url||null;
+    if(url)openImage(url);
+  });
+  els.profileViewClose.addEventListener('click',()=>closeProfileView());
+  els.profileViewEdit.addEventListener('click',()=>{
+    closeProfileView(false);
+    els.profileBtn.focus();
+    openProfileEditor();
+  });
+  els.profileViewModal.addEventListener('click',event=>{
+    if(event.target===els.profileViewModal)closeProfileView();
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Escape')return;
+    if(els.imageModal.classList.contains('show')){closeImage();return}
+    if(els.profileViewModal.classList.contains('show'))closeProfileView();
+  });
   els.profilePickBtn.addEventListener('click',()=>{if(!profileWorking)els.profileFile.click()});
   els.profileFile.addEventListener('change',()=>selectAvatarFile(els.profileFile,els.profilePreview,'edit'));
   els.profileSaveBtn.addEventListener('click',async()=>{
