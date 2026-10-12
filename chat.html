@@ -78,7 +78,7 @@
     .join-selected{margin:0 0 14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:12px;font-weight:800;color:var(--text);display:none}
     .entry-modal{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,20,16,.48);backdrop-filter:blur(3px)}
     .entry-modal.show{display:flex}
-    .entry-dialog{width:min(420px,100%);background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
+    .entry-dialog{width:min(420px,100%);max-height:90dvh;overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
     .entry-title{font-size:22px;font-weight:800;letter-spacing:-.04em;margin:0 0 6px}
     .entry-room{margin:0 0 18px;padding:13px 14px;border:2px solid color-mix(in srgb,var(--primary) 55%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:16px;font-weight:750}
     .entry-field{margin-top:13px}
@@ -1040,6 +1040,9 @@
     els.joinStatus.textContent='이 방은 이 기기에서 1년 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
   }
   function openFirstEntry(room){
+    els.entryAvatarFile.value='';
+    entryAvatarChoice=null;
+    paintAvatar(els.entryAvatarPreview,null);
     els.roomCode.value=String(room.code||'').toUpperCase();
     els.entryRoomName.textContent=room.title||'채팅방';
     els.entryPassword.value='';
@@ -1050,8 +1053,91 @@
     setTimeout(()=>els.entryPassword.focus(),50);
   }
   function closeFirstEntry(){
+    if(entryPreviewObjectUrl){URL.revokeObjectURL(entryPreviewObjectUrl);entryPreviewObjectUrl=null}
     els.entryModal.classList.remove('show');
     els.entryModal.setAttribute('aria-hidden','true');
+  }
+  function selectAvatarFile(input,preview,which){
+    const file=input.files?.[0];
+    if(!file)return;
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024){
+      alert('프로필 사진은 JPG·PNG·WEBP, 8MB 이하만 올릴 수 있어요.');
+      input.value='';
+      return;
+    }
+    if(which==='entry'){
+      entryAvatarChoice=file;
+      if(entryPreviewObjectUrl)URL.revokeObjectURL(entryPreviewObjectUrl);
+      entryPreviewObjectUrl=URL.createObjectURL(file);
+      paintAvatar(preview,entryPreviewObjectUrl);
+    }else{
+      profileAvatarChoice=file;
+      if(avatarPreviewObjectUrl)URL.revokeObjectURL(avatarPreviewObjectUrl);
+      avatarPreviewObjectUrl=URL.createObjectURL(file);
+      paintAvatar(preview,avatarPreviewObjectUrl);
+      els.profileStatus.textContent='사진 저장을 누르면 채팅방에 적용돼요.';
+    }
+  }
+  async function compressAvatarFile(file){
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024)
+      throw new Error('프로필 사진은 JPG·PNG·WEBP, 8MB 이하여야 합니다.');
+    const bitmap=await createImageBitmap(file);
+    try{
+      const square=Math.min(bitmap.width,bitmap.height);
+      const canvas=document.createElement('canvas');
+      canvas.width=320;canvas.height=320;
+      canvas.getContext('2d').drawImage(bitmap,(bitmap.width-square)/2,(bitmap.height-square)/2,square,square,0,0,320,320);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.82));
+      if(!blob)throw new Error('프로필 이미지를 변환하지 못했습니다.');
+      return new File([blob],'profile-'+Date.now()+'.webp',{type:'image/webp'});
+    }finally{bitmap.close?.()}
+  }
+  async function saveAvatarPhoto(file){
+    if(!session||profileWorking)throw new Error('현재 프로필을 저장할 수 없습니다.');
+    profileWorking=true;els.profileSaveBtn.disabled=true;els.profileRemoveBtn.disabled=true;
+    try{
+      const prepared=await compressAvatarFile(file);
+      const memberId=session.member.id,sessionToken=session.sessionToken;
+      const auth=await api({action:'chat-image-auth',purpose:'avatar',memberId,sessionToken});
+      const form=new FormData();
+      form.append('file',prepared);
+      form.append('fileName',prepared.name);
+      form.append('publicKey',auth.publicKey);
+      form.append('signature',auth.signature);
+      form.append('expire',String(auth.expire));
+      form.append('token',auth.token);
+      form.append('folder',auth.folder);
+      form.append('useUniqueFileName','true');
+      const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+      const uploaded=await response.json().catch(()=>({}));
+      if(!response.ok||!uploaded.fileId)throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
+      const updated=await api({action:'chat-update-profile',memberId,sessionToken,avatarFileId:uploaded.fileId});
+      if(!session||session.member.id!==memberId)throw new Error('채팅방이 변경됐습니다.');
+      updateMyAvatar(updated.avatarUrl);
+      paintAvatar(els.profilePreview,updated.avatarUrl);
+      els.profileStatus.textContent='프로필 사진이 저장됐어요.';
+    }finally{
+      profileWorking=false;els.profileSaveBtn.disabled=false;els.profileRemoveBtn.disabled=false;
+    }
+  }
+  function closeProfileEditor(){
+    if(profileWorking)return;
+    els.profileModal.classList.remove('show');
+    els.profileModal.setAttribute('aria-hidden','true');
+    profileAvatarChoice=null;
+    els.profileFile.value='';
+    if(avatarPreviewObjectUrl){URL.revokeObjectURL(avatarPreviewObjectUrl);avatarPreviewObjectUrl=null}
+    els.profileBtn.focus();
+  }
+  function openProfileEditor(){
+    if(!session)return;
+    els.profileStatus.textContent='';
+    profileAvatarChoice=null;
+    els.profileFile.value='';
+    paintAvatar(els.profilePreview,session.member.avatar_url||null);
+    els.profileModal.classList.add('show');
+    els.profileModal.setAttribute('aria-hidden','false');
+    els.profilePickBtn.focus();
   }
   async function submitFirstEntry(){
     els.entryStatus.textContent='';
@@ -1064,8 +1150,10 @@
       const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};
       saveSession();
+      const chosenPhoto=entryAvatarChoice;
       closeFirstEntry();
       showChat();
+      if(chosenPhoto)saveAvatarPhoto(chosenPhoto).catch(err=>alert('채팅방 입장은 완료했지만 프로필 사진을 올리지 못했습니다. 내 프로필에서 다시 시도해 주세요. '+(err.message||'')));
     }catch(e){
       els.entryStatus.textContent=e.message||'입장하지 못했습니다.';
     }finally{
@@ -1188,6 +1276,32 @@
       els.adminRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
     }
   }
+  els.entryAvatarPick.addEventListener('click',()=>els.entryAvatarFile.click());
+  els.entryAvatarFile.addEventListener('change',()=>selectAvatarFile(els.entryAvatarFile,els.entryAvatarPreview,'entry'));
+  els.profileBtn.addEventListener('click',openProfileEditor);
+  els.profilePickBtn.addEventListener('click',()=>{if(!profileWorking)els.profileFile.click()});
+  els.profileFile.addEventListener('change',()=>selectAvatarFile(els.profileFile,els.profilePreview,'edit'));
+  els.profileSaveBtn.addEventListener('click',async()=>{
+    if(!profileAvatarChoice){els.profileStatus.textContent='변경할 사진을 먼저 선택해 주세요.';return}
+    els.profileStatus.textContent='사진 저장 중…';
+    try{await saveAvatarPhoto(profileAvatarChoice);profileAvatarChoice=null}
+    catch(error){els.profileStatus.textContent=error.message||'프로필 사진 저장에 실패했습니다.'}
+  });
+  els.profileRemoveBtn.addEventListener('click',async()=>{
+    if(!session||profileWorking)return;
+    profileWorking=true;els.profileRemoveBtn.disabled=true;els.profileSaveBtn.disabled=true;
+    try{
+      const result=await api({action:'chat-update-profile',memberId:session.member.id,sessionToken:session.sessionToken,avatarFileId:''});
+      updateMyAvatar(result.avatarUrl);
+      paintAvatar(els.profilePreview,null);
+      profileAvatarChoice=null;
+      els.profileStatus.textContent='기본 프로필 아이콘으로 변경했어요.';
+    }catch(error){els.profileStatus.textContent=error.message||'사진을 삭제하지 못했습니다.'}
+    finally{profileWorking=false;els.profileRemoveBtn.disabled=false;els.profileSaveBtn.disabled=false}
+  });
+  els.profileCancelBtn.addEventListener('click',closeProfileEditor);
+  els.profileModal.addEventListener('click',event=>{if(event.target===els.profileModal)closeProfileEditor()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&els.profileModal.classList.contains('show'))closeProfileEditor()});
   els.entryCancel.addEventListener('click',closeFirstEntry);
   els.entrySubmit.addEventListener('click',submitFirstEntry);
   els.entryModal.addEventListener('click',e=>{if(e.target===els.entryModal)closeFirstEntry()});
