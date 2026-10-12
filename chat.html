@@ -163,6 +163,11 @@
     .profile-actions button{flex:1;min-height:46px;border-radius:12px;border:1px solid var(--admin-border);background:var(--paper);color:var(--text);font-size:14px;font-weight:800;white-space:nowrap}
     .profile-actions .profile-save{background:var(--accent);color:#fff;border-color:var(--accent)}
     .profile-status{font-size:12px;color:var(--muted);min-height:18px;margin-top:9px}
+    .profile-delete-row{margin-top:15px;padding-top:13px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+    .profile-delete-row .profile-delete-btn{min-height:44px;border:1px solid color-mix(in srgb,#b54b41 45%,var(--line));border-radius:11px;padding:8px 13px;background:transparent;color:color-mix(in srgb,#b54b41 75%,var(--text));font-size:13px;font-weight:800;cursor:pointer}
+    .profile-delete-row .profile-delete-btn[hidden]{display:none}
+    .profile-delete-row .profile-delete-btn:disabled{opacity:.55;cursor:wait}
+    .profile-delete-row .profile-delete-btn:focus-visible{outline:3px solid #b54b41;outline-offset:2px}
     .head-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .leave,.invite,.delete-room{border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:800;line-height:1;white-space:nowrap}
     .invite{padding:9px 13px;color:#fff;background:var(--accent);border-color:var(--accent);box-shadow:0 7px 16px rgba(139,104,71,.16)}
@@ -418,6 +423,7 @@
       <button class="profile-save" type="button" id="profileSaveBtn">프로필 저장</button>
     </div>
     <div class="profile-status" id="profileStatus" role="status"></div>
+    <div class="profile-delete-row"><button class="profile-delete-btn" id="profileDeleteBtn" type="button" hidden>프로필 전체 삭제</button></div>
   </div>
 </div>
 <div class="image-modal" id="imageModal" aria-hidden="true">
@@ -447,6 +453,7 @@
   const SOUND_KEY='bokjaksoChatSoundV1';
   const SOUND_VOLUME_KEY='bokjaksoChatSoundVolumeV1';
   const SHARED_PROFILE_KEY='bokjaksoChatSharedProfileV1';
+  const SHARED_PROFILE_DELETED_KEY='bokjaksoChatSharedProfileDeletedV1';
   const els={
     joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
     sharedProfileBtn:document.getElementById('sharedProfileBtn'),sharedProfileAvatar:document.getElementById('sharedProfileAvatar'),sharedProfileName:document.getElementById('sharedProfileName'),sharedProfileHelp:document.getElementById('sharedProfileHelp'),
@@ -476,7 +483,7 @@
     profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),
     chatEdgeTab:document.getElementById('chatEdgeTab'),chatEdgePanel:document.getElementById('chatEdgePanel'),chatEdgeBackdrop:document.getElementById('chatEdgeBackdrop'),chatEdgeClose:document.getElementById('chatEdgeClose'),
     profileViewModal:document.getElementById('profileViewModal'),profileViewPhoto:document.getElementById('profileViewPhoto'),profileViewName:document.getElementById('profileViewName'),profileViewHint:document.getElementById('profileViewHint'),profileViewEdit:document.getElementById('profileViewEdit'),profileViewClose:document.getElementById('profileViewClose'),
-    profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
+    profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileDeleteBtn:document.getElementById('profileDeleteBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
     entrySubmit:document.getElementById('entrySubmit'),
     entryCancel:document.getElementById('entryCancel'),
     entryStatus:document.getElementById('entryStatus')
@@ -500,6 +507,7 @@
     sharedProfile={id:profile.id,token:token||sharedProfile?.token,
       nickname:profile.nickname,avatar_url:profile.avatar_url||null};
     localStorage.setItem(SHARED_PROFILE_KEY,JSON.stringify(sharedProfile));
+    localStorage.removeItem(SHARED_PROFILE_DELETED_KEY);
     refreshSharedProfileCard();
   }
   async function ensureSharedProfile(nickname){
@@ -992,7 +1000,7 @@
     try{
       const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:sharedProfile?.nickname||els.nickname.value,...sharedCredentials()});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
-      if(!sharedProfile&&data.member?.nickname!=='관리자'){
+      if(!sharedProfile&&localStorage.getItem(SHARED_PROFILE_DELETED_KEY)!=='yes'&&data.member?.nickname!=='관리자'){
         ensureSharedProfile(data.member.nickname).then(syncSharedProfileToRoom).catch(error=>console.warn('초대 채팅방 프로필 연결 실패',error));
       }
     }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
@@ -1294,6 +1302,7 @@
     profileWorking=true;
     els.profileSaveBtn.disabled=true;
     els.profileRemoveBtn.disabled=true;
+    els.profileDeleteBtn.disabled=true;
     try{
       await ensureSharedProfile(name);
       const payload={action:'chat-profile-save',...sharedCredentials(),nickname:name};
@@ -1313,6 +1322,7 @@
       profileWorking=false;
       els.profileSaveBtn.disabled=false;
       els.profileRemoveBtn.disabled=false;
+      els.profileDeleteBtn.disabled=false;
     }
   }
   async function saveAvatarPhoto(file){
@@ -1354,6 +1364,7 @@
     els.profileStatus.textContent='';
     profileAvatarChoice=null;
     els.profileFile.value='';
+    els.profileDeleteBtn.hidden=!sharedProfile;
     const saved=Object.values(getRememberedSessions()).find(item=>item.member?.nickname!=='관리자');
     els.profileNameInput.value=sharedProfile?.nickname||
       (session?.member?.nickname!=='관리자'?session?.member?.nickname:'')||
@@ -1377,7 +1388,7 @@
       const chosenPhoto=entryAvatarChoice;
       closeFirstEntry();
       showChat();
-      if(!sharedProfile){
+      if(!sharedProfile&&localStorage.getItem(SHARED_PROFILE_DELETED_KEY)!=='yes'){
         (async()=>{
           try{
             await ensureSharedProfile(nickname);
@@ -1569,6 +1580,54 @@
       profileAvatarChoice=null;
       closeProfileEditor();
     }catch(error){els.profileStatus.textContent=error.message||'프로필을 저장하지 못했습니다.'}
+  });
+  els.profileDeleteBtn.addEventListener('click',async()=>{
+    if(profileWorking||!sharedProfile)return;
+    const confirmed=window.confirm(
+      '공통 프로필을 완전히 삭제할까요?\n\n닉네임·프로필 사진과 여러 채팅방의 프로필 연결이 삭제됩니다.\n기존 채팅 메시지와 방 입장 기록은 남아 있습니다.\n\n삭제한 프로필은 복원할 수 없습니다.'
+    );
+    if(!confirmed)return;
+    profileWorking=true;
+    els.profileSaveBtn.disabled=true;
+    els.profileRemoveBtn.disabled=true;
+    els.profileDeleteBtn.disabled=true;
+    els.profileStatus.textContent='프로필 삭제 중…';
+    const deletedId=sharedProfile.id;
+    try{
+      const response=await api({action:'chat-profile-delete',...sharedCredentials()});
+      if(sharedProfile?.id!==deletedId)return;
+      // The browser remembers room sessions independently of shared profiles.
+      // Remove only the shared avatar reference; preserve member tokens and chat history.
+      const rooms=getRememberedSessions();
+      for(const saved of Object.values(rooms)){
+        if(!saved?.member||saved.member.nickname==='관리자')continue;
+        saved.member.avatar_url=null;
+        saved.member.profile_id=null;
+      }
+      localStorage.setItem(SESSIONS_KEY,JSON.stringify(rooms));
+      sharedProfile=null;
+      localStorage.removeItem(SHARED_PROFILE_KEY);
+      localStorage.setItem(SHARED_PROFILE_DELETED_KEY,'yes');
+      lastUploadedProfilePhoto=null;
+      if(session&&session.member.nickname!=='관리자'){
+        session.member.profile_id=null;
+        updateMyAvatar(null);
+      }
+      refreshSharedProfileCard();
+      els.profileNameInput.value='';
+      paintAvatar(els.profilePreview,null);
+      closeProfileEditor();
+      alert(response.imageRemoved===false
+        ? '공통 프로필은 삭제됐지만 서버에서 이미지 파일 삭제는 확인하지 못했습니다. 채팅 기록은 남아 있어요.'
+        : '공통 프로필을 삭제했어요. 기존 채팅 기록과 방 입장 기록은 그대로 남아 있어요.');
+    }catch(error){
+      els.profileStatus.textContent=error.message||'프로필 삭제에 실패했습니다. 다시 시도해 주세요.';
+    }finally{
+      profileWorking=false;
+      els.profileSaveBtn.disabled=false;
+      els.profileRemoveBtn.disabled=false;
+      els.profileDeleteBtn.disabled=false;
+    }
   });
   els.profileRemoveBtn.addEventListener('click',async()=>{
     if(profileWorking)return;
