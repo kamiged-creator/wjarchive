@@ -342,8 +342,8 @@ async function handleChatAdmin(body, res) {
     const code = normalize(body.code).toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 24);
     const title = normalize(body.title).slice(0, 50);
     const password = String(body.password || '');
-    if (code.length < 3 || !title || password.length < 4) {
-      res.status(400).json({ message: '방 코드는 3자 이상, 비밀번호는 4자 이상으로 입력해 주세요.' });
+    if (code.length < 3 || !title || password.length < 8) {
+      res.status(400).json({ message: '방 코드는 3자 이상, 비밀번호는 8자 이상으로 입력해 주세요.' });
       return;
     }
     const existing = await db(`chat_rooms?code=eq.${encodeURIComponent(code)}&select=id,code&limit=1`);
@@ -485,21 +485,25 @@ async function handleChatAdmin(body, res) {
   if (action === 'chat-change-password') {
     const roomId = normalize(body.roomId);
     const password = String(body.password || '');
-    if (!roomId || password.length < 4) {
-      res.status(400).json({ message: '새 비밀번호는 4자 이상으로 입력해 주세요.' });
+    if (!roomId || password.length < 8) {
+      res.status(400).json({ message: '새 비밀번호는 8자 이상으로 입력해 주세요.' });
       return;
     }
     const salt = crypto.randomBytes(16).toString('hex');
-    await db(`chat_rooms?id=eq.${encodeURIComponent(roomId)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
+    // One DB transaction changes password, invalidates sessions, and removes old push subscriptions.
+    const changed = await db('rpc/bokjakso_chat_change_password', {
+      method: 'POST',
       body: JSON.stringify({
-        password_salt: salt,
-        password_hash: chatPasswordHash(password, salt),
-        updated_at: new Date().toISOString()
+        p_room_id: roomId,
+        p_salt: salt,
+        p_hash: chatPasswordHash(password, salt)
       })
     });
-    res.status(200).json({ ok: true });
+    if (changed !== true) {
+      res.status(404).json({ message: '비밀번호를 변경할 채팅방이 없습니다.' });
+      return;
+    }
+    res.status(200).json({ ok: true, sessionsRevoked: true, pushResubscribeRequired: true });
     return;
   }
 
