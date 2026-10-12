@@ -105,7 +105,7 @@
     .chat.show{display:flex}
     /* The right-edge settings drawer sits over the chat rather than consuming message height. */
     .chat{position:relative;isolation:isolate}
-    .chat-edge-tab{position:absolute;right:0;top:96px;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:42px;height:70px;padding:4px 2px;border:1px solid var(--admin-border);border-right:0;border-radius:13px 0 0 13px;background:var(--accent);color:#fff;box-shadow:-3px 3px 14px rgba(25,20,16,.15);cursor:pointer;touch-action:manipulation}
+    .chat-edge-tab{position:absolute;right:0;top:96px;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:42px;height:70px;padding:4px 2px;border:1px solid var(--admin-border);border-right:0;border-radius:13px 0 0 13px;background:color-mix(in srgb,var(--accent) 78%,transparent);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;text-shadow:0 1px 2px rgba(20,13,8,.35);box-shadow:-3px 3px 12px rgba(25,20,16,.10);cursor:pointer;touch-action:manipulation}
     .chat-edge-tab .edge-icon{font-size:21px;line-height:1.1}
     .chat-edge-tab .edge-label{font-size:12px;font-weight:850}
     .chat-edge-tab:focus-visible,.chat-edge-close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
