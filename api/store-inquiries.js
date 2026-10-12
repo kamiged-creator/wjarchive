@@ -74,7 +74,7 @@ async function deleteImageKitFile(fileId) {
 async function verifiedAvatarFromImageKit(fileId, roomId, profileId = null) {
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
   if (!privateKey || !/^[\w-]{10,100}$/.test(fileId)) return null;
-  const response = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId), {
+  const response = await fetch('https://api.imagekit.io/v1/files/' + encodeURIComponent(fileId) + '/details', {
     headers: { Authorization: 'Basic ' + Buffer.from(privateKey + ':').toString('base64') }
   });
   if (!response.ok) return null;
