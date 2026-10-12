@@ -206,6 +206,12 @@
     .msg.mine .msg-content{align-items:flex-end}
     .msg-avatar{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--paper) 70%,var(--soft));border:1px solid var(--bubble-border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:17px;overflow:hidden}
     .msg-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .msg-avatar[role="button"]{cursor:zoom-in}
+    .msg-avatar[role="button"]:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    /* Only a moderate-size circular portrait; outside tap returns to the conversation. */
+    .avatar-lightbox{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(23,18,14,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+    .avatar-lightbox.show{display:flex}
+    .avatar-lightbox-photo{display:block;width:min(196px,55vw,34dvh);height:auto;aspect-ratio:1;object-fit:cover;border-radius:50%;border:3px solid var(--paper);box-shadow:0 12px 28px rgba(0,0,0,.24);background:var(--soft);pointer-events:none}
     .msg .bubble,.msg .image-bubble{max-width:100%}
     .name{font-size:12px;color:var(--chat-meta);font-weight:650;margin:0 6px 5px}
     .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);color:var(--bubble-ink);border:1px solid var(--bubble-border);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55}
@@ -452,6 +458,7 @@
     <div class="profile-delete-row"><button class="profile-delete-btn" id="profileDeleteBtn" type="button" hidden>프로필 전체 삭제</button></div>
   </div>
 </div>
+<div class="avatar-lightbox" id="avatarLightbox" role="dialog" aria-modal="true" aria-label="프로필 사진 확대, 바깥 화면을 누르면 닫힙니다" aria-hidden="true" tabindex="-1"><img class="avatar-lightbox-photo" id="avatarLightboxImg" alt="프로필 사진"></div>
 <div class="image-modal" id="imageModal" aria-hidden="true">
   <button class="image-close" id="imageClose" type="button" aria-label="닫기">×</button>
   <img id="imageModalImg" alt="채팅 이미지 크게 보기">
@@ -490,6 +497,7 @@
     messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn'),inviteBtn:document.getElementById('inviteBtn'),deleteRoomBtn:document.getElementById('deleteRoomBtn'),
     photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
     imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
+    avatarLightbox:document.getElementById('avatarLightbox'),avatarLightboxImg:document.getElementById('avatarLightboxImg'),
     textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
     themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),volumeMenuBtn:document.getElementById('volumeMenuBtn'),volumeMenu:document.getElementById('volumeMenu'),soundVolumeControl:document.getElementById('soundVolumeControl'),pushToggle:document.getElementById('pushToggle'),
     adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
@@ -586,10 +594,27 @@
       target.appendChild(img);
     }else{target.textContent='👤'}
   }
+  function paintMessageAvatar(avatar,url){
+    paintAvatar(avatar,url);
+    const hasPhoto=Boolean(avatar.querySelector('img'));
+    if(hasPhoto){
+      avatar.setAttribute('role','button');
+      avatar.setAttribute('tabindex','0');
+      avatar.setAttribute('aria-haspopup','dialog');
+      avatar.setAttribute('aria-label','프로필 사진 크게 보기');
+      avatar.setAttribute('title','프로필 사진 크게 보기');
+    }else{
+      avatar.removeAttribute('role');
+      avatar.removeAttribute('tabindex');
+      avatar.removeAttribute('aria-haspopup');
+      avatar.removeAttribute('aria-label');
+      avatar.removeAttribute('title');
+    }
+  }
   function refreshMemberAvatars(memberId){
     const url=memberAvatars.get(String(memberId))||null;
     els.messages.querySelectorAll('.msg-avatar').forEach(avatar=>{
-      if(avatar.dataset.memberId===String(memberId))paintAvatar(avatar,url);
+      if(avatar.dataset.memberId===String(memberId))paintMessageAvatar(avatar,url);
     });
     if(session&&String(session.member.id)===String(memberId)){
       paintAvatar(els.myAvatarIcon,url);
@@ -982,7 +1007,7 @@
       const content=document.createElement('div');content.className='msg-content';
       while(wrap.firstChild)content.appendChild(wrap.firstChild);
       const avatar=document.createElement('span');avatar.className='msg-avatar';avatar.dataset.memberId=String(m.member_id);
-      paintAvatar(avatar,memberAvatars.get(String(m.member_id))||null);
+      paintMessageAvatar(avatar,memberAvatars.get(String(m.member_id))||null);
       wrap.append(avatar,content);
       els.messages.appendChild(wrap);
       if(followLatestAfterEntry)entryLayoutObserver?.observe(wrap);
@@ -1165,6 +1190,24 @@
     }finally{
       if(bitmap)bitmap.close();
     }
+  }
+  let avatarLightboxReturnFocus=null;
+  function openAvatarLightbox(avatar){
+    const image=avatar?.querySelector('img');
+    if(!image?.src)return;
+    avatarLightboxReturnFocus=avatar;
+    els.avatarLightboxImg.src=image.src;
+    els.avatarLightbox.classList.add('show');
+    els.avatarLightbox.setAttribute('aria-hidden','false');
+    els.avatarLightbox.focus({preventScroll:true});
+  }
+  function closeAvatarLightbox(){
+    if(!els.avatarLightbox.classList.contains('show'))return;
+    els.avatarLightbox.classList.remove('show');
+    els.avatarLightbox.setAttribute('aria-hidden','true');
+    els.avatarLightboxImg.removeAttribute('src');
+    if(avatarLightboxReturnFocus?.isConnected)avatarLightboxReturnFocus.focus({preventScroll:true});
+    avatarLightboxReturnFocus=null;
   }
   function openImage(url){
     els.imageModalImg.src=url;els.imageModal.classList.add('show');els.imageModal.setAttribute('aria-hidden','false');
@@ -1599,6 +1642,7 @@
   });
   document.addEventListener('keydown',event=>{
     if(event.key!=='Escape')return;
+    if(els.avatarLightbox.classList.contains('show')){event.preventDefault();closeAvatarLightbox();return}
     if(els.imageModal.classList.contains('show')){closeImage();return}
     if(els.profileViewModal.classList.contains('show'))closeProfileView();
   });
@@ -1715,6 +1759,19 @@
   els.leaveBtn.addEventListener('click',leave);
   els.inviteBtn.addEventListener('click',copyInvite);
   els.deleteRoomBtn.addEventListener('click',deleteCurrentRoom);
+  // Tap a sender portrait for a small circular preview, without leaving the chat.
+  els.messages.addEventListener('click',event=>{
+    const avatar=event.target.closest('.msg-avatar[role="button"]');
+    if(avatar&&els.messages.contains(avatar))openAvatarLightbox(avatar);
+  });
+  els.messages.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    const avatar=event.target.closest('.msg-avatar[role="button"]');
+    if(avatar&&els.messages.contains(avatar)){event.preventDefault();openAvatarLightbox(avatar)}
+  });
+  els.avatarLightbox.addEventListener('click',event=>{
+    if(event.target===els.avatarLightbox||event.target===els.avatarLightboxImg)closeAvatarLightbox();
+  });
   // Stop forced entry scrolling as soon as a visitor starts reading older messages.
   els.messages.addEventListener('pointerdown',stopEntryAutoScroll,{passive:true});
   els.messages.addEventListener('touchstart',stopEntryAutoScroll,{passive:true});
