@@ -130,7 +130,7 @@
     .bubble.is-truncated:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .time{font-size:11px;color:var(--chat-meta);margin:5px 6px 0}
     .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--composer-line);background:var(--composer-bg);align-items:flex-end}
-    .composer textarea{flex:1;resize:none;max-height:112px;min-height:46px;border:1px solid var(--composer-line);border-radius:14px;padding:11px 12px;outline:none;background:var(--composer-input);color:var(--text)}
+    .composer textarea{flex:1;min-width:0;resize:none;height:46px;min-height:46px;max-height:94px;line-height:24px;overflow-y:hidden;border:1px solid var(--composer-line);border-radius:14px;padding:10px 12px;outline:none;background:var(--composer-input);color:var(--text)}
     .composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent)}
     .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--composer-line);border-radius:14px;background:var(--composer-input);color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
     .photo:disabled,.send:disabled{opacity:.55;cursor:wait}
@@ -755,12 +755,24 @@
       document.getElementById('msg-'+messageId)?.remove();
     }catch(e){alert(e.message||'메시지를 삭제하지 못했습니다.')}
   }
+  // Grow with wrapped Korean/English text up to three lines, then scroll inside the editor.
+  // The composer remains part of the chat flex layout, so messages never get overlaid.
+  function resizeMessageInput(){
+    const input=els.messageInput;
+    const wasNearBottom=els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<90;
+    input.style.height='46px';
+    const required=input.scrollHeight+2; // scrollHeight excludes the 1px top/bottom borders
+    input.style.height=Math.min(94,Math.max(46,required))+'px';
+    input.style.overflowY=required>94?'auto':'hidden';
+    if(!input.value)input.scrollTop=0;
+    if(wasNearBottom)els.messages.scrollTop=els.messages.scrollHeight;
+  }
   async function send(){
     const message=els.messageInput.value.trim();if(!message||!session)return;
     els.sendBtn.disabled=true;
     try{
       const data=await api({action:'chat-send',memberId:session.member.id,sessionToken:session.sessionToken,message});
-      els.messageInput.value='';appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
+      els.messageInput.value='';resizeMessageInput();appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
     }catch(e){alert(e.message)}finally{
       els.sendBtn.disabled=false;
       if(window.matchMedia && window.matchMedia('(pointer:coarse)').matches){
@@ -1109,6 +1121,8 @@
   document.getElementById('brandHome').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();location.href='/'}});
   els.adminRoomAddBtn.addEventListener('click',()=>{location.href='/chat-admin.html?new=1'});
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
+  els.messageInput.addEventListener('input',resizeMessageInput);
+  window.addEventListener('resize',resizeMessageInput,{passive:true});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
   loadSoundDefault();
