@@ -46,6 +46,36 @@ function passwordHash(password, salt) {
   return crypto.scryptSync(String(password || ''), String(salt || ''), 64).toString('hex');
 }
 
+// Only a keyed hash of the client address and room code is persisted, never the raw IP.
+function chatJoinSourceKey(req, roomCode) {
+  const secret = process.env.CROP_ACCESS_PASSWORD ||
+    process.env.STORE_ADMIN_PASSWORD || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) {
+    const error = new Error('채팅방 보안 설정을 확인해 주세요.');
+    error.statusCode = 503;
+    throw error;
+  }
+  const forwarded = req.headers['x-vercel-forwarded-for'] ||
+    req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+  const ip = String(Array.isArray(forwarded) ? forwarded[0] : forwarded)
+    .split(',')[0].trim().slice(0, 128);
+  return crypto.createHmac('sha256', secret)
+    .update('chat-join-v1:' + ip + ':' + roomCode).digest('hex');
+}
+async function chatJoinLimit(sourceKey, action) {
+  const wait = await supabaseRequest('rpc/bokjakso_chat_join_limit', {
+    method: 'POST', body: JSON.stringify({p_key: sourceKey, p_action: action})
+  });
+  return Math.max(0, Math.ceil(Number(wait) || 0));
+}
+function denyLockedChatJoin(res, seconds) {
+  const minutes = Math.max(1, Math.ceil(seconds / 60));
+  res.setHeader('Retry-After', String(seconds));
+  res.status(429).json({
+    message: '비밀번호 입력 횟수가 많아 잠시 제한됐어요. 약 ' + minutes + '분 후 다시 시도해 주세요.'
+  });
+}
+
 function safeEqualHex(a, b) {
   try {
     const left = Buffer.from(String(a || ''), 'hex');
@@ -147,7 +177,7 @@ async function getChatMember(memberId, sessionToken) {
   return Array.isArray(rows) ? rows[0] : null;
 }
 
-async function handleChat(body, res) {
+async function handleChat(body, res, req) {
   const action = clean(body.action);
 
   // A saved profile belongs to this browser's private profile token, not to a room.
@@ -311,6 +341,12 @@ async function handleChat(body, res) {
       return;
     }
 
+    const sourceKey = chatJoinSourceKey(req, roomCode);
+    const alreadyLocked = await chatJoinLimit(sourceKey, 'check');
+    if (alreadyLocked > 0) {
+      denyLockedChatJoin(res, alreadyLocked);
+      return;
+    }
     const rooms = await supabaseRequest(`chat_rooms?code=eq.${encodeURIComponent(roomCode)}&is_active=eq.true&is_archived=eq.false&select=id,title,code,password_salt,password_hash`);
     const room = Array.isArray(rooms) ? rooms[0] : null;
     if (!room) {
@@ -320,9 +356,13 @@ async function handleChat(body, res) {
 
     const candidate = passwordHash(password, room.password_salt);
     if (!safeEqualHex(candidate, room.password_hash)) {
-      res.status(401).json({ message: '비밀번호가 맞지 않습니다.' });
+      const lockedSeconds = await chatJoinLimit(sourceKey, 'fail');
+      if (lockedSeconds > 0) denyLockedChatJoin(res, lockedSeconds);
+      else res.status(401).json({ message: '비밀번호가 맞지 않습니다.' });
       return;
     }
+    // A successful password check clears the failure counter.
+    await chatJoinLimit(sourceKey, 'reset');
 
     const sessionToken = crypto.randomBytes(32).toString('hex');
     const members = await supabaseRequest('chat_members?select=id,room_id,nickname,avatar_url,profile_id', {
@@ -670,7 +710,7 @@ module.exports = async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     if (String(body.action || '').startsWith('chat-')) {
-      await handleChat(body, res);
+      await handleChat(body, res, req);
       return;
     }
 
