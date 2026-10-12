@@ -27,7 +27,7 @@
       --scroll-thumb:#79624e;--scroll-track:#262320;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--text);background:linear-gradient(180deg,var(--paper),var(--bg));transition:background .2s ease,color .2s ease}
+    html,body{margin:0;min-height:100%;font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--text);background:linear-gradient(180deg,var(--paper),var(--bg));transition:background .2s ease,color .2s ease}
     button,input,textarea{font:inherit}
     button{cursor:pointer}
     .page{min-height:100vh;display:flex;flex-direction:column}
@@ -320,7 +320,13 @@
       .lead{letter-spacing:-.005em}
     }
     @media(max-width:560px){
-      html,body{height:100%;overscroll-behavior:none}
+      /* Same Pretendard as desktop; preserve mobile font sizes and hit areas. */
+      html,body{height:100%;overscroll-behavior:none;font-weight:400;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+      .brand,h1,.public-room-list h2,.admin-room-list h2,.entry-title,.profile-dialog h2,.profile-view-dialog h2{font-weight:700}
+      .public-room-name,.admin-room-name,.shared-profile-info strong,.public-room-enter,.admin-room-enter,.entered-badge,.room-title{font-weight:600}
+      .entry-room,.entry-field label,.field label,.primary,.entry-cancel,.entry-submit,.profile-actions button,.profile-pick-button,.profile-view-actions button{font-weight:600}
+      .invite,.leave,.send,.name,.settings-profile-name{font-weight:600}
+      .lead,.profile-hint,.public-room-last,.room-meta{font-weight:400}
       body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
       .page{height:var(--app-height,100dvh);min-height:var(--app-height,100dvh);overflow:hidden}
       header{height:54px;flex:0 0 54px}.sub{display:none}
