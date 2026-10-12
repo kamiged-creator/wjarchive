@@ -89,6 +89,7 @@
     /* Reserve a fixed slot for the entrance button even with very long room titles. */
     .public-room-item>div:first-child{flex:1 1 0;min-width:0}
     .public-room-name{font-size:15px;font-weight:750;letter-spacing:-.02em;line-height:1.45;overflow-wrap:anywhere}
+    .public-room-last{font-size:11px;line-height:1.3;color:var(--muted);margin-top:3px;white-space:nowrap}
     .public-room-code{font-size:12px;color:var(--muted);margin-top:4px}
     .public-room-enter{display:inline-flex;flex:0 0 94px;align-items:center;justify-content:center;width:94px;height:44px;box-sizing:border-box;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:0 6px;font-size:13px;font-weight:750;white-space:nowrap;cursor:pointer}
     .public-room-enter.selected{background:var(--primary);color:#fff}
@@ -748,6 +749,15 @@
 
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function fmtTime(value){try{return new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit'}).format(new Date(value))}catch(_){return ''}}
+  function fmtRoomLastDate(value){
+    if(!value)return '';
+    const date=new Date(value);
+    if(!Number.isFinite(date.getTime()))return '';
+    const formatter=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
+    const parts=Object.fromEntries(formatter.formatToParts(date).map(p=>[p.type,p.value]));
+    const today=Object.fromEntries(formatter.formatToParts(new Date()).map(p=>[p.type,p.value]));
+    return (parts.year===today.year?'':parts.year+'.')+parts.month+'.'+parts.day;
+  }
   async function api(payload){
     const r=await fetch('/api/store-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await r.json().catch(()=>({}));
@@ -1508,7 +1518,7 @@
         const slice=rooms.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
         const rows=slice.map(room=>{
           const known=Boolean(remembered[String(room.code).toUpperCase()]);
-          return '<div class="public-room-item'+(known?' remembered':'')+'"><div><div class="public-room-name">'+esc(room.title||'채팅방')+(known?' <span class="entered-badge">✓ 이전 입장</span>':'')+'</div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
+          return '<div class="public-room-item'+(known?' remembered':'')+'"><div><div class="public-room-name">'+esc(room.title||'채팅방')+(known?' <span class="entered-badge">✓ 이전 입장</span>':'')+'</div><div class="public-room-last" data-room-last-id="'+esc(room.id)+'" hidden></div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
         }).join('');
 
         let pager='';
@@ -1520,6 +1530,16 @@
           pager='<div class="room-pagination"><button class="room-page-btn" type="button" data-prev '+(page===1?'disabled':'')+'>‹</button>'+nums+'<button class="room-page-btn" type="button" data-next '+(page===totalPages?'disabled':'')+'>›</button></div>';
         }
         els.publicRooms.innerHTML=rows+pager;
+
+        // Fetch dates for this page only, without exposing any message contents.
+        api({action:'chat-public-last-activity',roomIds:slice.map(room=>room.id)}).then(result=>{
+          const activity=new Map((Array.isArray(result.latest)?result.latest:[])
+            .map(item=>[String(item.roomId),item.lastMessageAt]));
+          els.publicRooms.querySelectorAll('[data-room-last-id]').forEach(label=>{
+            const stamp=fmtRoomLastDate(activity.get(label.dataset.roomLastId));
+            if(stamp){label.textContent='최근 대화 '+stamp;label.hidden=false}
+          });
+        }).catch(error=>console.warn('최근 대화 날짜 조회 실패',error));
 
         els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
           const code=String(btn.dataset.publicRoom||'').toUpperCase();
