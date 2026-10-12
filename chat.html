@@ -290,6 +290,8 @@
     body.dark .chat .composer{background:#1c1a18;border-top-color:#52483f;box-shadow:0 -3px 12px rgba(0,0,0,.13)}
     body.dark .chat .composer textarea,body.dark .chat .photo{background:#292521;border-color:#584d41}
     body.dark .chat .composer textarea::placeholder{color:#B8ADA1;opacity:1}
+    /* In desktop dark mode the send action needs clear contrast with its white label. */
+    @media(min-width:561px){body.dark .chat .send{background:#835535;color:#fff;font-size:15px;font-weight:750;box-shadow:0 2px 8px rgba(0,0,0,.16)}}
     /* Desktop typography: retain clear hierarchy without blocky extra-bold lettering. */
     @media(min-width:561px){
       /* The desktop header follows the same 720px / 14px grid as main and chat. */
