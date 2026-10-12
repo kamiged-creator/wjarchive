@@ -94,7 +94,7 @@
     <div class="muted">방 이름과 입장 비밀번호만 입력하면 됩니다. 방 코드는 자동으로 생성됩니다.</div>
     <div class="grid" style="margin-top:16px">
       <div class="wide"><label for="title">방 이름</label><input id="title" placeholder="예: 복작소 관계자방"></div>
-      <div class="wide"><label for="password">입장 비밀번호</label><input id="password" type="password" placeholder="4자 이상"></div>
+      <div class="wide"><label for="password">입장 비밀번호</label><input id="password" type="password" placeholder="8자 이상"></div>
       <div class="wide"><button class="primary" id="createBtn">채팅방 만들기</button></div>
     </div>
     <div class="status" id="status"></div>
@@ -323,7 +323,7 @@
       roomsEl.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',async()=>{const title=decodeURIComponent(b.dataset.title||'채팅방');const ok=confirm('['+title+'] 방을 완전히 삭제할까요?\n삭제하면 이 방의 대화와 참여 기록도 함께 삭제되며 복구할 수 없습니다.');if(!ok)return;try{await api({action:'chat-delete-room',roomId:b.dataset.delete});alert('채팅방을 삭제했습니다.');load()}catch(e){alert(e.message)}}));
       roomsEl.querySelectorAll('[data-archive]').forEach(b=>b.addEventListener('click',async()=>{const restoring=b.dataset.archived==='true';const msg=restoring?'이 채팅방을 다시 사용할까요?':'이 채팅방을 보관할까요?\n보관 중에는 일반 사용자가 입장할 수 없습니다.';if(!confirm(msg))return;try{await api({action:'chat-set-archived',roomId:b.dataset.archive,isArchived:!restoring});alert(restoring?'채팅방을 복원했습니다.':'채팅방을 보관했습니다.');load()}catch(e){alert(e.message)}}));
       roomsEl.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',async()=>{await api({action:'chat-set-active',roomId:b.dataset.toggle,isActive:b.dataset.active!=='true'});load()}));
-      roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (4자 이상)');if(!p)return;try{await api({action:'chat-change-password',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.')}catch(e){alert(e.message)}}));
+      roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (8자 이상)\n변경하면 이전 입장 기록과 알림이 무효화됩니다.');if(!p)return;try{await api({action:'chat-change-password',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.\n기존 참여자는 새 비밀번호로 다시 입장해야 하고, 알림도 다시 켜야 합니다.')}catch(e){alert(e.message)}}));
     }catch(e){roomsEl.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
   }
   document.getElementById('createBtn').addEventListener('click',async()=>{
