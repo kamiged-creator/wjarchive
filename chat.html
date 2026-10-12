@@ -210,7 +210,8 @@
       header{height:54px;flex:0 0 54px}.sub{display:none}
       main{width:100%;padding:6px 8px max(8px,env(safe-area-inset-bottom));margin:0;flex:1;min-height:0;overflow:hidden;display:flex}
       .card{border-radius:20px}
-      .join{padding:24px 18px;width:100%}
+      .join{padding:24px 18px;width:100%;max-height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+      .join::-webkit-scrollbar{display:none}
       .chat{width:100%;height:100%;max-height:none;min-height:0;overflow:hidden}
       .chat-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px 12px}
       .chat-head>div:first-child{min-width:0}
@@ -463,7 +464,12 @@
     if(!sharedProfile)return;
     try{
       const data=await api({action:'chat-profile-read',...sharedCredentials()});
-      if(sharedProfile?.id===data.profile.id)storeSharedProfile(data.profile);
+      if(sharedProfile?.id===data.profile.id){
+        storeSharedProfile(data.profile);
+        if(session&&session.member.profile_id===sharedProfile.id){
+          updateMyAvatar(data.profile.avatar_url||null);
+        }
+      }
     }catch(error){console.warn('공통 프로필 확인 실패',error)}
   }
   const memberAvatars=new Map();
@@ -891,8 +897,11 @@
   async function join(){
     els.joinStatus.textContent='';els.joinBtn.disabled=true;
     try{
-      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:els.nickname.value});
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:sharedProfile?.nickname||els.nickname.value,...sharedCredentials()});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
+      if(!sharedProfile&&data.member?.nickname!=='관리자'){
+        ensureSharedProfile(data.member.nickname).then(syncSharedProfileToRoom).catch(error=>console.warn('초대 채팅방 프로필 연결 실패',error));
+      }
     }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
   }
   function attachLongPressDelete(target,messageId,onLongPress){
