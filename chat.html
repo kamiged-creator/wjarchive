@@ -11,7 +11,7 @@
     :root{
       --bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;
       --line:rgba(31,26,23,.12);--accent:#8b6847;--soft:#eadfd2;--shadow:0 24px 60px rgba(31,26,23,.12);
-      --notice:#fff8ec;--notice-text:#7f674f;--msg-bg:#fff;--mine-bg:#2a2521;--field-bg:#fff;--primary:#a67c52;
+      --notice:#fff8ec;--notice-text:#7f674f;--msg-bg:#fff;--mine-bg:#2F241D;--mine-border:#4A392C;--mine-text:#FFF8F1;--field-bg:#fff;--primary:#a67c52;
       --composer-bg:#fff8ef;--composer-input:#fffefa;--composer-line:rgba(139,104,71,.19);
       --chat-meta:#60564d;--bubble-border:#d0c2b4;--admin-bubble:#efddca;--admin-border:#c8a888;--admin-ink:#30251d;
       --scroll-thumb:#b6a28f;--scroll-track:#eee7df;
@@ -19,7 +19,7 @@
     body.dark{
       --bg:#111111;--paper:#171717;--text:#f2f2f2;--muted:#a9a9a9;
       --line:rgba(255,255,255,.10);--accent:#b68456;--soft:#222222;--shadow:0 24px 60px rgba(0,0,0,.42);
-      --notice:#1d1d1d;--notice-text:#d0d0d0;--msg-bg:#242424;--mine-bg:#9f7148;--field-bg:#1f1f1f;--primary:#b68456;
+      --notice:#1d1d1d;--notice-text:#d0d0d0;--msg-bg:#242424;--mine-bg:#9f7148;--mine-border:#9f7148;--mine-text:#fff;--field-bg:#1f1f1f;--primary:#b68456;
       --composer-bg:#1a1a1a;--composer-input:#242424;--composer-line:rgba(255,255,255,.16);
       --chat-meta:#c8bbae;--bubble-border:#66605a;--admin-bubble:#48382b;--admin-border:#977653;--admin-ink:#fff1e2;
       --scroll-thumb:#79624e;--scroll-track:#262320;
@@ -119,7 +119,7 @@
     .msg.mine{align-items:flex-end}
     .name{font-size:12px;color:var(--chat-meta);font-weight:650;margin:0 6px 5px}
     .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);border:1px solid var(--bubble-border);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55}
-    .mine .bubble{background:var(--mine-bg);color:#fff;border-color:var(--mine-bg);border-radius:16px 16px 4px 16px}
+    .mine .bubble{background:var(--mine-bg);color:var(--mine-text);border-color:var(--mine-border);border-radius:16px 16px 4px 16px}
     .msg.admin .bubble{background:var(--admin-bubble);color:var(--admin-ink);border-color:var(--admin-border)}
     .msg.admin .name{font-weight:750;color:var(--chat-meta)}
     .message-text{white-space:pre-wrap;overflow-wrap:anywhere}
