@@ -551,6 +551,7 @@ module.exports = async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const action = normalize(body.action);
 
+    if (action.startsWith('club-')) return await require('../lib/club-handler')(req, res);
     if (action.startsWith('chat-')) return await handleChatAdmin(body, res);
     if (action === 'replace-lists') return await handleReplaceLists(body, res);
     if (action === 'save-work') return await handleSaveWork(body, res);

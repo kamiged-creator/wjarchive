@@ -386,6 +386,40 @@
       .chat-image{max-width:min(190px,52vw);max-height:200px}
       .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
     }
+
+
+    .club-status{border-radius:13px;background:var(--bg);border:1px solid var(--line);padding:15px;margin:16px 0;font-size:15px;font-weight:700;line-height:1.7}
+    .club-chat[hidden],.club-actions[hidden],.club-admin-entry[hidden]{display:none!important}
+    .club-chat-feed{height:min(44vh,390px);min-height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--bg);scrollbar-width:thin}
+    .club-post{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.55;overflow-wrap:anywhere}
+    .club-post:last-child{border-bottom:0}.club-post strong{font-size:13px;color:var(--accent)}
+    .club-post time{font-size:11px;color:var(--muted);margin-left:7px}.club-post p{white-space:pre-wrap;margin:3px 0 0;font-size:15px}
+    .club-compose{display:flex;gap:8px;margin-top:11px}
+    .club-compose input{height:52px;flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;background:var(--field-bg);color:var(--text)}
+    .club-compose button{min-width:72px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:800}
+    .club-admin-entry{display:block;margin-top:16px;padding:14px;text-align:center;color:var(--text);border:1px solid var(--line);border-radius:12px;font-weight:750;text-decoration:none}
+    /* Independent PWA home navigation: preserve the existing chat room UI. */
+    .home-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px}
+    .home-tab{min-height:82px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1.5px solid var(--line);border-radius:18px;background:var(--paper);color:var(--text);font-size:14px;font-weight:800;line-height:1.2;word-break:keep-all}
+    .home-tab .home-tab-icon{font-size:25px;line-height:1}
+    .home-tab[aria-selected="true"]{border:2px solid var(--accent);background:color-mix(in srgb,var(--paper) 88%,var(--accent));box-shadow:0 5px 16px rgba(139,104,71,.10)}
+    .home-tab:focus-visible,.home-panel button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    body.chat-active .home-tabs{display:none}
+    .home-panel{padding:28px 22px}
+    .home-panel[hidden]{display:none!important}
+    .club-note{border:1px solid var(--line);border-radius:15px;background:var(--bg);padding:16px;margin-bottom:16px;line-height:1.75;font-size:14px}
+    .club-feature{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.5}
+    .club-feature:last-of-type{border-bottom:0}
+    .club-feature-icon{font-size:24px;flex:0 0 28px}
+    .club-feature strong{display:block}
+    .club-feature small{display:block;color:var(--muted);margin-top:3px}
+    .home-cta{min-height:52px;width:100%;border:0;border-radius:14px;background:var(--primary);color:white;font-weight:800;font-size:16px;margin-top:18px}
+    .home-cta:disabled{opacity:.65;cursor:not-allowed}
+    .my-profile-summary{display:flex;align-items:center;gap:15px;padding:19px;border:1px solid var(--line);border-radius:18px;background:var(--bg)}
+    .my-profile-summary .profile-preview{flex:0 0 62px;width:62px;height:62px}
+    .my-profile-summary strong{font-size:19px;overflow-wrap:anywhere}
+    @media(max-width:400px){.home-tabs{gap:6px}.home-tab{font-size:13px;min-height:76px}.home-panel{padding:24px 17px}}
+
   </style>
 </head>
 <body>
@@ -402,6 +436,12 @@
     </div>
   </header>
   <main>
+
+    <nav class="home-tabs" role="tablist" aria-label="복작소 메인 메뉴">
+      <button class="home-tab" id="homeTabRooms" type="button" role="tab" aria-selected="true" aria-controls="joinCard" data-home-tab="rooms"><span class="home-tab-icon" aria-hidden="true">💬</span>채팅방</button>
+      <button class="home-tab" id="homeTabClub" type="button" role="tab" aria-selected="false" aria-controls="clubPanel" data-home-tab="club"><span class="home-tab-icon" aria-hidden="true">👥</span>복작소 클럽</button>
+      <button class="home-tab" id="homeTabMe" type="button" role="tab" aria-selected="false" aria-controls="mePanel" data-home-tab="me"><span class="home-tab-icon" aria-hidden="true">👤</span>내 정보</button>
+    </nav>
     <section class="card join" id="joinCard">
       <div class="eyebrow">BOKJAKSO CHAT</div>
       <h1>복작소 채팅방</h1>
@@ -430,6 +470,31 @@
         <h2>채팅방 목록</h2>
         <div id="adminRooms"><div class="admin-empty">불러오는 중...</div></div>
       </div>
+    </section>
+
+
+    <section class="card home-panel" id="clubPanel" role="tabpanel" aria-labelledby="homeTabClub" hidden>
+      <div class="eyebrow">BOKJAKSO CLUB</div>
+      <h1>복작소 클럽</h1>
+      <p class="lead">일반 채팅은 누구나 이용할 수 있고, 클럽은 관리자 승인을 받은 회원만 참여할 수 있어요.</p>
+      <div class="club-status" role="status" aria-live="polite" id="clubStatus">회원 상태를 확인하고 있어요.</div>
+      <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📝</span><div><strong>회원 가입 신청</strong><small>기본 프로필을 사용해 가입 신청</small></div></div>
+      <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">✅</span><div><strong>관리자 승인</strong><small>승인된 회원만 클럽 전용 공간 이용</small></div></div>
+      <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📢</span><div><strong>회원 공지 및 클럽 채팅</strong><small>회원 전용 공지사항과 대화 공간</small></div></div>
+      <div class="club-actions" id="clubActions"><button class="home-cta" id="clubApplyBtn" type="button">클럽 가입 신청</button></div>
+      <section class="club-chat" id="clubChat" hidden aria-label="클럽 회원 전용 채팅">
+        <h2>클럽 전용 채팅</h2>
+        <div class="club-chat-feed" id="clubMessages" role="log" aria-live="polite"></div>
+        <form class="club-compose" id="clubCompose"><input id="clubMessageInput" maxlength="1000" placeholder="회원들과 이야기 나눠요" autocomplete="off" aria-label="클럽 메시지 입력"><button id="clubSendBtn" type="submit">전송</button></form>
+      </section>
+      <a class="club-admin-entry" id="clubAdminLink" href="/club-admin.html" hidden>클럽 회원관리 (관리자 전용)</a>
+    </section>
+    <section class="card home-panel" id="mePanel" role="tabpanel" aria-labelledby="homeTabMe" hidden>
+      <div class="eyebrow">MY PROFILE</div>
+      <h1>내 정보</h1>
+      <p class="lead">기존 복작소 채팅 프로필을 그대로 관리해요. 클럽 가입 여부와는 별개입니다.</p>
+      <div class="my-profile-summary"><span class="profile-preview" id="meProfileAvatar" aria-hidden="true">👤</span><div><strong id="meProfileName">내 프로필 만들기</strong><div class="sub" id="meProfileDesc">닉네임과 사진을 설정할 수 있어요.</div></div></div>
+      <button class="home-cta" id="homeProfileEditBtn" type="button">프로필 만들기 · 수정</button>
     </section>
 
     <section class="card chat" id="chatCard" aria-live="polite">
@@ -1027,7 +1092,7 @@
     if(els.chatCard.classList.contains('edge-open'))setChatEdgeOpen(false,false);
     stopEntryAutoScroll();
     document.body.classList.remove('chat-active');
-    clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';
+    clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');selectHomeTab('rooms');
     if(preserveRemembered){
       session=null;lastId=0;
     }else{
@@ -1952,6 +2017,37 @@
   window.addEventListener('resize',resizeMessageInput,{passive:true});
   window.visualViewport?.addEventListener('resize',resizeMessageInput,{passive:true});
   els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+
+  // Home tabs operate only on the room-list screen, never inside an open chat.
+  const homePanels={
+    rooms:document.getElementById('joinCard'),
+    club:document.getElementById('clubPanel'),
+    me:document.getElementById('mePanel')
+  };
+  function refreshHomeProfile(){
+    const name=document.getElementById('meProfileName');
+    const desc=document.getElementById('meProfileDesc');
+    name.textContent=sharedProfile?.nickname||'내 프로필 만들기';
+    desc.textContent=sharedProfile?'기존 채팅 공통 프로필':'닉네임과 사진을 설정할 수 있어요.';
+    paintAvatar(document.getElementById('meProfileAvatar'),sharedProfile?.avatar_url||null);
+  }
+  function selectHomeTab(tab){
+    if(!homePanels[tab])return;
+    homePanels.rooms.style.display=tab==='rooms'?'block':'none';
+    homePanels.club.hidden=tab!=='club';
+    homePanels.me.hidden=tab!=='me';
+    document.querySelectorAll('[data-home-tab]').forEach(button=>{
+      button.setAttribute('aria-selected',String(button.dataset.homeTab===tab));
+    });
+    if(tab==='me')refreshHomeProfile();
+  }
+  document.querySelectorAll('[data-home-tab]').forEach(button=>{
+    button.addEventListener('click',()=>selectHomeTab(button.dataset.homeTab));
+  });
+  document.getElementById('homeProfileEditBtn').addEventListener('click',()=>{
+    els.sharedProfileBtn.click();
+  });
+
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
   refreshSharedProfileCard();
   refreshSavedSharedProfile();
@@ -2002,5 +2098,6 @@
     }
   }catch(_){clearSession()}
 </script>
+<script src="/club.js"></script>
 </body>
 </html>
