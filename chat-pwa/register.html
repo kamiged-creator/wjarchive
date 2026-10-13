@@ -30,6 +30,7 @@ button:disabled{opacity:.55;cursor:wait}.consent{border:1px solid var(--border);
 <h1>복작소 회원 등록</h1>
 <p>가입 신청 후 <strong>관리자가 승인하면 일반 채팅방을 이용</strong>할 수 있어요. 복작소 클럽은 별도로 가입 승인받아야 해요.</p>
 <p class="notice">문자 인증은 사용하지 않아요. 입력한 전화번호가 본인 번호인지 확인되지 않으므로 관리자가 별도로 확인할 수 있어요.</p>
+<p class="notice" id="previewWarning" role="status" hidden>현재는 회원가입 화면만 미리 볼 수 있어요. 개인정보 저장 준비가 완료되기 전이므로 신청 접수는 비활성화되어 있어요.</p>
 <form id="joinForm" novalidate>
 <label for="legalName">이름 <small>관리자만 확인</small></label><input id="legalName" maxlength="40" placeholder="실제 이름" autocomplete="name" required>
 <label for="nickname">채팅 닉네임 <small>다른 사람에게 표시</small></label><input id="nickname" maxlength="20" placeholder="예: 복작이" autocomplete="nickname" required>
@@ -97,10 +98,14 @@ async function refresh(){
   const data=await api({action:'member-status',...credentials(),...(!p?oldSession():{})});
   $('loading').hidden=true;
   if(['approved','pending','rejected','suspended'].includes(data.status)){state(data.status);return}
-  if(!data.enforced){state('preparing');return}
   $('stateArea').hidden=true;$('formArea').hidden=false;
+  const isPreview=!data.enforced;
+  $('previewWarning').hidden=!isPreview;
+  $('joinForm').querySelectorAll('input,button').forEach(input=>{input.disabled=isPreview});
+  $('submitBtn').textContent=isPreview?'회원가입 접수 준비 중':'관리자에게 가입 신청하기';
+  $('formStatus').textContent=isPreview?'현재는 화면만 확인할 수 있어요. 실명이나 전화번호는 수집하지 않아요.':'';
   if(p?.nickname&&!$('nickname').value)$('nickname').value=p.nickname;
- }catch(e){$('loading').hidden=false;$('loading').querySelector('p').textContent=e.message}
+ }catch(e){$('loading').hidden=false;$('loading').querySelector('p').textContent=e.message+' 가입 기능 상태를 확인하지 못해 신청은 진행할 수 없어요.'}
 }
 $('refreshStatus').addEventListener('click',async()=>{
  if($('stateTitle').textContent==='회원 승인 완료'){
@@ -119,7 +124,7 @@ $('avatarFile').addEventListener('change',e=>{
  const img=document.createElement('img');img.src=photoUrl;img.alt='';$('avatarPreview').replaceChildren(img);
 });
 $('joinForm').addEventListener('submit',async e=>{
- e.preventDefault();if(busy)return;
+ e.preventDefault();if(busy||$('submitBtn').disabled)return;
  const name=$('legalName').value.trim(),nickname=$('nickname').value.trim(),phone=$('phone').value.trim();
  $('formStatus').textContent='';
  if(name.length<2||name.length>40||!nickname||nickname.length>20||nickname==='관리자'||!/^01[016789][\d\s-]{7,13}$/.test(phone)){
