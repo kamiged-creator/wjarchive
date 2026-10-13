@@ -843,7 +843,14 @@
     target.replaceChildren();
     if(typeof url==='string'&&(/^https:\/\//i.test(url)||url.startsWith('blob:'))){
       const img=document.createElement('img');
-      img.alt='';img.loading=target.classList.contains('msg-avatar')?'lazy':'eager';img.decoding='async';
+      img.alt='';
+      const isMessageAvatar=target.classList.contains('msg-avatar');
+      const isRecentAvatar=target.dataset.loadingPriority==='eager';
+      // Initial viewport portraits should load immediately; older offscreen
+      // portraits remain lazy so image requests don't delay message rendering.
+      img.loading=isMessageAvatar&&!isRecentAvatar?'lazy':'eager';
+      if(isMessageAvatar&&isRecentAvatar)img.fetchPriority='high';
+      img.decoding='async';
       img.onerror=()=>{if(img.parentElement===target)target.textContent='👤'};
       img.src=url;
       target.appendChild(img);
@@ -1149,8 +1156,10 @@
     entryLayoutObserver?.disconnect();
   }
   function showChat(){
-    memberAvatars.clear();
-    memberNames.clear();
+    // Keep room member thumbnails in memory across quick exits/re-entries.
+    // Fresh profile rows from chat-list still replace any changed photos.
+    // No chat messages, tokens or images are persisted into the service worker.
+    if(memberAvatars.size>150){memberAvatars.clear();memberNames.clear();}
     if(session?.member?.id){
       memberAvatars.set(String(session.member.id),session.member.avatar_url||null);
       memberNames.set(String(session.member.id),session.member.nickname||'');
@@ -1227,7 +1236,8 @@
     if(!Array.isArray(items)||!items.length)return;
     const empty=document.getElementById('emptyState');if(empty)empty.remove();
     const nearBottom=els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<90;
-    for(const m of items){
+    for(let index=0;index<items.length;index++){
+      const m=items[index];
       if(document.getElementById('msg-'+m.id))continue;
       lastId=Math.max(lastId,Number(m.id)||0);
       const mine=session&&m.member_id===session.member.id;
@@ -1272,6 +1282,9 @@
       const content=document.createElement('div');content.className='msg-content';
       while(wrap.firstChild)content.appendChild(wrap.firstChild);
       const avatar=document.createElement('span');avatar.className='msg-avatar';avatar.dataset.memberId=String(m.member_id);
+      // Prioritize the latest messages visible on room entry; loading every
+      // historical avatar eagerly would make low-bandwidth phones slower.
+      avatar.dataset.loadingPriority=index>=items.length-12?'eager':'lazy';
       paintMessageAvatar(avatar,memberAvatars.get(String(m.member_id))||null);
       wrap.append(avatar,content);
       els.messages.appendChild(wrap);
