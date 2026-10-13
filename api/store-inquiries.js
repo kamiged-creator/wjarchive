@@ -718,6 +718,10 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    if (String(body.action || '').startsWith('club-')) {
+      await require('../lib/club-handler')(req, res);
+      return;
+    }
     if (String(body.action || '').startsWith('chat-')) {
       await handleChat(body, res, req);
       return;
