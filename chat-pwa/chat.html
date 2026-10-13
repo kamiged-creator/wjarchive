@@ -393,7 +393,9 @@
 
 
     .club-status{border-radius:13px;background:var(--bg);border:1px solid var(--line);padding:15px;margin:16px 0;font-size:15px;font-weight:700;line-height:1.7}
-    .club-chat[hidden],.club-actions[hidden],.club-admin-entry[hidden]{display:none!important}
+    .club-chat[hidden],.club-actions[hidden],.club-admin-entry[hidden],.club-reset[hidden],.club-review-entry[hidden]{display:none!important}
+    .club-reset{display:block;margin:10px auto 0;min-height:45px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--text);font-size:14px;font-weight:750}
+    .club-review-entry{display:block;margin:14px auto 0;text-align:center;text-decoration:underline;text-underline-offset:3px;font-size:13px;color:var(--muted);font-weight:700}
     .club-chat-feed{height:min(44vh,390px);min-height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--bg);scrollbar-width:thin}
     .club-post{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.55;overflow-wrap:anywhere}
     .club-post:last-child{border-bottom:0}.club-post strong{font-size:13px;color:var(--accent)}
@@ -563,6 +565,8 @@
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">✅</span><div><strong>관리자 승인</strong><small>승인된 회원만 클럽 전용 공간 이용</small></div></div>
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📢</span><div><strong>회원 공지 및 클럽 채팅</strong><small>회원 전용 공지사항과 대화 공간</small></div></div>
       <div class="club-actions" id="clubActions"><button class="home-cta" id="clubApplyBtn" type="button">클럽 가입 신청</button></div>
+      <button class="club-reset" id="clubResetBtn" type="button" hidden>가입 신청 취소하고 처음부터 다시 하기</button>
+      <a class="club-review-entry" id="clubReviewEntry" href="/club-admin.html" hidden>관리자 승인 화면 열기 (관리자 로그인 필요)</a>
       <section class="club-chat" id="clubChat" hidden aria-label="클럽 회원 전용 채팅">
         <h2>클럽 전용 채팅</h2>
         <div class="club-chat-feed" id="clubMessages" role="log" aria-live="polite"></div>
