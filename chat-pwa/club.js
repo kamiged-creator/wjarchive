@@ -109,6 +109,6 @@
  });
  setInterval(()=>{
    if(document.hidden||document.body.classList.contains('chat-active')||clubTab.getAttribute('aria-selected')!=='true')return;
-   loadMessages();
+   if(membership==='pending')refresh();else loadMessages();
  },4500);
 })();
