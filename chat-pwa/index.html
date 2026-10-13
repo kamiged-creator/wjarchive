@@ -24,8 +24,8 @@
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;gap:12px}
     .top-brand{font-size:20px;font-weight:850;letter-spacing:-.04em}
     .top-caption{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.13em;margin-top:3px}
-    .top-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .install-shortcut{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:0 12px;border-radius:13px;border:1.5px solid var(--accent);background:var(--paper);color:var(--text);font-size:14px;font-weight:800;white-space:nowrap}
+    /* Prominent in-page installer for returning visitors; never crowd the header. */
+    .install-shortcut{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:61px;margin-top:16px;padding:13px 16px;border-radius:18px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:18px;font-weight:850;box-shadow:0 8px 18px rgba(45,29,17,.12);word-break:keep-all}
     .install-shortcut[hidden]{display:none!important}
     .theme{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:var(--paper);color:var(--text);font-size:21px}
     .hero{padding:26px 20px 29px;text-align:center;background:var(--paper);border:1px solid var(--border);border-radius:25px;box-shadow:var(--shadow)}
@@ -94,9 +94,9 @@
        increasing page height or hiding the permanent three-way menu. */
     .install-offer{position:fixed;z-index:8;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(650px,calc(100% - 24px));padding:16px 46px 16px 17px;border:1.5px solid var(--accent);border-radius:20px;background:var(--paper);color:var(--text);box-shadow:0 12px 35px rgba(0,0,0,.20)}
     .install-offer[hidden]{display:none!important}
-    .install-offer h2{font-size:17px;font-weight:850;line-height:1.4;margin:0 0 5px}
+    .install-offer h2{font-size:19px;font-weight:850;line-height:1.4;margin:0 0 5px}
     .install-offer p{margin:0;color:var(--muted);line-height:1.5;font-size:12px}
-    .install-offer .install-cta{margin-top:12px;min-height:49px;width:100%;border:0;border-radius:13px;background:var(--accent);color:#fff;font-weight:850;font-size:16px}
+    .install-offer .install-cta{margin-top:12px;min-height:54px;width:100%;border:0;border-radius:13px;background:var(--accent);color:#fff;font-weight:850;font-size:18px}
     .install-offer .install-close{position:absolute;right:10px;top:10px;width:34px;height:34px;border:1px solid var(--border);border-radius:50%;background:var(--panel);color:var(--text);font-size:22px;line-height:1}
     .install-guide{margin-top:10px!important;white-space:pre-line;overflow-wrap:break-word}
     .install-guide[hidden]{display:none!important}
@@ -125,10 +125,7 @@
   <main class="container">
     <header class="top">
       <div><div class="top-brand">복작소</div><div class="top-caption">BOKJAKSO COMMUNITY</div></div>
-      <div class="top-actions">
-        <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치 안내 열기">📲 앱 설치</button>
-        <button class="theme" id="themeToggle" type="button" aria-label="화면 테마 변경" title="화면 테마 변경">☾</button>
-      </div>
+      <button class="theme" id="themeToggle" type="button" aria-label="화면 테마 변경" title="화면 테마 변경">☾</button>
     </header>
     <section class="hero" aria-labelledby="pageTitle">
       <img src="/icon-192.png" alt="" class="hero-logo" width="90" height="90">
@@ -153,6 +150,7 @@
         <span class="arrow" aria-hidden="true">›</span>
       </a>
     </nav>
+    <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치하기">📲 복작소 앱 설치하기 <span aria-hidden="true">›</span></button>
     <p class="note">기존 채팅방과 대화는 그대로 유지돼요.<br>클럽에만 별도의 관리자 승인 절차가 있어요.</p>
   </main>
   <nav class="bottom" aria-label="하단 바로가기">
@@ -201,9 +199,10 @@
         window.addEventListener('load',()=>navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'}).catch(()=>{}));
       }
 
-      // Show an install invitation on first visit, never inside the installed app.
-      // Keep the existing app identity, icon, messages and user sessions unchanged.
-      const NOTICE_KEY='bokjaksoChatInstallNoticeDismissedV1';
+      // Show the large install banner when opening in a browser (not inside PWA).
+      // Dismiss it per tab only; visitors should not permanently lose install help.
+      // The large in-page button is always available until installed.
+      const NOTICE_KEY='bokjaksoChatInstallDismissedSessionV2';
       const installed=()=>window.matchMedia('(display-mode: standalone)').matches
         || window.matchMedia('(display-mode: fullscreen)').matches
         || window.navigator.standalone===true;
@@ -216,12 +215,12 @@
       let deferredInstallPrompt=null;
       const dismiss=()=>{
         offer.hidden=true;
-        localStorage.setItem(NOTICE_KEY,'yes');
+        sessionStorage.setItem(NOTICE_KEY,'yes');
       };
       const installTestRequested=new URLSearchParams(location.search).get('install')==='1';
-      // First-visit suggestion may be dismissed, but the header install
-      // button stays reachable in browser mode for returning visitors.
-      if(!installed()&&(installTestRequested||localStorage.getItem(NOTICE_KEY)!=='yes'))offer.hidden=false;
+      // A fresh browser tab shows the original prominent install offer.
+      // Closing it does not remove the install button below the three menus.
+      if(!installed()&&(installTestRequested||sessionStorage.getItem(NOTICE_KEY)!=='yes'))offer.hidden=false;
       else offer.hidden=true;
       close.addEventListener('click',dismiss);
       window.addEventListener('beforeinstallprompt',event=>{
