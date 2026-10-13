@@ -13,10 +13,10 @@
  let membership='none',busy=false;
 
  async function request(action,extra={}){
-   const response=await fetch('/api/club',{
+   const response=await fetch('/api/store-inquiries',{
      method:'POST',
      headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({action,...sharedCredentials(),...extra})
+     body:JSON.stringify({action:'club-'+action,...sharedCredentials(),...extra})
    });
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.message||'클럽 요청을 완료하지 못했습니다.');
