@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { waitUntil } = require('@vercel/functions');
 const { supabaseAdminRequest } = require('../lib/supabase-admin');
 const { getVapidKeys, validSubscription, sendChatPush } = require('../lib/chat-push');
 const allowedOrigins = new Set([
@@ -524,21 +525,34 @@ async function handleChat(body, res, req) {
 
   if (action === 'chat-list') {
     const now = new Date().toISOString();
-    await supabaseRequest(`chat_members?id=eq.${encodeURIComponent(member.id)}`, {
-      method: 'PATCH',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ last_seen_at: now })
-    });
     const after = Math.max(0, Number(body.afterId) || 0);
     const since = after > 0 ? `&id=gt.${after}` : '';
-    // Room entry must show the newest messages, not the oldest 100 in the room.
-    // Polling after a known id stays chronological for correct append order.
     const initialHistory = after === 0;
-    const messages = await supabaseRequest(
-      `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.${initialHistory ? 'desc' : 'asc'}&limit=100`
-    );
-    // Profile changes must reach already-displayed messages even when no new
-    // messages arrive. Never trust client member IDs without room scoping.
+    const changedSince = clean(body.changedSince);
+    const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+
+    // Message, deletion, presence, and heartbeat queries are independent.
+    // Run them together to avoid several cross-region DB round trips per poll.
+    const [messages, deleted, active] = await Promise.all([
+      supabaseRequest(
+        `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=is.null${since}&select=id,member_id,nickname,body,message_type,image_url,image_file_id,created_at,updated_at&order=id.${initialHistory ? 'desc' : 'asc'}&limit=100`
+      ),
+      changedSince
+        ? supabaseRequest(
+          `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=not.is.null&updated_at=gt.${encodeURIComponent(changedSince)}&select=id&order=updated_at.asc&limit=100`
+        )
+        : Promise.resolve([]),
+      supabaseRequest(
+        `chat_members?room_id=eq.${encodeURIComponent(member.room_id)}&is_blocked=eq.false&last_seen_at=gte.${encodeURIComponent(cutoff)}&select=id`
+      ),
+      supabaseRequest(`chat_members?id=eq.${encodeURIComponent(member.id)}`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ last_seen_at: now })
+      })
+    ]);
+
+    // Keep profile updates for already-visible messages, scoped to this room.
     const visibleMemberIds = Array.isArray(body.visibleMemberIds)
       ? body.visibleMemberIds.filter(id => typeof id === 'string' &&
           /^[0-9a-f-]{36}$/i.test(id)).slice(0, 100)
@@ -547,30 +561,18 @@ async function handleChat(body, res, req) {
       ...(Array.isArray(messages) ? messages : []).map(m => m.member_id).filter(Boolean),
       ...visibleMemberIds
     ])];
-    let profiles = [];
-    if (membersToRefresh.length) {
-      profiles = await supabaseRequest(
+    const profiles = membersToRefresh.length
+      ? await supabaseRequest(
         'chat_members?room_id=eq.' + encodeURIComponent(member.room_id) +
         '&id=in.(' + membersToRefresh.map(id => encodeURIComponent(id)).join(',') + ')' +
         '&select=id,avatar_url,nickname'
-      );
-    }
-    const changedSince = clean(body.changedSince);
-    let deletedIds = [];
-    if (changedSince) {
-      const deleted = await supabaseRequest(
-        `chat_messages?room_id=eq.${encodeURIComponent(member.room_id)}&deleted_at=not.is.null&updated_at=gt.${encodeURIComponent(changedSince)}&select=id&order=updated_at.asc&limit=100`
-      );
-      deletedIds = Array.isArray(deleted) ? deleted.map(row => row.id) : [];
-    }
-    const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-    const active = await supabaseRequest(
-      `chat_members?room_id=eq.${encodeURIComponent(member.room_id)}&is_blocked=eq.false&last_seen_at=gte.${encodeURIComponent(cutoff)}&select=id`
-    );
+      )
+      : [];
+
     res.status(200).json({
       ok: true,
       messages: Array.isArray(messages) ? (initialHistory ? messages.reverse() : messages) : [],
-      deletedIds,
+      deletedIds: Array.isArray(deleted) ? deleted.map(row => row.id) : [],
       activeCount: Array.isArray(active) ? active.length : 0,
       roomTitle: roomState.title,
       profiles: Array.isArray(profiles) ? profiles : [],
@@ -630,13 +632,20 @@ async function handleChat(body, res, req) {
       headers: { Prefer: 'return=minimal' },
       body: JSON.stringify({ last_seen_at: now, last_sent_at: now })
     });
-    await sendChatPush({
+    const pushTask = sendChatPush({
       roomId:member.room_id,
       roomCode:roomState.code,
       roomTitle:roomState.title,
       senderMemberId:member.id,
       senderNickname:member.nickname
     });
+    // Vercel keeps background push delivery alive without delaying chat confirmation.
+    // Preserve the old awaited path as a fallback outside a waitUntil runtime.
+    try { waitUntil(pushTask); }
+    catch (error) {
+      console.warn('Background push unavailable; awaiting push delivery:', error.message);
+      await pushTask;
+    }
     res.status(200).json({ ok: true, message: Array.isArray(inserted) ? inserted[0] : null });
     return;
   }
