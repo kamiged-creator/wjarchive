@@ -3,6 +3,13 @@
  'use strict';
  const status=document.getElementById('clubStatus');
  const applyBtn=document.getElementById('clubApplyBtn');
+ const applyForm=document.getElementById('clubApplyForm');
+ const formNickname=document.getElementById('clubApplyNickname');
+ const formIntroduction=document.getElementById('clubApplyIntroduction');
+ const formConsent=document.getElementById('clubApplyConsent');
+ const formFeedback=document.getElementById('clubFormFeedback');
+ const formSubmit=document.getElementById('clubApplySubmit');
+ const formCancel=document.getElementById('clubApplyCancel');
  const resetBtn=document.getElementById('clubResetBtn');
  const reviewEntry=document.getElementById('clubReviewEntry');
  const pane=document.getElementById('clubChat');
@@ -21,7 +28,11 @@
      body:JSON.stringify({action:'club-'+action,...sharedCredentials(),...extra})
    });
    const data=await response.json().catch(()=>({}));
-   if(!response.ok)throw new Error(data.message||'클럽 요청을 완료하지 못했습니다.');
+   if(!response.ok){
+     const error=new Error(data.message||'클럽 요청을 완료하지 못했습니다.');
+     error.statusCode=response.status;
+     throw error;
+   }
    return data;
  }
  function renderMembership(next){
@@ -35,8 +46,9 @@
    };
    status.textContent=labels[next]||'회원 상태를 확인할 수 없어요.';
    pane.hidden=next!=='approved';
-   actions.hidden=next==='approved'||next==='pending'||next==='suspended';
-   applyBtn.textContent=next==='rejected'?'가입 다시 신청':'클럽 가입 신청';
+   if(next==='pending'||next==='approved'||next==='suspended')applyForm.hidden=true;
+   actions.hidden=next==='approved'||next==='pending'||next==='suspended'||!applyForm.hidden;
+   applyBtn.textContent=next==='rejected'?'클럽 가입 다시 하기':'클럽 가입하기';
    resetBtn.hidden=next!=='pending'&&next!=='rejected';
    reviewEntry.hidden=next!=='pending';
  }
@@ -44,8 +56,6 @@
    adminLink.hidden=!sessionStorage.getItem(ADMIN_KEY);
    if(!sharedProfile){
      renderMembership('none');
-     status.textContent='내 정보에서 프로필을 먼저 만든 다음 클럽 가입을 신청해 주세요.';
-     applyBtn.textContent='내 프로필 만들기';
      return;
    }
    try{
@@ -53,6 +63,15 @@
      renderMembership(data.status);
      if(data.status==='approved')await loadMessages();
    }catch(e){
+     if(e.statusCode===401){
+       // Backend test users were erased: don't keep an invalid profile token.
+       sharedProfile=null;
+       localStorage.removeItem(SHARED_PROFILE_KEY);
+       refreshSharedProfileCard();
+       renderMembership('none');
+       status.textContent='이전 테스트 프로필이 초기화됐어요. 클럽 가입하기를 눌러 새로 신청해 주세요.';
+       return;
+     }
      pane.hidden=true;actions.hidden=true;status.textContent=e.message;
    }
  }
@@ -88,19 +107,60 @@
      if(e.message.includes('승인')){pane.hidden=true;actions.hidden=true;}
    }finally{busy=false;}
  }
+ function openSignupForm(){
+   applyForm.reset();
+   formNickname.value=sharedProfile?.nickname||'';
+   formNickname.readOnly=Boolean(sharedProfile);
+   document.getElementById('clubNicknameHint').textContent=sharedProfile
+     ?'기존 채팅 프로필 닉네임이에요. 변경하려면 내 정보에서 수정해 주세요.'
+     :'처음 신청한다면 이 닉네임으로 공통 채팅 프로필을 함께 만들어요.';
+   formFeedback.textContent='';
+   applyForm.hidden=false;
+   actions.hidden=true;
+   formNickname.focus();
+ }
+ function closeSignupForm(){
+   applyForm.reset();
+   formNickname.value='';
+   formFeedback.textContent='';
+   applyForm.hidden=true;
+   actions.hidden=membership==='pending'||membership==='approved'||membership==='suspended';
+ }
  clubTab.addEventListener('click',refresh);
- applyBtn.addEventListener('click',async()=>{
-   if(!sharedProfile){
-     document.getElementById('homeTabMe').click();
-     document.getElementById('homeProfileEditBtn').click();
+ applyBtn.addEventListener('click',()=>{
+   if(membership==='none'||membership==='rejected')openSignupForm();
+ });
+ formCancel.addEventListener('click',()=>{
+   closeSignupForm();
+   status.textContent='가입 작성이 취소되고 입력 내용이 초기화됐어요.';
+ });
+ applyForm.addEventListener('submit',async event=>{
+   event.preventDefault();
+   if(!applyForm.reportValidity())return;
+   if(membership!=='none'&&membership!=='rejected')return;
+   const nickname=formNickname.value.trim();
+   if(nickname.length<2||nickname.length>20||nickname==='관리자'){
+     formFeedback.textContent='닉네임을 2~20자로 입력해 주세요.';
      return;
    }
-   applyBtn.disabled=true;status.textContent='신청을 접수하고 있어요…';
+   if(!formConsent.checked){
+     formFeedback.textContent='가입 안내에 동의해 주세요.';
+     return;
+   }
+   formSubmit.disabled=true;
+   formCancel.disabled=true;
+   formFeedback.textContent='가입 신청을 접수하고 있어요…';
    try{
-     const data=await request('apply');
+     if(!sharedProfile)await ensureSharedProfile(nickname);
+     const data=await request('apply',{introduction:formIntroduction.value.trim()});
+     closeSignupForm();
      renderMembership(data.status);
-   }catch(e){status.textContent=e.message;}
-   finally{applyBtn.disabled=false;}
+   }catch(error){
+     formFeedback.textContent=error.message||'가입 신청에 실패했어요. 다시 시도해 주세요.';
+   }finally{
+     formSubmit.disabled=false;
+     formCancel.disabled=false;
+   }
  });
  resetBtn.addEventListener('click',async()=>{
    if(!['pending','rejected'].includes(membership))return;
@@ -110,9 +170,13 @@
    try{
      const data=await request('withdraw');
      renderMembership(data.status||'none');
-     status.textContent='클럽 가입 신청을 취소했어요. 이제 아래에서 다시 신청할 수 있어요.';
+     if(data.status==='none'){
+       openSignupForm();
+       status.textContent='클럽 신청을 초기화했어. 새 신청서를 작성해 줘.';
+     }
    }catch(error){
      status.textContent=error.message||'가입 신청 취소에 실패했어요.';
+     await refresh();
    }finally{resetBtn.disabled=false;}
  });
  document.getElementById('clubCompose').addEventListener('submit',async e=>{
