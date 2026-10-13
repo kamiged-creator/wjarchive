@@ -387,6 +387,17 @@
       .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
     }
 
+
+    .club-status{border-radius:13px;background:var(--bg);border:1px solid var(--line);padding:15px;margin:16px 0;font-size:15px;font-weight:700;line-height:1.7}
+    .club-chat[hidden],.club-actions[hidden],.club-admin-entry[hidden]{display:none!important}
+    .club-chat-feed{height:min(44vh,390px);min-height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--bg);scrollbar-width:thin}
+    .club-post{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.55;overflow-wrap:anywhere}
+    .club-post:last-child{border-bottom:0}.club-post strong{font-size:13px;color:var(--accent)}
+    .club-post time{font-size:11px;color:var(--muted);margin-left:7px}.club-post p{white-space:pre-wrap;margin:3px 0 0;font-size:15px}
+    .club-compose{display:flex;gap:8px;margin-top:11px}
+    .club-compose input{height:52px;flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;background:var(--field-bg);color:var(--text)}
+    .club-compose button{min-width:72px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:800}
+    .club-admin-entry{display:block;margin-top:16px;padding:14px;text-align:center;color:var(--text);border:1px solid var(--line);border-radius:12px;font-weight:750;text-decoration:none}
     /* Independent PWA home navigation: preserve the existing chat room UI. */
     .home-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px}
     .home-tab{min-height:82px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1.5px solid var(--line);border-radius:18px;background:var(--paper);color:var(--text);font-size:14px;font-weight:800;line-height:1.2;word-break:keep-all}
@@ -466,11 +477,17 @@
       <div class="eyebrow">BOKJAKSO CLUB</div>
       <h1>복작소 클럽</h1>
       <p class="lead">일반 채팅은 누구나 이용할 수 있고, 클럽은 관리자 승인을 받은 회원만 참여할 수 있어요.</p>
-      <div class="club-note" role="status">클럽 가입 신청과 승인 기능은 안전한 회원 인증 및 저장 기능을 연결한 뒤 열릴 예정입니다. 지금은 안내 화면만 제공해요.</div>
+      <div class="club-status" role="status" aria-live="polite" id="clubStatus">회원 상태를 확인하고 있어요.</div>
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📝</span><div><strong>회원 가입 신청</strong><small>기본 프로필을 사용해 가입 신청</small></div></div>
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">✅</span><div><strong>관리자 승인</strong><small>승인된 회원만 클럽 전용 공간 이용</small></div></div>
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📢</span><div><strong>회원 공지 및 클럽 채팅</strong><small>회원 전용 공지사항과 대화 공간</small></div></div>
-      <button class="home-cta" type="button" disabled aria-disabled="true">클럽 가입 신청 · 준비 중</button>
+      <div class="club-actions" id="clubActions"><button class="home-cta" id="clubApplyBtn" type="button">클럽 가입 신청</button></div>
+      <section class="club-chat" id="clubChat" hidden aria-label="클럽 회원 전용 채팅">
+        <h2>클럽 전용 채팅</h2>
+        <div class="club-chat-feed" id="clubMessages" role="log" aria-live="polite"></div>
+        <form class="club-compose" id="clubCompose"><input id="clubMessageInput" maxlength="1000" placeholder="회원들과 이야기 나눠요" autocomplete="off" aria-label="클럽 메시지 입력"><button id="clubSendBtn" type="submit">전송</button></form>
+      </section>
+      <a class="club-admin-entry" id="clubAdminLink" href="/club-admin.html" hidden>클럽 회원관리 (관리자 전용)</a>
     </section>
     <section class="card home-panel" id="mePanel" role="tabpanel" aria-labelledby="homeTabMe" hidden>
       <div class="eyebrow">MY PROFILE</div>
@@ -2081,5 +2098,6 @@
     }
   }catch(_){clearSession()}
 </script>
+<script src="/club.js"></script>
 </body>
 </html>
