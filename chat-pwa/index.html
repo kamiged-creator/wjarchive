@@ -43,10 +43,6 @@
     .entry-text strong{display:block;font-size:19px;line-height:1.3;letter-spacing:-.02em}
     .entry-text small{display:block;margin-top:6px;color:var(--muted);font-size:13px;line-height:1.5;word-break:keep-all}
     .arrow{font-size:25px;color:var(--accent);flex:0 0 auto}
-    .member-shortcut{margin-top:14px}
-    .member-shortcut[hidden]{display:none!important}
-    .member-shortcut a{display:block;border:1.5px solid var(--accent);border-radius:17px;padding:16px;background:var(--paper);text-align:center;font-size:17px;font-weight:850}
-    .member-shortcut small{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:5px}
     .note{margin:23px 4px 0;text-align:center;color:var(--muted);font-size:13px;line-height:1.7;word-break:keep-all}
     .bottom{position:fixed;z-index:4;left:50%;bottom:0;transform:translateX(-50%);width:min(690px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:var(--paper);border:1px solid var(--border);border-bottom:0;border-radius:21px 21px 0 0;box-shadow:0 -10px 24px rgba(0,0,0,.05)}
     .bottom a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px;border-radius:14px;color:var(--text);font-size:12px;font-weight:750;text-align:center}
@@ -140,12 +136,12 @@
     <nav class="cards" aria-label="복작소 서비스 선택">
       <a class="entry" href="/chat.html?tab=rooms">
         <span class="entry-icon" aria-hidden="true">💬</span>
-        <span class="entry-text"><strong>채팅방</strong><small>누구나 이용하는 자유로운 대화 공간</small></span>
+        <span class="entry-text"><strong>채팅방</strong><small>방 비밀번호 또는 초대 링크로 입장 · 가입 승인 없음</small></span>
         <span class="arrow" aria-hidden="true">›</span>
       </a>
       <a class="entry" href="/chat.html?tab=club">
         <span class="entry-icon" aria-hidden="true">👥</span>
-        <span class="entry-text"><strong>복작소 클럽</strong><small>가입 신청 후 관리자 승인 회원 전용</small></span>
+        <span class="entry-text"><strong>복작소 클럽</strong><small>가입하기 → 신청서 제출 → 관리자 승인 후 입장</small></span>
         <span class="arrow" aria-hidden="true">›</span>
       </a>
       <a class="entry" href="/chat.html?tab=me">
@@ -154,11 +150,8 @@
         <span class="arrow" aria-hidden="true">›</span>
       </a>
     </nav>
-    <div class="member-shortcut" id="memberShortcut">
-      <a href="/register.html" aria-label="복작소 회원가입 양식 및 승인 상태 확인">👤 회원가입 · 승인 확인<small id="memberShortcutNote">가입 양식과 회원 승인 상태를 확인하세요</small></a>
-    </div>
     <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치하기">📲 복작소 앱 설치하기 <span aria-hidden="true">›</span></button>
-    <p class="note" id="membershipNote">기존 채팅방과 대화는 그대로 유지돼요.<br>클럽에만 별도의 관리자 승인 절차가 있어요.</p>
+    <p class="note" id="membershipNote">일반 채팅방은 비밀번호 또는 초대 링크로 자유롭게 입장해요.<br>복작소 클럽만 가입 신청과 관리자 승인이 필요해요.</p>
   </main>
   <nav class="bottom" aria-label="하단 바로가기">
     <a href="/chat.html?tab=rooms"><span class="nav-icon" aria-hidden="true">💬</span>채팅방</a>
@@ -205,32 +198,6 @@
       if('serviceWorker' in navigator){
         window.addEventListener('load',()=>navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'}).catch(()=>{}));
       }
-
-      // Always offer a discoverable registration-page link until the server
-      // confirms existing membership. Launch gating belongs in register.html
-      // and protected APIs, not in whether the user can open the page.
-      (async()=>{
-        try{
-          const p=JSON.parse(localStorage.getItem('bokjaksoChatSharedProfileV1')||'null');
-          let creds=p?.id&&p.token?{profileId:p.id,profileToken:p.token}:null;
-          if(!creds){
-            const all=Object.values(JSON.parse(localStorage.getItem('bokjaksoChatSessionsV2')||'{}'));
-            const remembered=all.find(s=>s?.member?.id&&s.sessionToken&&s.expiresAt>Date.now());
-            if(remembered)creds={memberId:remembered.member.id,sessionToken:remembered.sessionToken};
-          }
-          const result=await fetch('/api/store-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'member-status',...(creds||{})}),cache:'no-store'});
-          if(!result.ok)return;
-          const state=await result.json();
-          // Existing members can also open the form as a disabled preview.
-          // This link never cancels their approved profile or room sessions.
-          document.getElementById('memberShortcut').hidden=false;
-          const note=document.getElementById('memberShortcutNote');
-          if(state.status==='approved')note.textContent='기존 회원 승인 확인 · 가입 양식 미리보기';
-          else if(!state.enforced)note.textContent='신규 회원가입 양식 확인 · 실제 신청 접수 준비 중';
-          else note.textContent='가입 신청 및 관리자 승인 상태 확인';
-          if(state.enforced)document.getElementById('membershipNote').textContent='기존 대화는 그대로 보존돼요. 신규 회원은 관리자 승인 후 일반 채팅을 이용할 수 있고, 클럽은 별도 승인이 필요해요.';
-        }catch(_){}
-      })();
 
       // Show the large install banner when opening in a browser (not inside PWA).
       // Dismiss it per tab only; visitors should not permanently lose install help.
