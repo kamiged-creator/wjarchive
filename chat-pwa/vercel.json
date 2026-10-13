@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/club",
+      "destination": "https://bokjakso.com/api/club"
+    },
+    {
       "source": "/api/store-inquiries",
       "destination": "https://bokjakso.com/api/store-inquiries"
     },
