@@ -28,6 +28,7 @@ button:disabled{opacity:.55;cursor:wait}.consent{border:1px solid var(--border);
 <section class="card" id="loading"><div class="state"><strong>회원 상태 확인 중…</strong><p>잠시만 기다려 주세요.</p></div></section>
 <section class="card" id="formArea" hidden>
 <h1>복작소 회원 등록</h1>
+<p class="notice" id="existingMemberHint" role="status" hidden></p>
 <p>가입 신청 후 <strong>관리자가 승인하면 일반 채팅방을 이용</strong>할 수 있어요. 복작소 클럽은 별도로 가입 승인받아야 해요.</p>
 <p class="notice">문자 인증은 사용하지 않아요. 입력한 전화번호가 본인 번호인지 확인되지 않으므로 관리자가 별도로 확인할 수 있어요.</p>
 <p class="notice" id="previewWarning" role="status" hidden>현재는 회원가입 화면만 미리 볼 수 있어요. 개인정보 저장 준비가 완료되기 전이므로 신청 접수는 비활성화되어 있어요.</p>
@@ -93,19 +94,42 @@ function state(status){
  $('refreshStatus').textContent=status==='approved'?'채팅방 들어가기':'승인 상태 새로 확인';
  $('refreshStatus').hidden=status==='preparing';
 }
+function showForm(isPreview,message='',status='new'){
+ $('loading').hidden=true;
+ $('formArea').hidden=false;
+ $('previewWarning').hidden=!isPreview;
+ $('previewWarning').textContent=isPreview
+   ? '회원가입 양식 미리보기입니다. 현재 개인정보 접수는 비활성화되어 있어요.': '';
+ const existing=$('existingMemberHint');
+ existing.hidden=status!=='approved';
+ existing.textContent=status==='approved'
+   ? '이미 승인된 기존 회원이에요. 다시 가입할 필요는 없고, 아래 양식은 화면 확인용이에요. 기존 채팅방과 대화는 그대로 유지돼요.'
+   : '';
+ $('joinForm').querySelectorAll('input,button').forEach(el=>{el.disabled=isPreview});
+ $('submitBtn').textContent=isPreview?'신규 회원가입 접수 준비 중':'관리자에게 가입 신청하기';
+ $('formStatus').textContent=message;
+ if(p?.nickname&&!$('nickname').value)$('nickname').value=p.nickname;
+}
 async function refresh(){
  try{
   const data=await api({action:'member-status',...credentials(),...(!p?oldSession():{})});
-  $('loading').hidden=true;
-  if(['approved','pending','rejected','suspended'].includes(data.status)){state(data.status);return}
-  $('stateArea').hidden=true;$('formArea').hidden=false;
-  const isPreview=!data.enforced;
-  $('previewWarning').hidden=!isPreview;
-  $('joinForm').querySelectorAll('input,button').forEach(input=>{input.disabled=isPreview});
-  $('submitBtn').textContent=isPreview?'회원가입 접수 준비 중':'관리자에게 가입 신청하기';
-  $('formStatus').textContent=isPreview?'현재는 화면만 확인할 수 있어요. 실명이나 전화번호는 수집하지 않아요.':'';
-  if(p?.nickname&&!$('nickname').value)$('nickname').value=p.nickname;
- }catch(e){$('loading').hidden=false;$('loading').querySelector('p').textContent=e.message+' 가입 기능 상태를 확인하지 못해 신청은 진행할 수 없어요.'}
+  const memberStatus=data.status||'new';
+  if(['approved','pending','rejected','suspended'].includes(memberStatus)){
+    state(memberStatus);
+    if(memberStatus==='approved'){
+      showForm(true,'기존 회원은 재가입하지 않아도 돼요. 아래 양식은 예시입니다.',memberStatus);
+    }
+    return;
+  }
+  $('stateArea').hidden=true;
+  const preview=!data.enforced;
+  showForm(preview,preview?'신청 접수 준비 중이라 이름·전화번호는 입력받지 않아요.':'',memberStatus);
+ }catch(e){
+  $('stateArea').hidden=true;
+  showForm(true,'서버 상태를 확인하지 못해 입력 및 신청을 막았어요. 새로고침 후 다시 확인해 주세요.');
+  $('previewWarning').textContent='현재 연결 상태를 확인하지 못했어요. 개인정보 입력은 비활성화되어 있어요.';
+  console.warn('회원 상태 조회 실패',e);
+ }
 }
 $('refreshStatus').addEventListener('click',async()=>{
  if($('stateTitle').textContent==='회원 승인 완료'){
