@@ -405,6 +405,22 @@
     .club-chat[hidden],.club-actions[hidden],.club-admin-entry[hidden],.club-reset[hidden],.club-review-entry[hidden]{display:none!important}
     .club-reset{display:block;margin:10px auto 0;min-height:45px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--text);font-size:14px;font-weight:750}
     .club-review-entry{display:block;margin:14px auto 0;text-align:center;text-decoration:underline;text-underline-offset:3px;font-size:13px;color:var(--muted);font-weight:700}
+    .club-apply-form{margin:20px 0 0;padding:19px;border:1.5px solid var(--line);border-radius:17px;background:var(--bg)}
+    .club-apply-form[hidden]{display:none!important}
+    .club-apply-form h2{margin:0 0 10px;font-size:22px;font-weight:800}
+    .club-apply-form .club-form-description{font-size:14px;color:var(--muted);line-height:1.65;margin:0 0 15px}
+    .club-apply-form label:not(.club-agree){display:block;font-size:15px;font-weight:800;margin:16px 0 7px}
+    .club-apply-form input[type="text"],.club-apply-form textarea{width:100%;min-height:49px;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:var(--field-bg);color:var(--text);font-size:16px;resize:vertical}
+    .club-apply-form input[readonly]{background:var(--paper)}
+    .club-apply-form small{display:block;font-size:13px;color:var(--muted);margin:5px 0;line-height:1.5}
+    .club-apply-form .club-agree{display:flex;align-items:flex-start;gap:10px;margin:20px 0 8px;font-size:14px;font-weight:700;line-height:1.5}
+    .club-apply-form .club-agree input{flex:0 0 21px;width:21px;height:21px;accent-color:var(--accent)}
+    .club-apply-form .club-form-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .club-apply-form .club-form-buttons button{min-height:52px;margin-top:12px;border-radius:12px;font-size:15px;font-weight:800}
+    .club-apply-form .club-form-buttons .home-cta{margin-top:12px}
+    .club-apply-form .club-cancel{border:1.5px solid var(--line);background:var(--paper);color:var(--text)}
+    .club-apply-form .club-form-feedback{color:var(--muted);min-height:21px;font-size:13px;line-height:1.5}
+    .club-apply-form input:focus-visible,.club-apply-form textarea:focus-visible,.club-apply-form button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     .club-chat-feed{height:min(44vh,390px);min-height:200px;overflow-y:auto;border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--bg);scrollbar-width:thin}
     .club-post{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.55;overflow-wrap:anywhere}
     .club-post:last-child{border-bottom:0}.club-post strong{font-size:13px;color:var(--accent)}
@@ -574,8 +590,23 @@
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📝</span><div><strong>회원 가입 신청</strong><small>기본 프로필을 사용해 가입 신청</small></div></div>
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">✅</span><div><strong>관리자 승인</strong><small>승인된 회원만 클럽 전용 공간 이용</small></div></div>
       <div class="club-feature"><span class="club-feature-icon" aria-hidden="true">📢</span><div><strong>회원 공지 및 클럽 채팅</strong><small>회원 전용 공지사항과 대화 공간</small></div></div>
-      <div class="club-actions" id="clubActions"><button class="home-cta" id="clubApplyBtn" type="button">클럽 가입 신청</button></div>
-      <button class="club-reset" id="clubResetBtn" type="button" hidden>가입 신청 취소하고 처음부터 다시 하기</button>
+      <div class="club-actions" id="clubActions"><button class="home-cta" id="clubApplyBtn" type="button">클럽 가입하기</button></div>
+      <form class="club-apply-form" id="clubApplyForm" hidden>
+        <h2>복작소 클럽 가입 신청서</h2>
+        <p class="club-form-description">신청서를 작성하면 관리자 승인 대기로 접수돼요. 일반 채팅방과는 별도 가입이에요.</p>
+        <label for="clubApplyNickname">채팅 닉네임</label>
+        <input type="text" id="clubApplyNickname" maxlength="20" autocomplete="nickname" placeholder="닉네임을 입력해 주세요" required>
+        <small id="clubNicknameHint">닉네임은 채팅에 표시돼요.</small>
+        <label for="clubApplyIntroduction">가입 인사 <small>선택 · 관리자에게만 표시</small></label>
+        <textarea id="clubApplyIntroduction" maxlength="300" rows="3" placeholder="간단한 가입 인사를 남겨 주세요 (선택)"></textarea>
+        <label class="club-agree"><input type="checkbox" id="clubApplyConsent" required><span>복작소 클럽은 관리자 승인 후 이용하며, 닉네임과 가입 인사를 가입 심사에 사용하는 데 동의해요.</span></label>
+        <div class="club-form-buttons">
+          <button class="home-cta" id="clubApplySubmit" type="submit">가입 신청 제출</button>
+          <button class="club-cancel" id="clubApplyCancel" type="button">가입 취소 · 초기화</button>
+        </div>
+        <p class="club-form-feedback" id="clubFormFeedback" role="status" aria-live="polite"></p>
+      </form>
+      <button class="club-reset" id="clubResetBtn" type="button" hidden>가입 신청 취소 · 초기화</button>
       <a class="club-review-entry" id="clubReviewEntry" href="/club-admin.html" hidden>관리자 승인 화면 열기 (관리자 로그인 필요)</a>
       <section class="club-chat" id="clubChat" hidden aria-label="클럽 회원 전용 채팅">
         <h2>클럽 전용 채팅</h2>
