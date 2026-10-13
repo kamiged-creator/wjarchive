@@ -84,23 +84,30 @@ function state(status){
   pending:['⏳','관리자 승인 대기','가입 신청이 접수됐어요. 관리자 승인 후 일반 채팅을 이용할 수 있어요.'],
   approved:['✅','회원 승인 완료','일반 채팅방에 입장할 수 있어요. 클럽은 별도로 가입 신청해야 해요.'],
   rejected:['ℹ️','가입 신청 검토 결과','가입이 승인되지 않았어요. 운영자에게 문의해 주세요.'],
-  suspended:['🔒','회원 이용 제한','관리자에게 문의해 주세요.']
+  suspended:['🔒','회원 이용 제한','관리자에게 문의해 주세요.'],
+  preparing:['🛠️','회원가입 준비 중','회원가입과 관리자 승인 기능을 연결하고 있어요. 준비가 완료되면 이곳에서 신청할 수 있어요.']
  };
  const [sym,title,msg]=states[status]||states.pending;
  $('stateSymbol').textContent=sym;$('stateTitle').textContent=title;$('stateDetail').textContent=msg;
  $('refreshStatus').textContent=status==='approved'?'채팅방 들어가기':'승인 상태 새로 확인';
+ $('refreshStatus').hidden=status==='preparing';
 }
 async function refresh(){
  try{
   const data=await api({action:'member-status',...credentials(),...(!p?oldSession():{})});
   $('loading').hidden=true;
   if(['approved','pending','rejected','suspended'].includes(data.status)){state(data.status);return}
+  if(!data.enforced){state('preparing');return}
   $('stateArea').hidden=true;$('formArea').hidden=false;
   if(p?.nickname&&!$('nickname').value)$('nickname').value=p.nickname;
  }catch(e){$('loading').hidden=false;$('loading').querySelector('p').textContent=e.message}
 }
 $('refreshStatus').addEventListener('click',async()=>{
- if($('stateTitle').textContent==='회원 승인 완료'){location.href='/chat.html?tab=rooms';return}
+ if($('stateTitle').textContent==='회원 승인 완료'){
+  const requested=sessionStorage.getItem('bokjaksoAfterMemberApprovedV1')||'/chat.html?tab=rooms';
+  const target=requested.startsWith('/chat.html')&&!requested.startsWith('//')?requested:'/chat.html?tab=rooms';
+  sessionStorage.removeItem('bokjaksoAfterMemberApprovedV1');location.href=target;return
+ }
  $('refreshStatus').disabled=true;try{await refresh()}finally{$('refreshStatus').disabled=false}
 });
 $('avatarFile').addEventListener('change',e=>{
