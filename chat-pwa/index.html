@@ -69,6 +69,17 @@
       .entry{min-height:82px;gap:10px;padding:9px 11px}
       .entry-icon{width:46px;height:46px;flex-basis:46px}
     }
+    /* First-visit install offer floats above the bottom navigation without
+       increasing page height or hiding the permanent three-way menu. */
+    .install-offer{position:fixed;z-index:8;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(650px,calc(100% - 24px));padding:16px 46px 16px 17px;border:1.5px solid var(--accent);border-radius:20px;background:var(--paper);color:var(--text);box-shadow:0 12px 35px rgba(0,0,0,.20)}
+    .install-offer[hidden]{display:none!important}
+    .install-offer h2{font-size:17px;font-weight:850;line-height:1.4;margin:0 0 5px}
+    .install-offer p{margin:0;color:var(--muted);line-height:1.5;font-size:12px}
+    .install-offer .install-cta{margin-top:12px;min-height:49px;width:100%;border:0;border-radius:13px;background:var(--accent);color:#fff;font-weight:850;font-size:16px}
+    .install-offer .install-close{position:absolute;right:10px;top:10px;width:34px;height:34px;border:1px solid var(--border);border-radius:50%;background:var(--panel);color:var(--text);font-size:22px;line-height:1}
+    .install-guide{margin-top:10px!important;white-space:pre-line;overflow-wrap:break-word}
+    .install-guide[hidden]{display:none!important}
+    @media(max-width:380px){.install-offer{bottom:calc(81px + env(safe-area-inset-bottom));padding:12px 44px 12px 13px}}
     @media(prefers-reduced-motion:reduce){.entry{transition:none}}
   </style>
 </head>
@@ -109,6 +120,13 @@
     <a href="/chat.html?tab=club"><span class="nav-icon" aria-hidden="true">👥</span>복작소 클럽</a>
     <a href="/chat.html?tab=me"><span class="nav-icon" aria-hidden="true">👤</span>내 정보</a>
   </nav>
+  <aside class="install-offer" id="installOffer" aria-label="복작소 앱 설치 안내" hidden>
+    <button class="install-close" id="installDismiss" type="button" aria-label="설치 안내 닫기" title="닫기">×</button>
+    <h2>📲 복작소 앱으로 편하게 이용하세요</h2>
+    <p>처음 방문했나요? 홈 화면에 복작소를 설치할 수 있어요.</p>
+    <button class="install-cta" id="installNow" type="button">복작소 앱 설치하기</button>
+    <p class="install-guide" id="installGuide" role="status" aria-live="polite" hidden></p>
+  </aside>
   <script>
     (()=>{
       const KEY='bokjaksoChatThemeV1';
@@ -124,6 +142,66 @@
       btn.addEventListener('click',()=>setTheme(document.body.classList.contains('dark')?'light':'dark'));
       if('serviceWorker' in navigator){
         window.addEventListener('load',()=>navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'}).catch(()=>{}));
+      }
+
+      // Show an install invitation on first visit, never inside the installed app.
+      // Keep the existing app identity, icon, messages and user sessions unchanged.
+      const NOTICE_KEY='bokjaksoChatInstallNoticeDismissedV1';
+      const installed=()=>window.matchMedia('(display-mode: standalone)').matches
+        || window.matchMedia('(display-mode: fullscreen)').matches
+        || window.navigator.standalone===true;
+      const offer=document.getElementById('installOffer');
+      const action=document.getElementById('installNow');
+      const guide=document.getElementById('installGuide');
+      const close=document.getElementById('installDismiss');
+      let deferredInstallPrompt=null;
+      const dismiss=()=>{
+        offer.hidden=true;
+        localStorage.setItem(NOTICE_KEY,'yes');
+      };
+      if(!installed()&&localStorage.getItem(NOTICE_KEY)!=='yes')offer.hidden=false;
+      else offer.hidden=true;
+      close.addEventListener('click',dismiss);
+      window.addEventListener('beforeinstallprompt',event=>{
+        event.preventDefault();
+        deferredInstallPrompt=event;
+      });
+      window.addEventListener('appinstalled',()=>{
+        deferredInstallPrompt=null;
+        dismiss();
+      });
+      action.addEventListener('click',async()=>{
+        if(installed()){dismiss();return;}
+        if(deferredInstallPrompt){
+          const prompt=deferredInstallPrompt;
+          deferredInstallPrompt=null;
+          guide.hidden=true;
+          action.disabled=true;
+          try{
+            await prompt.prompt();
+            const result=await prompt.userChoice;
+            if(result?.outcome==='accepted')dismiss();
+          }catch(error){
+            showGuide();
+          }finally{
+            action.disabled=false;
+          }
+        }else{
+          showGuide();
+        }
+      });
+      function showGuide(){
+        const ua=navigator.userAgent||'';
+        let message='브라우저 메뉴에서 “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.';
+        if(/iPhone|iPad|iPod/i.test(ua)){
+          message='아이폰 Safari에서 아래 공유 버튼(□↑) → “홈 화면에 추가”를 눌러 주세요. 다른 브라우저라면 Safari로 주소를 열어 주세요.';
+        }else if(/SamsungBrowser/i.test(ua)){
+          message='삼성 인터넷 하단 메뉴(≡) → “현재 페이지 추가” → “홈 화면”을 선택해 주세요.';
+        }else if(/Android/i.test(ua)){
+          message='Chrome 오른쪽 위 점 3개(⋮) → “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.';
+        }
+        guide.textContent=message;
+        guide.hidden=false;
       }
     })();
   </script>
