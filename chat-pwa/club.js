@@ -3,6 +3,8 @@
  'use strict';
  const status=document.getElementById('clubStatus');
  const applyBtn=document.getElementById('clubApplyBtn');
+ const resetBtn=document.getElementById('clubResetBtn');
+ const reviewEntry=document.getElementById('clubReviewEntry');
  const pane=document.getElementById('clubChat');
  const actions=document.getElementById('clubActions');
  const feed=document.getElementById('clubMessages');
@@ -35,6 +37,8 @@
    pane.hidden=next!=='approved';
    actions.hidden=next==='approved'||next==='pending'||next==='suspended';
    applyBtn.textContent=next==='rejected'?'가입 다시 신청':'클럽 가입 신청';
+   resetBtn.hidden=next!=='pending'&&next!=='rejected';
+   reviewEntry.hidden=next!=='pending';
  }
  async function refresh(){
    adminLink.hidden=!sessionStorage.getItem(ADMIN_KEY);
@@ -97,6 +101,19 @@
      renderMembership(data.status);
    }catch(e){status.textContent=e.message;}
    finally{applyBtn.disabled=false;}
+ });
+ resetBtn.addEventListener('click',async()=>{
+   if(!['pending','rejected'].includes(membership))return;
+   if(!window.confirm('현재 복작소 클럽 가입 신청을 취소하고 처음부터 다시 할까요?\n기존 일반 채팅방과 대화는 그대로 남아요.'))return;
+   resetBtn.disabled=true;
+   status.textContent='클럽 가입 신청을 초기화하고 있어요…';
+   try{
+     const data=await request('withdraw');
+     renderMembership(data.status||'none');
+     status.textContent='클럽 가입 신청을 취소했어요. 이제 아래에서 다시 신청할 수 있어요.';
+   }catch(error){
+     status.textContent=error.message||'가입 신청 취소에 실패했어요.';
+   }finally{resetBtn.disabled=false;}
  });
  document.getElementById('clubCompose').addEventListener('submit',async e=>{
    e.preventDefault();
