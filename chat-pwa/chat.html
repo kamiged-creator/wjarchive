@@ -420,6 +420,59 @@
     .my-profile-summary strong{font-size:19px;overflow-wrap:anywhere}
     @media(max-width:400px){.home-tabs{gap:6px}.home-tab{font-size:13px;min-height:76px}.home-panel{padding:24px 17px}}
 
+    /* Fix: the mobile chat layout uses flex-row. Room list and member panels
+       must instead fill the viewport, with navigation pinned to the bottom.
+       Keep live chat's original full-screen layout untouched. */
+    @media(max-width:560px){
+      body:not(.chat-active) main{
+        display:flex;
+        flex-direction:column;
+        align-items:stretch;
+        overflow-x:hidden;
+        overflow-y:auto;
+        overscroll-behavior-y:contain;
+        -webkit-overflow-scrolling:touch;
+        padding:10px 12px calc(98px + env(safe-area-inset-bottom));
+      }
+      body:not(.chat-active) main > .card:not(.chat){
+        display:block;
+        flex:0 0 auto;
+        width:100%;
+        min-width:0;
+        max-width:none;
+        min-height:0;
+        max-height:none;
+        overflow:visible;
+      }
+      body:not(.chat-active) .home-panel[hidden]{display:none!important}
+      body:not(.chat-active) .home-tabs{
+        position:fixed;
+        left:50%;
+        bottom:0;
+        z-index:10;
+        transform:translateX(-50%);
+        width:min(720px,100%);
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:6px;
+        margin:0;
+        padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+        background:var(--paper);
+        border-top:1px solid var(--line);
+        box-shadow:0 -5px 20px rgba(0,0,0,.07);
+      }
+      body:not(.chat-active) .home-tab{
+        min-height:64px;
+        padding:6px 3px;
+        gap:5px;
+        font-size:12px;
+        border-radius:14px;
+        line-height:1.15;
+      }
+      body:not(.chat-active) .home-tab .home-tab-icon{font-size:21px}
+      body.chat-active .home-tabs{display:none}
+    }
+
   </style>
 </head>
 <body>
