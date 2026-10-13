@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>채팅방 관리 | 복작소 채팅</title>
+  <style>
+    :root{--bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;--line:rgba(31,26,23,.12);--accent:#8b6847;--danger:#b94b4b;--ok:#2f7d4d}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;background:linear-gradient(180deg,#fbf8f4,var(--bg));color:var(--text)}
+    button,input{font:inherit}
+    header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:rgba(255,253,249,.9);border-bottom:1px solid var(--line);position:sticky;top:0}
+    header strong{font-size:18px}.back{border:0;background:transparent;color:var(--muted);font-weight:700;cursor:pointer}
+    main{width:min(860px,100%);margin:0 auto;padding:24px 14px 40px}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:16px}
+    .create-room-card{background:#fffefa;border:2px solid #cdbba9;box-shadow:0 5px 18px rgba(99,73,51,.08)}
+    .create-room-card .muted{color:#625448;font-size:14px;line-height:1.65;font-weight:550}
+    .create-room-card label{font-size:15px;color:#2d241e;margin-bottom:8px}
+    .create-room-card input{height:50px;border:2px solid #c9b8a6;background:#fff;color:#211b16;font-size:16px}
+    .create-room-card input::placeholder{color:#766c62;opacity:1}
+    .create-room-card input:focus{outline:3px solid rgba(139,104,71,.22);outline-offset:1px;border-color:#8b6847}
+    .create-room-card .primary{min-height:52px;height:auto;min-width:190px;background:#795738;font-size:16px;box-shadow:0 5px 12px rgba(87,60,38,.13)}
+    h1,h2{letter-spacing:-.035em}h1{font-size:28px;margin:0 0 6px}h2{font-size:18px;margin:0 0 14px}.muted{color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid .wide{grid-column:1/-1}
+    label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}
+    input{width:100%;height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff}
+    .primary{height:46px;border:0;border-radius:12px;padding:0 16px;background:var(--text);color:#fff;font-weight:850;cursor:pointer}
+    .status{min-height:18px;margin-top:10px;font-size:12px;color:var(--danger)}
+    .room{display:block;margin:12px 0;padding:18px;border:1.5px solid #d7c9bb;border-radius:18px;background:#fffdfa;box-shadow:0 4px 12px rgba(31,26,23,.04)}
+    .room-title{font-size:19px;line-height:1.4;font-weight:850;overflow-wrap:anywhere}
+    .room-meta{font-size:13px;line-height:1.4;color:#5d5248;font-weight:650;margin-top:5px}
+    .room.previously-joined{border-color:#86ab90;background:#f6fcf6}
+    .visited-badge{display:inline-flex;align-items:center;vertical-align:middle;border:1px solid #8dbb96;border-radius:999px;background:#e4f3e7;color:#225d37;font-size:12px;font-weight:850;line-height:1.3;white-space:nowrap;padding:3px 8px;margin-left:7px}
+    .actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:15px}
+    .secondary-actions{grid-template-columns:repeat(3,minmax(0,1fr));padding-top:13px;border-top:1px solid #e6dbcf;margin-top:13px}
+    .small{display:flex;justify-content:center;align-items:center;min-height:48px;width:100%;border:1.5px solid #c9bbae;border-radius:12px;background:#fff;color:#302821;padding:10px 8px;font-size:14px;font-weight:800;line-height:1.25;cursor:pointer;white-space:normal;word-break:keep-all;text-align:center}
+    .small:hover{filter:brightness(.97)}
+    .small:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .small:disabled{opacity:.55;cursor:wait}
+    .small.enter{background:#795738;border-color:#795738;color:#fff}
+    .small.edit{background:#f0dfc9;border-color:#ad8860;color:#51371f}
+    .small.manage{background:#faf6f1;border-color:#c9bbae;color:#51463c}
+    .small.danger{background:#fff1ee;border-color:#c89088;color:#953e38}
+    .small.ok{background:#edf8f0;border-color:#91b89b;color:#225e39}
+    .empty{padding:24px;text-align:center;color:#65594f;font-size:14px}
+    .section-label{margin:25px 0 10px;font-size:15px;font-weight:850;color:#584538;letter-spacing:.02em}
+    .archived-room{background:#faf7f3}
+    .title-status{font-size:13px;color:#326846;min-height:0;margin:-6px 0 12px;font-weight:700}
+    .title-status:empty{display:none}
+    .rename-panel{grid-column:1/-1;padding:14px;background:#faf4eb;border:1px solid rgba(139,104,71,.25);border-radius:15px}
+    .rename-panel[hidden]{display:none}
+    .rename-panel label{font-size:14px}
+    .rename-panel input{font-size:16px;margin-top:7px;border-color:rgba(139,104,71,.3)}
+    .rename-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+    .rename-actions button{min-height:44px;padding:0 18px;border-radius:12px;font-size:14px;font-weight:800}
+    .rename-save{background:var(--accent);color:white;border:1px solid var(--accent)}
+    .rename-cancel{background:#fff;color:var(--text);border:1px solid var(--line)}
+    .rename-feedback{font-size:13px;color:var(--danger);min-height:0;margin-top:8px}
+    .rename-feedback:empty{display:none}
+
+    .volume-card{border:2px solid #d0bfac;background:#fffefa;box-shadow:0 4px 14px rgba(66,44,30,.05)}
+    .volume-card h2{font-size:20px;margin-bottom:7px}
+    .volume-card .muted{font-size:14px;line-height:1.6;color:#5b4a3d}
+    .volume-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}
+    .volume-choice{min-height:52px;border:2px solid #cbb8a3;border-radius:13px;background:#fff;color:#473628;font-size:16px;font-weight:850;cursor:pointer}
+    .volume-choice[aria-pressed="true"]{background:#795738;border-color:#795738;color:#fff;box-shadow:0 4px 12px rgba(91,57,35,.14)}
+    .volume-choice:focus-visible{outline:3px solid #b58d64;outline-offset:2px}
+    .volume-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+    .volume-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-size:15px;font-weight:850;cursor:pointer}
+    .volume-preview{border:1.5px solid #bba48b;background:#fff;color:#513d2c}
+    .volume-feedback{min-height:20px;margin-top:12px;color:#3b6549;font-size:13px;font-weight:750}
+    .volume-feedback.error{color:var(--danger)}
+
+    @media(max-width:620px){
+      .grid{grid-template-columns:1fr}
+      .grid .wide{grid-column:auto}
+      main{padding:16px 10px 32px}
+      .card{padding:17px 14px}
+      .room{padding:16px 12px;margin:12px 0}
+      .actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+      .secondary-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+      .small{min-height:48px;font-size:14px;padding:9px 6px}
+      .secondary-actions .small{font-size:13px}
+    }
+    @media(max-width:350px){.secondary-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+<header><strong>관계자 채팅 관리</strong><button class="back" onclick="location.href='/chat.html'">관리자로 돌아가기</button></header>
+<main>
+  <section class="card create-room-card">
+    <h1>채팅방 만들기</h1>
+    <div class="muted">방 이름과 입장 비밀번호만 입력하면 됩니다. 방 코드는 자동으로 생성됩니다.</div>
+    <div class="grid" style="margin-top:16px">
+      <div class="wide"><label for="title">방 이름</label><input id="title" placeholder="예: 복작소 관계자방"></div>
+      <div class="wide"><label for="password">입장 비밀번호</label><input id="password" type="password" placeholder="비밀번호 8자 이상 입력"></div>
+      <div class="wide"><button class="primary" id="createBtn">채팅방 만들기</button></div>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+
+  <section class="card volume-card">
+    <h2>🔔 ‘뽁짝’ 기본 알림 음량</h2>
+    <p class="muted">관리자는 새 방문자의 기본 소리를 설정할 수 있어요. 방문자가 직접 고른 음량은 그 기기에서 우선 적용됩니다.</p>
+    <div class="volume-options" role="group" aria-label="관리자 기본 알림 음량">
+      <button class="volume-choice" type="button" data-default-volume="30" aria-pressed="false">작게 30%</button>
+      <button class="volume-choice" type="button" data-default-volume="60" aria-pressed="false">보통 60%</button>
+      <button class="volume-choice" type="button" data-default-volume="100" aria-pressed="true">크게 100%</button>
+    </div>
+    <div class="volume-actions">
+      <button class="primary" type="button" id="volumeSave">기본 음량 저장</button>
+      <button class="volume-preview" type="button" id="volumePreview">▶ 소리 미리 듣기</button>
+    </div>
+    <div class="volume-feedback" role="status" aria-live="polite" id="volumeFeedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>채팅방 목록</h2>
+    <div class="title-status" id="titleUpdateStatus" role="status" aria-live="polite"></div>
+    <div id="rooms"><div class="empty">불러오는 중...</div></div>
+  </section>
+</main>
+<script>
+  const ADMIN_KEY='wjarchiveAdminAccessToken';
+  if(!sessionStorage.getItem(ADMIN_KEY))location.replace('/admin-login.html');
+  const statusEl=document.getElementById('status'),roomsEl=document.getElementById('rooms'),titleUpdateStatus=document.getElementById('titleUpdateStatus');
+  function token(){return sessionStorage.getItem(ADMIN_KEY)||''}
+  async function api(payload){
+    const t=token();if(!t)throw new Error('먼저 채팅 관리자 로그인을 해 주세요.');
+    const r=await fetch('/api/content-admin',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify(payload)});
+    const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'처리하지 못했습니다.');return d;
+  }
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+  let selectedVolume=100;
+  const volumeFeedback=document.getElementById('volumeFeedback');
+  function chooseVolume(level){
+    if(![30,60,100].includes(level))return;
+    selectedVolume=level;
+    document.querySelectorAll('[data-default-volume]').forEach(b=>{
+      b.setAttribute('aria-pressed',String(Number(b.dataset.defaultVolume)===level));
+    });
+  }
+  async function loadSoundSettings(){
+    try{
+      const response=await api({action:'chat-get-sound-config'});
+      chooseVolume(Number(response.level));
+      volumeFeedback.textContent='';
+    }catch(error){
+      volumeFeedback.classList.add('error');
+      volumeFeedback.textContent='설정을 불러오지 못했어. '+(error.message||'');
+    }
+  }
+  function previewBokjak(level){
+    const volume=level/100;
+    function chime(){
+      try{
+        const Ctx=window.AudioContext||window.webkitAudioContext;
+        if(!Ctx)return;
+        const ctx=new Ctx(),t=ctx.currentTime;
+        [[0,640],[.14,860]].forEach(([offset,freq])=>{
+          const osc=ctx.createOscillator(),gain=ctx.createGain();
+          osc.type='sine';osc.frequency.value=freq;
+          gain.gain.setValueAtTime(.0001,t+offset);
+          gain.gain.exponentialRampToValueAtTime(.22*volume,t+offset+.015);
+          gain.gain.exponentialRampToValueAtTime(.0001,t+offset+.13);
+          osc.connect(gain);gain.connect(ctx.destination);
+          osc.start(t+offset);osc.stop(t+offset+.14);
+        });
+        setTimeout(()=>ctx.close().catch(()=>{}),700);
+      }catch(_){}
+    }
+    try{
+      if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){chime();return}
+      const u=new SpeechSynthesisUtterance('뽁짝');
+      u.lang='ko-KR';u.rate=1.18;u.pitch=1.2;u.volume=volume;
+      const korean=window.speechSynthesis.getVoices().find(v=>String(v.lang).toLowerCase().startsWith('ko'));
+      if(korean)u.voice=korean;
+      u.onerror=chime;
+      window.speechSynthesis.speak(u);
+    }catch(_){chime()}
+  }
+  document.querySelectorAll('[data-default-volume]').forEach(b=>b.addEventListener('click',()=>{
+    chooseVolume(Number(b.dataset.defaultVolume));
+    volumeFeedback.classList.remove('error');
+    volumeFeedback.textContent='저장 버튼을 누르면 새 기본 음량이 적용돼.';
+  }));
+  document.getElementById('volumePreview').addEventListener('click',()=>previewBokjak(selectedVolume));
+  document.getElementById('volumeSave').addEventListener('click',async()=>{
+    const button=document.getElementById('volumeSave');
+    button.disabled=true;
+    volumeFeedback.classList.remove('error');volumeFeedback.textContent='저장 중…';
+    try{
+      await api({action:'chat-set-sound-config',level:selectedVolume});
+      volumeFeedback.textContent='기본 알림 음량 '+selectedVolume+'% 저장 완료!';
+    }catch(error){
+      volumeFeedback.classList.add('error');
+      volumeFeedback.textContent=error.message||'저장하지 못했습니다.';
+    }finally{button.disabled=false}
+  });
+
+  function makeRoomCode(title){
+    const cleaned=String(title||'').trim().toUpperCase()
+      .replace(/[^A-Z0-9가-힣]+/g,'')
+      .slice(0,8);
+    const base=cleaned||'ROOM';
+    const suffix=Date.now().toString(36).slice(-5).toUpperCase();
+    return (base+suffix).slice(0,16);
+  }
+
+  // Save the administrator session for the selected room, then open that room directly.
+  function enterAdminChat(entered){
+    const code=String(entered?.room?.code||'').trim().toUpperCase();
+    if(!code||!entered?.member?.id||!entered?.sessionToken){
+      throw new Error('채팅방 입장 정보를 확인하지 못했습니다.');
+    }
+    const saved={
+      room:entered.room,
+      member:entered.member,
+      sessionToken:entered.sessionToken,
+      expiresAt:Date.now()+365*24*60*60*1000
+    };
+    const key='bokjaksoChatSessionsV2';
+    let remembered={};
+    try{
+      remembered=JSON.parse(localStorage.getItem(key)||'{}')||{};
+      if(Array.isArray(remembered)||typeof remembered!=='object')remembered={};
+    }catch(_){remembered={}}
+    remembered[code]=saved;
+    localStorage.setItem(key,JSON.stringify(remembered));
+    // Keep compatibility with the chat page's legacy-session migration.
+    localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
+    location.href='/chat.html?room='+encodeURIComponent(code);
+  }
+
+  async function load(){
+    try{
+      const d=await api({action:'chat-list-rooms'});
+      if(!d.rooms.length){roomsEl.innerHTML='<div class="empty">아직 만든 채팅방이 없습니다.</div>';return}
+      let remembered={};
+      try{remembered=JSON.parse(localStorage.getItem('bokjaksoChatSessionsV2')||'{}')||{}}catch(_){}
+      const rowHtml=r=>{
+        const archived=!!r.is_archived;
+        const rememberedRoom=remembered[String(r.code||'').toUpperCase()];
+        const known=Boolean(rememberedRoom?.expiresAt>Date.now()&&String(rememberedRoom?.room?.id)===String(r.id));
+        const editTitleButton='<button class="small edit" type="button" data-edit-title="'+esc(r.id)+'">제목 수정</button>';
+        const state=archived?'보관됨':(r.is_active?'입장 가능':'닫힘');
+        const mainButtons=archived
+          ? editTitleButton+'<button class="small ok" data-archive="'+r.id+'" data-archived="true">복원</button>'
+          : '<button class="small enter" data-enter="'+r.id+'">입장</button>'+editTitleButton+'<button class="small" data-copy="'+r.code+'">초대 링크 복사</button><button class="small" data-pass="'+r.id+'">비밀번호 변경</button>';
+        const manageButtons=archived
+          ? '<button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">완전 삭제</button>'
+          : '<button class="small '+(r.is_active?'manage':'ok')+'" data-toggle="'+r.id+'" data-active="'+r.is_active+'">'+(r.is_active?'방 닫기':'다시 열기')+'</button><button class="small manage" data-archive="'+r.id+'" data-archived="false">보관</button><button class="small danger" data-delete="'+r.id+'" data-title="'+encodeURIComponent(r.title)+'">방 삭제</button>';
+        const editPanel='<div class="rename-panel" hidden><label>새 채팅방 제목<input class="rename-input" type="text" maxlength="50" autocomplete="off" aria-label="새 채팅방 제목"></label><div class="rename-actions"><button class="rename-save" type="button" data-save-title>저장</button><button class="rename-cancel" type="button" data-cancel-title>취소</button></div><div class="rename-feedback" role="alert"></div></div>';
+        return '<div class="room '+(archived?'archived-room':'')+(known?' previously-joined':'')+'"><div class="room-info"><div class="room-title">'+esc(r.title)+(known?' <span class="visited-badge">✓ 이전 입장</span>':'')+'</div><div class="room-meta">#'+esc(r.code)+' · '+state+'</div></div><div class="actions primary-actions">'+mainButtons+'</div><div class="actions secondary-actions">'+manageButtons+'</div>'+editPanel+'</div>';
+      };
+      const active=d.rooms.filter(r=>!r.is_archived), archived=d.rooms.filter(r=>r.is_archived);
+      roomsEl.innerHTML=
+        '<div class="section-label">사용 중</div>'+(active.length?active.map(rowHtml).join(''):'<div class="empty">사용 중인 채팅방이 없습니다.</div>')+
+        '<div class="section-label">보관함</div>'+(archived.length?archived.map(rowHtml).join(''):'<div class="empty">보관된 채팅방이 없습니다.</div>');
+      roomsEl.querySelectorAll('[data-edit-title]').forEach(b=>b.addEventListener('click',()=>{
+        titleUpdateStatus.textContent='';
+        const row=b.closest('.room');
+        const panel=row?.querySelector('.rename-panel');
+        const room=d.rooms.find(item=>String(item.id)===String(b.dataset.editTitle));
+        if(!panel||!room)return;
+        roomsEl.querySelectorAll('.rename-panel').forEach(item=>item.hidden=true);
+        const input=panel.querySelector('.rename-input');
+        const feedback=panel.querySelector('.rename-feedback');
+        feedback.textContent='';
+        input.value=room.title||'';
+        panel.hidden=false;
+        input.focus();
+        input.select();
+      }));
+      roomsEl.querySelectorAll('[data-cancel-title]').forEach(b=>b.addEventListener('click',()=>{
+        b.closest('.rename-panel').hidden=true;
+      }));
+      roomsEl.querySelectorAll('[data-save-title]').forEach(b=>b.addEventListener('click',async()=>{
+        const panel=b.closest('.rename-panel');
+        const row=b.closest('.room');
+        const editButton=row.querySelector('[data-edit-title]');
+        const room=d.rooms.find(item=>String(item.id)===String(editButton?.dataset.editTitle));
+        const input=panel.querySelector('.rename-input');
+        const feedback=panel.querySelector('.rename-feedback');
+        const title=input.value.trim();
+        feedback.textContent='';
+        if(!room)return;
+        if(!title||title.length>50){
+          feedback.textContent='제목은 1~50자로 입력해 주세요.';
+          input.focus();
+          return;
+        }
+        if(title===room.title){panel.hidden=true;return}
+        b.disabled=true;
+        try{
+          await api({action:'chat-rename-room',roomId:room.id,expectedTitle:room.title,title});
+          titleUpdateStatus.textContent='채팅방 제목이 수정되었습니다.';
+          await load();
+        }catch(e){
+          feedback.textContent=e.message||'제목을 저장하지 못했습니다.';
+          if(e.message&&e.message.includes('다른 관리자')){
+            titleUpdateStatus.textContent='방 이름이 다른 관리자에 의해 변경되었을 수 있습니다.';
+          }
+        }finally{b.disabled=false}
+      }));
+      roomsEl.querySelectorAll('.rename-input').forEach(input=>input.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){e.preventDefault();input.closest('.rename-panel').querySelector('[data-save-title]').click()}
+        if(e.key==='Escape'){input.closest('.rename-panel').querySelector('[data-cancel-title]').click()}
+      }));
+      roomsEl.querySelectorAll('[data-enter]').forEach(b=>b.addEventListener('click',async()=>{
+        b.disabled=true;
+        try{
+          const data=await api({action:'chat-admin-enter-room',roomId:b.dataset.enter});
+          enterAdminChat(data);
+        }catch(e){
+          alert(e.message||'채팅방에 입장하지 못했습니다.');
+          b.disabled=false;
+        }
+      }));
+      roomsEl.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',async()=>{const url=new URL('/chat.html',window.location.origin);url.searchParams.set('room',b.dataset.copy);const text=url.toString();try{await navigator.clipboard.writeText(text);alert('초대 링크를 복사했습니다.\n비밀번호는 따로 전달해 주세요.')}catch(_){prompt('아래 초대 링크를 복사해 주세요.',text)}}));
+      roomsEl.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',async()=>{const title=decodeURIComponent(b.dataset.title||'채팅방');const ok=confirm('['+title+'] 방을 완전히 삭제할까요?\n삭제하면 이 방의 대화와 참여 기록도 함께 삭제되며 복구할 수 없습니다.');if(!ok)return;try{await api({action:'chat-delete-room',roomId:b.dataset.delete});alert('채팅방을 삭제했습니다.');load()}catch(e){alert(e.message)}}));
+      roomsEl.querySelectorAll('[data-archive]').forEach(b=>b.addEventListener('click',async()=>{const restoring=b.dataset.archived==='true';const msg=restoring?'이 채팅방을 다시 사용할까요?':'이 채팅방을 보관할까요?\n보관 중에는 일반 사용자가 입장할 수 없습니다.';if(!confirm(msg))return;try{await api({action:'chat-set-archived',roomId:b.dataset.archive,isArchived:!restoring});alert(restoring?'채팅방을 복원했습니다.':'채팅방을 보관했습니다.');load()}catch(e){alert(e.message)}}));
+      roomsEl.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click',async()=>{await api({action:'chat-set-active',roomId:b.dataset.toggle,isActive:b.dataset.active!=='true'});load()}));
+      roomsEl.querySelectorAll('[data-pass]').forEach(b=>b.addEventListener('click',async()=>{const p=prompt('새 비밀번호를 입력해 주세요. (8자 이상)\n변경하면 이전 입장 기록과 알림이 무효화됩니다.');if(!p)return;try{await api({action:'chat-change-password',roomId:b.dataset.pass,password:p});alert('비밀번호를 변경했습니다.\n기존 참여자는 새 비밀번호로 다시 입장해야 하고, 알림도 다시 켜야 합니다.')}catch(e){alert(e.message)}}));
+    }catch(e){roomsEl.innerHTML='<div class="empty">'+esc(e.message)+'</div>'}
+  }
+  document.getElementById('createBtn').addEventListener('click',async()=>{
+    statusEl.textContent='';
+    const btn=document.getElementById('createBtn');
+    btn.disabled=true;
+    try{
+      const title=document.getElementById('title').value.trim();
+      const password=document.getElementById('password').value;
+      if(!title)throw new Error('방 이름을 입력해 주세요.');
+      const code=makeRoomCode(title);
+      const created=await api({action:'chat-create-room',title,code,password});
+      const roomId=created.room?.id;
+      if(!roomId)throw new Error('채팅방은 만들었지만 입장 정보를 확인하지 못했습니다.');
+      const entered=await api({action:'chat-admin-enter-room',roomId});
+      enterAdminChat(entered);
+    }catch(e){
+      btn.disabled=false;
+      statusEl.style.color='var(--danger)';
+      statusEl.textContent=e.message;
+    }
+  });
+  loadSoundSettings();
+  load();
+</script>
+</body>
+</html>

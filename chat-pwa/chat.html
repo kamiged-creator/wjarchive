@@ -1,0 +1,2006 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>복작소 채팅</title>
+  <meta name="description" content="복작소 채팅 전용 앱 - 채팅방에 바로 입장하세요">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="복작소 채팅">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#fbf8f4">
+  <!-- Refined Korean UI typeface with browser/system-font fallback. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">
+  <style>
+    :root{
+      --bg:#f6f1ea;--paper:#fffdf9;--text:#1f1a17;--muted:#746a61;
+      --line:rgba(31,26,23,.12);--accent:#8b6847;--soft:#eadfd2;--shadow:0 24px 60px rgba(31,26,23,.12);
+      --notice:#fff8ec;--notice-text:#7f674f;--msg-bg:#EAD8C6;--bubble-ink:#4A3628;--mine-bg:#D7B899;--mine-border:#B9926B;--mine-text:#2F241D;--field-bg:#fff;--primary:#a67c52;
+      --composer-bg:#fff8ef;--composer-input:#fffefa;--composer-line:rgba(139,104,71,.19);
+      --chat-meta:#60564d;--bubble-border:#D9C3AE;--admin-bubble:#EAD8C6;--admin-border:#D9C3AE;--admin-ink:#4A3628;
+      --scroll-thumb:#b6a28f;--scroll-track:#eee7df;
+    }
+    body.dark{
+      --bg:#111111;--paper:#171717;--text:#f2f2f2;--muted:#a9a9a9;
+      --line:rgba(255,255,255,.10);--accent:#b68456;--soft:#222222;--shadow:0 24px 60px rgba(0,0,0,.42);
+      --notice:#1d1d1d;--notice-text:#d0d0d0;--msg-bg:#242424;--bubble-ink:#f2f2f2;--mine-bg:#9f7148;--mine-border:#9f7148;--mine-text:#fff;--field-bg:#1f1f1f;--primary:#b68456;
+      --composer-bg:#1a1a1a;--composer-input:#242424;--composer-line:rgba(255,255,255,.16);
+      --chat-meta:#c8bbae;--bubble-border:#66605a;--admin-bubble:#48382b;--admin-border:#977653;--admin-ink:#fff1e2;
+      --scroll-thumb:#79624e;--scroll-track:#262320;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--text);background:linear-gradient(180deg,var(--paper),var(--bg));transition:background .2s ease,color .2s ease}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    .page{min-height:100vh;display:flex;flex-direction:column}
+    header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;width:100%;height:100%;min-width:0}
+    .brand{font-weight:850;letter-spacing:-.03em;cursor:pointer}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .back{border:0;background:transparent;color:var(--muted);font-weight:700}
+    /* Match the moon and avatar: clean, recognizable home button without a word label. */
+    .back.home-shortcut{width:38px;height:38px;flex:0 0 38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--muted)}
+    .back.home-shortcut svg{display:block;width:21px;height:21px;flex:0 0 21px}
+    .back.home-shortcut:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    /* A single round avatar in the top bar replaces the floating edge settings tab. */
+    .header-profile-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;padding:2px;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--text);cursor:pointer;overflow:hidden;box-shadow:0 1px 4px rgba(25,20,16,.05)}
+    body.chat-active .header-profile-btn{display:inline-flex}
+    .header-profile-btn .header-avatar{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;font-size:20px;background:var(--soft)}
+    .header-profile-btn .header-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .header-profile-btn:focus-visible,.chat-edge-close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    main{width:min(720px,100%);margin:0 auto;padding:24px 14px 28px;flex:1}
+    .card{background:color-mix(in srgb,var(--paper) 96%,transparent);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);overflow:hidden}
+    .join{padding:28px 22px}
+    .eyebrow{font-size:11px;font-weight:850;letter-spacing:.16em;color:var(--accent)}
+    h1{font-size:30px;margin:8px 0 8px;letter-spacing:-.04em;font-weight:800}
+    .lead{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.7}
+    .field{margin-top:13px}
+    .field label{display:block;font-size:12px;font-weight:800;margin:0 0 7px}
+    .field input{width:100%;height:48px;border:1px solid var(--line);border-radius:14px;background:var(--field-bg);color:var(--text);padding:0 14px;outline:none}
+    .field input:focus{border-color:rgba(139,104,71,.55);box-shadow:0 0 0 3px rgba(139,104,71,.09)}
+    .primary{width:100%;height:50px;margin-top:18px;border:0;border-radius:14px;background:var(--primary);color:#fff;font-weight:750;box-shadow:0 8px 18px rgba(139,104,71,.14);transition:background .18s ease,transform .12s ease}
+    .primary:hover{background:color-mix(in srgb,var(--primary) 90%,#000)}
+    .primary:active{transform:translateY(1px)}
+    .help{margin-top:12px;text-align:center;color:var(--muted);font-size:12px}
+    .admin-room-list{display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+    .admin-room-list.show{display:block}
+    .admin-room-list h2{font-size:15px;margin:0 0 8px}
+    .admin-room-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 0;border-top:1px solid var(--line)}
+    .admin-room-item:first-of-type{border-top:0}
+    .admin-room-item.remembered,.public-room-item.remembered{background:color-mix(in srgb,var(--paper) 91%,#92bd9e);border-radius:12px;padding-left:10px;padding-right:10px}
+    .entered-badge{display:inline-flex;align-items:center;vertical-align:middle;gap:4px;border:1px solid color-mix(in srgb,#388555 45%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--paper) 83%,#a2caaa);color:var(--text);font-size:11px;font-weight:850;line-height:1.3;white-space:nowrap;padding:3px 7px;margin-left:5px}
+    .room-title-line{display:flex;align-items:center;gap:8px;min-width:0}
+    .room-title-line .room-title{min-width:0}
+    .room-presence{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;background:color-mix(in srgb,var(--paper) 82%,#99cda9);border:1px solid color-mix(in srgb,#388555 40%,var(--line));border-radius:999px;padding:4px 9px;font-size:11px;font-weight:850;white-space:nowrap}
+    .room-presence::before{content:'';width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#28864e}
+    .admin-room-name{font-weight:850;font-size:16px;line-height:1.4}
+    .admin-room-meta{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4}
+    .admin-room-enter{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:104px;min-height:52px;border:2px solid #795738;border-radius:15px;background:#795738;color:#fff;padding:10px 16px;font-size:17px;line-height:1.2;font-weight:850;box-shadow:0 5px 13px rgba(93,64,42,.16);cursor:pointer}
+    .admin-room-enter:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .admin-room-enter:disabled{background:var(--soft);border-color:var(--line);color:var(--muted);box-shadow:none;cursor:default}
+    .admin-empty{padding:14px 0;color:var(--muted);font-size:12px;text-align:center}
+    .shared-profile-card{display:flex;align-items:center;gap:13px;margin:16px 0 12px;padding:14px;border:2px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--paper) 90%,var(--soft));color:var(--text);width:100%;text-align:left;cursor:pointer}
+    .shared-profile-card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .shared-profile-card .profile-preview{flex-basis:54px;width:54px;height:54px}
+    .shared-profile-info{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+    .shared-profile-info strong{font-size:16px;font-weight:850;line-height:1.2}
+    .shared-profile-info small{font-size:12px;color:var(--muted);line-height:1.4}
+    .shared-profile-card .profile-arrow{font-size:22px;color:var(--accent);font-weight:800}
+    .profile-name-field{display:block;margin:10px 0 13px;font-size:14px;font-weight:800}
+    .profile-name-field input{display:block;width:100%;margin-top:7px;height:48px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);border-radius:12px;padding:0 12px;font-size:16px}
+    .public-room-list{margin:16px 0;border:2px solid var(--line);border-radius:20px;padding:14px;background:color-mix(in srgb,var(--paper) 94%,var(--primary) 6%);box-shadow:0 8px 24px rgba(0,0,0,.04)}
+    .public-room-list h2{font-size:16px;margin:0 0 6px;font-weight:800;letter-spacing:-.03em}
+    /* A shared title inset makes new and previously entered rooms start at the same x position. */
+    .pwa-install-row{text-align:center;margin:13px 0 3px}
+    .pwa-install-button{min-height:48px;padding:10px 18px;border-radius:14px;border:1.5px solid var(--accent);background:var(--paper);color:var(--text);font-weight:700;font-size:15px}
+    .admin-login-link{display:block;text-align:center;margin-top:22px;padding:12px;color:var(--muted);font-size:13px}
+    .public-room-item{display:grid;grid-template-columns:minmax(0,1fr) 94px;align-items:center;gap:12px;padding:7px 10px 7px 0;border-top:1px solid var(--line)}
+    .public-room-item.remembered{padding-left:0}
+    .public-room-item:first-of-type{border-top:0}
+    /* Keep the inset on the title only; the fixed-width entrance button never shifts. */
+    .public-room-item>div:first-child{min-width:0;padding-left:10px}
+    /* Long titles use one line with an ellipsis; retain the prior-entry badge. */
+    .public-room-title-row{display:flex;align-items:center;gap:5px;min-width:0}
+    .public-room-title-row::before{content:"";display:block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#A9825A;margin-right:3px}
+    .public-room-name{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:750;letter-spacing:-.02em;line-height:1.45}
+    .public-room-title-row .entered-badge{flex:0 0 auto;margin-left:0}
+    .public-room-last{font-size:11px;line-height:1.3;color:var(--muted);margin-top:3px;white-space:nowrap}
+    .public-room-code{font-size:12px;color:var(--muted);margin-top:4px}
+    .public-room-enter{display:inline-flex;flex:0 0 94px;align-items:center;justify-content:center;width:94px;height:44px;box-sizing:border-box;border:2px solid var(--primary);border-radius:999px;background:var(--paper);color:var(--primary);padding:0 6px;font-size:13px;font-weight:750;white-space:nowrap;cursor:pointer}
+    .public-room-enter.selected{background:var(--primary);color:#fff}
+    .room-pagination{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;flex-wrap:wrap}
+    .room-page-btn{min-width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--text);font-size:12px;font-weight:750;padding:0 10px}
+    .room-page-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+    .room-page-btn:disabled{opacity:.38;cursor:default}
+    .join-selected{margin:0 0 14px;padding:11px 13px;border-radius:14px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:12px;font-weight:800;color:var(--text);display:none}
+    .entry-modal{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(25,20,16,.48);backdrop-filter:blur(3px)}
+    .entry-modal.show{display:flex}
+    .entry-dialog{width:min(420px,100%);max-height:90dvh;overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
+    .entry-title{font-size:22px;font-weight:800;letter-spacing:-.04em;margin:0 0 6px}
+    .entry-room{margin:0 0 18px;padding:13px 14px;border:2px solid color-mix(in srgb,var(--primary) 55%,var(--line));border-radius:15px;background:color-mix(in srgb,var(--primary) 10%,var(--paper));font-size:16px;font-weight:750}
+    .entry-field{margin-top:13px}
+    .entry-field label{display:block;font-size:13px;font-weight:700;margin:0 0 7px}
+    .entry-field input{width:100%;height:54px;border:2px solid color-mix(in srgb,var(--text) 20%,var(--line));border-radius:15px;background:#fff;color:#1f1a17;padding:0 15px;font-size:16px;font-weight:500;outline:none}
+    body.dark .entry-field input{background:#202020;color:#f2f2f2}
+    .entry-field input:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 14%,transparent)}
+    /* Large touch target for the first-entry password visibility toggle. */
+    .entry-password-wrap{position:relative}
+    .entry-password-wrap #entryPassword{padding-right:64px}
+    .entry-eye-toggle{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:48px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:11px;background:transparent;color:var(--muted);touch-action:manipulation}
+    .entry-eye-toggle svg{display:block;width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .entry-eye-toggle .eye-hide-icon{display:none}
+    .entry-eye-toggle[aria-pressed="true"] .eye-show-icon{display:none}
+    .entry-eye-toggle[aria-pressed="true"] .eye-hide-icon{display:block}
+    .entry-eye-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+    .entry-actions{display:flex;gap:9px;margin-top:18px}
+    .entry-cancel,.entry-submit{height:50px;border-radius:14px;font-weight:750}
+    .entry-cancel{width:34%;border:1px solid var(--line);background:var(--paper);color:var(--muted)}
+    .entry-submit{flex:1;border:0;background:var(--primary);color:#fff}
+    .entry-status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
+    .status{min-height:18px;margin-top:10px;font-size:12px;color:#a33}
+    .chat{display:none;height:min(720px,calc(100vh - 120px));min-height:520px;flex-direction:column}
+    .chat.show{display:flex}
+    /* Settings still slide over the chat, opened from the header avatar. */
+    .chat{position:relative;isolation:isolate}
+    .chat-edge-backdrop{position:absolute;inset:0;z-index:18;background:rgba(25,20,16,.38);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
+    .chat-edge-panel{position:absolute;top:10px;right:0;bottom:auto;z-index:19;width:min(330px,calc(100% - 44px));max-height:calc(100% - 20px);min-width:0;overflow-y:auto;overscroll-behavior:contain;background:var(--paper);color:var(--text);border:1px solid var(--line);border-right:0;border-radius:20px 0 0 20px;box-shadow:-12px 8px 32px rgba(25,20,16,.15);transform:translateX(105%);visibility:hidden;pointer-events:none;transition:transform .22s ease,visibility .22s}
+    .chat.edge-open .chat-edge-backdrop{opacity:1;visibility:visible;pointer-events:auto}
+    .chat.edge-open .chat-edge-panel{transform:translateX(0);visibility:visible;pointer-events:auto}
+    .chat-edge-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px 12px;border-bottom:1px solid var(--line)}
+    .chat-edge-panel-head strong{font-size:18px;font-weight:850}
+    .chat-edge-close{min-height:44px;padding:0 12px;border-radius:12px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);font-size:14px;font-weight:800}
+    /* Centered round identity and one compact row of accessible settings controls. */
+    .chat-settings-content{padding:18px 14px 18px;text-align:center}
+    .chat-settings-identity{display:flex;flex-direction:column;align-items:center;gap:5px}
+    .chat-edge-panel .profile-shortcut{display:flex;align-items:center;justify-content:center;width:84px;height:84px;min-height:84px;margin:0;padding:3px;border:2px solid var(--admin-border);border-radius:50%;background:var(--paper);overflow:hidden;cursor:pointer}
+    .chat-edge-panel .profile-shortcut .profile-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:var(--soft);font-size:36px;overflow:hidden}
+    .chat-edge-panel .profile-shortcut .profile-icon img{width:100%;height:100%;object-fit:cover}
+    .settings-profile-name{font-size:16px;font-weight:850;color:var(--text);max-width:100%;overflow-wrap:anywhere}
+    .settings-profile-hint{font-size:11px;color:var(--muted);line-height:1.4}
+    .chat-edge-panel .settings-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;margin-top:18px}
+    .chat-edge-panel .settings-actions .sound-volume{display:flex;min-width:0;width:100%;align-items:stretch}
+    .chat-edge-panel .setting-action{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;width:100%;height:65px;min-height:65px;margin:0;padding:7px 2px;border:1.5px solid var(--admin-border);border-radius:13px;background:var(--paper);color:var(--text);font-size:12px;line-height:1.2;font-weight:800;white-space:nowrap}
+    .chat-edge-panel .setting-action svg{width:22px;height:22px;flex:0 0 22px}
+    .chat-edge-panel .setting-action[aria-pressed="true"]{background:var(--admin-bubble);color:var(--admin-ink);border-color:var(--admin-border)}
+    .chat-edge-panel .setting-action:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .chat-edge-panel .volume-menu{top:auto;bottom:calc(100% + 6px)}
+    .chat-edge-panel .volume-menu-toggle{height:65px}
+    @media(prefers-reduced-motion:reduce){.chat-edge-backdrop,.chat-edge-panel{transition:none}}
+    .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+    /* Always-visible safety reminder stays compact; extended guidance remains in settings. */
+    .chat-safety-reminder{display:flex;align-items:center;min-height:29px;padding:5px 14px;border-bottom:1px solid var(--line);background:var(--notice);color:var(--notice-text);font-size:12px;line-height:1.45;font-weight:650}
+    .chat-safety-reminder span{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .room-title{font-weight:850}.room-meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .profile-shortcut{display:inline-flex;align-items:center;gap:5px;margin-top:5px;min-height:30px;border:1px solid var(--admin-border);border-radius:999px;background:var(--paper);color:var(--text);padding:3px 9px 3px 5px;font-size:11px;font-weight:800;cursor:pointer}
+    .profile-shortcut .profile-icon{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--soft);overflow:hidden}
+    .profile-shortcut img,.profile-preview img{width:100%;height:100%;object-fit:cover;display:block}
+    .profile-shortcut:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .profile-view-modal{position:fixed;inset:0;z-index:124;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(25,20,16,.55);backdrop-filter:blur(3px)}
+    .profile-view-modal.show{display:flex}
+    .profile-view-dialog{width:min(400px,100%);max-height:90dvh;overflow-y:auto;border:1px solid var(--line);border-radius:24px;padding:24px 18px 20px;background:var(--paper);color:var(--text);text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.24)}
+    .profile-view-dialog h2{margin:0 0 19px;font-size:23px;font-weight:850}
+    .profile-view-photo{display:flex;align-items:center;justify-content:center;width:200px;height:200px;max-width:60vw;max-height:60vw;aspect-ratio:1;margin:0 auto 14px;padding:0;border:3px solid var(--admin-border);border-radius:50%;background:var(--soft);color:var(--text);font-size:76px;overflow:hidden;cursor:zoom-in}
+    .profile-view-photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .profile-view-photo:disabled{cursor:default}
+    .profile-view-photo:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+    .profile-view-name{font-size:22px;font-weight:850;overflow-wrap:anywhere}
+    .profile-view-hint{min-height:20px;margin:8px 0 18px;font-size:13px;color:var(--muted)}
+    .profile-view-actions{display:flex;gap:10px;justify-content:center}
+    .profile-view-actions button{flex:1;min-height:52px;border-radius:14px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);font-weight:850;font-size:16px}
+    .profile-view-actions .profile-view-edit{background:var(--accent);border-color:var(--accent);color:#fff}
+    .profile-view-actions button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .profile-modal{position:fixed;inset:0;z-index:125;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(25,20,16,.5)}
+    .profile-modal.show{display:flex}
+    .profile-dialog{width:min(420px,100%);max-height:90dvh;overflow:auto;border-radius:22px;border:1px solid var(--line);padding:20px;background:var(--paper);box-shadow:0 22px 60px rgba(0,0,0,.23)}
+    .profile-dialog h2{margin:0 0 7px;font-size:21px}
+    .profile-hint{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 12px}
+    .profile-picker{display:flex;gap:12px;align-items:center}
+    .profile-preview{display:flex;align-items:center;justify-content:center;width:62px;height:62px;flex:0 0 62px;border-radius:50%;border:2px solid var(--admin-border);background:var(--soft);color:var(--text);font-size:27px;overflow:hidden}
+    .profile-preview.small{width:52px;height:52px;flex-basis:52px;font-size:23px}
+    .profile-pick-button{min-height:44px;padding:9px 13px;border-radius:12px;border:1.5px solid var(--admin-border);background:var(--paper);color:var(--text);font-size:14px;font-weight:800}
+    .profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+    .profile-actions button{flex:1;min-height:46px;border-radius:12px;border:1px solid var(--admin-border);background:var(--paper);color:var(--text);font-size:14px;font-weight:800;white-space:nowrap}
+    .profile-actions .profile-save{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .profile-status{font-size:12px;color:var(--muted);min-height:18px;margin-top:9px}
+    .profile-delete-row{margin-top:15px;padding-top:13px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+    .profile-delete-row .profile-delete-btn{min-height:44px;border:1px solid color-mix(in srgb,#b54b41 45%,var(--line));border-radius:11px;padding:8px 13px;background:transparent;color:color-mix(in srgb,#b54b41 75%,var(--text));font-size:13px;font-weight:800;cursor:pointer}
+    .profile-delete-row .profile-delete-btn[hidden]{display:none}
+    .profile-delete-row .profile-delete-btn:disabled{opacity:.55;cursor:wait}
+    .profile-delete-row .profile-delete-btn:focus-visible{outline:3px solid #b54b41;outline-offset:2px}
+    .head-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .leave,.invite,.delete-room{border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:800;line-height:1;white-space:nowrap}
+    .invite{padding:9px 13px;color:var(--text);background:color-mix(in srgb,var(--paper) 82%,#99cda9);border-color:color-mix(in srgb,#388555 40%,var(--line));box-shadow:none;cursor:pointer}
+    .invite:focus-visible{outline:3px solid #388555;outline-offset:3px}
+    .leave{padding:8px 10px;background:var(--paper);color:var(--muted)}
+    .theme-toggle{width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;padding:0;background:var(--paper);color:var(--muted);font-size:18px;font-weight:700;line-height:1;white-space:nowrap}
+    .admin-room-add{display:none;border:1px solid var(--line);border-radius:999px;padding:9px 12px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap}
+    .admin-room-add.show{display:inline-flex;align-items:center;gap:4px}
+    .delete-room{display:none;padding:7px 9px;color:#b33d3d;background:transparent;border-color:rgba(179,61,61,.2);font-size:11px}
+    .delete-room.show{display:inline-flex}
+    .messages{flex:1;overflow:auto;padding:18px;background:linear-gradient(180deg,color-mix(in srgb,var(--soft) 72%,transparent),color-mix(in srgb,var(--paper) 92%,transparent));scroll-behavior:auto;scroll-padding-top:14px}
+    /* Replace the bright Windows scrollbars with slim, theme-matched scroll indicators. */
+    .messages,.text-modal-body{scrollbar-width:thin;scrollbar-color:var(--scroll-thumb) var(--scroll-track)}
+    .messages::-webkit-scrollbar,.text-modal-body::-webkit-scrollbar{width:7px}
+    .messages::-webkit-scrollbar-track,.text-modal-body::-webkit-scrollbar-track{background:var(--scroll-track)}
+    .messages::-webkit-scrollbar-thumb,.text-modal-body::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:10px;border:1px solid var(--scroll-track)}
+    /* Keep text input scrolling functional, but hide distracting default arrows. */
+    .composer textarea{scrollbar-width:none;-ms-overflow-style:none}
+    .composer textarea::-webkit-scrollbar{display:none}
+    .empty{text-align:center;color:var(--muted);font-size:13px;padding:40px 16px}
+    .msg{display:flex;flex-direction:row;align-items:flex-start;gap:8px;margin:0 0 14px}
+    .msg.mine{flex-direction:row-reverse}
+    .msg-content{display:flex;flex-direction:column;align-items:flex-start;min-width:0;max-width:calc(82% - 42px)}
+    .msg.mine .msg-content{align-items:flex-end}
+    .msg-avatar{flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--paper) 70%,var(--soft));border:1px solid var(--bubble-border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:17px;overflow:hidden}
+    .msg-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .msg-avatar[role="button"]{cursor:zoom-in}
+    .msg-avatar[role="button"]:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    /* Only a moderate-size circular portrait; outside tap returns to the conversation. */
+    .avatar-lightbox{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(23,18,14,.58);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+    .avatar-lightbox.show{display:flex}
+    .avatar-lightbox-photo{display:block;width:min(160px,48vw,28dvh);height:auto;aspect-ratio:1;object-fit:cover;border-radius:50%;border:1px solid #F0E5D5;box-shadow:0 8px 22px rgba(0,0,0,.14);background:var(--soft);pointer-events:none}
+    .msg .bubble,.msg .image-bubble{max-width:100%}
+    .name{font-size:12px;color:var(--chat-meta);font-weight:650;margin:0 6px 5px}
+    .bubble{max-width:78%;padding:10px 13px;border-radius:16px 16px 16px 4px;background:var(--msg-bg);color:var(--bubble-ink);border:1px solid var(--bubble-border);box-shadow:0 8px 18px rgba(31,26,23,.05);white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55}
+    .mine .bubble{background:var(--mine-bg);color:var(--mine-text);border-color:var(--mine-border);border-radius:16px 16px 4px 16px}
+    .msg.admin .bubble{background:var(--admin-bubble);color:var(--admin-ink);border-color:var(--admin-border)}
+    .msg.admin .name{font-weight:750;color:var(--chat-meta)}
+    .message-text{white-space:pre-wrap;overflow-wrap:anywhere}
+    .bubble.is-truncated{cursor:pointer}
+    .bubble.is-truncated .message-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden}
+    .read-more{display:none}
+    .bubble.is-truncated .read-more{display:block;margin-top:5px;text-align:right;font-size:13px;font-weight:800;color:inherit;opacity:.88;text-decoration:underline;text-underline-offset:3px}
+    .bubble.is-truncated:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .time{font-size:11px;color:var(--chat-meta);margin:5px 6px 0}
+    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--composer-line);background:var(--composer-bg);align-items:flex-end}
+    .composer textarea{flex:1;min-width:0;resize:none;height:46px;min-height:46px;max-height:94px;line-height:24px;overflow-y:hidden;border:1px solid var(--composer-line);border-radius:14px;padding:10px 12px;outline:none;background:var(--composer-input);color:var(--text)}
+    .composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent)}
+    .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--composer-line);border-radius:14px;background:var(--composer-input);color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
+    .photo:disabled,.send:disabled{opacity:.55;cursor:wait}
+    .send{width:65px;flex:0 0 65px;height:46px;border:0;border-radius:14px;background:color-mix(in srgb,var(--accent) 86%,#d9b995);color:#fff;font-weight:850}
+    .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:var(--composer-input);border:1px solid var(--composer-line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
+    .mine .image-bubble{border-radius:16px 16px 4px 16px}
+    .chat-image{display:block;max-width:min(220px,65vw);max-height:240px;width:auto;height:auto;object-fit:contain;border-radius:12px;cursor:zoom-in}
+    .chat-image:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .image-modal{position:fixed;inset:0;z-index:140;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,17,15,.88)}
+    .image-modal.show{display:flex}
+    .image-modal img{max-width:96vw;max-height:90vh;object-fit:contain;border-radius:14px}
+    .image-close{position:absolute;top:16px;right:16px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.9);font-size:24px;line-height:1}
+    .text-modal{position:fixed;inset:0;z-index:125;display:none;flex-direction:column;background:var(--paper);color:var(--text)}
+    .text-modal.show{display:flex}
+    .text-modal-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:max(14px,env(safe-area-inset-top)) 18px 12px;border-bottom:1px solid var(--line);background:var(--composer-bg)}
+    .text-modal-title{font-weight:850;font-size:19px}
+    .text-modal-close{min-width:76px;min-height:46px;border:1px solid var(--bubble-border);border-radius:13px;background:var(--paper);color:var(--text);font-size:17px;font-weight:800}
+    .text-modal-meta{flex:0 0 auto;padding:16px 20px 8px;color:var(--chat-meta);font-size:14px;font-weight:650}
+    .text-modal-body{flex:1;min-height:0;overflow-y:auto;padding:8px 20px max(28px,env(safe-area-inset-bottom));font-size:19px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;overscroll-behavior:contain}
+    .text-modal-close:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .notice{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--notice);border-bottom:1px solid var(--line);font-size:11px;color:var(--notice-text)}
+    .notice-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
+    .notice-actions .profile-shortcut{order:1;flex:0 0 auto;margin:0;min-height:38px;padding:4px 9px 4px 5px;white-space:nowrap}
+    .notice-actions .sound-toggle{order:2}
+    .notice-actions .sound-volume{order:3}
+    .notice-actions .push-toggle{order:4}
+    .push-toggle{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1.5px solid var(--admin-border);border-radius:11px;background:var(--composer-input);color:var(--admin-ink);font-size:12px;font-weight:850;cursor:pointer}
+    .push-toggle[aria-pressed="true"]{background:var(--admin-bubble);color:var(--admin-ink)}
+    .push-toggle:disabled{opacity:.6;cursor:wait}
+    .push-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .notice-copy{min-width:0;line-height:1.5}
+    .sound-toggle{flex:0 0 auto;min-height:38px;padding:6px 11px;border:1.5px solid var(--composer-line);border-radius:11px;background:var(--paper);color:var(--text);font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+    .sound-toggle[aria-pressed="true"]{background:var(--admin-bubble);border-color:var(--admin-border);color:var(--admin-ink)}
+    .sound-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    /* The volume menu floats over messages; opening it never changes chat height. */
+    .notice{position:relative;z-index:6}
+    .sound-volume{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+    .volume-menu-toggle{min-width:52px;height:40px;padding:0 9px;border:1.5px solid var(--admin-border);border-radius:10px;background:var(--paper);color:var(--text);font-size:12px;font-weight:850;cursor:pointer;white-space:nowrap}
+    .volume-menu-toggle:focus-visible,.volume-choice:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .volume-menu{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);z-index:20;display:none;width:116px;padding:5px;border:1.5px solid var(--admin-border);border-radius:13px;background:var(--paper);box-shadow:0 12px 28px rgba(30,22,15,.20)}
+    .sound-volume.open .volume-menu{display:flex;flex-direction:column;gap:2px}
+    .volume-choice{height:40px;width:100%;border:0;border-radius:9px;background:transparent;color:var(--text);font-size:14px;font-weight:750;cursor:pointer;white-space:nowrap}
+    .volume-choice[aria-checked="true"]{background:var(--admin-bubble);color:var(--admin-ink);font-weight:900}
+    .volume-choice[aria-checked="true"]::before{content:'✓ ';color:var(--accent)}
+    /* Dark-mode chat only: clear visual layers without changing any message bubble colors. */
+    body.dark .chat{background:#1c1b1a;border-color:#484039;box-shadow:0 0 0 1px rgba(255,255,255,.035),0 14px 40px rgba(0,0,0,.30)}
+    body.dark .chat .chat-head{background:#1d1b19;border-bottom-color:#494139}
+    body.dark .chat .chat-safety-reminder{background:#29231d;color:#e7d7c4;border-bottom-color:#524437}
+    body.dark .chat .messages{background:linear-gradient(180deg,#25221f 0%,#292521 100%)}
+    body.dark .chat .composer{background:#1c1a18;border-top-color:#52483f;box-shadow:0 -3px 12px rgba(0,0,0,.13)}
+    body.dark .chat .composer textarea,body.dark .chat .photo{background:#292521;border-color:#584d41}
+    body.dark .chat .composer textarea::placeholder{color:#B8ADA1;opacity:1}
+    /* In desktop dark mode the send action needs clear contrast with its white label. */
+    @media(min-width:561px){body.dark .chat .send{background:#835535;color:#fff;font-size:15px;font-weight:750;box-shadow:0 2px 8px rgba(0,0,0,.16)}}
+    /* Desktop typography: retain clear hierarchy without blocky extra-bold lettering. */
+    @media(min-width:561px){
+      /* The desktop header follows the same 720px / 14px grid as main and chat. */
+      header{padding:0}
+      .header-inner{width:min(720px,100%);margin:0 auto;padding:0 14px}
+      html,body{font-family:"Pretendard Variable","Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+      .brand{font-weight:750;letter-spacing:-.025em}
+      h1{font-weight:750;letter-spacing:-.035em}
+      .eyebrow{font-weight:700}
+      .shared-profile-info strong{font-weight:700}
+      .public-room-list h2,.admin-room-list h2{font-weight:720}
+      .public-room-name,.admin-room-name{font-weight:680}
+      .public-room-enter,.admin-room-enter,.entered-badge{font-weight:700}
+      .entry-title,.profile-dialog h2,.profile-view-dialog h2{font-weight:740;letter-spacing:-.025em}
+      .entry-room,.profile-view-name{font-weight:690}
+      .profile-hint{font-weight:400;line-height:1.75}
+      .profile-name-field,.profile-name-field label,.entry-field label{font-weight:650}
+      .profile-pick-button,.profile-actions button,.profile-delete-row .profile-delete-btn,.profile-view-actions button{font-weight:680}
+      .field label,.primary,.room-title,.settings-profile-name{font-weight:700}
+      /* Keep the first-entry dialog readable without heavy, block-like labels. */
+      .entry-dialog .entry-title{font-weight:650;letter-spacing:-.025em}
+      .entry-dialog .entry-room{font-weight:550}
+      .entry-dialog .entry-field label{font-weight:550}
+      .entry-dialog .entry-field input{font-weight:450}
+      .entry-dialog .entry-cancel,.entry-dialog .entry-submit{font-weight:600}
+      .lead{letter-spacing:-.005em}
+    }
+    @media(max-width:560px){
+      /* Same Pretendard as desktop; preserve mobile font sizes and hit areas. */
+      html,body{height:100%;overscroll-behavior:none;font-weight:400;letter-spacing:-.008em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+      .brand,h1,.public-room-list h2,.admin-room-list h2,.entry-title,.profile-dialog h2,.profile-view-dialog h2{font-weight:700}
+      .public-room-name,.admin-room-name,.shared-profile-info strong,.public-room-enter,.admin-room-enter,.entered-badge,.room-title{font-weight:600}
+      .entry-room,.entry-field label,.field label,.primary,.entry-cancel,.entry-submit,.profile-actions button,.profile-pick-button,.profile-view-actions button{font-weight:600}
+      .invite,.leave,.send,.name,.settings-profile-name{font-weight:600}
+      .lead,.profile-hint,.public-room-last,.room-meta{font-weight:400}
+      body.chat-active{height:var(--app-height,100dvh);overflow:hidden}
+      .page{height:var(--app-height,100dvh);min-height:var(--app-height,100dvh);overflow:hidden}
+      header{height:54px;flex:0 0 54px}.sub{display:none}
+      main{width:100%;padding:6px 8px max(8px,env(safe-area-inset-bottom));margin:0;flex:1;min-height:0;overflow:hidden;display:flex}
+      .card{border-radius:20px}
+      .join{padding:24px 18px;width:100%;max-height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+      .join::-webkit-scrollbar{display:none}
+      .chat{width:100%;height:100%;max-height:none;min-height:0;overflow:hidden}
+      .chat-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px 12px}
+      .chat-safety-reminder{min-height:27px;padding:4px 10px;font-size:11px}
+      .chat-head>div:first-child{min-width:0}
+      .room-title{font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .room-meta{font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      /* Profile photo lives in the existing header row without adding height. */
+      .header-profile-btn{width:36px;height:36px;flex-basis:36px}
+      .header-profile-btn .header-avatar{font-size:18px}
+      .chat-edge-panel .notice-actions .profile-shortcut{height:52px;font-size:15px;padding:6px 12px;justify-content:flex-start}
+      .chat-edge-panel .notice-actions .profile-shortcut .profile-icon{width:36px;height:36px;flex-basis:36px;font-size:20px}
+      .head-actions{gap:6px;max-width:160px;flex-wrap:wrap;justify-content:flex-end}
+      .invite{min-height:40px;padding:0 12px;font-size:12px}
+      .leave{min-height:40px;padding:0 12px;font-size:12px}
+      .delete-room{min-height:32px;padding:0 9px;font-size:10px}
+      /* On small screens admins delete rooms from the dedicated management page. */
+      .admin-mode .chat-head{min-height:62px}
+      .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
+      .admin-mode .chat-head .delete-room.show{display:none}
+      .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
+      .chat-settings-content{padding:16px 12px 17px}
+      .chat-edge-panel .settings-actions{gap:6px;margin-top:16px}
+      .chat-edge-panel .setting-action{height:62px;min-height:62px;font-size:11px;padding:6px 2px}
+      .chat-edge-panel .volume-menu-toggle{height:62px}
+      .chat-edge-panel .profile-shortcut{width:78px;height:78px;min-height:78px}
+      .messages{padding:14px 11px;min-height:0;overscroll-behavior:contain;scrollbar-width:none}.bubble{max-width:84%}
+      .msg-content{max-width:calc(92% - 42px)}
+      .msg .bubble,.msg .image-bubble{max-width:100%}
+      .msg-avatar{flex-basis:32px;width:32px;height:32px}
+      .messages::-webkit-scrollbar{display:none}
+      .chat-image{max-width:min(190px,52vw);max-height:200px}
+      .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="header-inner">
+    <div><div class="brand" id="brandHome" role="link" tabindex="0" aria-label="복작소 홈으로">복작소</div><div class="sub">채팅</div></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
+      <button class="header-profile-btn" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="프로필 및 채팅 설정 열기" title="프로필 및 채팅 설정"><span class="header-avatar" id="headerAvatarIcon">👤</span></button>
+      <button class="back home-shortcut" type="button" onclick="location.href='/chat.html'" aria-label="채팅방 목록으로 이동" title="채팅방 목록으로 이동"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-7h6v7"></path></svg></button>
+    </div>
+    </div>
+  </header>
+  <main>
+    <section class="card join" id="joinCard">
+      <div class="eyebrow">BOKJAKSO CHAT</div>
+      <h1>복작소 채팅방</h1>
+      <p class="lead">입장할 채팅방을 선택해 주세요. 프로필은 한 번 만들면 다른 방에서도 사용할 수 있어요.</p>
+      <button type="button" class="shared-profile-card" id="sharedProfileBtn" aria-label="공통 프로필 만들기 또는 수정">
+        <span class="profile-preview" id="sharedProfileAvatar">👤</span>
+        <span class="shared-profile-info"><strong id="sharedProfileName">내 프로필 만들기</strong><small id="sharedProfileHelp">닉네임·사진 한 번 설정, 모든 채팅방에서 사용</small></span>
+        <span class="profile-arrow" aria-hidden="true">›</span>
+      </button>
+      <div class="pwa-install-row" id="pwaInstallRow" hidden><button class="pwa-install-button" id="pwaInstallButton" type="button">휴대폰에 채팅앱 설치하기</button></div>
+      <div class="public-room-list" id="publicRoomList">
+        <h2>채팅방 목록</h2>
+        <div id="publicRooms"><div class="admin-empty">불러오는 중...</div></div>
+      </div>
+      <div class="field" id="roomCodeField"><label for="roomCode">방 코드</label><input id="roomCode" autocomplete="off" placeholder="예: BOKJAKSO"></div>
+      <div class="join-selected" id="selectedRoom"></div>
+      <div id="joinCredentials" style="display:none">
+        <div class="field"><label for="roomPassword">비밀번호</label><input id="roomPassword" type="password" autocomplete="current-password" placeholder="채팅방 비밀번호를 입력해 주세요"></div>
+        <div class="field"><label for="nickname">닉네임</label><input id="nickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름"></div>
+        <button class="primary" id="joinBtn" type="button">선택한 방 입장</button>
+        <div class="status" id="joinStatus"></div>
+        <div class="help" id="joinHelp">방마다 비밀번호가 다를 수 있습니다.</div>
+      </div>
+      <a class="admin-login-link" href="/admin-login.html" aria-label="채팅방 관리자 로그인">관리자 로그인</a>
+      <div class="admin-room-list" id="adminRoomList">
+        <h2>채팅방 목록</h2>
+        <div id="adminRooms"><div class="admin-empty">불러오는 중...</div></div>
+      </div>
+    </section>
+
+    <section class="card chat" id="chatCard" aria-live="polite">
+      <div class="chat-head">
+        <div>
+          <div class="room-title-line"><div class="room-title" id="roomTitle">복작소 채팅방</div><span class="room-presence" aria-label="현재 채팅방에 입장 중">입장 중</span></div>
+          <div class="room-meta"><span id="roomCodeText"></span> · 현재 접속 <span id="activeCount">1</span>명</div>
+        </div>
+        <div class="head-actions">
+          <button class="invite" id="inviteBtn" type="button">초대하기</button>
+          <button class="delete-room" id="deleteRoomBtn" type="button">방 삭제</button>
+          <button class="leave" id="leaveBtn" type="button">나가기</button>
+        </div>
+      </div>
+      <div class="chat-safety-reminder" role="note"><span>⚠️ 계좌번호·비밀번호 등 개인정보를 올리지 마세요.</span></div>
+      <div class="chat-edge-backdrop" id="chatEdgeBackdrop" aria-hidden="true"></div>
+      <aside class="chat-edge-panel" id="chatEdgePanel" role="dialog" aria-modal="true" aria-label="채팅 설정" aria-hidden="true" inert>
+        <div class="chat-edge-panel-head"><strong>채팅 설정</strong><button class="chat-edge-close" id="chatEdgeClose" type="button">닫기 ×</button></div>
+      <div class="chat-settings-content">
+        <div class="chat-settings-identity">
+          <button class="profile-shortcut" id="profileBtn" type="button" aria-label="내 프로필 보기 및 수정" title="프로필 보기·수정"><span class="profile-icon" id="myAvatarIcon">👤</span></button>
+          <div class="settings-profile-name" id="settingsProfileName">내 프로필</div>
+          <div class="settings-profile-hint">사진을 눌러 수정·삭제</div>
+        </div>
+        <div class="settings-actions" aria-label="채팅 알림 설정">
+          <button class="sound-toggle setting-action" id="soundToggle" type="button" aria-pressed="false" title="채팅 중 알림 소리"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span id="soundToggleLabel">소리</span></button>
+          <div class="sound-volume" id="soundVolumeControl">
+            <button class="volume-menu-toggle setting-action" id="volumeMenuBtn" type="button" aria-controls="volumeMenu" aria-expanded="false" aria-haspopup="true" title="알림 음량 선택"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"></path><path d="M15 9a5 5 0 0 1 0 6"></path><path d="M18 6a9 9 0 0 1 0 12"></path></svg><span>음량</span></button>
+            <div class="volume-menu" id="volumeMenu" role="group" aria-label="알림 음량"><button type="button" class="volume-choice" data-volume="30" aria-checked="false" role="radio">작게</button><button type="button" class="volume-choice" data-volume="60" aria-checked="false" role="radio">보통</button><button type="button" class="volume-choice" data-volume="100" aria-checked="true" role="radio">크게</button></div>
+          </div>
+          <button class="push-toggle setting-action" id="pushToggle" type="button" aria-pressed="false" title="앱을 닫아도 새 메시지 알림 받기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M11 18h2"></path></svg><span id="pushToggleLabel">알림</span></button>
+        </div>
+      </div>
+      </aside>
+      <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
+      <div class="composer">
+        <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        <button class="photo" id="photoBtn" type="button" aria-label="사진 올리기" title="사진 올리기">＋</button>
+        <textarea id="messageInput" rows="1" maxlength="1000" placeholder="메시지 입력"></textarea>
+        <button class="send" id="sendBtn" type="button">전송</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="entry-modal" id="entryModal" aria-hidden="true">
+  <div class="entry-dialog" role="dialog" aria-modal="true" aria-labelledby="entryTitle">
+    <div class="entry-title" id="entryTitle">처음 입장</div>
+    <div class="entry-room" id="entryRoomName"></div>
+    <div class="entry-field">
+      <label for="entryPassword">비밀번호</label>
+      <div class="entry-password-wrap">
+        <input id="entryPassword" type="password" autocomplete="current-password" placeholder="채팅방 비밀번호를 입력해 주세요">
+        <button id="entryPasswordToggle" class="entry-eye-toggle" type="button" aria-label="비밀번호 보기" aria-controls="entryPassword" aria-pressed="false" title="비밀번호 보기">
+          <svg class="eye-show-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <svg class="eye-hide-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.6 6.1A11.4 11.4 0 0 1 12 6c6.5 0 10 6 10 6a15.8 15.8 0 0 1-3.1 3.6M6.2 7.7C3.5 9.3 2 12 2 12s3.5 6 10 6a10.2 10.2 0 0 0 4.1-.8"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path><path d="M3 3l18 18"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div class="entry-field">
+      <label for="entryNickname">닉네임</label>
+      <input id="entryNickname" maxlength="20" autocomplete="nickname" placeholder="대화에 표시할 이름">
+    </div>
+    <div class="entry-field">
+      <label>프로필 사진 <span style="font-weight:500;color:var(--muted)">(선택 사항)</span></label>
+      <div class="profile-picker">
+        <span class="profile-preview small" id="entryAvatarPreview">👤</span>
+        <button class="profile-pick-button" id="entryAvatarPick" type="button">사진 선택</button>
+        <input type="file" id="entryAvatarFile" accept="image/jpeg,image/png,image/webp" hidden>
+      </div>
+    </div>
+    <div class="entry-actions">
+      <button class="entry-cancel" id="entryCancel" type="button">취소</button>
+      <button class="entry-submit" id="entrySubmit" type="button">입장하기</button>
+    </div>
+    <div class="entry-status" id="entryStatus"></div>
+  </div>
+</div>
+<div class="profile-view-modal" id="profileViewModal" aria-hidden="true">
+  <div class="profile-view-dialog" role="dialog" aria-modal="true" aria-labelledby="profileViewTitle" aria-describedby="profileViewHint">
+    <h2 id="profileViewTitle">내 프로필</h2>
+    <button class="profile-view-photo" id="profileViewPhoto" type="button" aria-label="프로필 사진 크게 보기" title="사진을 누르면 더 크게 볼 수 있어요">👤</button>
+    <div class="profile-view-name" id="profileViewName">내 프로필</div>
+    <p class="profile-view-hint" id="profileViewHint">사진을 누르면 더 크게 볼 수 있어요.</p>
+    <div class="profile-view-actions">
+      <button class="profile-view-edit" id="profileViewEdit" type="button">프로필 수정</button>
+      <button id="profileViewClose" type="button">닫기</button>
+    </div>
+  </div>
+</div>
+<div class="profile-modal" id="profileModal" aria-hidden="true">
+  <div class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+    <h2 id="profileTitle">내 프로필</h2>
+    <p class="profile-hint">한 번 저장하면 다른 채팅방에도 적용돼요. 사진은 선택 사항이며, 이 기기에서 저장한 프로필로 사용할 수 있어요.</p>
+    <label class="profile-name-field" for="profileNameInput">닉네임
+      <input type="text" id="profileNameInput" maxlength="20" autocomplete="nickname" placeholder="채팅방에 표시할 이름">
+    </label>
+    <div class="profile-picker">
+      <span class="profile-preview" id="profilePreview">👤</span>
+      <button class="profile-pick-button" id="profilePickBtn" type="button">사진 선택 · 변경</button>
+      <input type="file" id="profileFile" accept="image/jpeg,image/png,image/webp" hidden>
+    </div>
+    <div class="profile-actions">
+      <button type="button" id="profileRemoveBtn">기본 아이콘</button>
+      <button type="button" id="profileCancelBtn">닫기</button>
+      <button class="profile-save" type="button" id="profileSaveBtn">프로필 저장</button>
+    </div>
+    <div class="profile-status" id="profileStatus" role="status"></div>
+    <div class="profile-delete-row"><button class="profile-delete-btn" id="profileDeleteBtn" type="button" hidden>프로필 전체 삭제</button></div>
+  </div>
+</div>
+<div class="avatar-lightbox" id="avatarLightbox" role="dialog" aria-modal="true" aria-label="프로필 사진 확대, 바깥 화면을 누르면 닫힙니다" aria-hidden="true" tabindex="-1"><img class="avatar-lightbox-photo" id="avatarLightboxImg" alt="프로필 사진"></div>
+<div class="image-modal" id="imageModal" aria-hidden="true">
+  <button class="image-close" id="imageClose" type="button" aria-label="닫기">×</button>
+  <img id="imageModalImg" alt="채팅 이미지 크게 보기">
+</div>
+<div class="text-modal" id="textModal" role="dialog" aria-modal="true" aria-labelledby="textModalTitle" aria-hidden="true">
+  <div class="text-modal-head"><div class="text-modal-title" id="textModalTitle">전체 메시지</div><button class="text-modal-close" id="textModalClose" type="button">닫기</button></div>
+  <div class="text-modal-meta" id="textModalMeta"></div>
+  <div class="text-modal-body" id="textModalBody" tabindex="0"></div>
+</div>
+<script>
+  function syncViewportHeight(){
+    const h=window.visualViewport?.height||window.innerHeight;
+    document.documentElement.style.setProperty('--app-height',Math.round(h)+'px');
+  }
+  syncViewportHeight();
+  window.addEventListener('resize',syncViewportHeight,{passive:true});
+  window.visualViewport?.addEventListener('resize',syncViewportHeight,{passive:true});
+  window.visualViewport?.addEventListener('scroll',syncViewportHeight,{passive:true});
+
+  // Standalone installable PWA: no old homepage or its service worker is required.
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'})
+      .catch(error=>console.warn('채팅앱 등록 실패:',error)));
+  }
+  let deferredChatInstall=null;
+  const installRow=document.getElementById('pwaInstallRow');
+  const installButton=document.getElementById('pwaInstallButton');
+  window.addEventListener('beforeinstallprompt',event=>{
+    event.preventDefault();
+    deferredChatInstall=event;
+    installRow.hidden=false;
+  });
+  installButton.addEventListener('click',async()=>{
+    if(!deferredChatInstall)return;
+    const prompt=deferredChatInstall;
+    deferredChatInstall=null;
+    installRow.hidden=true;
+    await prompt.prompt();
+  });
+  window.addEventListener('appinstalled',()=>{deferredChatInstall=null;installRow.hidden=true});
+  const KEY='bokjaksoChatSessionV1';
+  const SESSIONS_KEY='bokjaksoChatSessionsV2';
+  const REMEMBER_MS=365*24*60*60*1000;
+  const ADMIN_KEY='wjarchiveAdminAccessToken';
+  const THEME_KEY='bokjaksoChatThemeV1';
+  const SOUND_KEY='bokjaksoChatSoundV1';
+  const SOUND_VOLUME_KEY='bokjaksoChatSoundVolumeV1';
+  const SHARED_PROFILE_KEY='bokjaksoChatSharedProfileV1';
+  const SHARED_PROFILE_DELETED_KEY='bokjaksoChatSharedProfileDeletedV1';
+  const els={
+    joinCard:document.getElementById('joinCard'),chatCard:document.getElementById('chatCard'),
+    sharedProfileBtn:document.getElementById('sharedProfileBtn'),sharedProfileAvatar:document.getElementById('sharedProfileAvatar'),sharedProfileName:document.getElementById('sharedProfileName'),sharedProfileHelp:document.getElementById('sharedProfileHelp'),
+    roomCode:document.getElementById('roomCode'),roomPassword:document.getElementById('roomPassword'),
+    nickname:document.getElementById('nickname'),joinBtn:document.getElementById('joinBtn'),joinStatus:document.getElementById('joinStatus'),
+    roomTitle:document.getElementById('roomTitle'),roomCodeText:document.getElementById('roomCodeText'),activeCount:document.getElementById('activeCount'),
+    messages:document.getElementById('messages'),emptyState:document.getElementById('emptyState'),
+    messageInput:document.getElementById('messageInput'),sendBtn:document.getElementById('sendBtn'),leaveBtn:document.getElementById('leaveBtn'),inviteBtn:document.getElementById('inviteBtn'),deleteRoomBtn:document.getElementById('deleteRoomBtn'),
+    photoInput:document.getElementById('photoInput'),photoBtn:document.getElementById('photoBtn'),
+    imageModal:document.getElementById('imageModal'),imageModalImg:document.getElementById('imageModalImg'),imageClose:document.getElementById('imageClose'),
+    avatarLightbox:document.getElementById('avatarLightbox'),avatarLightboxImg:document.getElementById('avatarLightboxImg'),
+    textModal:document.getElementById('textModal'),textModalClose:document.getElementById('textModalClose'),textModalMeta:document.getElementById('textModalMeta'),textModalBody:document.getElementById('textModalBody'),
+    themeToggle:document.getElementById('themeToggle'),soundToggle:document.getElementById('soundToggle'),volumeMenuBtn:document.getElementById('volumeMenuBtn'),volumeMenu:document.getElementById('volumeMenu'),soundVolumeControl:document.getElementById('soundVolumeControl'),pushToggle:document.getElementById('pushToggle'),
+    adminRoomAddBtn:document.getElementById('adminRoomAddBtn'),
+    adminRoomList:document.getElementById('adminRoomList'),
+    adminRooms:document.getElementById('adminRooms'),
+    joinHelp:document.getElementById('joinHelp'),
+    publicRoomList:document.getElementById('publicRoomList'),
+    publicRooms:document.getElementById('publicRooms'),
+    roomCodeField:document.getElementById('roomCodeField'),
+    selectedRoom:document.getElementById('selectedRoom'),
+    joinCredentials:document.getElementById('joinCredentials'),
+    entryModal:document.getElementById('entryModal'),
+    entryRoomName:document.getElementById('entryRoomName'),
+    entryPassword:document.getElementById('entryPassword'),
+    entryPasswordToggle:document.getElementById('entryPasswordToggle'),
+    entryNickname:document.getElementById('entryNickname'),
+    entryAvatarPick:document.getElementById('entryAvatarPick'),entryAvatarFile:document.getElementById('entryAvatarFile'),entryAvatarPreview:document.getElementById('entryAvatarPreview'),
+    profileBtn:document.getElementById('profileBtn'),myAvatarIcon:document.getElementById('myAvatarIcon'),settingsProfileName:document.getElementById('settingsProfileName'),soundToggleLabel:document.getElementById('soundToggleLabel'),pushToggleLabel:document.getElementById('pushToggleLabel'),
+    chatEdgeTab:document.getElementById('chatEdgeTab'),headerAvatarIcon:document.getElementById('headerAvatarIcon'),chatEdgePanel:document.getElementById('chatEdgePanel'),chatEdgeBackdrop:document.getElementById('chatEdgeBackdrop'),chatEdgeClose:document.getElementById('chatEdgeClose'),
+    profileViewModal:document.getElementById('profileViewModal'),profileViewPhoto:document.getElementById('profileViewPhoto'),profileViewName:document.getElementById('profileViewName'),profileViewHint:document.getElementById('profileViewHint'),profileViewEdit:document.getElementById('profileViewEdit'),profileViewClose:document.getElementById('profileViewClose'),
+    profileModal:document.getElementById('profileModal'),profilePreview:document.getElementById('profilePreview'),profileNameInput:document.getElementById('profileNameInput'),profilePickBtn:document.getElementById('profilePickBtn'),profileFile:document.getElementById('profileFile'),profileSaveBtn:document.getElementById('profileSaveBtn'),profileRemoveBtn:document.getElementById('profileRemoveBtn'),profileDeleteBtn:document.getElementById('profileDeleteBtn'),profileCancelBtn:document.getElementById('profileCancelBtn'),profileStatus:document.getElementById('profileStatus'),
+    entrySubmit:document.getElementById('entrySubmit'),
+    entryCancel:document.getElementById('entryCancel'),
+    entryStatus:document.getElementById('entryStatus')
+  };
+  const CHAT_POLL_MS=1500; // Faster visible-room updates; pause while the tab is hidden.
+  let session=null,lastId=0,lastSyncAt='',pollTimer=null,busy=false;
+  let sharedProfile=null;
+  try{
+    const stored=JSON.parse(localStorage.getItem(SHARED_PROFILE_KEY)||'null');
+    if(stored?.id&&stored?.token)sharedProfile=stored;
+  }catch(_){}
+  function sharedCredentials(){
+    return sharedProfile ? {profileId:sharedProfile.id,profileToken:sharedProfile.token} : {};
+  }
+  function refreshSharedProfileCard(){
+    paintAvatar(els.sharedProfileAvatar,sharedProfile?.avatar_url||null);
+    els.sharedProfileName.textContent=sharedProfile?.nickname||'내 프로필 만들기';
+    els.sharedProfileHelp.textContent=sharedProfile?'모든 채팅방 공통 · 눌러서 수정':'닉네임·사진 한 번 설정, 모든 방에서 사용';
+    if(els.nickname&&sharedProfile)els.nickname.value=sharedProfile.nickname;
+    if(!session)paintAvatar(els.headerAvatarIcon,sharedProfile?.avatar_url||null);
+    els.settingsProfileName.textContent=sharedProfile?.nickname||session?.member?.nickname||'내 프로필';
+  }
+  function storeSharedProfile(profile,token){
+    sharedProfile={id:profile.id,token:token||sharedProfile?.token,
+      nickname:profile.nickname,avatar_url:profile.avatar_url||null};
+    localStorage.setItem(SHARED_PROFILE_KEY,JSON.stringify(sharedProfile));
+    localStorage.removeItem(SHARED_PROFILE_DELETED_KEY);
+    refreshSharedProfileCard();
+  }
+  async function ensureSharedProfile(nickname){
+    if(sharedProfile)return sharedProfile;
+    const value=String(nickname||'').trim().slice(0,20);
+    if(!value||value==='관리자')throw new Error('프로필 닉네임을 입력해 주세요.');
+    const source=session||(Object.values(getRememberedSessions()).find(item=>item.member?.nickname!=='관리자')||null);
+    const result=await api({action:'chat-profile-create',nickname:value,
+      sourceMemberId:source?.member?.id||'',sourceSessionToken:source?.sessionToken||''});
+    storeSharedProfile(result.profile,result.profileToken);
+    return sharedProfile;
+  }
+  async function syncSharedProfileToRoom(){
+    if(!session||!sharedProfile)return;
+    const currentId=session.member.id,currentToken=session.sessionToken,profileId=sharedProfile.id;
+    const data=await api({action:'chat-profile-link',memberId:currentId,sessionToken:currentToken,...sharedCredentials()});
+    if(!session||session.member.id!==currentId||sharedProfile?.id!==profileId)return;
+    if(data.member){
+      session.member.nickname=data.member.nickname||session.member.nickname;
+      session.member.profile_id=profileId;
+      updateMyAvatar(data.member.avatar_url||null);
+    }
+  }
+  async function refreshSavedSharedProfile(){
+    if(!sharedProfile)return;
+    try{
+      const data=await api({action:'chat-profile-read',...sharedCredentials()});
+      if(sharedProfile?.id===data.profile.id){
+        storeSharedProfile(data.profile);
+        if(session&&session.member.profile_id===sharedProfile.id){
+          updateMyAvatar(data.profile.avatar_url||null);
+        }
+      }
+    }catch(error){console.warn('공통 프로필 확인 실패',error)}
+  }
+  const memberAvatars=new Map();
+  const memberNames=new Map();
+  let entryAvatarChoice=null,profileAvatarChoice=null,profileWorking=false,avatarPreviewObjectUrl=null,entryPreviewObjectUrl=null;
+  let lastUploadedProfilePhoto=null; // Retry saving without uploading a duplicate on ImageKit.
+  function paintAvatar(target,url){
+    if(!target)return;
+    target.replaceChildren();
+    if(typeof url==='string'&&(/^https:\/\//i.test(url)||url.startsWith('blob:'))){
+      const img=document.createElement('img');
+      img.alt='';img.loading=target.classList.contains('msg-avatar')?'lazy':'eager';img.decoding='async';
+      img.onerror=()=>{if(img.parentElement===target)target.textContent='👤'};
+      img.src=url;
+      target.appendChild(img);
+    }else{target.textContent='👤'}
+  }
+  function paintMessageAvatar(avatar,url){
+    paintAvatar(avatar,url);
+    const hasPhoto=Boolean(avatar.querySelector('img'));
+    if(hasPhoto){
+      avatar.setAttribute('role','button');
+      avatar.setAttribute('tabindex','0');
+      avatar.setAttribute('aria-haspopup','dialog');
+      avatar.setAttribute('aria-label','프로필 사진 크게 보기');
+      avatar.setAttribute('title','프로필 사진 크게 보기');
+    }else{
+      avatar.removeAttribute('role');
+      avatar.removeAttribute('tabindex');
+      avatar.removeAttribute('aria-haspopup');
+      avatar.removeAttribute('aria-label');
+      avatar.removeAttribute('title');
+    }
+  }
+  function refreshMemberAvatars(memberId){
+    const url=memberAvatars.get(String(memberId))||null;
+    els.messages.querySelectorAll('.msg-avatar').forEach(avatar=>{
+      if(avatar.dataset.memberId===String(memberId))paintMessageAvatar(avatar,url);
+    });
+    if(session&&String(session.member.id)===String(memberId)){
+      paintAvatar(els.myAvatarIcon,url);
+      paintAvatar(els.headerAvatarIcon,url);
+    }
+  }
+  function applyProfileRows(rows){
+    if(!Array.isArray(rows))return;
+    for(const profile of rows){
+      if(!profile?.id)continue;
+      const id=String(profile.id),url=profile.avatar_url||null;
+      if(memberAvatars.get(id)!==url){
+        memberAvatars.set(id,url);
+        refreshMemberAvatars(id);
+      }
+      if(profile.nickname&&memberNames.get(id)!==profile.nickname){
+        memberNames.set(id,profile.nickname);
+        els.messages.querySelectorAll('.msg').forEach(row=>{
+          if(row.dataset.memberId===id){
+            const label=row.querySelector('.name');
+            if(label)label.textContent=profile.nickname;
+          }
+        });
+      }
+    }
+  }
+  function updateMyAvatar(url){
+    if(!session)return;
+    session.member.avatar_url=url||null;
+    memberAvatars.set(String(session.member.id),url||null);
+    refreshMemberAvatars(session.member.id);
+    saveSession();
+  }
+  let soundEnabled=localStorage.getItem(SOUND_KEY)==='on';
+  const savedSoundVolume=localStorage.getItem(SOUND_VOLUME_KEY);
+  let personalSoundVolume=[30,60,100].includes(Number(savedSoundVolume))?Number(savedSoundVolume):null;
+  let defaultSoundVolume=100;
+  let lastSoundAt=0;
+  function effectiveSoundVolume(){return personalSoundVolume??defaultSoundVolume}
+  const volumeLabels={30:'작게',60:'보통',100:'크게'};
+  function displaySoundVolume(){
+    const current=effectiveSoundVolume();
+    els.volumeMenuBtn.title='알림 음량 · 현재 '+volumeLabels[current];
+    els.volumeMenuBtn.setAttribute('aria-label','알림 음량 설정 · 현재 '+volumeLabels[current]);
+    els.volumeMenu.querySelectorAll('[data-volume]').forEach(button=>{
+      button.setAttribute('aria-checked',String(Number(button.dataset.volume)===current));
+    });
+  }
+  function closeVolumeMenu(restoreFocus=false){
+    const wasOpen=els.soundVolumeControl.classList.contains('open');
+    els.soundVolumeControl.classList.remove('open');
+    els.volumeMenuBtn.setAttribute('aria-expanded','false');
+    if(restoreFocus&&wasOpen)els.volumeMenuBtn.focus();
+  }
+  function setSoundVolume(level){
+    if(![30,60,100].includes(level))return;
+    personalSoundVolume=level;
+    localStorage.setItem(SOUND_VOLUME_KEY,String(level));
+    displaySoundVolume();
+    closeVolumeMenu(true);
+    if(soundEnabled)playBokjakSound(true);
+  }
+  displaySoundVolume();
+  async function loadSoundDefault(){
+    try{
+      const data=await api({action:'chat-sound-config'});
+      const level=Number(data.level);
+      if([30,60,100].includes(level))defaultSoundVolume=level;
+    }catch(error){console.warn('기본 알림 음량 불러오기 실패',error)}
+    displaySoundVolume();
+  }
+  function updateSoundToggle(){
+    els.soundToggleLabel.textContent=soundEnabled?'소리 켜짐':'소리 꺼짐';
+    els.soundToggle.setAttribute('aria-pressed',String(soundEnabled));
+    els.soundToggle.setAttribute('aria-label',soundEnabled?'복작 알림 소리 끄기':'복작 알림 소리 켜기');
+    els.soundToggle.title=soundEnabled?'새 메시지 알림 소리 끄기':'새 메시지 알림 소리 켜기';
+  }
+  function playBokjakSound(preview=false){
+    if(!soundEnabled||(!preview&&document.visibilityState==='hidden'))return;
+    const now=Date.now();
+    if(!preview&&now-lastSoundAt<2500)return;
+    lastSoundAt=now;
+    const volume=effectiveSoundVolume()/100;
+    function fallbackChime(){
+      try{
+        const AudioCtx=window.AudioContext||window.webkitAudioContext;
+        if(!AudioCtx)return;
+        const context=new AudioCtx();
+        if(context.state==='suspended')context.resume().catch(()=>{});
+        const t=context.currentTime;
+        [[0,640],[.14,860]].forEach(([offset,freq])=>{
+          const oscillator=context.createOscillator(),gain=context.createGain();
+          oscillator.type='sine';
+          oscillator.frequency.value=freq;
+          gain.gain.setValueAtTime(.0001,t+offset);
+          gain.gain.exponentialRampToValueAtTime(.22*volume,t+offset+.015);
+          gain.gain.exponentialRampToValueAtTime(.0001,t+offset+.13);
+          oscillator.connect(gain);gain.connect(context.destination);
+          oscillator.start(t+offset);oscillator.stop(t+offset+.14);
+        });
+        setTimeout(()=>context.close().catch(()=>{}),700);
+      }catch(_){}
+    }
+    try{
+      if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
+        fallbackChime();return;
+      }
+      const voice=new SpeechSynthesisUtterance('뽁짝');
+      voice.lang='ko-KR';
+      voice.rate=1.18;
+      voice.pitch=1.2;
+      voice.volume=volume;
+      const koreanVoice=window.speechSynthesis.getVoices().find(v=>String(v.lang).toLowerCase().startsWith('ko'));
+      if(koreanVoice)voice.voice=koreanVoice;
+      voice.onerror=()=>fallbackChime();
+      window.speechSynthesis.speak(voice);
+    }catch(_){fallbackChime()}
+  }
+  updateSoundToggle();
+  displaySoundVolume();
+  function applyTheme(mode){
+    const dark=mode==='dark';
+    document.body.classList.toggle('dark',dark);
+    els.themeToggle.textContent=dark?'☀':'☾';
+    els.themeToggle.setAttribute('aria-label',dark?'밝은 모드로 전환':'다크모드로 전환');
+    els.themeToggle.setAttribute('title',dark?'밝은 모드로 전환':'다크모드로 전환');
+    localStorage.setItem(THEME_KEY,dark?'dark':'light');
+  }
+
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function fmtTime(value){try{return new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit'}).format(new Date(value))}catch(_){return ''}}
+  function fmtRoomLastDate(value){
+    if(!value)return '';
+    const date=new Date(value);
+    if(!Number.isFinite(date.getTime()))return '';
+    const formatter=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'});
+    const parts=Object.fromEntries(formatter.formatToParts(date).map(p=>[p.type,p.value]));
+    const today=Object.fromEntries(formatter.formatToParts(new Date()).map(p=>[p.type,p.value]));
+    return (parts.year===today.year?'':parts.year+'.')+parts.month+'.'+parts.day;
+  }
+  async function api(payload){
+    const r=await fetch('/api/store-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.message||'요청에 실패했습니다.');
+    return data;
+  }
+  let pushEnabled=false,pushBusy=false;
+  function pushAvailable(){
+    return window.isSecureContext && ('serviceWorker' in navigator) &&
+      ('PushManager' in window) && ('Notification' in window);
+  }
+  function updatePushButton(){
+    els.pushToggleLabel.textContent=pushBusy?'처리 중…':(pushEnabled?'알림 켜짐':'알림 받기');
+    els.pushToggle.setAttribute('aria-pressed',String(pushEnabled));
+    els.pushToggle.setAttribute('aria-label',pushEnabled?'휴대폰 푸시 알림 해제':'휴대폰 푸시 알림 받기');
+    els.pushToggle.disabled=pushBusy;
+  }
+  function vapidKeyBytes(base64){
+    const encoded=base64.replace(/-/g,'+').replace(/_/g,'/');
+    const decoded=atob(encoded.padEnd(Math.ceil(encoded.length/4)*4,'='));
+    return Uint8Array.from(decoded,char=>char.charCodeAt(0));
+  }
+  async function refreshPushState(){
+    const memberId=session?.member?.id;
+    pushEnabled=false;
+    if(!memberId||!pushAvailable()){updatePushButton();return}
+    try{
+      const worker=await navigator.serviceWorker.getRegistration('/');
+      const current=await worker?.pushManager.getSubscription();
+      if(current && session?.member?.id===memberId){
+        const response=await api({action:'chat-push-status',memberId,sessionToken:session.sessionToken,endpoint:current.endpoint});
+        pushEnabled=Boolean(response.subscribed);
+      }
+    }catch(error){console.warn('알림 상태 확인 실패',error)}
+    updatePushButton();
+  }
+  async function togglePhonePush(){
+    if(!session||pushBusy)return;
+    if(!pushAvailable()){
+      alert('이 브라우저는 휴대폰 푸시 알림을 지원하지 않습니다. 안드로이드에서는 크롬으로 복작소를 열어주세요.');
+      return;
+    }
+    if(/iPhone|iPad|iPod/i.test(navigator.userAgent)&&!navigator.standalone){
+      alert('아이폰에서는 Safari의 공유 버튼을 눌러 홈 화면에 복작소를 추가한 뒤, 그 아이콘에서 열어 알림을 켜주세요.');
+      return;
+    }
+    const memberId=session.member.id,sessionToken=session.sessionToken;
+    // Request permission directly from the click gesture, before any network await.
+    let permission=Notification.permission;
+    if(!pushEnabled){
+      if(permission==='denied'){
+        alert('휴대폰 설정에서 이 사이트의 알림이 차단되어 있습니다. 브라우저 알림 설정에서 복작소를 허용해 주세요.');
+        return;
+      }
+      if(permission!=='granted'){
+        permission=await Notification.requestPermission();
+        if(permission!=='granted'){
+          alert('알림이 허용되지 않았습니다. 허용한 뒤 다시 시도해 주세요.');
+          return;
+        }
+      }
+    }
+    pushBusy=true;updatePushButton();
+    try{
+      const registration=await navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'});
+      await navigator.serviceWorker.ready;
+      let subscription=await registration.pushManager.getSubscription();
+      if(pushEnabled){
+        if(subscription){
+          await api({action:'chat-push-unsubscribe',memberId,sessionToken,endpoint:subscription.endpoint});
+        }
+        pushEnabled=false;
+        alert('이 채팅방의 휴대폰 알림을 해제했습니다.');
+      }else{
+        if(!subscription){
+          const config=await api({action:'chat-push-config'});
+          subscription=await registration.pushManager.subscribe({
+            userVisibleOnly:true,applicationServerKey:vapidKeyBytes(config.publicKey)
+          });
+        }
+        await api({action:'chat-push-subscribe',memberId,sessionToken,subscription:subscription.toJSON()});
+        pushEnabled=true;
+        alert('휴대폰 알림을 켰습니다. 복작소를 닫아도 새 메시지를 받도록 설정했어요.');
+      }
+    }catch(error){
+      alert('휴대폰 알림 설정에 실패했습니다. '+(error.message||'브라우저 설정을 확인해 주세요.'));
+    }finally{pushBusy=false;updatePushButton()}
+  }
+  updatePushButton();
+  function getRememberedSessions(){
+    let map={};
+    try{
+      map=JSON.parse(localStorage.getItem(SESSIONS_KEY)||'{}')||{};
+      const now=Date.now();
+      for(const [code,s] of Object.entries(map)){
+        if(!s?.expiresAt||s.expiresAt<=now||!s?.member?.id||!s?.sessionToken||!s?.room?.id) delete map[code];
+      }
+      const legacy=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(legacy?.expiresAt>Date.now()&&legacy?.room?.code&&legacy?.member?.id&&legacy?.sessionToken){
+        map[String(legacy.room.code).toUpperCase()]=legacy;
+        localStorage.removeItem(KEY);
+      }
+      localStorage.setItem(SESSIONS_KEY,JSON.stringify(map));
+    }catch(_){map={}}
+    return map;
+  }
+  function rememberedFor(code){
+    return getRememberedSessions()[String(code||'').toUpperCase()]||null;
+  }
+  function saveSession(){
+    const saved={...session,expiresAt:Date.now()+REMEMBER_MS};
+    const map=getRememberedSessions();
+    map[String(session.room.code||'').toUpperCase()]=saved;
+    localStorage.setItem(SESSIONS_KEY,JSON.stringify(map));
+  }
+  function forgetCurrentRoom(){
+    if(session?.room?.code){
+      const map=getRememberedSessions();
+      delete map[String(session.room.code).toUpperCase()];
+      localStorage.setItem(SESSIONS_KEY,JSON.stringify(map));
+    }
+  }
+  function clearSession(removeRemembered=false){
+    if(removeRemembered)forgetCurrentRoom();
+    session=null;lastId=0;lastSyncAt='';
+  }
+  let followLatestAfterEntry=false;
+  function scrollToNewest(){
+    if(!els.chatCard.classList.contains('show'))return;
+    els.messages.scrollTop=els.messages.scrollHeight;
+  }
+  const entryLayoutObserver=typeof ResizeObserver==='function'
+    ? new ResizeObserver(()=>{if(followLatestAfterEntry)scrollToNewest()})
+    : null;
+  function stopEntryAutoScroll(){
+    followLatestAfterEntry=false;
+    entryLayoutObserver?.disconnect();
+  }
+  function showChat(){
+    memberAvatars.clear();
+    memberNames.clear();
+    if(session?.member?.id){
+      memberAvatars.set(String(session.member.id),session.member.avatar_url||null);
+      memberNames.set(String(session.member.id),session.member.nickname||'');
+    }
+    paintAvatar(els.myAvatarIcon,session?.member?.avatar_url||null);
+    paintAvatar(els.headerAvatarIcon,session?.member?.avatar_url||sharedProfile?.avatar_url||null);
+    els.settingsProfileName.textContent=session?.member?.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session?.member?.nickname||'내 프로필');
+    document.body.classList.add('chat-active');
+    followLatestAfterEntry=true;
+    entryLayoutObserver?.disconnect();
+    clearInterval(pollTimer);pollTimer=null;
+    lastId=0;lastSyncAt='';
+    els.messages.innerHTML='<div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div>';
+    els.joinCard.style.display='none';els.chatCard.classList.add('show');
+    els.roomTitle.textContent=session.room.title||'복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
+    els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
+    loadMessages(true);
+    pollTimer=setInterval(()=>{if(!document.hidden)loadMessages(false)},CHAT_POLL_MS);
+    if(sharedProfile)syncSharedProfileToRoom().catch(error=>console.warn('공통 프로필 동기화 실패',error));
+    refreshPushState();
+  }
+  function showJoin(preserveRemembered=false){
+    if(els.chatCard.classList.contains('edge-open'))setChatEdgeOpen(false,false);
+    stopEntryAutoScroll();
+    document.body.classList.remove('chat-active');
+    clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';
+    if(preserveRemembered){
+      session=null;lastId=0;
+    }else{
+      clearSession();
+    }
+  }
+  let textModalReturnFocus=null;
+  function openTextMessage(message,author,time,bubble){
+    textModalReturnFocus=bubble;
+    els.textModalMeta.textContent=author+' · '+fmtTime(time);
+    els.textModalBody.textContent=message;
+    els.textModalBody.scrollTop=0;
+    els.textModal.classList.add('show');
+    els.textModal.setAttribute('aria-hidden','false');
+    els.textModalClose.focus();
+  }
+  function closeTextMessage(){
+    els.textModal.classList.remove('show');
+    els.textModal.setAttribute('aria-hidden','true');
+    els.textModalBody.textContent='';
+    if(textModalReturnFocus?.isConnected)textModalReturnFocus.focus();
+    textModalReturnFocus=null;
+  }
+  function updateLongMessage(bubble){
+    if(!bubble)return;
+    const preview=bubble.querySelector('.message-text');
+    if(!preview)return;
+    bubble.classList.remove('is-truncated');
+    const lineHeight=parseFloat(getComputedStyle(preview).lineHeight)||23.25;
+    const long=preview.scrollHeight>lineHeight*4+3;
+    bubble.classList.toggle('is-truncated',long);
+    if(long){
+      bubble.setAttribute('role','button');
+      bubble.setAttribute('tabindex','0');
+      bubble.setAttribute('aria-haspopup','dialog');
+      bubble.setAttribute('aria-label','긴 메시지 전체보기');
+    }else{
+      bubble.removeAttribute('role');
+      bubble.removeAttribute('tabindex');
+      bubble.removeAttribute('aria-haspopup');
+      bubble.removeAttribute('aria-label');
+    }
+  }
+  window.addEventListener('resize',()=>{
+    document.querySelectorAll('#messages .bubble').forEach(updateLongMessage);
+  },{passive:true});
+  function appendMessages(items){
+    if(!Array.isArray(items)||!items.length)return;
+    const empty=document.getElementById('emptyState');if(empty)empty.remove();
+    const nearBottom=els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<90;
+    for(const m of items){
+      if(document.getElementById('msg-'+m.id))continue;
+      lastId=Math.max(lastId,Number(m.id)||0);
+      const mine=session&&m.member_id===session.member.id;
+      const isAdminMessage=String(m.nickname||'').trim()==='관리자';
+      const wrap=document.createElement('div');wrap.className='msg'+(mine?' mine':'')+(isAdminMessage?' admin':'');wrap.id='msg-'+m.id;wrap.dataset.memberId=String(m.member_id);
+      const displayName=memberNames.get(String(m.member_id))||m.nickname;
+      if(m.message_type==='image'&&m.image_url){
+        wrap.innerHTML='<div class="name">'+esc(displayName)+'</div><div class="image-bubble"><img class="chat-image" src="'+esc(m.image_url)+'" alt="채팅 사진 - 선택하면 크게 볼 수 있습니다" title="사진 크게 보기" role="button" tabindex="0" loading="'+(items.length<=6?'eager':'lazy')+'" decoding="async"></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        const img=wrap.querySelector('.chat-image');
+        let suppressImageOpen=false;
+        img.addEventListener('click',()=>{if(suppressImageOpen){suppressImageOpen=false;return}openImage(m.image_url)});
+        img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openImage(m.image_url)}});
+        img.addEventListener('load',()=>{
+          trimDarkImageMargins(img,m.image_url);
+          if(followLatestAfterEntry)scrollToNewest();
+        });
+        if(img.complete&&img.naturalWidth)trimDarkImageMargins(img,m.image_url);
+        if(mine){
+          const target=wrap.querySelector('.image-bubble');
+          attachLongPressDelete(target,m.id,()=>{suppressImageOpen=true});
+        }
+      }else{
+        wrap.innerHTML='<div class="name">'+esc(displayName)+'</div><div class="bubble"><div class="message-text">'+esc(m.body)+'</div><span class="read-more" aria-hidden="true">… 전체보기</span></div><div class="time">'+fmtTime(m.created_at)+'</div>';
+        const bubble=wrap.querySelector('.bubble');
+        let suppressTextOpen=false;
+        const showLongText=()=>{
+          if(suppressTextOpen){suppressTextOpen=false;return}
+          if(bubble.classList.contains('is-truncated'))openTextMessage(m.body,memberNames.get(String(m.member_id))||m.nickname,m.created_at,bubble);
+        };
+        bubble.addEventListener('click',showLongText);
+        bubble.addEventListener('keydown',e=>{
+          if((e.key==='Enter'||e.key===' ')&&bubble.classList.contains('is-truncated')){
+            e.preventDefault();showLongText();
+          }
+        });
+        if(mine)attachLongPressDelete(bubble,m.id,()=>{
+          suppressTextOpen=true;
+          setTimeout(()=>{suppressTextOpen=false},2000);
+        });
+      }
+      // Keep the sender's portrait beside the existing text/photo message.
+      const content=document.createElement('div');content.className='msg-content';
+      while(wrap.firstChild)content.appendChild(wrap.firstChild);
+      const avatar=document.createElement('span');avatar.className='msg-avatar';avatar.dataset.memberId=String(m.member_id);
+      paintMessageAvatar(avatar,memberAvatars.get(String(m.member_id))||null);
+      wrap.append(avatar,content);
+      els.messages.appendChild(wrap);
+      if(followLatestAfterEntry)entryLayoutObserver?.observe(wrap);
+      if(m.message_type!=='image')updateLongMessage(wrap.querySelector('.bubble'));
+    }
+    if(nearBottom)els.messages.scrollTop=els.messages.scrollHeight;
+  }
+  async function loadMessages(initial){
+    if(!session||busy)return;busy=true;
+    const requestedMemberId=session.member.id;
+    const requestedSessionToken=session.sessionToken;
+    try{
+      // Include members already visible in the chat so newly changed profile photos
+      // refresh without anyone needing to send another message.
+      const visibleMemberIds=[...new Set(Array.from(
+        els.messages.querySelectorAll('.msg-avatar[data-member-id]'),
+        avatar=>avatar.dataset.memberId
+      ).filter(Boolean))].slice(-100);
+      const data=await api({
+        action:'chat-list',
+        memberId:requestedMemberId,
+        sessionToken:requestedSessionToken,
+        afterId:initial?0:lastId,
+        changedSince:initial?'':lastSyncAt,
+        visibleMemberIds
+      });
+      // Ignore a response from a room that was exited while the request was in flight.
+      if(!session||session.member.id!==requestedMemberId||session.sessionToken!==requestedSessionToken)return;
+      els.activeCount.textContent=data.activeCount||1;
+      if(typeof data.roomTitle==='string'&&data.roomTitle&&data.roomTitle!==session.room.title){
+        session.room.title=data.roomTitle;
+        els.roomTitle.textContent=data.roomTitle;
+        saveSession();
+      }
+      applyProfileRows(data.profiles);
+      if(session&&data.myAvatarUrl!==undefined&&session.member.avatar_url!==data.myAvatarUrl){
+        updateMyAvatar(data.myAvatarUrl);
+      }
+      appendMessages(data.messages);
+      // No alert for the initial history or our own messages. Only newly received messages.
+      if(!initial&&Array.isArray(data.messages)&&data.messages.some(m=>String(m.member_id)!==String(session.member.id))){
+        playBokjakSound();
+      }
+      if(Array.isArray(data.deletedIds)){
+        for(const id of data.deletedIds)document.getElementById('msg-'+id)?.remove();
+      }
+      if(data.syncAt)lastSyncAt=data.syncAt;
+      if(initial){
+        scrollToNewest();
+        requestAnimationFrame(()=>{if(followLatestAfterEntry)scrollToNewest()});
+      }
+    }catch(e){
+      if(!session||session.member.id!==requestedMemberId||session.sessionToken!==requestedSessionToken)return;
+      if(/다시 입장|제한|보관|닫혀/.test(e.message)){alert(e.message);forgetCurrentRoom();showJoin(true);loadPublicRooms()}
+    }finally{busy=false}
+  }
+  // On returning to the app, fetch immediately instead of waiting for the next tick.
+  function refreshChatWhenVisible(){
+    if(!document.hidden&&session&&els.chatCard.classList.contains('show'))loadMessages(false);
+  }
+  document.addEventListener('visibilitychange',refreshChatWhenVisible);
+  window.addEventListener('focus',refreshChatWhenVisible);
+  window.addEventListener('online',refreshChatWhenVisible);
+  async function join(){
+    els.joinStatus.textContent='';els.joinBtn.disabled=true;
+    try{
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:sharedProfile?.nickname||els.nickname.value,...sharedCredentials()});
+      session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
+      if(!sharedProfile&&localStorage.getItem(SHARED_PROFILE_DELETED_KEY)!=='yes'&&data.member?.nickname!=='관리자'){
+        ensureSharedProfile(data.member.nickname).then(syncSharedProfileToRoom).catch(error=>console.warn('초대 채팅방 프로필 연결 실패',error));
+      }
+    }catch(e){els.joinStatus.textContent=e.message}finally{els.joinBtn.disabled=false}
+  }
+  function attachLongPressDelete(target,messageId,onLongPress){
+    if(!target)return;
+    let timer=null,startX=0,startY=0,longPressed=false;
+    const clear=()=>{
+      if(timer){clearTimeout(timer);timer=null}
+      target.classList.remove('pressing');
+    };
+    target.addEventListener('pointerdown',e=>{
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      startX=e.clientX;startY=e.clientY;longPressed=false;
+      timer=setTimeout(async()=>{
+        timer=null;longPressed=true;target.classList.add('pressing');
+        if(navigator.vibrate)navigator.vibrate(35);
+        onLongPress?.();
+        await deleteMyMessage(messageId);
+        clear();
+      },650);
+    });
+    target.addEventListener('pointermove',e=>{
+      if(Math.abs(e.clientX-startX)>10||Math.abs(e.clientY-startY)>10)clear();
+    });
+    target.addEventListener('pointerup',clear);
+    target.addEventListener('pointercancel',clear);
+    target.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')clear()});
+    target.addEventListener('contextmenu',e=>{
+      if(session){e.preventDefault();onLongPress?.();deleteMyMessage(messageId)}
+    });
+  }
+  async function deleteMyMessage(messageId){
+    if(!session)return;
+    if(!confirm('선택한 메시지만 삭제할까요?'))return;
+    try{
+      await api({action:'chat-delete-message',memberId:session.member.id,sessionToken:session.sessionToken,messageId});
+      document.getElementById('msg-'+messageId)?.remove();
+    }catch(e){alert(e.message||'메시지를 삭제하지 못했습니다.')}
+  }
+  // Grow with wrapped Korean/English text up to three lines, then scroll inside the editor.
+  // The composer remains part of the chat flex layout, so messages never get overlaid.
+  function resizeMessageInput(){
+    const input=els.messageInput;
+    const wasNearBottom=els.messages.scrollHeight-els.messages.scrollTop-els.messages.clientHeight<90;
+    // Preserve the user's scroll position if they are editing an earlier sentence.
+    const previousScrollTop=input.scrollTop;
+    const caretAtEnd=input.selectionStart===input.value.length&&input.selectionEnd===input.value.length;
+    input.style.height='46px';
+    const required=input.scrollHeight+2; // scrollHeight excludes the 1px top/bottom borders
+    const maxHeight=94; // three 24px text lines, plus 20px padding and 2px border
+    input.style.height=Math.min(maxHeight,Math.max(46,required))+'px';
+    const overflowing=required>maxHeight;
+    input.style.overflowY=overflowing?'auto':'hidden';
+    if(!input.value||!overflowing){
+      input.scrollTop=0;
+    }else if(caretAtEnd){
+      // Align the bottom of the last line with the padding.
+      // Android Chrome otherwise leaves a partially clipped line at the top.
+      input.scrollTop=Math.max(0,input.scrollHeight-input.clientHeight);
+    }else{
+      input.scrollTop=previousScrollTop;
+    }
+    if(wasNearBottom)els.messages.scrollTop=els.messages.scrollHeight;
+  }
+  async function send(){
+    const message=els.messageInput.value.trim();if(!message||!session)return;
+    els.sendBtn.disabled=true;
+    try{
+      const data=await api({action:'chat-send',memberId:session.member.id,sessionToken:session.sessionToken,message});
+      els.messageInput.value='';resizeMessageInput();appendMessages(data.message?[data.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
+    }catch(e){alert(e.message)}finally{
+      els.sendBtn.disabled=false;
+      if(window.matchMedia && window.matchMedia('(pointer:coarse)').matches){
+        els.messageInput.blur();
+      }else{
+        els.messageInput.focus();
+      }
+    }
+  }
+  // Only the small chat preview is cleaned. Tapping it always opens the untouched original image.
+  // Preserve artwork, text and dark photos: remove only consistent near-black outer bands.
+  async function trimDarkImageMargins(img,originalUrl){
+    if(img.dataset.trimAttempted)return;
+    img.dataset.trimAttempted='1';
+    if(!img.naturalWidth||!img.naturalHeight||img.naturalWidth/img.naturalHeight>.72)return;
+    let bitmap;
+    try{
+      const response=await fetch(originalUrl,{mode:'cors'});
+      if(!response.ok)return;
+      bitmap=await createImageBitmap(await response.blob());
+      const w=Math.min(320,bitmap.width),h=Math.round(w*bitmap.height/bitmap.width);
+      if(w<40||h<80)return;
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d',{willReadFrequently:true});
+      if(!ctx)return;
+      ctx.drawImage(bitmap,0,0,w,h);
+      const pixels=ctx.getImageData(0,0,w,h).data;
+      const darkAt=(x,y)=>{
+        const i=(y*w+x)*4;
+        return pixels[i+3]>230&&pixels[i]<48&&pixels[i+1]<48&&pixels[i+2]<48;
+      };
+      const rowIsMatte=y=>{
+        let n=0,dark=0;
+        for(let x=0;x<w;x+=4){n++;if(darkAt(x,y))dark++}
+        return dark/n>.93;
+      };
+      let top=0,bottom=h;
+      while(top<Math.floor(h*.22)&&rowIsMatte(top))top++;
+      while(bottom>Math.ceil(h*.78)&&rowIsMatte(bottom-1))bottom--;
+      const colIsMatte=x=>{
+        let n=0,dark=0;
+        for(let y=top;y<bottom;y+=4){n++;if(darkAt(x,y))dark++}
+        return n>0&&dark/n>.94;
+      };
+      let left=0,right=w;
+      while(left<Math.floor(w*.16)&&colIsMatte(left))left++;
+      while(right>Math.ceil(w*.84)&&colIsMatte(right-1))right--;
+      if(top+h-bottom+left+w-right<8||right-left<40||bottom-top<50)return;
+      const preview=document.createElement('canvas');preview.width=right-left;preview.height=bottom-top;
+      preview.getContext('2d').drawImage(canvas,left,top,preview.width,preview.height,0,0,preview.width,preview.height);
+      preview.toBlob(blob=>{
+        if(!blob||!img.isConnected)return;
+        const url=URL.createObjectURL(blob);
+        img.addEventListener('load',()=>URL.revokeObjectURL(url),{once:true});
+        img.src=url;
+      },'image/webp',.86);
+    }catch(_){
+      // A photo host without CORS support still displays the original preview normally.
+    }finally{
+      if(bitmap)bitmap.close();
+    }
+  }
+  let avatarLightboxReturnFocus=null;
+  function openAvatarLightbox(avatar){
+    const image=avatar?.querySelector('img');
+    if(!image?.src)return;
+    avatarLightboxReturnFocus=avatar;
+    els.avatarLightboxImg.src=image.src;
+    els.avatarLightbox.classList.add('show');
+    els.avatarLightbox.setAttribute('aria-hidden','false');
+    els.avatarLightbox.focus({preventScroll:true});
+  }
+  function closeAvatarLightbox(){
+    if(!els.avatarLightbox.classList.contains('show'))return;
+    els.avatarLightbox.classList.remove('show');
+    els.avatarLightbox.setAttribute('aria-hidden','true');
+    els.avatarLightboxImg.removeAttribute('src');
+    if(avatarLightboxReturnFocus?.isConnected)avatarLightboxReturnFocus.focus({preventScroll:true});
+    avatarLightboxReturnFocus=null;
+  }
+  function openImage(url){
+    els.imageModalImg.src=url;els.imageModal.classList.add('show');els.imageModal.setAttribute('aria-hidden','false');
+  }
+  function closeImage(){
+    els.imageModal.classList.remove('show');els.imageModal.setAttribute('aria-hidden','true');els.imageModalImg.src='';
+  }
+  async function compressImage(file){
+    if(!file.type.startsWith('image/')) throw new Error('이미지 파일만 올릴 수 있어요.');
+    if(file.size>12*1024*1024) throw new Error('사진은 12MB 이하만 올릴 수 있어요.');
+    const bitmap=await createImageBitmap(file);
+    const max=1600;
+    const scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.82));
+    if(!blob) throw new Error('사진을 처리하지 못했습니다.');
+    return new File([blob],'chat-'+Date.now()+'.webp',{type:'image/webp'});
+  }
+  async function uploadPhoto(file){
+    if(!session)return;
+    els.photoBtn.disabled=true;els.sendBtn.disabled=true;
+    try{
+      const prepared=await compressImage(file);
+      const auth=await api({action:'chat-image-auth',memberId:session.member.id,sessionToken:session.sessionToken});
+      const form=new FormData();
+      form.append('file',prepared);
+      form.append('fileName',prepared.name);
+      form.append('publicKey',auth.publicKey);
+      form.append('signature',auth.signature);
+      form.append('expire',String(auth.expire));
+      form.append('token',auth.token);
+      form.append('folder',auth.folder);
+      form.append('useUniqueFileName','true');
+      const r=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+      const uploaded=await r.json().catch(()=>({}));
+      if(!r.ok||!uploaded.url||!uploaded.fileId) throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
+      const sent=await api({
+        action:'chat-send',memberId:session.member.id,sessionToken:session.sessionToken,
+        messageType:'image',message:'사진',imageUrl:uploaded.url,imageFileId:uploaded.fileId
+      });
+      appendMessages(sent.message?[sent.message]:[]);els.messages.scrollTop=els.messages.scrollHeight;
+    }catch(e){alert(e.message||'사진 업로드에 실패했습니다.')}
+    finally{els.photoInput.value='';els.photoBtn.disabled=false;els.sendBtn.disabled=false}
+  }
+  async function copyInvite(){
+    if(!session)return;
+    const url=new URL('/chat.html',window.location.origin);
+    url.searchParams.set('room',session.room.code);
+    const text=url.toString();
+    try{
+      await navigator.clipboard.writeText(text);
+      alert('초대 링크를 복사했습니다.\n비밀번호는 따로 전달해 주세요.');
+    }catch(_){
+      prompt('아래 초대 링크를 복사해 주세요.',text);
+    }
+  }
+  async function deleteCurrentRoom(){
+    if(!session)return;
+    const adminToken=sessionStorage.getItem(ADMIN_KEY)||'';
+    if(!adminToken){alert('관리자 로그인 후 사용할 수 있습니다.');return}
+    const ok=confirm('['+session.room.title+'] 방을 삭제할까요?\n대화 내용과 참여 기록, 채팅 사진도 함께 삭제되며 복구할 수 없습니다.');
+    if(!ok)return;
+    try{
+      const r=await fetch('/api/content-admin',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken},
+        body:JSON.stringify({action:'chat-delete-room',roomId:session.room.id})
+      });
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(data.message||'채팅방 삭제에 실패했습니다.');
+      alert('채팅방을 삭제했습니다.');
+      showJoin();
+    }catch(e){alert(e.message||'채팅방 삭제에 실패했습니다.')}
+  }
+  async function leave(){
+    const code=session?.room?.code||'';
+    showJoin(true);
+    if(code)els.roomCode.value=code;
+    if(sessionStorage.getItem(ADMIN_KEY))loadAdminRooms();else loadPublicRooms();
+    els.roomPassword.value='';
+    els.joinStatus.textContent='이 방은 이 기기에서 1년 동안 기억되어 다음에는 비밀번호 없이 들어갈 수 있습니다.';
+  }
+  function setEntryPasswordVisible(visible){
+    els.entryPassword.type=visible?'text':'password';
+    els.entryPasswordToggle.setAttribute('aria-pressed',String(visible));
+    const label=visible?'비밀번호 숨기기':'비밀번호 보기';
+    els.entryPasswordToggle.setAttribute('aria-label',label);
+    els.entryPasswordToggle.title=label;
+  }
+  els.entryPasswordToggle.addEventListener('click',()=>{
+    setEntryPasswordVisible(els.entryPassword.type==='password');
+  });
+  function openFirstEntry(room){
+    setEntryPasswordVisible(false);
+    els.entryAvatarPick.closest('.entry-field').style.display=sharedProfile?'none':'';
+    els.entryNickname.readOnly=Boolean(sharedProfile);
+    els.entryAvatarFile.value='';
+    entryAvatarChoice=null;
+    paintAvatar(els.entryAvatarPreview,null);
+    els.roomCode.value=String(room.code||'').toUpperCase();
+    els.entryRoomName.textContent=room.title||'채팅방';
+    els.entryPassword.value='';
+    els.entryNickname.value=sharedProfile?.nickname||'';
+    els.entryStatus.textContent='';
+    els.entryModal.classList.add('show');
+    els.entryModal.setAttribute('aria-hidden','false');
+    setTimeout(()=>els.entryPassword.focus(),50);
+  }
+  function closeFirstEntry(){
+    setEntryPasswordVisible(false);
+    if(entryPreviewObjectUrl){URL.revokeObjectURL(entryPreviewObjectUrl);entryPreviewObjectUrl=null}
+    els.entryModal.classList.remove('show');
+    els.entryModal.setAttribute('aria-hidden','true');
+  }
+  function selectAvatarFile(input,preview,which){
+    const file=input.files?.[0];
+    if(!file)return;
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024){
+      alert('프로필 사진은 JPG·PNG·WEBP, 8MB 이하만 올릴 수 있어요.');
+      input.value='';
+      return;
+    }
+    if(which==='entry'){
+      entryAvatarChoice=file;
+      if(entryPreviewObjectUrl)URL.revokeObjectURL(entryPreviewObjectUrl);
+      entryPreviewObjectUrl=URL.createObjectURL(file);
+      paintAvatar(preview,entryPreviewObjectUrl);
+    }else{
+      profileAvatarChoice=file;
+      lastUploadedProfilePhoto=null;
+      if(avatarPreviewObjectUrl)URL.revokeObjectURL(avatarPreviewObjectUrl);
+      avatarPreviewObjectUrl=URL.createObjectURL(file);
+      paintAvatar(preview,avatarPreviewObjectUrl);
+      els.profileStatus.textContent='프로필 저장을 누르면 모든 채팅방에 적용돼요.';
+    }
+  }
+  async function compressAvatarFile(file){
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024)
+      throw new Error('프로필 사진은 JPG·PNG·WEBP, 8MB 이하여야 합니다.');
+    const bitmap=await createImageBitmap(file);
+    try{
+      const square=Math.min(bitmap.width,bitmap.height);
+      const canvas=document.createElement('canvas');
+      canvas.width=320;canvas.height=320;
+      canvas.getContext('2d').drawImage(bitmap,(bitmap.width-square)/2,(bitmap.height-square)/2,square,square,0,0,320,320);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',.82));
+      if(!blob)throw new Error('프로필 이미지를 변환하지 못했습니다.');
+      return new File([blob],'profile-'+Date.now()+'.webp',{type:'image/webp'});
+    }finally{bitmap.close?.()}
+  }
+  async function uploadSharedProfilePhoto(file){
+    if(!sharedProfile)throw new Error('먼저 프로필을 만들어 주세요.');
+    if(lastUploadedProfilePhoto?.file===file&&lastUploadedProfilePhoto.profileId===sharedProfile.id){
+      return lastUploadedProfilePhoto.fileId;
+    }
+    const prepared=await compressAvatarFile(file);
+    const auth=await api({action:'chat-profile-image-auth',...sharedCredentials()});
+    const form=new FormData();
+    form.append('file',prepared);
+    form.append('fileName',prepared.name);
+    form.append('publicKey',auth.publicKey);
+    form.append('signature',auth.signature);
+    form.append('expire',String(auth.expire));
+    form.append('token',auth.token);
+    form.append('folder',auth.folder);
+    form.append('useUniqueFileName','true');
+    const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+    const uploaded=await response.json().catch(()=>({}));
+    if(!response.ok||!uploaded.fileId)throw new Error(uploaded.message||'사진 업로드에 실패했습니다.');
+    lastUploadedProfilePhoto={file,profileId:sharedProfile.id,fileId:uploaded.fileId};
+    return uploaded.fileId;
+  }
+  async function saveSharedProfileChanges(nickname,file=null,removePhoto=false){
+    if(profileWorking)throw new Error('이미 프로필을 저장 중입니다.');
+    const name=String(nickname||'').trim().slice(0,20);
+    if(!name||name==='관리자')throw new Error('닉네임을 입력해 주세요. 관리자 이름은 사용할 수 없습니다.');
+    profileWorking=true;
+    els.profileSaveBtn.disabled=true;
+    els.profileRemoveBtn.disabled=true;
+    els.profileDeleteBtn.disabled=true;
+    try{
+      await ensureSharedProfile(name);
+      const payload={action:'chat-profile-save',...sharedCredentials(),nickname:name};
+      if(removePhoto)payload.avatarFileId='';
+      else if(file)payload.avatarFileId=await uploadSharedProfilePhoto(file);
+      const result=await api(payload);
+      storeSharedProfile(result.profile);
+      lastUploadedProfilePhoto=null;
+      if(session){
+        session.member.nickname=session.member.nickname==='관리자'?'관리자':result.profile.nickname;
+        session.member.profile_id=sharedProfile.id;
+        updateMyAvatar(result.profile.avatar_url||null);
+      }
+      paintAvatar(els.profilePreview,result.profile.avatar_url||null);
+      els.profileStatus.textContent='모든 채팅방에서 사용할 프로필을 저장했어요.';
+    }finally{
+      profileWorking=false;
+      els.profileSaveBtn.disabled=false;
+      els.profileRemoveBtn.disabled=false;
+      els.profileDeleteBtn.disabled=false;
+    }
+  }
+  async function saveAvatarPhoto(file){
+    await saveSharedProfileChanges(sharedProfile?.nickname||session?.member?.nickname||'',file);
+  }
+  let profileViewReturnFocus=null;
+  function openProfileView(){
+    if(!session)return;
+    profileViewReturnFocus=document.activeElement;
+    const url=sharedProfile?.avatar_url||session.member.avatar_url||null;
+    paintAvatar(els.profileViewPhoto,url);
+    const name=session.member.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session.member.nickname);
+    els.profileViewName.textContent=name||'내 프로필';
+    els.profileViewPhoto.disabled=!url;
+    els.profileViewHint.textContent=url?'사진을 누르면 더 크게 볼 수 있어요.':'사진을 등록하려면 프로필 수정을 눌러 주세요.';
+    els.profileViewModal.classList.add('show');
+    els.profileViewModal.setAttribute('aria-hidden','false');
+    (url?els.profileViewPhoto:els.profileViewEdit).focus();
+  }
+  function closeProfileView(restoreFocus=true){
+    els.profileViewModal.classList.remove('show');
+    els.profileViewModal.setAttribute('aria-hidden','true');
+    if(restoreFocus&&profileViewReturnFocus?.isConnected)profileViewReturnFocus.focus();
+    profileViewReturnFocus=null;
+  }
+  let profileEditorReturnFocus=null;
+  function closeProfileEditor(){
+    if(profileWorking)return;
+    els.profileModal.classList.remove('show');
+    els.profileModal.setAttribute('aria-hidden','true');
+    profileAvatarChoice=null;
+    els.profileFile.value='';
+    if(avatarPreviewObjectUrl){URL.revokeObjectURL(avatarPreviewObjectUrl);avatarPreviewObjectUrl=null}
+    (profileEditorReturnFocus||els.sharedProfileBtn).focus();
+    profileEditorReturnFocus=null;
+  }
+  function openProfileEditor(){
+    profileEditorReturnFocus=document.activeElement;
+    els.profileStatus.textContent='';
+    profileAvatarChoice=null;
+    els.profileFile.value='';
+    els.profileDeleteBtn.hidden=!sharedProfile;
+    const saved=Object.values(getRememberedSessions()).find(item=>item.member?.nickname!=='관리자');
+    els.profileNameInput.value=sharedProfile?.nickname||
+      (session?.member?.nickname!=='관리자'?session?.member?.nickname:'')||
+      saved?.member?.nickname||'';
+    paintAvatar(els.profilePreview,sharedProfile?.avatar_url||session?.member?.avatar_url||null);
+    els.profileModal.classList.add('show');
+    els.profileModal.setAttribute('aria-hidden','false');
+    els.profileNameInput.focus();
+  }
+  async function submitFirstEntry(){
+    els.entryStatus.textContent='';
+    const password=els.entryPassword.value;
+    const nickname=els.entryNickname.value.trim();
+    if(!password){els.entryStatus.textContent='비밀번호를 입력해 주세요.';els.entryPassword.focus();return}
+    if(!nickname){els.entryStatus.textContent='닉네임을 입력해 주세요.';els.entryNickname.focus();return}
+    els.entrySubmit.disabled=true;
+    try{
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname,...sharedCredentials()});
+      session={room:data.room,member:data.member,sessionToken:data.sessionToken};
+      saveSession();
+      const chosenPhoto=entryAvatarChoice;
+      closeFirstEntry();
+      showChat();
+      if(!sharedProfile&&localStorage.getItem(SHARED_PROFILE_DELETED_KEY)!=='yes'){
+        (async()=>{
+          try{
+            await ensureSharedProfile(nickname);
+            await syncSharedProfileToRoom();
+            if(chosenPhoto)await saveAvatarPhoto(chosenPhoto);
+          }catch(error){console.warn('공통 프로필 초기 설정 실패',error)}
+        })();
+      }else if(chosenPhoto){
+        saveAvatarPhoto(chosenPhoto).catch(error=>console.warn('프로필 사진 적용 실패',error));
+      }
+    }catch(e){
+      els.entryStatus.textContent=e.message||'입장하지 못했습니다.';
+    }finally{
+      els.entrySubmit.disabled=false;
+    }
+  }
+
+  async function loadPublicRooms(){
+    try{
+      const data=await api({action:'chat-public-list-rooms'});
+      const rooms=Array.isArray(data.rooms)?data.rooms:[];
+      if(!rooms.length){
+        els.publicRooms.innerHTML='<div class="admin-empty">현재 입장 가능한 채팅방이 없습니다.</div>';
+        return;
+      }
+      const remembered=getRememberedSessions();
+      const PAGE_SIZE=5;
+      let page=1;
+      const totalPages=Math.max(1,Math.ceil(rooms.length/PAGE_SIZE));
+
+      const render=()=>{
+        if(page>totalPages)page=totalPages;
+        const slice=rooms.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
+        const rows=slice.map(room=>{
+          const known=Boolean(remembered[String(room.code).toUpperCase()]);
+          return '<div class="public-room-item'+(known?' remembered':'')+'"><div><div class="public-room-title-row"><div class="public-room-name" title="'+esc(room.title||'채팅방')+'">'+esc(room.title||'채팅방')+'</div>'+(known?'<span class="entered-badge">✓ 이전 입장</span>':'')+'</div><div class="public-room-last" data-room-last-id="'+esc(room.id)+'" hidden></div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
+        }).join('');
+
+        let pager='';
+        if(totalPages>1){
+          let nums='';
+          for(let i=1;i<=totalPages;i++){
+            nums+='<button class="room-page-btn'+(i===page?' active':'')+'" type="button" data-page="'+i+'">'+i+'</button>';
+          }
+          pager='<div class="room-pagination"><button class="room-page-btn" type="button" data-prev '+(page===1?'disabled':'')+'>‹</button>'+nums+'<button class="room-page-btn" type="button" data-next '+(page===totalPages?'disabled':'')+'>›</button></div>';
+        }
+        els.publicRooms.innerHTML=rows+pager;
+
+        // Fetch dates for this page only, without exposing any message contents.
+        api({action:'chat-public-last-activity',roomIds:slice.map(room=>room.id)}).then(result=>{
+          const activity=new Map((Array.isArray(result.latest)?result.latest:[])
+            .map(item=>[String(item.roomId),item.lastMessageAt]));
+          els.publicRooms.querySelectorAll('[data-room-last-id]').forEach(label=>{
+            const stamp=fmtRoomLastDate(activity.get(label.dataset.roomLastId));
+            if(stamp){label.textContent='최근 대화 '+stamp;label.hidden=false}
+          });
+        }).catch(error=>console.warn('최근 대화 날짜 조회 실패',error));
+
+        els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
+          const code=String(btn.dataset.publicRoom||'').toUpperCase();
+          const known=rememberedFor(code);
+          if(known){
+            session={room:known.room,member:known.member,sessionToken:known.sessionToken};
+            saveSession();
+            showChat();
+            return;
+          }
+          const room=rooms.find(r=>String(r.code).toUpperCase()===code);
+          if(room)openFirstEntry(room);
+        }));
+
+        els.publicRooms.querySelectorAll('[data-page]').forEach(btn=>btn.addEventListener('click',()=>{
+          page=Number(btn.dataset.page)||1;
+          render();
+        }));
+        els.publicRooms.querySelector('[data-prev]')?.addEventListener('click',()=>{
+          if(page>1){page--;render()}
+        });
+        els.publicRooms.querySelector('[data-next]')?.addEventListener('click',()=>{
+          if(page<totalPages){page++;render()}
+        });
+      };
+      render();
+    }catch(e){
+      els.publicRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
+    }
+  }
+
+  async function loadAdminRooms(){
+    const token=sessionStorage.getItem(ADMIN_KEY)||'';
+    if(!token)return;
+    try{
+      const r=await fetch('/api/content-admin',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:JSON.stringify({action:'chat-list-rooms'})
+      });
+      const data=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(data.message||'채팅방을 불러오지 못했습니다.');
+      const rooms=Array.isArray(data.rooms)?data.rooms:[];
+      if(!rooms.length){
+        els.adminRooms.innerHTML='<div class="admin-empty">아직 만든 채팅방이 없습니다.</div>';
+        return;
+      }
+      const remembered=getRememberedSessions();
+      els.adminRooms.innerHTML=rooms.map(room=>{
+        const state=room.is_archived?'보관됨':(room.is_active?'사용 중':'닫힘');
+        const disabled=room.is_archived?' disabled':'';
+        const known=Boolean(remembered[String(room.code||'').toUpperCase()]);
+        return '<div class="admin-room-item'+(known?' remembered':'')+'"><div><div class="admin-room-name">'+esc(room.title||'채팅방')+(known?' <span class="entered-badge">✓ 이전 입장</span>':'')+'</div><div class="admin-room-meta">#'+esc(room.code)+' · '+state+'</div></div><button class="admin-room-enter" type="button" data-room-code="'+esc(room.code)+'"'+disabled+'>'+(room.is_archived?'보관됨':'입장')+'</button></div>';
+      }).join('');
+      els.adminRooms.querySelectorAll('[data-room-code]:not([disabled])').forEach(btn=>btn.addEventListener('click',async()=>{
+        const token=sessionStorage.getItem(ADMIN_KEY)||'';
+        btn.disabled=true;
+        try{
+          const room=rooms.find(r=>String(r.code)===String(btn.dataset.roomCode));
+          if(!room)throw new Error('채팅방 정보를 찾지 못했습니다.');
+          const r=await fetch('/api/content-admin',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+            body:JSON.stringify({action:'chat-admin-enter-room',roomId:room.id})
+          });
+          const data=await r.json().catch(()=>({}));
+          if(!r.ok)throw new Error(data.message||'채팅방에 입장하지 못했습니다.');
+          const saved={
+            room:data.room,
+            member:data.member,
+            sessionToken:data.sessionToken,
+            expiresAt:Date.now()+REMEMBER_MS
+          };
+          session={room:data.room,member:data.member,sessionToken:data.sessionToken};
+          saveSession();
+          showChat();
+        }catch(e){
+          alert(e.message||'채팅방에 입장하지 못했습니다.');
+          btn.disabled=false;
+        }
+      }));
+    }catch(e){
+      els.adminRooms.innerHTML='<div class="admin-empty">'+esc(e.message)+'</div>';
+    }
+  }
+  els.entryAvatarPick.addEventListener('click',()=>els.entryAvatarFile.click());
+  els.entryAvatarFile.addEventListener('change',()=>selectAvatarFile(els.entryAvatarFile,els.entryAvatarPreview,'entry'));
+  let chatEdgeOpened=false;
+  function setChatEdgeOpen(open,restoreFocus=true){
+    chatEdgeOpened=Boolean(open);
+    els.chatCard.classList.toggle('edge-open',chatEdgeOpened);
+    els.chatEdgeTab.setAttribute('aria-expanded',String(chatEdgeOpened));
+    els.chatEdgeTab.setAttribute('aria-label',chatEdgeOpened?'프로필 및 채팅 설정 닫기':'프로필 및 채팅 설정 열기');
+    els.chatEdgePanel.setAttribute('aria-hidden',String(!chatEdgeOpened));
+    els.chatEdgePanel.inert=!chatEdgeOpened;
+    if(chatEdgeOpened){
+      els.chatEdgeClose.focus({preventScroll:true});
+    }else{
+      closeVolumeMenu();
+      if(restoreFocus)els.chatEdgeTab.focus({preventScroll:true});
+    }
+  }
+  els.chatEdgeTab.addEventListener('click',()=>setChatEdgeOpen(!chatEdgeOpened));
+  els.chatEdgeClose.addEventListener('click',()=>setChatEdgeOpen(false));
+  els.chatEdgeBackdrop.addEventListener('click',()=>setChatEdgeOpen(false));
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&chatEdgeOpened&&!els.profileViewModal.classList.contains('show')&&!els.profileModal.classList.contains('show')){
+      event.preventDefault();
+      setChatEdgeOpen(false);
+    }
+  });
+  els.sharedProfileBtn.addEventListener('click',openProfileEditor);
+  els.profileBtn.addEventListener('click',()=>{
+    // Keep chat settings behind the profile dialog so Close returns here.
+    openProfileView();
+  });
+  els.profileViewPhoto.addEventListener('click',()=>{
+    const url=sharedProfile?.avatar_url||session?.member?.avatar_url||null;
+    if(url)openImage(url);
+  });
+  els.profileViewClose.addEventListener('click',()=>closeProfileView());
+  els.profileViewEdit.addEventListener('click',()=>{
+    closeProfileView(false);
+    els.profileBtn.focus();
+    openProfileEditor();
+  });
+  els.profileViewModal.addEventListener('click',event=>{
+    if(event.target===els.profileViewModal)closeProfileView();
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key!=='Escape')return;
+    if(els.avatarLightbox.classList.contains('show')){event.preventDefault();closeAvatarLightbox();return}
+    if(els.imageModal.classList.contains('show')){closeImage();return}
+    if(els.profileViewModal.classList.contains('show'))closeProfileView();
+  });
+  els.profilePickBtn.addEventListener('click',()=>{if(!profileWorking)els.profileFile.click()});
+  els.profileFile.addEventListener('change',()=>selectAvatarFile(els.profileFile,els.profilePreview,'edit'));
+  els.profileSaveBtn.addEventListener('click',async()=>{
+    if(profileWorking)return;
+    els.profileStatus.textContent='프로필 저장 중…';
+    try{
+      await saveSharedProfileChanges(els.profileNameInput.value,profileAvatarChoice);
+      profileAvatarChoice=null;
+      closeProfileEditor();
+    }catch(error){els.profileStatus.textContent=error.message||'프로필을 저장하지 못했습니다.'}
+  });
+  els.profileDeleteBtn.addEventListener('click',async()=>{
+    if(profileWorking||!sharedProfile)return;
+    const confirmed=window.confirm(
+      '공통 프로필을 완전히 삭제할까요?\n\n닉네임·프로필 사진과 여러 채팅방의 프로필 연결이 삭제됩니다.\n기존 채팅 메시지와 방 입장 기록은 남아 있습니다.\n\n삭제한 프로필은 복원할 수 없습니다.'
+    );
+    if(!confirmed)return;
+    profileWorking=true;
+    els.profileSaveBtn.disabled=true;
+    els.profileRemoveBtn.disabled=true;
+    els.profileDeleteBtn.disabled=true;
+    els.profileStatus.textContent='프로필 삭제 중…';
+    const deletedId=sharedProfile.id;
+    try{
+      const response=await api({action:'chat-profile-delete',...sharedCredentials()});
+      if(sharedProfile?.id!==deletedId)return;
+      // The browser remembers room sessions independently of shared profiles.
+      // Remove only the shared avatar reference; preserve member tokens and chat history.
+      const rooms=getRememberedSessions();
+      for(const saved of Object.values(rooms)){
+        if(!saved?.member||saved.member.nickname==='관리자')continue;
+        saved.member.avatar_url=null;
+        saved.member.profile_id=null;
+      }
+      localStorage.setItem(SESSIONS_KEY,JSON.stringify(rooms));
+      sharedProfile=null;
+      localStorage.removeItem(SHARED_PROFILE_KEY);
+      localStorage.setItem(SHARED_PROFILE_DELETED_KEY,'yes');
+      lastUploadedProfilePhoto=null;
+      if(session&&session.member.nickname!=='관리자'){
+        session.member.profile_id=null;
+        updateMyAvatar(null);
+      }
+      refreshSharedProfileCard();
+      els.profileNameInput.value='';
+      paintAvatar(els.profilePreview,null);
+      // Allow the editor to close after the confirmed server deletion.
+      profileWorking=false;
+      closeProfileEditor();
+      alert(response.imageRemoved===false
+        ? '공통 프로필은 삭제됐지만 서버에서 이미지 파일 삭제는 확인하지 못했습니다. 채팅 기록은 남아 있어요.'
+        : '공통 프로필을 삭제했어요. 기존 채팅 기록과 방 입장 기록은 그대로 남아 있어요.');
+    }catch(error){
+      els.profileStatus.textContent=error.message||'프로필 삭제에 실패했습니다. 다시 시도해 주세요.';
+    }finally{
+      profileWorking=false;
+      els.profileSaveBtn.disabled=false;
+      els.profileRemoveBtn.disabled=false;
+      els.profileDeleteBtn.disabled=false;
+    }
+  });
+  els.profileRemoveBtn.addEventListener('click',async()=>{
+    if(profileWorking)return;
+    els.profileStatus.textContent='기본 아이콘으로 변경 중…';
+    try{
+      await saveSharedProfileChanges(els.profileNameInput.value,null,true);
+      profileAvatarChoice=null;
+      els.profileStatus.textContent='모든 채팅방의 프로필 사진을 기본 아이콘으로 바꿨어요.';
+    }catch(error){els.profileStatus.textContent=error.message||'프로필 사진을 변경하지 못했습니다.'}
+  });
+  els.profileCancelBtn.addEventListener('click',closeProfileEditor);
+  els.profileModal.addEventListener('click',event=>{if(event.target===els.profileModal)closeProfileEditor()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&els.profileModal.classList.contains('show'))closeProfileEditor()});
+  els.entryCancel.addEventListener('click',closeFirstEntry);
+  els.entrySubmit.addEventListener('click',submitFirstEntry);
+  els.entryModal.addEventListener('click',e=>{if(e.target===els.entryModal)closeFirstEntry()});
+  els.entryPassword.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();els.entryNickname.focus()}});
+  els.entryNickname.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submitFirstEntry()}});
+  els.joinBtn.addEventListener('click',()=>{
+    if(sessionStorage.getItem(ADMIN_KEY)){
+      location.href='/chat-admin.html?new=1';
+      return;
+    }
+    join();
+  });
+  els.pushToggle.addEventListener('click',togglePhonePush);
+  els.volumeMenuBtn.addEventListener('click',()=>{
+    const isOpening=!els.soundVolumeControl.classList.contains('open');
+    els.soundVolumeControl.classList.toggle('open',isOpening);
+    els.volumeMenuBtn.setAttribute('aria-expanded',String(isOpening));
+  });
+  els.volumeMenu.querySelectorAll('[data-volume]').forEach(button=>{
+    button.addEventListener('click',()=>setSoundVolume(Number(button.dataset.volume)));
+  });
+  document.addEventListener('pointerdown',event=>{
+    if(!els.soundVolumeControl.contains(event.target))closeVolumeMenu();
+  },{passive:true});
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&els.soundVolumeControl.classList.contains('open')){
+      event.preventDefault();
+      closeVolumeMenu(true);
+    }
+  });
+  els.soundToggle.addEventListener('click',()=>{
+    soundEnabled=!soundEnabled;
+    localStorage.setItem(SOUND_KEY,soundEnabled?'on':'off');
+    updateSoundToggle();
+    if(soundEnabled)playBokjakSound(true);
+  });
+  els.sendBtn.addEventListener('click',send);
+  els.leaveBtn.addEventListener('click',leave);
+  els.inviteBtn.addEventListener('click',copyInvite);
+  els.deleteRoomBtn.addEventListener('click',deleteCurrentRoom);
+  // Tap a sender portrait for a small circular preview, without leaving the chat.
+  els.messages.addEventListener('click',event=>{
+    const avatar=event.target.closest('.msg-avatar[role="button"]');
+    if(avatar&&els.messages.contains(avatar))openAvatarLightbox(avatar);
+  });
+  els.messages.addEventListener('keydown',event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    const avatar=event.target.closest('.msg-avatar[role="button"]');
+    if(avatar&&els.messages.contains(avatar)){event.preventDefault();openAvatarLightbox(avatar)}
+  });
+  els.avatarLightbox.addEventListener('click',event=>{
+    if(event.target===els.avatarLightbox||event.target===els.avatarLightboxImg)closeAvatarLightbox();
+  });
+  // Stop forced entry scrolling as soon as a visitor starts reading older messages.
+  els.messages.addEventListener('pointerdown',stopEntryAutoScroll,{passive:true});
+  els.messages.addEventListener('touchstart',stopEntryAutoScroll,{passive:true});
+  els.messages.addEventListener('wheel',stopEntryAutoScroll,{passive:true});
+  els.messages.addEventListener('keydown',e=>{
+    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(e.key))stopEntryAutoScroll();
+  });
+  els.photoBtn.addEventListener('click',()=>els.photoInput.click());
+  els.photoInput.addEventListener('change',()=>{const file=els.photoInput.files?.[0];if(file)uploadPhoto(file)});
+  els.imageClose.addEventListener('click',closeImage);
+  els.textModalClose.addEventListener('click',closeTextMessage);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&els.textModal.classList.contains('show'))closeTextMessage();
+  });
+  els.themeToggle.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
+  document.getElementById('brandHome').addEventListener('click',()=>{location.href='/chat.html'});
+  document.getElementById('brandHome').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();location.href='/chat.html'}});
+  els.adminRoomAddBtn.addEventListener('click',()=>{location.href='/chat-admin.html?new=1'});
+  els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
+  els.messageInput.addEventListener('input',resizeMessageInput);
+  window.addEventListener('resize',resizeMessageInput,{passive:true});
+  window.visualViewport?.addEventListener('resize',resizeMessageInput,{passive:true});
+  els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  applyTheme(localStorage.getItem(THEME_KEY)||'light');
+  refreshSharedProfileCard();
+  refreshSavedSharedProfile();
+  loadSoundDefault();
+  const isAdmin=Boolean(sessionStorage.getItem(ADMIN_KEY));
+  document.body.classList.toggle('admin-mode',isAdmin);
+  els.adminRoomAddBtn.classList.toggle('show',isAdmin);
+  if(isAdmin){
+    els.joinCredentials.style.display='block';
+    els.joinBtn.textContent='채팅방 만들기';
+    els.joinBtn.setAttribute('aria-label','채팅방 만들기');
+    document.querySelectorAll('#joinCard .field').forEach(el=>el.style.display='none');
+    els.publicRoomList.style.display='none';
+    els.joinHelp.textContent='관리자 전용 화면입니다. 새 방을 만들거나 아래 목록에서 기존 방에 입장할 수 있습니다.';
+    els.adminRoomList.classList.add('show');
+    loadAdminRooms();
+  }else{
+    els.joinCredentials.style.display='none';
+    loadPublicRooms();
+  }
+  let invitedRoom='';
+  try{
+    const params=new URLSearchParams(window.location.search);
+    invitedRoom=String(params.get('room')||'').toUpperCase();
+    if(invitedRoom){
+      els.roomCode.value=invitedRoom;
+      if(!isAdmin){
+        els.publicRoomList.style.display='none';
+        els.roomCodeField.style.display='none';
+        els.joinCredentials.style.display='block';
+        els.selectedRoom.style.display='block';
+        els.selectedRoom.textContent='초대받은 채팅방입니다.';
+        els.joinStatus.textContent='비밀번호와 닉네임을 입력해 주세요.';
+      }
+    }else if(!isAdmin){
+      els.roomCodeField.style.display='none';
+    }
+  }catch(_){}
+  try{
+    getRememberedSessions();
+    if(invitedRoom){
+      const saved=rememberedFor(invitedRoom);
+      if(saved){
+        session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken};
+        saveSession();
+        showChat();
+      }
+    }
+  }catch(_){clearSession()}
+</script>
+</body>
+</html>

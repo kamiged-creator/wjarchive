@@ -1,0 +1,31 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/store-inquiries",
+      "destination": "https://bokjakso.com/api/store-inquiries"
+    },
+    {
+      "source": "/api/content-admin",
+      "destination": "https://bokjakso.com/api/content-admin"
+    },
+    {
+      "source": "/api/admin-session",
+      "destination": "https://bokjakso.com/api/admin-session"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
