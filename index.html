@@ -1512,6 +1512,10 @@
     @media (max-width:800px){
       .bokjakso-install-offer:not([hidden]){display:block}
     }
+    /* The installed app never needs the browser install banner. */
+    @media (display-mode:standalone),(display-mode:fullscreen){
+      .bokjakso-install-offer,.bokjakso-install-success{display:none!important}
+    }
     @media (max-width:360px){
       .bokjakso-install-offer{padding-left:11px;padding-right:76px}
       .bokjakso-install-symbol{width:36px;height:36px;flex-basis:36px}
@@ -2745,8 +2749,14 @@
   function read(key){try{return localStorage.getItem(key)==='yes'}catch(_){return false}}
   function write(key){try{localStorage.setItem(key,'yes')}catch(_){}}
   function forget(key){try{localStorage.removeItem(key)}catch(_){}}
+  function readSession(key){try{return sessionStorage.getItem(key)==='yes'}catch(_){return false}}
+  function writeSession(key){try{sessionStorage.setItem(key,'yes')}catch(_){}}
+  function forgetSession(key){try{sessionStorage.removeItem(key)}catch(_){}}
   function runningAsApp(){return standalone.matches || fullscreen.matches || navigator.standalone===true}
-  function alreadyInstalled(){return runningAsApp() || read(installedKey)}
+  // A web page cannot reliably detect uninstall. Avoid keeping a permanent
+  // 'installed' flag: after uninstall, a fresh Chrome visit can offer install.
+  // Only suppress the banner in the app itself or the install-completion tab.
+  function alreadyInstalled(){return runningAsApp() || readSession(installedKey)}
   function refreshOffer(){bar.hidden=!(isMobile && !alreadyInstalled() && !read(dismissKey))}
   function hide(){bar.hidden=true}
   // Browser storage can survive app uninstall. A deliberate reinstall link
@@ -2754,7 +2764,8 @@
   if(!runningAsApp()){
     const query=new URLSearchParams(location.search);
     if(query.get('install')==='1'){
-      forget(installedKey);
+      forget(installedKey); // clear the old permanent flag from older versions
+      forgetSession(installedKey);
       forget(dismissKey);
       query.delete('install');
       const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
@@ -2762,7 +2773,7 @@
     }
   }
   function markInstalled(showSuccess=false){
-    write(installedKey);
+    writeSession(installedKey);
     hide();
     if(showSuccess && isMobile){
       success.hidden=false;
@@ -2780,10 +2791,10 @@
     if(!isMobile)return;
     event.preventDefault();
     deferredPrompt=event;
-    // An installable browser page means the previous 'installed' flag
-    // may belong to an uninstalled app. Restore the install offer.
-    if(!runningAsApp()){
-      forget(installedKey);
+    // Restore the banner on an installable browser visit. Do not override
+    // a deliberate dismissal by the user.
+    if(!runningAsApp() && !read(dismissKey)){
+      forgetSession(installedKey);
       refreshOffer();
     }
   });
