@@ -69,6 +69,24 @@
       .entry{min-height:82px;gap:10px;padding:9px 11px}
       .entry-icon{width:46px;height:46px;flex-basis:46px}
     }
+    /* Keep the mobile welcome page within the visible area. The document no
+       longer scrolls under the fixed navigation; genuinely short screens can
+       still scroll inside main rather than losing the profile option. */
+    @media(max-width:560px){
+      html{height:100%;overscroll-behavior-y:none}
+      body{height:100dvh;min-height:0;overflow:hidden;overscroll-behavior-y:none}
+      .container{
+        height:calc(100dvh - 75px - env(safe-area-inset-bottom));
+        min-height:0;
+        overflow-x:hidden;
+        overflow-y:auto;
+        overscroll-behavior-y:none;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+        padding-bottom:12px;
+      }
+      .container::-webkit-scrollbar{display:none}
+    }
     /* First-visit install offer floats above the bottom navigation without
        increasing page height or hiding the permanent three-way menu. */
     .install-offer{position:fixed;z-index:8;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(650px,calc(100% - 24px));padding:16px 46px 16px 17px;border:1.5px solid var(--accent);border-radius:20px;background:var(--paper);color:var(--text);box-shadow:0 12px 35px rgba(0,0,0,.20)}
