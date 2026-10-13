@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { waitUntil } = require('@vercel/functions');
 const { supabaseAdminRequest } = require('../lib/supabase-admin');
 const { getVapidKeys, validSubscription, sendChatPush } = require('../lib/chat-push');
+const memberAccess = require('../lib/member-access');
 const allowedOrigins = new Set([
   'https://wjarchive.vercel.app',
   'https://ycuve.com',
@@ -199,6 +200,8 @@ async function handleChat(body, res, req) {
     });
     const profile = saved?.[0];
     if(!profile){res.status(500).json({message:'프로필을 만들지 못했습니다.'});return}
+    // Only holders of a previously existing, verified room session are grandfathered.
+    await memberAccess.grantLegacyProfile(profile.id,source);
     res.status(200).json({ok:true,profile,profileToken});
     return;
   }
@@ -331,6 +334,7 @@ async function handleChat(body, res, req) {
     if ((body.profileId || body.profileToken) && !profile) {
       res.status(401).json({message:'저장된 프로필을 확인할 수 없습니다. 다시 설정해 주세요.'});return;
     }
+    await memberAccess.requireJoin(body,profile);
     const nickname = profile?.nickname || requestedNickname;
     if (!roomCode || !password || !nickname) {
       res.status(400).json({ message: '방 코드, 비밀번호, 닉네임을 입력해 주세요.' });
@@ -394,6 +398,7 @@ async function handleChat(body, res, req) {
     res.status(401).json({ message: member?.is_blocked ? '채팅방 이용이 제한되었습니다.' : '채팅방에 다시 입장해 주세요.' });
     return;
   }
+  await memberAccess.requireSession(body.memberId,body.sessionToken);
   const roomStateRows = await supabaseRequest(`chat_rooms?id=eq.${encodeURIComponent(member.room_id)}&select=is_active,is_archived,title,code&limit=1`);
   const roomState = Array.isArray(roomStateRows) ? roomStateRows[0] : null;
   if (!roomState || roomState.is_archived || !roomState.is_active) {
@@ -718,6 +723,10 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    if (String(body.action || '').startsWith('member-')) {
+      await require('../lib/member-handler')(req, res);
+      return;
+    }
     if (String(body.action || '').startsWith('club-')) {
       await require('../lib/club-handler')(req, res);
       return;
