@@ -43,6 +43,10 @@
     .entry-text strong{display:block;font-size:19px;line-height:1.3;letter-spacing:-.02em}
     .entry-text small{display:block;margin-top:6px;color:var(--muted);font-size:13px;line-height:1.5;word-break:keep-all}
     .arrow{font-size:25px;color:var(--accent);flex:0 0 auto}
+    .member-shortcut{margin-top:14px}
+    .member-shortcut[hidden]{display:none!important}
+    .member-shortcut a{display:block;border:1.5px solid var(--accent);border-radius:17px;padding:16px;background:var(--paper);text-align:center;font-size:17px;font-weight:850}
+    .member-shortcut small{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:5px}
     .note{margin:23px 4px 0;text-align:center;color:var(--muted);font-size:13px;line-height:1.7;word-break:keep-all}
     .bottom{position:fixed;z-index:4;left:50%;bottom:0;transform:translateX(-50%);width:min(690px,100%);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:var(--paper);border:1px solid var(--border);border-bottom:0;border-radius:21px 21px 0 0;box-shadow:0 -10px 24px rgba(0,0,0,.05)}
     .bottom a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px;border-radius:14px;color:var(--text);font-size:12px;font-weight:750;text-align:center}
@@ -150,6 +154,9 @@
         <span class="arrow" aria-hidden="true">›</span>
       </a>
     </nav>
+    <div class="member-shortcut" id="memberShortcut" hidden>
+      <a href="/register.html" aria-label="복작소 회원가입 또는 승인 상태 확인">👤 회원가입 · 승인 확인<small>관리자가 승인하면 일반 채팅방을 이용할 수 있어요</small></a>
+    </div>
     <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치하기">📲 복작소 앱 설치하기 <span aria-hidden="true">›</span></button>
     <p class="note">기존 채팅방과 대화는 그대로 유지돼요.<br>클럽에만 별도의 관리자 승인 절차가 있어요.</p>
   </main>
@@ -198,6 +205,24 @@
       if('serviceWorker' in navigator){
         window.addEventListener('load',()=>navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'}).catch(()=>{}));
       }
+
+      // General membership banner appears only when the membership rollout
+      // is enabled and the server confirms this browser isn't approved.
+      (async()=>{
+        try{
+          const p=JSON.parse(localStorage.getItem('bokjaksoChatSharedProfileV1')||'null');
+          let creds=p?.id&&p.token?{profileId:p.id,profileToken:p.token}:null;
+          if(!creds){
+            const all=Object.values(JSON.parse(localStorage.getItem('bokjaksoChatSessionsV2')||'{}'));
+            const remembered=all.find(s=>s?.member?.id&&s.sessionToken&&s.expiresAt>Date.now());
+            if(remembered)creds={memberId:remembered.member.id,sessionToken:remembered.sessionToken};
+          }
+          const result=await fetch('/api/store-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'member-status',...(creds||{})}),cache:'no-store'});
+          if(!result.ok)return;
+          const state=await result.json();
+          document.getElementById('memberShortcut').hidden=!(state.enforced&&state.status!=='approved');
+        }catch(_){}
+      })();
 
       // Show the large install banner when opening in a browser (not inside PWA).
       // Dismiss it per tab only; visitors should not permanently lose install help.
