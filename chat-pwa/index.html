@@ -24,6 +24,9 @@
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;gap:12px}
     .top-brand{font-size:20px;font-weight:850;letter-spacing:-.04em}
     .top-caption{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.13em;margin-top:3px}
+    .top-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .install-shortcut{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:44px;padding:0 12px;border-radius:13px;border:1.5px solid var(--accent);background:var(--paper);color:var(--text);font-size:14px;font-weight:800;white-space:nowrap}
+    .install-shortcut[hidden]{display:none!important}
     .theme{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:var(--paper);color:var(--text);font-size:21px}
     .hero{padding:26px 20px 29px;text-align:center;background:var(--paper);border:1px solid var(--border);border-radius:25px;box-shadow:var(--shadow)}
     .hero-logo{width:90px;height:90px;display:block;margin:0 auto 13px;border-radius:22px;object-fit:cover}
@@ -122,7 +125,10 @@
   <main class="container">
     <header class="top">
       <div><div class="top-brand">복작소</div><div class="top-caption">BOKJAKSO COMMUNITY</div></div>
-      <button class="theme" id="themeToggle" type="button" aria-label="화면 테마 변경" title="화면 테마 변경">☾</button>
+      <div class="top-actions">
+        <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치 안내 열기">📲 앱 설치</button>
+        <button class="theme" id="themeToggle" type="button" aria-label="화면 테마 변경" title="화면 테마 변경">☾</button>
+      </div>
     </header>
     <section class="hero" aria-labelledby="pageTitle">
       <img src="/icon-192.png" alt="" class="hero-logo" width="90" height="90">
@@ -203,6 +209,8 @@
         || window.navigator.standalone===true;
       const offer=document.getElementById('installOffer');
       const action=document.getElementById('installNow');
+      const shortcut=document.getElementById('installShortcut');
+      shortcut.hidden=installed();
       const guide=document.getElementById('installGuide');
       const close=document.getElementById('installDismiss');
       let deferredInstallPrompt=null;
@@ -211,6 +219,8 @@
         localStorage.setItem(NOTICE_KEY,'yes');
       };
       const installTestRequested=new URLSearchParams(location.search).get('install')==='1';
+      // First-visit suggestion may be dismissed, but the header install
+      // button stays reachable in browser mode for returning visitors.
       if(!installed()&&(installTestRequested||localStorage.getItem(NOTICE_KEY)!=='yes'))offer.hidden=false;
       else offer.hidden=true;
       close.addEventListener('click',dismiss);
@@ -283,6 +293,7 @@
       }
       function completeInstall(autoDetected){
         completionConfirmed=true;
+        shortcut.hidden=true;
         stopTimer();
         deferredInstallPrompt=null;
         dismiss();
@@ -305,6 +316,9 @@
       }
       function installationInstructions(){
         const ua=navigator.userAgent||'';
+        if(/KAKAOTALK/i.test(ua)){
+          return '카카오톡 안에서는 직접 설치가 어려울 수 있어요. 오른쪽 위 메뉴(⋮) → “다른 브라우저로 열기”를 눌러 주세요. 안드로이드는 Chrome/삼성 인터넷, 아이폰은 Safari로 열고 브라우저 메뉴에서 “앱 설치” 또는 “홈 화면에 추가”를 선택하세요.';
+        }
         if(/iPhone|iPad|iPod/i.test(ua)){
           return '아이폰 Safari의 공유 버튼(□↑) → “홈 화면에 추가”를 선택해 주세요. 다른 브라우저라면 Safari에서 주소를 열어 주세요.';
         }
@@ -349,14 +363,14 @@
         }
       }
       window.addEventListener('appinstalled',()=>completeInstall(true));
-      action.addEventListener('click',()=>{
-        if(installed()){dismiss();return;}
+      const launchInstall=()=>{
+        if(installed()){dismiss();shortcut.hidden=true;return;}
         openProgress();
-        // The native prompt must be triggered by the direct install click.
-        // Opening our custom dialog is synchronous; trigger the browser prompt
-        // immediately in the same user-gesture task.
+        // Trigger native install prompt directly from a user click.
         promptInstall();
-      });
+      };
+      action.addEventListener('click',launchInstall);
+      shortcut.addEventListener('click',launchInstall);
       progressClose.addEventListener('click',closeProgress);
       tryAgain.addEventListener('click',()=>{
         completionConfirmed=false;
