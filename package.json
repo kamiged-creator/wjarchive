@@ -3,6 +3,7 @@
   "name": "bokjakso-wjarchive",
   "version": "1.0.0",
   "dependencies": {
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "@vercel/functions": "^3.9.9"
   }
 }
