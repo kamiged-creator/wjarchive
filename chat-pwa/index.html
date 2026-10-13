@@ -193,7 +193,8 @@
         offer.hidden=true;
         localStorage.setItem(NOTICE_KEY,'yes');
       };
-      if(!installed()&&localStorage.getItem(NOTICE_KEY)!=='yes')offer.hidden=false;
+      const installTestRequested=new URLSearchParams(location.search).get('install')==='1';
+      if(!installed()&&(installTestRequested||localStorage.getItem(NOTICE_KEY)!=='yes'))offer.hidden=false;
       else offer.hidden=true;
       close.addEventListener('click',dismiss);
       window.addEventListener('beforeinstallprompt',event=>{
