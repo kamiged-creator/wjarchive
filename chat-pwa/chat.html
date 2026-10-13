@@ -1352,7 +1352,7 @@
   async function join(){
     els.joinStatus.textContent='';els.joinBtn.disabled=true;
     try{
-      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:sharedProfile?.nickname||els.nickname.value,...sharedCredentials()});
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password:els.roomPassword.value,nickname:sharedProfile?.nickname||els.nickname.value,...sharedCredentials(),...(!sharedProfile?(() => {const old=Object.values(getRememberedSessions()).find(item=>item.member?.id&&item.sessionToken&&item.member.nickname!=='관리자');return old?{sourceMemberId:old.member.id,sourceSessionToken:old.sessionToken}:{}})():{})});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};saveSession();showChat();
       if(!sharedProfile&&localStorage.getItem(SHARED_PROFILE_DELETED_KEY)!=='yes'&&data.member?.nickname!=='관리자'){
         ensureSharedProfile(data.member.nickname).then(syncSharedProfileToRoom).catch(error=>console.warn('초대 채팅방 프로필 연결 실패',error));
@@ -1766,7 +1766,7 @@
     if(!nickname){els.entryStatus.textContent='닉네임을 입력해 주세요.';els.entryNickname.focus();return}
     els.entrySubmit.disabled=true;
     try{
-      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname,...sharedCredentials()});
+      const data=await api({action:'chat-join',roomCode:els.roomCode.value,password,nickname,...sharedCredentials(),...(!sharedProfile?(() => {const old=Object.values(getRememberedSessions()).find(item=>item.member?.id&&item.sessionToken&&item.member.nickname!=='관리자');return old?{sourceMemberId:old.member.id,sourceSessionToken:old.sessionToken}:{}})():{})});
       session={room:data.room,member:data.member,sessionToken:data.sessionToken};
       saveSession();
       const chosenPhoto=entryAvatarChoice;
@@ -2154,6 +2154,39 @@
       document.querySelector('[data-home-tab="'+tab+'"]')?.click();
     }
   });
+
+
+  // General membership is verified on the server. Old, server-snapshotted room
+  // tokens remain valid even if the visitor never created a shared profile.
+  // This is a navigation aid, not the security boundary (API enforces access).
+  (async function guardGeneralMember(){
+    if(sessionStorage.getItem('wjarchiveAdminAccessToken'))return;
+    let p=null;
+    try{p=JSON.parse(localStorage.getItem('bokjaksoChatSharedProfileV1')||'null')}catch(_){}
+    let previous=null;
+    try{
+      const all=Object.values(JSON.parse(localStorage.getItem('bokjaksoChatSessionsV2')||'{}'));
+      previous=all.find(s=>s?.member?.id&&s.sessionToken&&s.expiresAt>Date.now())||null;
+      if(!previous){const old=JSON.parse(localStorage.getItem('bokjaksoChatSessionV1')||'null');if(old?.expiresAt>Date.now())previous=old}
+    }catch(_){}
+    const credentials=p?.id&&p.token?{profileId:p.id,profileToken:p.token}:
+      previous?.member?.id?{memberId:previous.member.id,sessionToken:previous.sessionToken}:{};
+    try{
+      const r=await fetch('/api/store-inquiries',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'member-status',...credentials}),cache:'no-store'
+      });
+      if(!r.ok)throw new Error('회원 인증 확인 실패');
+      const d=await r.json();
+      if(d.enforced&&d.status!=='approved'){
+        sessionStorage.setItem('bokjaksoAfterMemberApprovedV1',location.pathname+location.search);
+        location.replace('/register.html');
+      }
+    }catch(error){
+      console.warn('일반 회원 인증 상태를 확인하지 못했습니다.',error);
+      // On an API outage the protected chat requests still fail closed.
+    }
+  })();
 
   applyTheme(localStorage.getItem(THEME_KEY)||'light');
   refreshSharedProfileCard();
