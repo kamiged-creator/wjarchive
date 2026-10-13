@@ -2744,8 +2744,23 @@
   let successTimer=null;
   function read(key){try{return localStorage.getItem(key)==='yes'}catch(_){return false}}
   function write(key){try{localStorage.setItem(key,'yes')}catch(_){}}
-  function alreadyInstalled(){return standalone.matches || fullscreen.matches || navigator.standalone===true || read(installedKey)}
+  function forget(key){try{localStorage.removeItem(key)}catch(_){}}
+  function runningAsApp(){return standalone.matches || fullscreen.matches || navigator.standalone===true}
+  function alreadyInstalled(){return runningAsApp() || read(installedKey)}
+  function refreshOffer(){bar.hidden=!(isMobile && !alreadyInstalled() && !read(dismissKey))}
   function hide(){bar.hidden=true}
+  // Browser storage can survive app uninstall. A deliberate reinstall link
+  // clears only install-banner flags; no profiles, settings or site data.
+  if(!runningAsApp()){
+    const query=new URLSearchParams(location.search);
+    if(query.get('install')==='1'){
+      forget(installedKey);
+      forget(dismissKey);
+      query.delete('install');
+      const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
+      if(window.history?.replaceState)window.history.replaceState(window.history.state,'',next);
+    }
+  }
   function markInstalled(showSuccess=false){
     write(installedKey);
     hide();
@@ -2755,7 +2770,7 @@
       successTimer=setTimeout(()=>{success.hidden=true;successTimer=null},7500);
     }
   }
-  if(isMobile && !alreadyInstalled() && !read(dismissKey))bar.hidden=false;
+  refreshOffer();
   dismiss.addEventListener('click',()=>{
     write(dismissKey);
     hide();
@@ -2765,6 +2780,12 @@
     if(!isMobile)return;
     event.preventDefault();
     deferredPrompt=event;
+    // An installable browser page means the previous 'installed' flag
+    // may belong to an uninstalled app. Restore the install offer.
+    if(!runningAsApp()){
+      forget(installedKey);
+      refreshOffer();
+    }
   });
   window.addEventListener('appinstalled',()=>markInstalled(true));
   const checkDisplayMode=()=>{if(standalone.matches || fullscreen.matches || navigator.standalone===true)markInstalled(false)};
