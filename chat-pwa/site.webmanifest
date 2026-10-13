@@ -5,7 +5,7 @@
   "description": "복작소 채팅 전용 앱",
   "lang": "ko",
   "dir": "ltr",
-  "start_url": "/chat.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFFCF7",

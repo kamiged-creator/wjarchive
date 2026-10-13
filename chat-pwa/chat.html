@@ -431,7 +431,7 @@
       <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="다크모드 전환" title="다크모드 전환">☾</button>
       <button class="header-profile-btn" id="chatEdgeTab" type="button" aria-controls="chatEdgePanel" aria-expanded="false" aria-label="프로필 및 채팅 설정 열기" title="프로필 및 채팅 설정"><span class="header-avatar" id="headerAvatarIcon">👤</span></button>
-      <button class="back home-shortcut" type="button" onclick="location.href='/chat.html'" aria-label="채팅방 목록으로 이동" title="채팅방 목록으로 이동"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-7h6v7"></path></svg></button>
+      <button class="back home-shortcut" type="button" onclick="location.href='/'" aria-label="복작소 메인으로 이동" title="복작소 메인으로 이동"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-7h6v7"></path></svg></button>
     </div>
     </div>
   </header>
@@ -2009,8 +2009,8 @@
     if(e.key==='Escape'&&els.textModal.classList.contains('show'))closeTextMessage();
   });
   els.themeToggle.addEventListener('click',()=>applyTheme(document.body.classList.contains('dark')?'light':'dark'));
-  document.getElementById('brandHome').addEventListener('click',()=>{location.href='/chat.html'});
-  document.getElementById('brandHome').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();location.href='/chat.html'}});
+  document.getElementById('brandHome').addEventListener('click',()=>{location.href='/'});
+  document.getElementById('brandHome').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();location.href='/'}});
   els.adminRoomAddBtn.addEventListener('click',()=>{location.href='/chat-admin.html?new=1'});
   els.imageModal.addEventListener('click',e=>{if(e.target===els.imageModal)closeImage()});
   els.messageInput.addEventListener('input',resizeMessageInput);
@@ -2046,6 +2046,16 @@
   });
   document.getElementById('homeProfileEditBtn').addEventListener('click',()=>{
     els.sharedProfileBtn.click();
+  });
+
+  // Let the separate PWA landing page open the desired section directly.
+  // Invitation URLs (room=...) keep their existing automatic room-entry behavior.
+  document.addEventListener('DOMContentLoaded',()=>{
+    const params=new URLSearchParams(location.search);
+    const tab=params.get('tab');
+    if(!params.has('room')&&['rooms','club','me'].includes(tab)){
+      document.querySelector('[data-home-tab="'+tab+'"]')?.click();
+    }
   });
 
   applyTheme(localStorage.getItem(THEME_KEY)||'light');

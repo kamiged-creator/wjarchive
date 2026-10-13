@@ -1,7 +1,9 @@
 # 복작소 독립 채팅 PWA
 
 - Vercel `bokjakso-chat-pwa` 프로젝트의 루트 디렉터리: `chat-pwa`
-- 시작 화면 `/chat.html`; 기존 채팅방, 비밀번호, 공통 프로필 및 대화는 보존
+- 앱 시작 화면 `/` (메뉴 3개 및 하단 바로가기); 각 메뉴 `/chat.html?tab=rooms|club|me`로 이동, 기존 초대 링크 `/chat.html?room=...`는 유지
+- 기존 채팅방, 비밀번호, 공통 프로필 및 대화는 보존
+- PWA manifest `id=/chat.html`는 기존 설치 앱의 동일성을 위해 유지하고 `start_url=/`만 변경
 - 앱 설치 아이콘: 福 말풍선; 기존 복작소 홈페이지와는 별도 PWA
 - `/api/store-inquiries`, `/api/content-admin`, `/api/admin-session`은 기존 bokjakso.com 서버로 프록시
 - 클럽 전용 **새 Vercel 함수는 추가하지 않음** (Hobby 요금제 함수 수 제한 회피)
