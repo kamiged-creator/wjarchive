@@ -80,6 +80,23 @@
     .install-guide{margin-top:10px!important;white-space:pre-line;overflow-wrap:break-word}
     .install-guide[hidden]{display:none!important}
     @media(max-width:380px){.install-offer{bottom:calc(81px + env(safe-area-inset-bottom));padding:12px 44px 12px 13px}}
+
+    /* Full-screen install-status dialog: elapsed time, not a fake download %. */
+    .install-progress-backdrop{position:fixed;z-index:30;inset:0;display:grid;place-items:center;padding:18px;background:rgba(22,18,14,.70)}
+    .install-progress-backdrop[hidden]{display:none!important}
+    .install-progress-dialog{width:min(420px,100%);max-height:calc(100dvh - 36px);overflow:auto;border-radius:27px;border:1px solid var(--border);background:var(--paper);color:var(--text);padding:28px 23px 23px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.28)}
+    .install-progress-icon{font-size:38px;line-height:1.2;margin-bottom:9px}
+    .install-progress-dialog h2{font-size:23px;line-height:1.4;letter-spacing:-.035em;margin:0 0 8px}
+    .install-progress-description{font-size:14px;line-height:1.65;color:var(--muted);margin:0}
+    .install-time{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";font-size:clamp(60px,16vw,83px);font-weight:850;line-height:1.25;letter-spacing:-.06em;display:block;margin:13px 0 3px;color:var(--accent)}
+    .install-time-label{font-size:12px;color:var(--muted);margin:0 0 17px}
+    .install-progress-status{font-size:15px;font-weight:750;line-height:1.7;padding:12px;border-radius:14px;background:var(--panel);margin:0 0 14px;word-break:keep-all}
+    .install-progress-instructions{font-size:13px;line-height:1.7;text-align:left;margin:0 0 14px;color:var(--muted);white-space:pre-line;word-break:keep-all}
+    .install-progress-instructions[hidden],.install-progress-btn[hidden]{display:none!important}
+    .install-progress-actions{display:grid;gap:9px}
+    .install-progress-btn{min-height:49px;border:1.5px solid var(--border);border-radius:13px;background:var(--panel);color:var(--text);font:inherit;font-weight:750;cursor:pointer}
+    .install-progress-btn.main{background:var(--accent);border-color:var(--accent);color:#fff}
+    .install-progress-btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     @media(prefers-reduced-motion:reduce){.entry{transition:none}}
   </style>
 </head>
@@ -127,6 +144,23 @@
     <button class="install-cta" id="installNow" type="button">복작소 앱 설치하기</button>
     <p class="install-guide" id="installGuide" role="status" aria-live="polite" hidden></p>
   </aside>
+
+  <div class="install-progress-backdrop" id="installProgress" hidden>
+    <section class="install-progress-dialog" role="dialog" aria-modal="true" aria-labelledby="installProgressTitle" aria-describedby="installProgressDescription" tabindex="-1" id="installProgressDialog">
+      <div class="install-progress-icon" aria-hidden="true">📲</div>
+      <h2 id="installProgressTitle">복작소 앱 설치 확인 중</h2>
+      <p class="install-progress-description" id="installProgressDescription">설치가 확인되면 완료로 표시돼요.</p>
+      <output class="install-time" id="installElapsed" aria-label="설치 확인 경과 시간">00:00</output>
+      <p class="install-time-label">경과 시간 · 실제 설치 진행률은 아니에요</p>
+      <p class="install-progress-status" id="installProgressStatus" role="status" aria-live="polite">설치 안내를 준비하고 있어요.</p>
+      <p class="install-progress-instructions" id="installProgressInstructions" hidden></p>
+      <div class="install-progress-actions">
+        <button class="install-progress-btn main" id="installManualConfirm" type="button" hidden>홈 화면에 복작소 아이콘이 보여요</button>
+        <button class="install-progress-btn main" id="installTryAgain" type="button" hidden>설치 다시 시도</button>
+        <button class="install-progress-btn" id="installProgressClose" type="button">닫기</button>
+      </div>
+    </section>
+  </div>
   <script>
     (()=>{
       const KEY='bokjaksoChatThemeV1';
@@ -166,43 +200,159 @@
         event.preventDefault();
         deferredInstallPrompt=event;
       });
-      window.addEventListener('appinstalled',()=>{
+      const progress=document.getElementById('installProgress');
+      const dialog=document.getElementById('installProgressDialog');
+      const progressTitle=document.getElementById('installProgressTitle');
+      const progressStatus=document.getElementById('installProgressStatus');
+      const elapsed=document.getElementById('installElapsed');
+      const instructions=document.getElementById('installProgressInstructions');
+      const manualConfirm=document.getElementById('installManualConfirm');
+      const tryAgain=document.getElementById('installTryAgain');
+      const progressClose=document.getElementById('installProgressClose');
+      let timerId=null;
+      let startTime=0;
+      let completionConfirmed=false;
+      let lastFocus=null;
+      let previousOverflow='';
+      const formatElapsed=(ms)=>{
+        const seconds=Math.floor(Math.max(0,ms)/1000);
+        return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+      };
+      function tick(){
+        if(!startTime||completionConfirmed)return;
+        const passed=Date.now()-startTime;
+        elapsed.textContent=formatElapsed(passed);
+        // Some browsers don't report installation completion. Let visitors
+        // confirm only after visually checking the home-screen icon.
+        if(passed>=10000 && !instructions.hidden)manualConfirm.hidden=false;
+        if(passed>=15000 && instructions.hidden){
+          progressStatus.textContent='설치 완료 신호를 기다리고 있어요. 홈 화면에 아이콘이 있는지 확인해 주세요.';
+          manualConfirm.hidden=false;
+        }
+      }
+      function stopTimer(){
+        if(timerId!==null){clearInterval(timerId);timerId=null;}
+        if(startTime)elapsed.textContent=formatElapsed(Date.now()-startTime);
+      }
+      function beginTimer(){
+        stopTimer();
+        startTime=Date.now();
+        elapsed.textContent='00:00';
+        timerId=setInterval(tick,1000);
+      }
+      function openProgress(){
+        lastFocus=document.activeElement;
+        previousOverflow=document.body.style.overflow;
+        document.body.style.overflow='hidden';
+        progress.hidden=false;
+        dialog.focus();
+        completionConfirmed=false;
+        progressTitle.textContent='복작소 앱 설치 확인 중';
+        progressStatus.textContent='설치 안내를 준비하고 있어요.';
+        instructions.hidden=true;
+        instructions.textContent='';
+        manualConfirm.hidden=true;
+        tryAgain.hidden=true;
+        progressClose.textContent='닫기';
+        beginTimer();
+      }
+      function closeProgress(){
+        stopTimer();
+        startTime=0;
+        progress.hidden=true;
+        document.body.style.overflow=previousOverflow;
+        lastFocus?.focus?.();
+      }
+      function completeInstall(autoDetected){
+        completionConfirmed=true;
+        stopTimer();
         deferredInstallPrompt=null;
         dismiss();
-      });
-      action.addEventListener('click',async()=>{
-        if(installed()){dismiss();return;}
-        if(deferredInstallPrompt){
-          const prompt=deferredInstallPrompt;
-          deferredInstallPrompt=null;
-          guide.hidden=true;
-          action.disabled=true;
-          try{
-            await prompt.prompt();
-            const result=await prompt.userChoice;
-            if(result?.outcome==='accepted')dismiss();
-          }catch(error){
-            showGuide();
-          }finally{
-            action.disabled=false;
-          }
-        }else{
-          showGuide();
-        }
-      });
-      function showGuide(){
+        if(progress.hidden)return;
+        progressTitle.textContent=autoDetected?'✅ 설치 완료!':'✅ 홈 화면 아이콘 확인 완료!';
+        progressStatus.textContent=autoDetected
+          ?'복작소 앱 설치가 확인됐어요. 홈 화면의 복작소 아이콘을 눌러 실행하세요.'
+          :'홈 화면에 앱 아이콘이 보이는 것을 확인했어요. 아이콘을 눌러 실행하세요.';
+        instructions.hidden=true;
+        tryAgain.hidden=true;
+        manualConfirm.hidden=true;
+        progressClose.textContent='확인';
+      }
+      function cancelAttempt(){
+        stopTimer();
+        progressStatus.textContent='설치가 취소됐어요. 다시 시도하거나 닫아 주세요.';
+        tryAgain.hidden=false;
+        manualConfirm.hidden=true;
+        instructions.hidden=true;
+      }
+      function installationInstructions(){
         const ua=navigator.userAgent||'';
-        let message='브라우저 메뉴에서 “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.';
         if(/iPhone|iPad|iPod/i.test(ua)){
-          message='아이폰 Safari에서 아래 공유 버튼(□↑) → “홈 화면에 추가”를 눌러 주세요. 다른 브라우저라면 Safari로 주소를 열어 주세요.';
-        }else if(/SamsungBrowser/i.test(ua)){
-          message='삼성 인터넷 하단 메뉴(≡) → “현재 페이지 추가” → “홈 화면”을 선택해 주세요.';
-        }else if(/Android/i.test(ua)){
-          message='Chrome 오른쪽 위 점 3개(⋮) → “홈 화면에 추가” 또는 “앱 설치”를 선택해 주세요.';
+          return '아이폰 Safari의 공유 버튼(□↑) → “홈 화면에 추가”를 선택해 주세요. 다른 브라우저라면 Safari에서 주소를 열어 주세요.';
         }
+        if(/SamsungBrowser/i.test(ua)){
+          return '삼성 인터넷 메뉴(≡) → “현재 페이지 추가” → “홈 화면”을 선택해 주세요.';
+        }
+        if(/Android/i.test(ua)){
+          return 'Chrome 오른쪽 위 점 3개(⋮) → “앱 설치” 또는 “홈 화면에 추가”를 선택해 주세요.';
+        }
+        return '브라우저 메뉴에서 “앱 설치” 또는 “홈 화면에 추가”를 선택해 주세요.';
+      }
+      function showGuide(){
+        const message=installationInstructions();
         guide.textContent=message;
         guide.hidden=false;
+        progressStatus.textContent='자동 설치 안내를 사용할 수 없어 직접 설치 방법을 보여드려요.';
+        instructions.textContent=message+'\n홈 화면에 복작소 아이콘이 생겼다면 아래 확인 버튼을 눌러 주세요.';
+        instructions.hidden=false;
+        manualConfirm.hidden=false;
+        tryAgain.hidden=true;
       }
+      async function promptInstall(){
+        if(completionConfirmed)return;
+        if(installed()){completeInstall(true);return;}
+        if(!deferredInstallPrompt){showGuide();return;}
+        const nativePrompt=deferredInstallPrompt;
+        deferredInstallPrompt=null;
+        guide.hidden=true;
+        tryAgain.hidden=true;
+        manualConfirm.hidden=true;
+        instructions.hidden=true;
+        progressStatus.textContent='휴대폰에 표시되는 설치창에서 “설치”를 눌러 주세요.';
+        try{
+          await nativePrompt.prompt();
+          const result=await nativePrompt.userChoice;
+          if(completionConfirmed)return;
+          if(result?.outcome==='dismissed'){cancelAttempt();return;}
+          progressStatus.textContent='설치를 선택했어요. 완료 신호를 기다리고 있어요.';
+          tick();
+        }catch(error){
+          if(!completionConfirmed)showGuide();
+        }
+      }
+      window.addEventListener('appinstalled',()=>completeInstall(true));
+      action.addEventListener('click',()=>{
+        if(installed()){dismiss();return;}
+        openProgress();
+        // The native prompt must be triggered by the direct install click.
+        // Opening our custom dialog is synchronous; trigger the browser prompt
+        // immediately in the same user-gesture task.
+        promptInstall();
+      });
+      progressClose.addEventListener('click',closeProgress);
+      tryAgain.addEventListener('click',()=>{
+        completionConfirmed=false;
+        progressStatus.textContent='설치를 다시 확인할게요.';
+        instructions.hidden=true;
+        tryAgain.hidden=true;
+        manualConfirm.hidden=true;
+        beginTimer();
+        promptInstall();
+      });
+      manualConfirm.addEventListener('click',()=>completeInstall(false));
+      document.addEventListener('keydown',event=>{
+        if(event.key==='Escape'&&!progress.hidden){event.preventDefault();closeProgress();}
+      });
     })();
   </script>
 </body>
