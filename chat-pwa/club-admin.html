@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>복작소 클럽 회원관리</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f1ea;--paper:#fffdf9;--ink:#251b15;--line:#dacbbb;--accent:#795738}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,"Noto Sans KR",system-ui,sans-serif}
+header{padding:18px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+header strong{font-size:20px}header a{color:var(--ink);font-weight:700}
+main{max-width:840px;margin:0 auto;padding:20px 14px 60px}
+h1{font-size:27px;letter-spacing:-.04em}h2{font-size:20px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:20px;margin:15px 0}
+.status{color:#765d46;min-height:22px;line-height:1.6}.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{background:#efe4d7;border-radius:12px;padding:14px 20px;min-width:115px}
+.stat strong{display:block;font-size:24px}.stat span{display:block;font-size:13px}
+.member{border-top:1px solid var(--line);padding:18px 0}.member:first-child{border:0}
+.member-name{font-weight:850;font-size:18px}.meta{color:#73665d;font-size:13px;margin:5px 0 10px}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{font:inherit;cursor:pointer;min-height:48px;border-radius:11px;padding:9px 16px;border:1px solid var(--line);background:#fff;color:#21190f;font-weight:800}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{color:#9c302a;background:#fff4f3;border-color:#d49d94}
+button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible{outline:3px solid #b6874b;outline-offset:3px}
+.empty{color:#796e61;padding:16px 0}
+@media(prefers-color-scheme:dark){:root{--bg:#141414;--paper:#222;--ink:#f4eee7;--line:#46403b;--accent:#af8156}.stat{background:#302923}.status,.meta,.empty{color:#c4b4a5}.buttons button{background:#302a24;color:#fff}.buttons .primary{background:#95704d}.buttons .danger{background:#4b2928;color:#ffe1dc}}
+</style></head><body>
+<header><strong>👥 복작소 클럽 회원관리</strong><a href="/chat-admin.html">채팅 관리자 화면</a></header>
+<main>
+<h1>가입 신청 · 회원관리</h1>
+<p>클럽은 관리자 승인 회원제입니다. 일반 채팅방은 기존처럼 이용할 수 있어요.</p>
+<section class="card"><div class="stats" id="stats" aria-live="polite"></div><div class="buttons"><button class="primary" id="refresh" type="button">회원 목록 새로고침</button><button id="pendingOnly" type="button" aria-pressed="false">승인 대기만 보기</button></div><p class="status" id="feedback" role="status" aria-live="polite"></p></section>
+<section class="card"><h2>클럽 회원 명단</h2><div id="members" aria-live="polite">회원 목록을 불러오는 중…</div></section>
+</main>
+<script>
+(()=>{
+'use strict';
+const TOKEN_KEY='wjarchiveAdminAccessToken';
+if(!sessionStorage.getItem(TOKEN_KEY)){location.replace('/admin-login.html');return;}
+const feedback=document.getElementById('feedback'),members=document.getElementById('members'),stats=document.getElementById('stats');
+const pendingButton=document.getElementById('pendingOnly');
+let entries=[],pendingOnly=false;
+async function api(action,extra={}){
+ const t=sessionStorage.getItem(TOKEN_KEY);
+ if(!t)throw new Error('관리자 로그인이 필요해요.');
+ const response=await fetch('/api/club',{
+   method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},
+   body:JSON.stringify({action,...extra})
+ });
+ const data=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(data.message||'회원 정보를 가져오지 못했습니다.');
+ return data;
+}
+const label={pending:'승인 대기',approved:'정회원',rejected:'거절됨',suspended:'활동 제한'};
+function date(t){if(!t)return '';const d=new Date(t);return Number.isNaN(d.getTime())?'':d.toLocaleString('ko-KR');}
+function button(text,klass,handler){
+ const b=document.createElement('button');b.type='button';b.textContent=text;b.className=klass;
+ b.addEventListener('click',handler);return b;
+}
+async function review(row,status){
+ const message=status==='approved'?'이 회원을 승인할까요?':status==='rejected'?'가입 신청을 거절할까요?':'이 회원의 클럽 이용을 제한할까요?';
+ if(!confirm(message))return;
+ feedback.textContent='처리 중…';
+ try{await api('admin-review',{profileId:row.profile_id,status});feedback.textContent='회원 상태를 변경했어요.';await load();}
+ catch(e){feedback.textContent=e.message;}
+}
+function render(){
+ const statuses={pending:0,approved:0,rejected:0,suspended:0};
+ for(const row of entries)if(Object.hasOwn(statuses,row.status))statuses[row.status]++;
+ stats.replaceChildren();
+ for(const [name,num] of [['전체',entries.length],['승인 대기',statuses.pending],['정회원',statuses.approved],['활동 제한',statuses.suspended]]){
+  const el=document.createElement('div');el.className='stat';
+  const big=document.createElement('strong');big.textContent=String(num);
+  const title=document.createElement('span');title.textContent=name;
+  el.append(big,title);stats.appendChild(el);
+ }
+ members.replaceChildren();
+ const rows=pendingOnly?entries.filter(r=>r.status==='pending'):entries;
+ if(!rows.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='표시할 회원이 없습니다.';members.appendChild(empty);return;}
+ for(const row of rows){
+  const article=document.createElement('article');article.className='member';
+  const name=document.createElement('div');name.className='member-name';name.textContent=row.nickname||'이름 없음';
+  const meta=document.createElement('div');meta.className='meta';meta.textContent=(label[row.status]||row.status)+' · 신청 '+date(row.requested_at)+(row.reviewed_at?' · 처리 '+date(row.reviewed_at):'');
+  const controls=document.createElement('div');controls.className='buttons';
+  if(row.status!=='approved')controls.appendChild(button('승인','primary',()=>review(row,'approved')));
+  if(row.status==='pending')controls.appendChild(button('거절','danger',()=>review(row,'rejected')));
+  if(row.status==='approved')controls.appendChild(button('이용 제한','danger',()=>review(row,'suspended')));
+  article.append(name,meta,controls);members.appendChild(article);
+ }
+}
+async function load(){
+ try{const data=await api('admin-list');entries=Array.isArray(data.members)?data.members:[];feedback.textContent='회원 정보를 불러왔어요.';render();}
+ catch(e){feedback.textContent=e.message;members.textContent='목록을 표시할 수 없습니다.';if(e.message.includes('로그인'))location.replace('/admin-login.html');}
+}
+pendingButton.addEventListener('click',()=>{pendingOnly=!pendingOnly;pendingButton.setAttribute('aria-pressed',String(pendingOnly));pendingButton.textContent=pendingOnly?'모든 회원 보기':'승인 대기만 보기';render();});
+document.getElementById('refresh').addEventListener('click',load);
+load();
+})();
+</script></body></html>
