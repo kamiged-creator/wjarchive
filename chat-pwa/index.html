@@ -158,7 +158,7 @@
       <a href="/register.html" aria-label="복작소 회원가입 또는 승인 상태 확인">👤 회원가입 · 승인 확인<small>관리자가 승인하면 일반 채팅방을 이용할 수 있어요</small></a>
     </div>
     <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치하기">📲 복작소 앱 설치하기 <span aria-hidden="true">›</span></button>
-    <p class="note">기존 채팅방과 대화는 그대로 유지돼요.<br>클럽에만 별도의 관리자 승인 절차가 있어요.</p>
+    <p class="note" id="membershipNote">기존 채팅방과 대화는 그대로 유지돼요.<br>클럽에만 별도의 관리자 승인 절차가 있어요.</p>
   </main>
   <nav class="bottom" aria-label="하단 바로가기">
     <a href="/chat.html?tab=rooms"><span class="nav-icon" aria-hidden="true">💬</span>채팅방</a>
@@ -221,6 +221,7 @@
           if(!result.ok)return;
           const state=await result.json();
           document.getElementById('memberShortcut').hidden=!(state.enforced&&state.status!=='approved');
+          if(state.enforced)document.getElementById('membershipNote').textContent='기존 대화는 그대로 보존돼요. 신규 회원은 관리자 승인 후 일반 채팅을 이용할 수 있고, 클럽은 별도 승인이 필요해요.';
         }catch(_){}
       })();
 
