@@ -1493,45 +1493,56 @@
     .relation-chat-fab:hover{transform:translateY(-1px)}
     @media(max-width:560px){.relation-chat-fab{right:12px;bottom:76px;min-height:42px;padding:0 13px;font-size:12px}}
 
-    /* Mobile-first PWA install offer: main Bokjakso website only. */
-    .bokjakso-install-offer[hidden],.bokjakso-install-guide[hidden],.bokjakso-install-done[hidden]{display:none!important}
-    .bokjakso-install-offer{display:none;position:relative;background:#fffaf2;border-bottom:2px solid #b59677;color:#32271f;padding:14px 90px 15px 16px;box-shadow:0 5px 16px rgba(45,30,18,.08);z-index:95}
-    .bokjakso-install-heading{display:flex;align-items:flex-start;gap:10px}
-    .bokjakso-install-symbol{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border-radius:13px;background:#efe3d5;font-size:24px}
-    .bokjakso-install-heading strong{display:block;font-size:16px;font-weight:800;line-height:1.4;word-break:keep-all}
-    .bokjakso-install-heading p{font-size:13px;line-height:1.5;margin:4px 0 0;color:#6c5746}
-    .bokjakso-install-cta{margin:11px 0 0 52px;min-height:46px;padding:10px 15px;background:#8b6847;color:#fff;border:0;border-radius:12px;font-size:15px;font-weight:800;box-shadow:0 3px 10px rgba(90,64,44,.14)}
-    .bokjakso-install-dismiss{position:absolute;right:11px;top:13px;min-height:42px;padding:0 10px;border:1.5px solid #ccbba9;border-radius:11px;background:#fff;color:#49392c;font-size:13px;font-weight:800}
-    .bokjakso-install-guide{font-size:13px;line-height:1.7;margin:11px 0 0 52px;color:#594535;word-break:keep-all}
-    .bokjakso-install-done{margin:9px 0 0 52px;padding:7px 10px;border:1px solid #bea68c;border-radius:10px;background:#fff;color:#594535;font-size:13px;font-weight:750;min-height:38px}
+    /* Bokjakso app install: mobile bottom-sheet popup (does not push homepage). */
+    .bokjakso-install-backdrop[hidden],.bokjakso-install-offer[hidden],.bokjakso-install-guide[hidden],.bokjakso-install-done[hidden]{display:none!important}
+    .bokjakso-install-backdrop{display:none;position:fixed;inset:0;z-index:110;background:rgba(26,20,15,.32);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px)}
+    .bokjakso-install-offer{display:none;position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:111;width:min(calc(100% - 24px),480px);max-height:min(72dvh,520px);overflow-y:auto;overscroll-behavior:contain;padding:22px 18px 19px;border:1.5px solid #ceb49a;border-radius:25px;background:#fffaf2;color:#32271f;box-shadow:0 18px 50px rgba(33,21,13,.26);word-break:keep-all}
+    .bokjakso-install-heading{display:flex;align-items:flex-start;gap:11px;margin-right:65px}
+    .bokjakso-install-symbol{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border-radius:14px;background:#efe3d5;font-size:25px}
+    .bokjakso-install-heading strong{display:block;font-size:18px;font-weight:850;line-height:1.38;letter-spacing:-.025em}
+    .bokjakso-install-heading p{font-size:14px;line-height:1.6;margin:6px 0 0;color:#6c5746}
+    .bokjakso-install-cta{display:block;width:100%;min-height:54px;margin:19px 0 0;padding:12px 15px;background:#8b6847;color:#fff;border:0;border-radius:14px;font-size:17px;font-weight:850;box-shadow:0 3px 10px rgba(90,64,44,.14)}
+    .bokjakso-install-cta:disabled{opacity:.7;cursor:wait}
+    .bokjakso-install-dismiss{position:absolute;right:14px;top:15px;min-height:45px;padding:0 10px;border:1.5px solid #ccbba9;border-radius:12px;background:#fff;color:#49392c;font-size:14px;font-weight:800}
+    .bokjakso-install-guide{font-size:14px;line-height:1.65;margin:14px 2px 0;color:#594535}
+    .bokjakso-install-done{display:block;width:100%;margin:11px 0 0;padding:10px;border:1px solid #bea68c;border-radius:12px;background:#fff;color:#594535;font-size:14px;font-weight:750;min-height:48px}
     .bokjakso-install-success[hidden]{display:none!important}
     .bokjakso-install-success{position:fixed;z-index:2147483000;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(calc(100% - 28px),410px);padding:17px 18px;background:#fffaf2;color:#33271e;border:2px solid #ad8964;border-radius:16px;box-shadow:0 9px 32px rgba(30,20,12,.26);text-align:center;word-break:keep-all}
     .bokjakso-install-success strong{display:block;font-size:18px;font-weight:850;line-height:1.4}
     .bokjakso-install-success span{display:block;margin-top:6px;font-size:14px;line-height:1.55;color:#604a37}
     .bokjakso-install-cta:focus-visible,.bokjakso-install-dismiss:focus-visible,.bokjakso-install-done:focus-visible{outline:3px solid #8b6847;outline-offset:3px}
     @media (max-width:800px){
+      .bokjakso-install-backdrop:not([hidden]){display:block}
       .bokjakso-install-offer:not([hidden]){display:block}
     }
-    /* The installed app never needs the browser install banner. */
     @media (display-mode:standalone),(display-mode:fullscreen){
-      .bokjakso-install-offer,.bokjakso-install-success{display:none!important}
+      .bokjakso-install-backdrop,.bokjakso-install-offer,.bokjakso-install-success{display:none!important}
     }
     @media (max-width:360px){
-      .bokjakso-install-offer{padding-left:11px;padding-right:76px}
-      .bokjakso-install-symbol{width:36px;height:36px;flex-basis:36px}
-      .bokjakso-install-heading strong{font-size:14px}
-      .bokjakso-install-cta,.bokjakso-install-guide,.bokjakso-install-done{margin-left:46px}
-      .bokjakso-install-dismiss{right:7px;padding:0 6px}
+      .bokjakso-install-offer{width:calc(100% - 14px);padding:18px 13px 16px}
+      .bokjakso-install-heading{gap:9px;margin-right:61px}
+      .bokjakso-install-symbol{width:41px;height:41px;flex-basis:41px}
+      .bokjakso-install-heading strong{font-size:16px}
+      .bokjakso-install-heading p{font-size:13px}
+      .bokjakso-install-dismiss{right:9px;top:11px;padding:0 7px}
+    }
+    @media (prefers-reduced-motion:no-preference){
+      .bokjakso-install-offer:not([hidden]){animation:bokjakso-install-rise .2s ease-out both}
+    }
+    @keyframes bokjakso-install-rise{
+      from{opacity:.45;transform:translate(-50%,22px)}
+      to{opacity:1;transform:translate(-50%,0)}
     }
 </style>
 </head>
 <body id="top" class="is-loading">
-  <aside id="bokjaksoInstallOffer" class="bokjakso-install-offer" aria-label="복작소 스마트폰 앱 설치 안내" hidden>
+  <div id="bokjaksoInstallBackdrop" class="bokjakso-install-backdrop" hidden></div>
+  <aside id="bokjaksoInstallOffer" class="bokjakso-install-offer" role="region" aria-label="복작소 스마트폰 앱 설치 안내" hidden>
     <button id="bokjaksoInstallDismiss" class="bokjakso-install-dismiss" type="button" aria-label="앱 설치 안내 닫기" title="설치 안내 닫기">닫기 ×</button>
     <div class="bokjakso-install-heading">
       <span class="bokjakso-install-symbol" aria-hidden="true">📲</span>
       <div>
-        <strong>복작소를 홈 화면에 설치해 보세요</strong>
+        <strong>복작소 앱으로 편하게 이용하세요</strong>
         <p>스마트폰에서 앱처럼 편하게 이용할 수 있어요.</p>
       </div>
     </div>
@@ -2732,6 +2743,7 @@
 (function(){
   'use strict';
   const bar=document.getElementById('bokjaksoInstallOffer');
+  const backdrop=document.getElementById('bokjaksoInstallBackdrop');
   const install=document.getElementById('bokjaksoInstallNow');
   const dismiss=document.getElementById('bokjaksoInstallDismiss');
   const guide=document.getElementById('bokjaksoInstallGuide');
@@ -2757,8 +2769,12 @@
   // 'installed' flag: after uninstall, a fresh Chrome visit can offer install.
   // Only suppress the banner in the app itself or the install-completion tab.
   function alreadyInstalled(){return runningAsApp() || readSession(installedKey)}
-  function refreshOffer(){bar.hidden=!(isMobile && !alreadyInstalled() && !read(dismissKey))}
-  function hide(){bar.hidden=true}
+  function refreshOffer(){
+    const shouldShow=isMobile && !alreadyInstalled() && !read(dismissKey);
+    bar.hidden=!shouldShow;
+    backdrop.hidden=!shouldShow;
+  }
+  function hide(){bar.hidden=true;backdrop.hidden=true}
   // Browser storage can survive app uninstall. A deliberate reinstall link
   // clears only install-banner flags; no profiles, settings or site data.
   if(!runningAsApp()){
@@ -2782,9 +2798,14 @@
     }
   }
   refreshOffer();
-  dismiss.addEventListener('click',()=>{
+  function dismissOffer(){
     write(dismissKey);
     hide();
+  }
+  dismiss.addEventListener('click',dismissOffer);
+  backdrop.addEventListener('click',dismissOffer);
+  window.addEventListener('keydown',event=>{
+    if(event.key==='Escape' && !bar.hidden)dismissOffer();
   });
   done.addEventListener('click',()=>markInstalled(true));
   window.addEventListener('beforeinstallprompt',event=>{
