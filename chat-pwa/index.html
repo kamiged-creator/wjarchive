@@ -47,6 +47,28 @@
     .bottom a:hover,.bottom a:focus-visible{background:var(--panel)}
     a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     @media(max-width:380px){.container{padding-left:13px;padding-right:13px}.entry{gap:11px}.entry-icon{width:48px;height:48px;flex-basis:48px}.entry-text strong{font-size:18px}.entry-text small{font-size:12px}}
+
+    /* Small-screen home: make all three entry cards easy to see above
+       the fixed bottom navigation without reducing tap targets. */
+    @media(max-width:560px){
+      .container{padding-top:18px;padding-bottom:calc(95px + env(safe-area-inset-bottom))}
+      .top{margin-bottom:17px}
+      .hero{padding:16px 15px 18px;border-radius:23px}
+      .hero-logo{width:72px;height:72px;margin-bottom:9px;border-radius:18px}
+      .hero h1{font-size:30px;margin-bottom:5px}
+      .tagline{font-size:14px;margin-top:9px;line-height:1.55}
+      .section-title{margin:18px 2px 11px}
+      .cards{gap:9px}
+      .entry{min-height:84px;padding:10px 14px;gap:12px;border-radius:18px}
+      .entry-icon{flex-basis:48px;width:48px;height:48px;font-size:24px;border-radius:14px}
+      .entry-text strong{font-size:17px}
+      .entry-text small{font-size:12px;margin-top:4px}
+      .note{margin-top:15px;font-size:12px}
+    }
+    @media(max-width:380px){
+      .entry{min-height:82px;gap:10px;padding:9px 11px}
+      .entry-icon{width:46px;height:46px;flex-basis:46px}
+    }
     @media(prefers-reduced-motion:reduce){.entry{transition:none}}
   </style>
 </head>
