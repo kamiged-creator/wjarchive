@@ -1504,6 +1504,10 @@
     .bokjakso-install-dismiss{position:absolute;right:11px;top:13px;min-height:42px;padding:0 10px;border:1.5px solid #ccbba9;border-radius:11px;background:#fff;color:#49392c;font-size:13px;font-weight:800}
     .bokjakso-install-guide{font-size:13px;line-height:1.7;margin:11px 0 0 52px;color:#594535;word-break:keep-all}
     .bokjakso-install-done{margin:9px 0 0 52px;padding:7px 10px;border:1px solid #bea68c;border-radius:10px;background:#fff;color:#594535;font-size:13px;font-weight:750;min-height:38px}
+    .bokjakso-install-success[hidden]{display:none!important}
+    .bokjakso-install-success{position:fixed;z-index:2147483000;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(calc(100% - 28px),410px);padding:17px 18px;background:#fffaf2;color:#33271e;border:2px solid #ad8964;border-radius:16px;box-shadow:0 9px 32px rgba(30,20,12,.26);text-align:center;word-break:keep-all}
+    .bokjakso-install-success strong{display:block;font-size:18px;font-weight:850;line-height:1.4}
+    .bokjakso-install-success span{display:block;margin-top:6px;font-size:14px;line-height:1.55;color:#604a37}
     .bokjakso-install-cta:focus-visible,.bokjakso-install-dismiss:focus-visible,.bokjakso-install-done:focus-visible{outline:3px solid #8b6847;outline-offset:3px}
     @media (max-width:800px){
       .bokjakso-install-offer:not([hidden]){display:block}
@@ -1531,6 +1535,10 @@
     <p id="bokjaksoInstallGuide" class="bokjakso-install-guide" role="status" aria-live="polite" hidden></p>
     <button id="bokjaksoInstallDone" class="bokjakso-install-done" type="button" hidden>홈 화면에 설치했어요</button>
   </aside>
+  <div id="bokjaksoInstallSuccess" class="bokjakso-install-success" role="status" aria-live="polite" hidden>
+    <strong>✅ 복작소 앱 설치 완료!</strong>
+    <span>이제 스마트폰 홈 화면의 ‘복작소’ 아이콘을 누르면 앱으로 열 수 있어요.</span>
+  </div>
 
   <header class="topbar">
     <div class="wrap topbar-inner">
@@ -2724,6 +2732,7 @@
   const dismiss=document.getElementById('bokjaksoInstallDismiss');
   const guide=document.getElementById('bokjaksoInstallGuide');
   const done=document.getElementById('bokjaksoInstallDone');
+  const success=document.getElementById('bokjaksoInstallSuccess');
   const dismissKey='bokjaksoMainInstallDismissedV1';
   const installedKey='bokjaksoMainInstallInstalledV1';
   const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -2732,43 +2741,58 @@
   const standalone=window.matchMedia('(display-mode:standalone)');
   const fullscreen=window.matchMedia('(display-mode:fullscreen)');
   let deferredPrompt=null;
+  let successTimer=null;
   function read(key){try{return localStorage.getItem(key)==='yes'}catch(_){return false}}
   function write(key){try{localStorage.setItem(key,'yes')}catch(_){}}
   function alreadyInstalled(){return standalone.matches || fullscreen.matches || navigator.standalone===true || read(installedKey)}
   function hide(){bar.hidden=true}
-  function installed(){write(installedKey);hide()}
+  function markInstalled(showSuccess=false){
+    write(installedKey);
+    hide();
+    if(showSuccess && isMobile){
+      success.hidden=false;
+      if(successTimer)clearTimeout(successTimer);
+      successTimer=setTimeout(()=>{success.hidden=true;successTimer=null},7500);
+    }
+  }
   if(isMobile && !alreadyInstalled() && !read(dismissKey))bar.hidden=false;
   dismiss.addEventListener('click',()=>{
     write(dismissKey);
     hide();
   });
-  done.addEventListener('click',installed);
+  done.addEventListener('click',()=>markInstalled(true));
   window.addEventListener('beforeinstallprompt',event=>{
     if(!isMobile)return;
     event.preventDefault();
     deferredPrompt=event;
   });
-  window.addEventListener('appinstalled',installed);
-  const checkDisplayMode=()=>{if(standalone.matches || fullscreen.matches || navigator.standalone===true)installed()};
+  window.addEventListener('appinstalled',()=>markInstalled(true));
+  const checkDisplayMode=()=>{if(standalone.matches || fullscreen.matches || navigator.standalone===true)markInstalled(false)};
   if(standalone.addEventListener)standalone.addEventListener('change',checkDisplayMode);
   else if(standalone.addListener)standalone.addListener(checkDisplayMode);
   install.addEventListener('click',async()=>{
-    if(alreadyInstalled()){installed();return}
+    if(alreadyInstalled()){markInstalled(false);return}
     if(deferredPrompt){
       const prompt=deferredPrompt;
       deferredPrompt=null;
       try{
         await prompt.prompt();
         const outcome=await prompt.userChoice;
-        guide.hidden=false;
         if(outcome?.outcome==='accepted'){
-          guide.textContent='앱 설치가 진행 중이에요. 설치가 완료되면 안내가 사라져요.';
+          if(!alreadyInstalled()){
+            guide.hidden=false;
+            guide.textContent='⏳ 복작소 앱 설치 중… 설치가 끝나면 완료 안내가 나와요.';
+            install.disabled=true;
+            install.textContent='설치 중…';
+          }
         }else{
-          guide.textContent='원할 때 다시 설치할 수 있어요. 브라우저 메뉴에서 앱 설치 또는 홈 화면에 추가를 선택해 주세요.';
+          guide.hidden=false;
+          guide.textContent='설치를 취소했어요. 원할 때 다시 설치할 수 있어요.';
+          install.textContent='다시 설치하기';
         }
       }catch(_){
         guide.hidden=false;
-        guide.textContent='브라우저 메뉴에서 앱 설치 또는 홈 화면에 추가를 선택해 주세요.';
+        guide.textContent='브라우저 메뉴(⋮)에서 ‘앱 설치’ 또는 ‘홈 화면에 추가’를 선택해 주세요.';
       }
       return;
     }
