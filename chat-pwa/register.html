@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#171514">
+<title>복작소 회원 등록</title>
+<link rel="icon" href="/icon-192.png"><link rel="manifest" href="/site.webmanifest">
+<style>
+:root{color-scheme:dark;--bg:#141414;--paper:#23201d;--text:#f7f1eb;--muted:#c7b9ac;--border:#4f4338;--accent:#b58a62}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:16px}a{color:inherit;text-decoration:none}
+header{max-width:680px;margin:auto;padding:18px 18px 4px;display:flex;align-items:center;justify-content:space-between;gap:12px}header strong{font-size:21px}header a{color:var(--muted);font-weight:700}
+main{max-width:680px;margin:0 auto;padding:18px 15px 80px}.card{border:1px solid var(--border);background:var(--paper);border-radius:23px;padding:23px 18px;margin-bottom:16px}
+h1{font-size:26px;letter-spacing:-.04em;margin:0 0 13px}h2{font-size:19px;margin:0 0 13px}
+p{line-height:1.7;margin:8px 0;color:var(--muted);word-break:keep-all}
+label{font-weight:750;display:block;margin:19px 0 8px}
+input:not([type="checkbox"]):not([type="file"]){width:100%;height:54px;padding:12px 13px;font:inherit;font-size:17px;border:1.5px solid var(--border);background:#171513;border-radius:13px;color:var(--text)}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+small{font-size:13px;color:var(--muted);line-height:1.6}.small{font-size:13px}
+.photo-row{display:flex;gap:15px;align-items:center;margin-top:13px}.photo-preview{width:65px;height:65px;border:2px solid var(--border);border-radius:50%;display:grid;place-items:center;font-size:30px;background:#35302b;overflow:hidden;flex:0 0 65px}.photo-preview img{width:100%;height:100%;object-fit:cover}
+button{min-height:48px;padding:10px 17px;border-radius:13px;border:1px solid var(--border);background:#39322c;color:var(--text);font:inherit;font-weight:800;cursor:pointer}
+.primary{width:100%;min-height:57px;font-size:18px;background:var(--accent);color:#1a130d;border-color:var(--accent);margin-top:16px}
+button:disabled{opacity:.55;cursor:wait}.consent{border:1px solid var(--border);padding:14px 14px 17px;border-radius:13px;font-size:13px;color:var(--muted);line-height:1.7;margin-top:22px}
+.consent h2{font-size:15px;color:var(--text);margin-bottom:7px}.agree{display:flex;gap:10px;align-items:flex-start;color:var(--text);font-size:15px;margin-top:15px}.agree input{width:22px;height:22px;accent-color:var(--accent);flex:0 0 22px}
+.help{margin:10px 0 0;color:#d9ba8d;font-size:13px}.error{margin-top:12px;color:#ffbbb4;min-height:24px;font-weight:700}.state{min-height:85px;display:grid;place-content:center;text-align:center;padding:22px 6px;line-height:1.8}.state strong{font-size:22px}.state .symbol{font-size:44px}
+[hidden]{display:none!important}.actions{display:grid;gap:12px;margin-top:20px}.actions a{display:block;text-align:center;border:1px solid var(--border);border-radius:13px;padding:15px;font-weight:800}
+.notice{font-size:13px;border-left:3px solid var(--accent);padding:9px 12px;background:#302a26;margin:12px 0 15px}
+</style></head><body>
+<header><strong>福 복작소</strong><a href="/">메인으로</a></header>
+<main>
+<section class="card" id="loading"><div class="state"><strong>회원 상태 확인 중…</strong><p>잠시만 기다려 주세요.</p></div></section>
+<section class="card" id="formArea" hidden>
+<h1>복작소 회원 등록</h1>
+<p>가입 신청 후 <strong>관리자가 승인하면 일반 채팅방을 이용</strong>할 수 있어요. 복작소 클럽은 별도로 가입 승인받아야 해요.</p>
+<p class="notice">문자 인증은 사용하지 않아요. 입력한 전화번호가 본인 번호인지 확인되지 않으므로 관리자가 별도로 확인할 수 있어요.</p>
+<form id="joinForm" novalidate>
+<label for="legalName">이름 <small>관리자만 확인</small></label><input id="legalName" maxlength="40" placeholder="실제 이름" autocomplete="name" required>
+<label for="nickname">채팅 닉네임 <small>다른 사람에게 표시</small></label><input id="nickname" maxlength="20" placeholder="예: 복작이" autocomplete="nickname" required>
+<label for="phone">휴대전화 번호 <small>관리자만 확인 · 미인증</small></label><input id="phone" type="tel" inputmode="tel" maxlength="15" placeholder="010-1234-5678" autocomplete="tel-national" required>
+<label for="avatarFile">프로필 사진 <small>선택 · 채팅방에 공개</small></label>
+<div class="photo-row"><div id="avatarPreview" class="photo-preview" aria-label="프로필 사진 미리보기">👤</div><div><input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp" style="max-width:210px"><small>최대 3MB · 등록 후에도 변경 가능</small></div></div>
+<div class="consent"><h2>개인정보 수집·이용 안내 (필수)</h2>
+<strong>처리 목적:</strong> 회원 신청 접수, 관리자 승인·회원 관리, 부정 이용 방지<br>
+<strong>수집 항목:</strong> 이름, 닉네임, 휴대전화 번호(미인증), 선택한 프로필 사진<br>
+<strong>공개 범위:</strong> 닉네임·프로필 사진만 채팅 참가자에게 공개. 실명·전화번호는 관리자용<br>
+<strong>보유 기간:</strong> 회원 탈퇴·개인정보 삭제 요청 시 삭제. 법령상 보존 의무가 있으면 해당 기간 보존<br>
+<strong>처리 서비스:</strong> 복작소 운영 서버 및 데이터베이스·이미지 보관 서비스<br>
+<strong>동의 거부:</strong> 가능하지만 회원 신청은 할 수 없음<br>
+<strong>문의 및 삭제 요청:</strong> <a href="https://bokjakso.com/#contact" style="text-decoration:underline">복작소 운영자 문의</a>
+<label class="agree"><input type="checkbox" id="consent"><span>위 내용을 읽었으며 회원 등록을 위한 개인정보 수집·이용에 동의합니다.</span></label>
+</div>
+<button class="primary" type="submit" id="submitBtn">관리자에게 가입 신청하기</button>
+<div id="formStatus" class="error" role="status" aria-live="polite"></div>
+</form>
+</section>
+<section class="card" id="stateArea" hidden>
+ <div class="state"><div class="symbol" id="stateSymbol">⏳</div><strong id="stateTitle"></strong><p id="stateDetail"></p></div>
+ <div class="actions"><button type="button" id="refreshStatus" class="primary">승인 상태 새로 확인</button><a href="/">복작소 메인으로</a></div>
+</section>
+</main>
+<script>
+(()=>{'use strict';
+const KEY='bokjaksoChatSharedProfileV1',SESSION_KEY='bokjaksoChatSessionsV2';
+const $=id=>document.getElementById(id);
+let p=null,photoUrl='',busy=false;
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved?.id&&saved?.token)p=saved}catch(_){}
+function credentials(){return p?{profileId:p.id,profileToken:p.token}:{}}
+function oldSession(){
+ try{
+  const sessions=JSON.parse(localStorage.getItem(SESSION_KEY)||'{}');
+  const all=Object.values(sessions).filter(x=>x?.sessionToken&&x?.member?.id&&x.expiresAt>Date.now());
+  if(all.length)return {memberId:all[0].member.id,sessionToken:all[0].sessionToken};
+  const old=JSON.parse(localStorage.getItem('bokjaksoChatSessionV1')||'null');
+  if(old?.sessionToken&&old?.member?.id&&old.expiresAt>Date.now())return{memberId:old.member.id,sessionToken:old.sessionToken};
+ }catch(_){}
+ return {};
+}
+async function api(data){
+ const response=await fetch('/api/store-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),cache:'no-store'});
+ const json=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(json.message||'연결을 확인해 주세요.');
+ return json;
+}
+function state(status){
+ $('loading').hidden=true;$('formArea').hidden=true;$('stateArea').hidden=false;
+ const states={
+  pending:['⏳','관리자 승인 대기','가입 신청이 접수됐어요. 관리자 승인 후 일반 채팅을 이용할 수 있어요.'],
+  approved:['✅','회원 승인 완료','일반 채팅방에 입장할 수 있어요. 클럽은 별도로 가입 신청해야 해요.'],
+  rejected:['ℹ️','가입 신청 검토 결과','가입이 승인되지 않았어요. 운영자에게 문의해 주세요.'],
+  suspended:['🔒','회원 이용 제한','관리자에게 문의해 주세요.']
+ };
+ const [sym,title,msg]=states[status]||states.pending;
+ $('stateSymbol').textContent=sym;$('stateTitle').textContent=title;$('stateDetail').textContent=msg;
+ $('refreshStatus').textContent=status==='approved'?'채팅방 들어가기':'승인 상태 새로 확인';
+}
+async function refresh(){
+ try{
+  const data=await api({action:'member-status',...credentials(),...(!p?oldSession():{})});
+  $('loading').hidden=true;
+  if(['approved','pending','rejected','suspended'].includes(data.status)){state(data.status);return}
+  $('stateArea').hidden=true;$('formArea').hidden=false;
+  if(p?.nickname&&!$('nickname').value)$('nickname').value=p.nickname;
+ }catch(e){$('loading').hidden=false;$('loading').querySelector('p').textContent=e.message}
+}
+$('refreshStatus').addEventListener('click',async()=>{
+ if($('stateTitle').textContent==='회원 승인 완료'){location.href='/chat.html?tab=rooms';return}
+ $('refreshStatus').disabled=true;try{await refresh()}finally{$('refreshStatus').disabled=false}
+});
+$('avatarFile').addEventListener('change',e=>{
+ const file=e.target.files?.[0];if(photoUrl)URL.revokeObjectURL(photoUrl);photoUrl='';
+ $('avatarPreview').textContent='👤';
+ if(!file)return;
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>3*1024*1024){e.target.value='';$('formStatus').textContent='사진은 JPG·PNG·WEBP 3MB 이하로 선택해 주세요.';return}
+ photoUrl=URL.createObjectURL(file);
+ const img=document.createElement('img');img.src=photoUrl;img.alt='';$('avatarPreview').replaceChildren(img);
+});
+$('joinForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(busy)return;
+ const name=$('legalName').value.trim(),nickname=$('nickname').value.trim(),phone=$('phone').value.trim();
+ $('formStatus').textContent='';
+ if(name.length<2||name.length>40||!nickname||nickname.length>20||nickname==='관리자'||!/^01[016789][\d\s-]{7,13}$/.test(phone)){
+  $('formStatus').textContent='이름·닉네임·휴대전화 번호를 확인해 주세요.';return}
+ if(!$('consent').checked){$('formStatus').textContent='개인정보 안내에 동의해 주세요.';return}
+ busy=true;$('submitBtn').disabled=true;$('submitBtn').textContent='신청서 제출 중…';
+ try{
+  if(!p){
+   const src=oldSession();
+   const data=await api({action:'chat-profile-create',nickname,...(src.memberId?{sourceMemberId:src.memberId,sourceSessionToken:src.sessionToken}:{})});
+   p={id:data.profile.id,token:data.profileToken,nickname:data.profile.nickname,avatar_url:data.profile.avatar_url||null};
+   localStorage.setItem(KEY,JSON.stringify(p));
+  }
+  const data=await api({action:'member-register',...credentials(),legalName:name,nickname,phone,consent:true,consentVersion:'bokjakso-registration-v1'});
+  p.nickname=nickname;localStorage.setItem(KEY,JSON.stringify(p));
+  const image=$('avatarFile').files?.[0];
+  if(image&&data.status==='pending'){
+   try{
+    const auth=await api({action:'chat-profile-image-auth',...credentials()});
+    const fd=new FormData();
+    for(const [k,v] of Object.entries({fileName:image.name,publicKey:auth.publicKey,signature:auth.signature,expire:String(auth.expire),token:auth.token,folder:auth.folder,useUniqueFileName:'true'}))fd.append(k,v);
+    fd.append('file',image);
+    const upload=await fetch(auth.uploadEndpoint,{method:'POST',body:fd});
+    const uploaded=await upload.json().catch(()=>({}));
+    if(!upload.ok||!uploaded.fileId)throw new Error('사진을 업로드하지 못했어요.');
+    await api({action:'chat-profile-save',...credentials(),nickname,avatarFileId:uploaded.fileId});
+   }catch(error){$('formStatus').textContent='회원 신청은 접수됐지만 사진 저장은 실패했어요. 나중에 내 정보에서 변경해 주세요.';}
+  }
+  state(data.status);
+ }catch(err){$('formStatus').textContent=err.message||'가입 신청을 처리하지 못했어요.'}
+ finally{busy=false;$('submitBtn').disabled=false;$('submitBtn').textContent='관리자에게 가입 신청하기'}
+});
+refresh();
+})();
+</script></body></html>
