@@ -14,6 +14,7 @@ h1{font-size:27px;letter-spacing:-.04em}h2{font-size:20px}
 .stat strong{display:block;font-size:24px}.stat span{display:block;font-size:13px}
 .member{border-top:1px solid var(--line);padding:18px 0}.member:first-child{border:0}
 .member-name{font-weight:850;font-size:18px}.meta{color:#73665d;font-size:13px;margin:5px 0 10px}
+.application-note{padding:12px;margin:10px 0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 button{font:inherit;cursor:pointer;min-height:48px;border-radius:11px;padding:9px 16px;border:1px solid var(--line);background:#fff;color:#21190f;font-weight:800}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -82,7 +83,15 @@ function render(){
   if(row.status!=='approved')controls.appendChild(button('승인','primary',()=>review(row,'approved')));
   if(row.status==='pending')controls.appendChild(button('거절','danger',()=>review(row,'rejected')));
   if(row.status==='approved')controls.appendChild(button('이용 제한','danger',()=>review(row,'suspended')));
-  article.append(name,meta,controls);members.appendChild(article);
+  article.append(name,meta);
+  if(row.application_note){
+    const note=document.createElement('div');
+    note.className='application-note';
+    note.textContent='가입 인사: '+row.application_note;
+    article.appendChild(note);
+  }
+  article.appendChild(controls);
+  members.appendChild(article);
  }
 }
 async function load(){
