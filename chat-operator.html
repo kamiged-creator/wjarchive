@@ -98,6 +98,9 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .operator-pagination button.active{background:var(--accent);border-color:var(--accent);color:#fff}
 .operator-pagination button:disabled{opacity:.35;cursor:default}
 @media(max-width:450px){.operator-pagination{gap:6px}.operator-pagination button{min-width:42px;min-height:44px;padding:5px 10px}}
+/* Subtle utility action: smaller than primary room controls, still comfortably tappable. */
+.operator-room-tools #refreshBtn{min-height:40px;padding:7px 12px;border-radius:10px;font-size:14px;line-height:1.2;font-weight:650}
+@media(max-width:450px){.operator-room-tools #refreshBtn{min-height:42px;padding:7px 12px;font-size:14px}}
 </style>
 </head>
 <body>
@@ -153,7 +156,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
       </form>
     </details>
     <div class="operator-room-list">
-      <div class="row operator-room-tools"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
+      <div class="row operator-room-tools"><button id="refreshBtn" type="button" aria-label="채팅방 목록 새로고침">↻ 새로고침</button></div>
       <div id="panelStatus" class="feedback" role="status"></div>
       <div id="rooms"></div>
       <nav id="roomPagination" class="operator-pagination" aria-label="채팅방 목록 페이지" hidden></nav>
