@@ -363,7 +363,21 @@
    enterBtn.disabled=true;
    status.textContent='정회원 승인 상태를 확인하고 있어요…';
    try{
-     const data=await request('status');
+     // On a new backend this combines the approval check and message list.
+     // Older backends safely fall back to the original two-request sequence.
+     let data;
+     try{
+       data=await request('enter');
+     }catch(error){
+       if(error.statusCode!==400)throw error;
+       const statusResult=await request('status');
+       if(statusResult.status==='approved'){
+         const messageResult=await request('messages');
+         data={...statusResult,messages:messageResult.messages};
+       }else{
+         data={...statusResult,messages:[]};
+       }
+     }
      renderMembership(data.status);
      if(data.status!=='approved')return;
      landing.hidden=true;
@@ -372,9 +386,12 @@
      document.body.classList.add('club-chat-open');
      updateClubReturnButton();
      onlineCount.textContent='접속 확인 중';
-     updatePresence();
-     await loadMessages();
+     confirmedRows=Array.isArray(data.messages)?data.messages:[];
+     optimisticMessage=null;
+     lastRenderKey='';
+     renderMessages(true);
      scrollLatestOnEntry();
+     updatePresence();
      // Do not force-open the virtual keyboard on mobile just for entering a room.
      if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
    }catch(error){
