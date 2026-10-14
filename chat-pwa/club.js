@@ -13,6 +13,12 @@
  const resetBtn=document.getElementById('clubResetBtn');
  const reviewEntry=document.getElementById('clubReviewEntry');
  const pane=document.getElementById('clubChat');
+ const landing=document.getElementById('clubLanding');
+ const intro=document.getElementById('clubIntro');
+ const approvedEntry=document.getElementById('clubApprovedEntry');
+ const enterBtn=document.getElementById('clubEnterBtn');
+ const leaveBtn=document.getElementById('clubLeaveBtn');
+ const chatFeedback=document.getElementById('clubChatFeedback');
  const actions=document.getElementById('clubActions');
  const feed=document.getElementById('clubMessages');
  const input=document.getElementById('clubMessageInput');
@@ -35,17 +41,26 @@
    }
    return data;
  }
+ function leaveClubRoom(restoreFocus=false){
+   const wasOpen=!pane.hidden;
+   pane.hidden=true;
+   landing.hidden=false;
+   chatFeedback.textContent='';
+   if(restoreFocus&&wasOpen)enterBtn.focus();
+ }
  function renderMembership(next){
    membership=next;
    const labels={
      none:'아직 클럽 회원이 아니에요. 아래에서 가입 신청을 해 주세요.',
-     pending:'가입 신청 완료! 관리자 승인을 기다리고 있어요.',
-     approved:'복작소 클럽 정회원이에요. 함께 이야기 나눠요!',
+     pending:'⏳ 가입 신청 완료! 최고관리자의 승인을 기다리고 있어요.',
+     approved:'✅ 정회원 가입이 승인되었어요.',
      rejected:'가입이 승인되지 않았어요. 다시 신청할 수 있어요.',
      suspended:'클럽 이용이 제한되었어요. 관리자에게 문의해 주세요.'
    };
    status.textContent=labels[next]||'회원 상태를 확인할 수 없어요.';
-   pane.hidden=next!=='approved';
+   intro.hidden=next==='approved';
+   approvedEntry.hidden=next!=='approved';
+   if(next!=='approved')leaveClubRoom();
    if(next==='pending'||next==='approved'||next==='suspended')applyForm.hidden=true;
    actions.hidden=next==='approved'||next==='pending'||next==='suspended'||!applyForm.hidden;
    applyBtn.textContent=next==='rejected'?'클럽 가입 다시 하기':'클럽 가입하기';
@@ -61,7 +76,6 @@
    try{
      const data=await request('status');
      renderMembership(data.status);
-     if(data.status==='approved')await loadMessages();
    }catch(e){
      if(e.statusCode===401){
        // Backend test users were erased: don't keep an invalid profile token.
@@ -72,7 +86,7 @@
        status.textContent='이전 테스트 프로필이 초기화됐어요. 클럽 가입하기를 눌러 새로 신청해 주세요.';
        return;
      }
-     pane.hidden=true;actions.hidden=true;status.textContent=e.message;
+     leaveClubRoom();actions.hidden=true;status.textContent=e.message;
    }
  }
  async function loadMessages(){
@@ -103,8 +117,12 @@
      }
      if(atBottom)feed.scrollTop=feed.scrollHeight;
    }catch(e){
-     status.textContent=e.message;
-     if(e.message.includes('승인')){pane.hidden=true;actions.hidden=true;}
+     if(e.statusCode===401||e.statusCode===403){
+       leaveClubRoom();
+       await refresh();
+     }else{
+       chatFeedback.textContent=e.message;
+     }
    }finally{busy=false;}
  }
  function openSignupForm(){
@@ -125,6 +143,32 @@
    formFeedback.textContent='';
    applyForm.hidden=true;
    actions.hidden=membership==='pending'||membership==='approved'||membership==='suspended';
+ }
+ // Entering the club room is an explicit step after a fresh server-side approval check.
+ enterBtn.addEventListener('click',async()=>{
+   if(membership!=='approved'||!sharedProfile||enterBtn.disabled)return;
+   enterBtn.disabled=true;
+   status.textContent='정회원 승인 상태를 확인하고 있어요…';
+   try{
+     const data=await request('status');
+     renderMembership(data.status);
+     if(data.status!=='approved')return;
+     landing.hidden=true;
+     pane.hidden=false;
+     await loadMessages();
+     if(!pane.hidden)input.focus({preventScroll:true});
+   }catch(error){
+     leaveClubRoom();
+     status.textContent=error.message||'클럽 채팅방에 입장하지 못했어요.';
+   }finally{
+     enterBtn.disabled=false;
+   }
+ });
+ leaveBtn.addEventListener('click',()=>leaveClubRoom(true));
+ for(const tab of document.querySelectorAll('[data-home-tab]')){
+   if(tab!==clubTab)tab.addEventListener('click',()=>{
+     if(!pane.hidden)leaveClubRoom();
+   });
  }
  clubTab.addEventListener('click',refresh);
  applyBtn.addEventListener('click',()=>{
@@ -185,11 +229,16 @@
    if(!message||membership!=='approved')return;
    sendBtn.disabled=true;
    try{await request('send',{message});input.value='';await loadMessages();}
-   catch(err){status.textContent=err.message;}
+   catch(err){
+     if(err.statusCode===401||err.statusCode===403){
+       leaveClubRoom();
+       await refresh();
+     }else{chatFeedback.textContent=err.message;}
+   }
    finally{sendBtn.disabled=false;}
  });
  setInterval(()=>{
    if(document.hidden||document.body.classList.contains('chat-active')||clubTab.getAttribute('aria-selected')!=='true')return;
-   if(membership==='pending')refresh();else loadMessages();
+   if(membership==='pending')refresh();else if(!pane.hidden)loadMessages();
  },4500);
 })();
