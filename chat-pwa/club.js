@@ -222,6 +222,22 @@
    }
    if(atBottom||forceBottom)feed.scrollTop=feed.scrollHeight;
  }
+ // Initial entry needs an extra layout pass: mobile panels resize after
+ // the message nodes are painted, so a synchronous scrollTop can stop early.
+ // Only run on first entry, never on periodic refresh or manual history scroll.
+ function scrollLatestOnEntry(){
+   const generation=roomGeneration;
+   const move=()=>{
+     if(generation!==roomGeneration||pane.hidden||
+        clubTab.getAttribute('aria-selected')!=='true')return;
+     feed.scrollTop=feed.scrollHeight;
+   };
+   move();
+   requestAnimationFrame(()=>{
+     move();
+     requestAnimationFrame(move);
+   });
+ }
  async function loadMessages(){
    if(busy||membership!=='approved'||pane.hidden||sending)return;
    busy=true;
@@ -278,6 +294,7 @@
      document.body.classList.add('club-chat-open');
      updateClubReturnButton();
      await loadMessages();
+     scrollLatestOnEntry();
      // Do not force-open the virtual keyboard on mobile just for entering a room.
      if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
    }catch(error){
