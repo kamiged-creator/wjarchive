@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>복작소 일반 채팅 운영진</title>
+<style>
+:root{color-scheme:light;--bg:#f6f1ea;--paper:#fffefa;--ink:#30261f;--muted:#66594d;--line:#c9b8a5;--accent:#795738}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
+header{background:var(--paper);border-bottom:1px solid var(--line);padding:16px max(16px,calc((100vw - 850px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+header strong{font-size:18px}a{color:#604328}main{max-width:850px;margin:0 auto;padding:18px 14px 44px}
+.card{background:var(--paper);border:1px solid #dfd0bf;border-radius:18px;padding:20px;margin-bottom:17px;box-shadow:0 3px 14px #30200d0a}
+h1{font-size:24px;margin:0 0 6px}h2{font-size:19px;margin:0 0 10px}p{line-height:1.65;margin:9px 0;color:var(--muted)}
+label{display:block;font-weight:750;margin:16px 0 7px}input{width:100%;height:53px;border:1.5px solid var(--line);border-radius:12px;background:white;color:var(--ink);font-size:16px;padding:12px}
+button{font:inherit;min-height:45px;border-radius:11px;border:1.5px solid #b6a18c;background:white;color:var(--ink);padding:9px 13px;font-weight:750;cursor:pointer;word-break:keep-all}
+button.primary{border-color:var(--accent);background:var(--accent);color:white}
+button.danger{border-color:#d6a5a0;color:#903b35;background:#fff7f6}
+button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #ae8963;outline-offset:2px}
+#loginBtn{width:100%;margin-top:16px;min-height:53px;font-size:16px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.row>*{flex:0 0 auto}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.room{border:1.5px solid #dacaba;background:#fffcf7;border-radius:15px;padding:16px;margin-top:14px}
+.room h3{font-size:18px;margin:0 0 5px;overflow-wrap:anywhere}.meta{color:var(--muted);font-size:13px;margin-bottom:10px}
+.room .row{margin-top:12px}.panel{background:#f8f1e8;border:1px solid #d6c6b4;border-radius:13px;margin-top:14px;padding:13px}
+.panel h4{margin:0 0 9px}.member,.message{padding:10px 0;border-bottom:1px solid #dbcbbb;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.member:last-child,.message:last-child{border-bottom:0}.member>div,.message>div{flex:1;min-width:0}
+.message small,.member small{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.message span{display:block;white-space:normal;overflow-wrap:anywhere;line-height:1.5}
+.feedback{min-height:18px;font-size:14px;color:#ad332d;margin-top:9px}
+[hidden]{display:none!important}
+@media(max-width:450px){.card{padding:16px 12px}.room{padding:14px 11px}button{min-height:48px}.room .row button{flex:1 1 42%}.member button,.message button{min-width:70px}}
+</style>
+</head>
+<body>
+<header><strong>🔒 복작소 일반 채팅 운영진</strong><a href="/chat.html">채팅방으로 돌아가기</a></header>
+<main>
+<section class="card" id="loginCard">
+  <h1>운영진 로그인</h1>
+  <p>최고관리자가 발급한 <b>운영진 전용 비밀번호</b>로 로그인해 줘. 홈페이지 관리자 비밀번호와는 달라.</p>
+  <form id="loginForm"><label for="operatorPassword">운영진 비밀번호</label><input id="operatorPassword" type="password" autocomplete="current-password" required minlength="12" placeholder="운영진 비밀번호 입력">
+    <button class="primary" id="loginBtn" type="submit">로그인</button>
+  </form><div id="loginStatus" class="feedback" role="status"></div>
+</section>
+<section id="panelCard" hidden>
+  <div class="card">
+    <div class="heading"><div><h1>기존 채팅방 관리</h1><p>채팅방 만들기·영구 삭제·클럽·홈페이지 수정 권한은 없어.</p></div><button id="logoutBtn" type="button">로그아웃</button></div>
+    <div class="row"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
+    <div id="panelStatus" class="feedback" role="status"></div>
+    <div id="rooms"></div>
+  </div>
+</section>
+</main>
+<script>
+(function(){
+  'use strict';
+  const KEY='bokjaksoRegularRoomOperatorSessionV1';
+  const loginCard=document.getElementById('loginCard'),panel=document.getElementById('panelCard');
+  const loginStatus=document.getElementById('loginStatus'),panelStatus=document.getElementById('panelStatus');
+  const roomsEl=document.getElementById('rooms');
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function token(){try{return sessionStorage.getItem(KEY)||''}catch(_){return ''}}
+  function clearToken(){try{sessionStorage.removeItem(KEY)}catch(_){}}
+  function showLogin(message=''){
+    clearToken();loginCard.hidden=false;panel.hidden=true;
+    loginStatus.textContent=message;
+    document.getElementById('operatorPassword').value='';
+  }
+  async function api(action,other={},auth=token()){
+    const r=await fetch('/api/content-admin',{method:'POST',cache:'no-store',
+      headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},
+      body:JSON.stringify({action,...other})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){const err=new Error(d.message||'처리하지 못했어.');err.status=r.status;throw err}
+    return d;
+  }
+  function check(e){if(e?.status===401){showLogin('로그인 시간이 끝났어. 다시 로그인해 줘.');return true}return false}
+  function note(text){panelStatus.textContent=text}
+  function roomHtml(r){
+    const state=r.is_archived?'보관된 방':(r.is_active?'열림':'닫힘');
+    const disabled=r.is_archived?' disabled title="보관된 방은 최고관리자가 복원할 수 있어"':'';
+    return '<section class="room" data-room="'+esc(r.id)+'"><h3>'+esc(r.title)+'</h3><div class="meta">#'+esc(r.code)+' · '+state+'</div>'+
+      '<div class="row"><button data-op="rename">제목 수정</button>'+
+      '<button data-op="toggle"'+disabled+'>'+(r.is_active?'방 닫기':'방 열기')+'</button>'+
+      '<button data-op="password">비밀번호 변경</button>'+
+      '<button data-op="members">참여자 관리</button>'+
+      '<button data-op="messages">메시지 관리</button></div>'+
+      '<div class="panel" data-detail hidden></div></section>';
+  }
+  let currentRooms=[];
+  async function load(){
+    const d=await api('operator-list-rooms');
+    currentRooms=d.rooms||[];
+    roomsEl.innerHTML=currentRooms.length?currentRooms.map(roomHtml).join(''):'<p>등록된 일반 채팅방이 없어.</p>';
+    note('');
+  }
+  async function showMembers(r,detail){
+    const {members}=await api('operator-list-members',{roomId:r.id});
+    detail.innerHTML='<h4>참여자 차단·해제</h4>'+
+      ((members||[]).length?members.map(m=>
+      '<div class="member"><div><b>'+esc(m.nickname)+'</b><small>'+(m.is_blocked?'차단 중':'정상 이용')+'</small></div>'+
+      '<button type="button" '+(m.is_blocked?'':'class="danger"')+' data-member="'+esc(m.id)+'" data-blocked="'+(!m.is_blocked)+'">'+(m.is_blocked?'차단 해제':'차단')+'</button></div>').join(''):'<p>참여자가 없어.</p>');
+    detail.hidden=false;
+    detail.querySelectorAll('[data-member]').forEach(b=>b.addEventListener('click',async()=>{
+      if(!confirm('이 참여자를 '+(b.dataset.blocked==='true'?'차단':'차단 해제')+'할까?'))return;
+      b.disabled=true;
+      try{await api('operator-set-blocked',{roomId:r.id,memberId:b.dataset.member,isBlocked:b.dataset.blocked==='true'});
+        await showMembers(r,detail)}
+      catch(e){if(!check(e))alert(e.message)}
+      finally{b.disabled=false}
+    }));
+  }
+  async function showMessages(r,detail){
+    const {messages}=await api('operator-list-messages',{roomId:r.id});
+    detail.innerHTML='<h4>최근 메시지 40개 · 개별 관리</h4>'+
+      ((messages||[]).length?messages.map(m=>
+      '<div class="message"><div><small>'+esc(m.nickname)+' · '+esc(new Date(m.created_at).toLocaleString('ko-KR'))+'</small>'+
+      '<span>'+esc(m.body).slice(0,500)+(m.message_type==='image'?' [이미지]':'')+'</span></div>'+
+      '<button type="button" class="danger" data-message="'+esc(m.id)+'">삭제</button></div>').join(''):'<p>메시지가 없어.</p>');
+    detail.hidden=false;
+    detail.querySelectorAll('[data-message]').forEach(b=>b.addEventListener('click',async()=>{
+      if(!confirm('이 메시지 하나를 삭제할까? 다른 대화는 그대로 보존돼.'))return;
+      b.disabled=true;
+      try{await api('operator-delete-message',{roomId:r.id,messageId:Number(b.dataset.message)});
+        await showMessages(r,detail)}
+      catch(e){if(!check(e))alert(e.message)}
+      finally{b.disabled=false}
+    }));
+  }
+  async function clickRoom(b){
+    const r=currentRooms.find(r=>String(r.id)===String(b.closest('[data-room]')?.dataset.room));
+    if(!r)return;
+    const op=b.dataset.op;
+    const detail=b.closest('.room').querySelector('[data-detail]');
+    if(op==='members'){await showMembers(r,detail);return}
+    if(op==='messages'){await showMessages(r,detail);return}
+    if(op==='rename'){
+      const title=prompt('새 채팅방 제목 (최대 50자)',r.title);
+      if(title===null||title.trim()===r.title)return;
+      if(!title.trim()||title.trim().length>50)throw Error('방 제목은 1~50자여야 해.');
+      await api('operator-rename-room',{roomId:r.id,expectedTitle:r.title,title:title.trim()});
+      await load();note('방 제목이 변경됐어.');return;
+    }
+    if(op==='toggle'){
+      const next=!r.is_active;
+      if(!confirm('이 방을 '+(next?'다시 열기':'일시 닫기')+' 할까?'))return;
+      await api('operator-set-active',{roomId:r.id,isActive:next});
+      await load();note('채팅방 상태를 변경했어.');return;
+    }
+    if(op==='password'){
+      if(!confirm('비밀번호를 바꾸면 기존 참여자가 다시 입장해야 하고 알림도 다시 켜야 해. 계속할까?'))return;
+      const password=prompt('새 채팅방 입장 비밀번호 (8자 이상)');
+      if(password===null)return;
+      if(password.length<8)throw Error('비밀번호는 8자 이상이어야 해.');
+      await api('operator-change-password',{roomId:r.id,password});
+      note('비밀번호가 변경됐어. 이전 참여자는 새 비밀번호로 다시 입장해야 해.');
+    }
+  }
+  roomsEl.addEventListener('click',async e=>{
+    const b=e.target.closest('button[data-op]');if(!b||b.disabled)return;
+    b.disabled=true;
+    try{await clickRoom(b)}catch(err){if(!check(err))alert(err.message)}
+    finally{b.disabled=false}
+  });
+  document.getElementById('loginForm').addEventListener('submit',async e=>{
+    e.preventDefault();const btn=document.getElementById('loginBtn');btn.disabled=true;loginStatus.textContent='확인 중…';
+    try{
+      const d=await api('operator-login',{password:document.getElementById('operatorPassword').value},'');
+      sessionStorage.setItem(KEY,d.accessToken);
+      loginCard.hidden=true;panel.hidden=false;
+      await load();
+    }catch(err){if(err.status!==401&&err.status!==429&&err.status!==503){showLogin(err.message)}else loginStatus.textContent=err.message}
+    finally{btn.disabled=false}
+  });
+  document.getElementById('refreshBtn').addEventListener('click',async()=>{
+    try{await load()}catch(e){if(!check(e))note(e.message)}
+  });
+  document.getElementById('logoutBtn').addEventListener('click',()=>showLogin('로그아웃했어.'));
+  if(token()){loginCard.hidden=true;panel.hidden=false;load().catch(e=>{if(!check(e))showLogin(e.message)})}
+})();
+</script>
+</body>
+</html>
