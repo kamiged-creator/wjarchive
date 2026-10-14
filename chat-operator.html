@@ -91,6 +91,13 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .room-talking-badge{border:1px solid #a4c9ac;background:#eaf5eb;color:#277144}
 .room-talking-badge[hidden]{display:none!important}
 @media(max-width:450px){.room-summary-meta{gap:4px}.room-online-badge,.room-talking-badge{padding:2px 5px;font-size:10px}.room-heading{min-height:69px}}
+/* Five existing rooms per page; page controls appear only when needed. */
+.operator-pagination{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:17px}
+.operator-pagination[hidden]{display:none!important}
+.operator-pagination button{min-width:44px;min-height:44px;padding:6px 12px;border-radius:999px;font-size:16px;font-weight:750}
+.operator-pagination button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.operator-pagination button:disabled{opacity:.35;cursor:default}
+@media(max-width:450px){.operator-pagination{gap:6px}.operator-pagination button{min-width:42px;min-height:44px;padding:5px 10px}}
 </style>
 </head>
 <body>
@@ -149,6 +156,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
       <div class="row operator-room-tools"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
       <div id="panelStatus" class="feedback" role="status"></div>
       <div id="rooms"></div>
+      <nav id="roomPagination" class="operator-pagination" aria-label="채팅방 목록 페이지" hidden></nav>
     </div>
     <div class="operator-footer"><button id="logoutBtn" type="button">로그아웃</button></div>
   </div>
@@ -226,6 +234,9 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   const loginCard=document.getElementById('loginCard'),panel=document.getElementById('panelCard');
   const loginStatus=document.getElementById('loginStatus'),panelStatus=document.getElementById('panelStatus');
   const roomsEl=document.getElementById('rooms');
+  const roomPagination=document.getElementById('roomPagination');
+  const ROOM_PAGE_SIZE=5;
+  let currentRoomPage=1;
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function token(){
     try{return sessionStorage.getItem(KEY)||localStorage.getItem(KEY)||''}
@@ -286,15 +297,43 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
       '<div class="panel" data-detail hidden></div></div></details>';
   }
   let currentRooms=[];
-  async function load(){
-    const expandedRoomId=roomsEl.querySelector('details.room[open]')?.dataset.room||'';
-    const d=await api('operator-list-rooms');
-    currentRooms=d.rooms||[];
-    roomsEl.innerHTML=currentRooms.length?currentRooms.map(roomHtml).join(''):'<p>등록된 일반 채팅방이 없어.</p>';
+  function renderRoomPage(expandedRoomId=''){
+    const totalPages=Math.max(1,Math.ceil(currentRooms.length/ROOM_PAGE_SIZE));
+    currentRoomPage=Math.max(1,Math.min(currentRoomPage,totalPages));
+    const start=(currentRoomPage-1)*ROOM_PAGE_SIZE;
+    const visible=currentRooms.slice(start,start+ROOM_PAGE_SIZE);
+    roomsEl.innerHTML=visible.length?visible.map(roomHtml).join(''):'<p>등록된 일반 채팅방이 없어.</p>';
     if(expandedRoomId){
       const room=[...roomsEl.querySelectorAll('details.room')].find(el=>el.dataset.room===expandedRoomId);
       if(room)room.open=true;
     }
+    roomPagination.hidden=totalPages<=1;
+    if(totalPages<=1){roomPagination.replaceChildren();return}
+    const first=Math.max(1,Math.min(currentRoomPage-2,totalPages-4));
+    const last=Math.min(totalPages,first+4);
+    let html='<button type="button" data-step="-1" aria-label="이전 페이지"'+(currentRoomPage===1?' disabled':'')+'>‹</button>';
+    for(let n=first;n<=last;n++){
+      html+='<button type="button" data-page="'+n+'"'+(n===currentRoomPage?' class="active" aria-current="page"':'')+' aria-label="'+n+'페이지">'+n+'</button>';
+    }
+    html+='<button type="button" data-step="1" aria-label="다음 페이지"'+(currentRoomPage===totalPages?' disabled':'')+'>›</button>';
+    roomPagination.innerHTML=html;
+  }
+  roomPagination.addEventListener('click',event=>{
+    const button=event.target.closest('button');
+    if(!button||button.disabled)return;
+    const totalPages=Math.max(1,Math.ceil(currentRooms.length/ROOM_PAGE_SIZE));
+    const next=button.hasAttribute('data-step')
+      ?currentRoomPage+Number(button.dataset.step):Number(button.dataset.page);
+    if(!Number.isInteger(next)||next<1||next>totalPages||next===currentRoomPage)return;
+    currentRoomPage=next;
+    renderRoomPage();
+    roomPagination.querySelector('[aria-current="page"]')?.focus({preventScroll:true});
+  });
+  async function load(){
+    const expandedRoomId=roomsEl.querySelector('details.room[open]')?.dataset.room||'';
+    const d=await api('operator-list-rooms');
+    currentRooms=d.rooms||[];
+    renderRoomPage(expandedRoomId);
     note('');
   }
   // Refresh only the visible counts; do not close any expanded room or erase unsaved forms.
