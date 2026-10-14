@@ -42,6 +42,149 @@ async function db(path, options = {}) {
   return supabaseAdminRequest(path, options);
 }
 
+
+// One dedicated regular-chat operator. This credential never grants content,
+// club or room-creation privileges. It is configured only by the owner.
+const OPERATOR_SETTING='chat_operator_account_v1';
+const OPERATOR_ALLOWED=new Map([
+  ['operator-list-rooms','chat-list-rooms'],
+  ['operator-rename-room','chat-rename-room'],
+  ['operator-set-active','chat-set-active'],
+  ['operator-change-password','chat-change-password'],
+  ['operator-list-members','chat-list-members']
+]);
+const operatorError=(message,statusCode=400)=>Object.assign(new Error(message),{statusCode});
+async function operatorSettings(){
+  const rows=await db('site_settings?key=eq.'+OPERATOR_SETTING+'&select=value&limit=1');
+  return Array.isArray(rows)?rows[0]?.value||null:null;
+}
+async function operatorSave(value){
+  await db('site_settings?on_conflict=key',{
+    method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify({key:OPERATOR_SETTING,value,updated_at:new Date().toISOString()})
+  });
+}
+function operatorSign(expiry,nonce,version){
+  const secret=env().adminSecret;
+  if(!secret)throw operatorError('운영진 인증 서버 설정이 필요합니다.',503);
+  return crypto.createHmac('sha256',secret).update('bokjakso-operator-v1:'+expiry+':'+nonce+':'+version).digest('hex');
+}
+function secureHexEqual(a,b){
+  if(typeof a!=='string'||typeof b!=='string'||!/^[a-f0-9]{64}$/i.test(a)||!/^[a-f0-9]{64}$/i.test(b))return false;
+  return crypto.timingSafeEqual(Buffer.from(a,'hex'),Buffer.from(b,'hex'));
+}
+async function operatorRequire(req){
+  const value=String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
+  const parts=value.split(':');
+  if(parts.length!==5||parts[0]!=='op1'||!/^\d{10}$/.test(parts[1])||
+    Number(parts[1])<=Date.now()/1000||Number(parts[1])>Date.now()/1000+5*3600||
+    !/^[a-f0-9]{32}$/.test(parts[2])||!/^[a-f0-9-]{36}$/.test(parts[3])){
+    throw operatorError('운영진 로그인 시간이 만료됐어요. 다시 로그인해 주세요.',401);
+  }
+  const settings=await operatorSettings();
+  if(!settings?.enabled||settings.version!==parts[3]||
+     !secureHexEqual(parts[4],operatorSign(parts[1],parts[2],parts[3]))){
+    throw operatorError('운영진 로그인을 다시 해 주세요.',401);
+  }
+}
+async function operatorLogin(req,body,res){
+  const settings=await operatorSettings();
+  if(!settings?.enabled||!settings.salt||!settings.hash||!settings.version){
+    throw operatorError('최고관리자가 운영진 계정을 아직 설정하지 않았어요.',503);
+  }
+  const password=String(body.password||'');
+  const secret=env().adminSecret;
+  if(!secret)throw operatorError('운영진 인증 서버 설정을 확인해 주세요.',503);
+  // Shared database limit keyed to a pseudonymous client address. No IP stored.
+  const source=String(req.headers['x-vercel-forwarded-for']||req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0].trim();
+  const key='chat_operator_attempts_'+crypto.createHmac('sha256',secret).update(source).digest('hex').slice(0,24);
+  const attempts=await db('site_settings?key=eq.'+key+'&select=value&limit=1');
+  const saved=Array.isArray(attempts)?attempts[0]?.value||{}:{};
+  const now=Date.now();
+  if(Number(saved.until||0)>now)throw operatorError('로그인 시도가 많아요. 15분 후 다시 시도해 주세요.',429);
+  const hash=crypto.scryptSync(password.slice(0,256),settings.salt,64).toString('hex');
+  if(password.length>256||!secureHexEqual(hash,settings.hash)){
+    const validWindow=now-Number(saved.started||0)<15*60*1000;
+    const count=(validWindow?Number(saved.count||0):0)+1;
+    await db('site_settings?on_conflict=key',{
+      method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({key,value:{
+        count,started:validWindow?Number(saved.started):now,until:count>=8?now+15*60*1000:0
+      },updated_at:new Date().toISOString()})
+    });
+    throw operatorError('운영진 비밀번호가 올바르지 않아요.',401);
+  }
+  await db('site_settings?key=eq.'+key,{method:'DELETE',headers:{Prefer:'return=minimal'}});
+  const expiry=Math.floor(Date.now()/1000)+4*60*60;
+  const nonce=crypto.randomBytes(16).toString('hex');
+  const version=settings.version;
+  res.status(200).json({ok:true,accessToken:['op1',expiry,nonce,version,operatorSign(expiry,nonce,version)].join(':'),expiresAt:expiry});
+}
+async function operatorConfigure(action,body,res){
+  if(action==='operator-status'){
+    const settings=await operatorSettings();
+    return res.status(200).json({ok:true,enabled:settings?.enabled===true});
+  }
+  if(action==='operator-disable'){
+    await operatorSave({enabled:false,version:crypto.randomUUID()});
+    return res.status(200).json({ok:true,enabled:false});
+  }
+  if(action==='operator-set-password'){
+    const password=String(body.password||'');
+    if(password.length<12||password.length>128)throw operatorError('운영진 비밀번호는 12~128자로 정해 주세요.');
+    const salt=crypto.randomBytes(16).toString('hex');
+    await operatorSave({enabled:true,salt,hash:crypto.scryptSync(password,salt,64).toString('hex'),
+      version:crypto.randomUUID()});
+    return res.status(200).json({ok:true,enabled:true});
+  }
+  throw operatorError('지원하지 않는 운영진 설정입니다.');
+}
+async function handleOperator(body,res){
+  const action=normalize(body.action);
+  const delegate=OPERATOR_ALLOWED.get(action);
+  if(delegate)return handleChatAdmin({...body,action:delegate},res);
+  if(action==='operator-set-blocked'){
+    const roomId=normalize(body.roomId);
+    const memberId=normalize(body.memberId);
+    if(!/^[a-f0-9-]{36}$/i.test(roomId)||!/^[a-f0-9-]{36}$/i.test(memberId)){
+      throw operatorError('참여자 정보가 올바르지 않아요.');
+    }
+    const found=await db('chat_members?id=eq.'+encodeURIComponent(memberId)+'&room_id=eq.'+encodeURIComponent(roomId)+'&select=id&limit=1');
+    if(!Array.isArray(found)||!found.length)throw operatorError('해당 방의 참여자를 찾지 못했어요.',404);
+    await db('chat_members?id=eq.'+encodeURIComponent(memberId)+'&room_id=eq.'+encodeURIComponent(roomId),{
+      method:'PATCH',headers:{Prefer:'return=minimal'},
+      body:JSON.stringify({is_blocked:body.isBlocked===true})
+    });
+    return res.status(200).json({ok:true});
+  }
+  if(action==='operator-list-messages'){
+    const roomId=normalize(body.roomId);
+    if(!/^[a-f0-9-]{36}$/i.test(roomId))throw operatorError('채팅방을 선택해 주세요.');
+    const messages=await db('chat_messages?room_id=eq.'+encodeURIComponent(roomId)+
+      '&deleted_at=is.null&select=id,nickname,body,message_type,created_at&order=id.desc&limit=40');
+    return res.status(200).json({ok:true,messages:Array.isArray(messages)?messages:[]});
+  }
+  if(action==='operator-delete-message'){
+    const roomId=normalize(body.roomId);
+    const messageId=Number(body.messageId);
+    if(!/^[a-f0-9-]{36}$/i.test(roomId)||!Number.isSafeInteger(messageId)||messageId<=0){
+      throw operatorError('삭제할 메시지 정보가 올바르지 않아요.');
+    }
+    const rows=await db('chat_messages?id=eq.'+messageId+'&room_id=eq.'+encodeURIComponent(roomId)+
+      '&deleted_at=is.null&select=id&limit=1');
+    if(!Array.isArray(rows)||!rows.length)throw operatorError('해당 방에서 메시지를 찾을 수 없어요.',404);
+    const stamp=new Date().toISOString();
+    // Individual soft deletion only. Other chat history remains untouched.
+    await db('chat_messages?id=eq.'+messageId+'&room_id=eq.'+encodeURIComponent(roomId),{
+      method:'PATCH',headers:{Prefer:'return=minimal'},
+      body:JSON.stringify({deleted_at:stamp,updated_at:stamp,body:'삭제된 메시지입니다.',
+        message_type:'text',image_url:null,image_file_id:null})
+    });
+    return res.status(200).json({ok:true});
+  }
+  throw operatorError('운영진에게 허용되지 않은 기능입니다.',403);
+}
+
 function canonical(value) {
   if (Array.isArray(value)) return value.map(canonical);
   if (value && typeof value === 'object') {
@@ -547,10 +690,18 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    requireAdmin(req);
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const action = normalize(body.action);
-
+    if(action==='operator-login')return await operatorLogin(req,body,res);
+    if(action.startsWith('operator-')){
+      if(['operator-status','operator-set-password','operator-disable'].includes(action)){
+        requireAdmin(req);
+        return await operatorConfigure(action,body,res);
+      }
+      await operatorRequire(req);
+      return await handleOperator(body,res);
+    }
+    requireAdmin(req);
     if (action.startsWith('member-admin-')) return await require('../lib/member-handler')(req, res);
     if (action.startsWith('club-')) return await require('../lib/club-handler')(req, res);
     if (action.startsWith('chat-')) return await handleChatAdmin(body, res);
