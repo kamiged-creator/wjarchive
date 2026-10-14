@@ -101,6 +101,19 @@
   </section>
 
 
+  <section class="card" id="operatorConfigCard">
+    <h2>🔒 일반 채팅 운영진 1명 설정</h2>
+    <p class="muted" style="line-height:1.7">운영진은 기존 일반 채팅방만 관리할 수 있어요. 방 만들기·영구 삭제·홈페이지·클럽 관리 권한은 없습니다. 아래에서 별도 로그인 비밀번호를 등록해 주세요.</p>
+    <label for="operatorNewPassword" style="margin-top:13px">운영진 전용 비밀번호 (12자 이상)</label>
+    <input id="operatorNewPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" placeholder="최고관리자 비밀번호와 다르게 설정">
+    <div class="volume-actions" style="margin-top:12px">
+      <button class="primary" type="button" id="operatorSaveBtn">운영진 비밀번호 등록·변경</button>
+      <button class="volume-preview" type="button" id="operatorDisableBtn">운영진 로그인 중지</button>
+    </div>
+    <div id="operatorConfigStatus" class="volume-feedback" role="status" aria-live="polite"></div>
+    <p class="muted">운영진 전용 로그인 주소: <a href="/chat-operator.html">/chat-operator.html</a> · 비밀번호 변경 또는 로그인 중지 시 기존 운영진 로그인이 즉시 무효화됩니다.</p>
+  </section>
+
   <section class="card volume-card">
     <h2>🔔 ‘뽁짝’ 기본 알림 음량</h2>
     <p class="muted">관리자는 새 방문자의 기본 소리를 설정할 수 있어요. 방문자가 직접 고른 음량은 그 기기에서 우선 적용됩니다.</p>
@@ -346,6 +359,36 @@
       statusEl.textContent=e.message;
     }
   });
+  async function operatorStatus(){
+    const status=document.getElementById('operatorConfigStatus');
+    try{
+      const result=await api({action:'operator-status'});
+      status.textContent=result.enabled?'운영진 계정이 활성화되어 있어요.':'운영진 계정은 아직 비활성 상태예요.';
+    }catch(e){status.textContent=e.message;status.classList.add('error')}
+  }
+  document.getElementById('operatorSaveBtn').addEventListener('click',async()=>{
+    const btn=document.getElementById('operatorSaveBtn');
+    const input=document.getElementById('operatorNewPassword'),value=input.value;
+    const status=document.getElementById('operatorConfigStatus');
+    if(value.length<12||value.length>128){status.textContent='비밀번호를 12~128자로 입력해 주세요.';status.classList.add('error');return}
+    if(!confirm('운영진 전용 비밀번호를 등록 또는 변경할까? 기존 운영진 로그인은 만료돼.'))return;
+    btn.disabled=true;status.textContent='저장 중…';status.classList.remove('error');
+    try{
+      await api({action:'operator-set-password',password:value});
+      input.value='';
+      status.textContent='운영진 계정을 설정했어요. 새 비밀번호를 운영진에게 안전하게 전달해 주세요.';
+    }catch(e){status.textContent=e.message;status.classList.add('error')}
+    finally{btn.disabled=false}
+  });
+  document.getElementById('operatorDisableBtn').addEventListener('click',async()=>{
+    if(!confirm('운영진 로그인을 중지할까? 기존 채팅방과 대화는 보존돼.'))return;
+    const status=document.getElementById('operatorConfigStatus'),btn=document.getElementById('operatorDisableBtn');
+    btn.disabled=true;status.classList.remove('error');
+    try{await api({action:'operator-disable'});status.textContent='운영진 로그인을 중지했어요.'}
+    catch(e){status.textContent=e.message;status.classList.add('error')}
+    finally{btn.disabled=false}
+  });
+  operatorStatus();
   loadSoundSettings();
   load();
 </script>
