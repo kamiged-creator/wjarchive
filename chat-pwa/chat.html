@@ -671,6 +671,17 @@
       }
     }
 
+    /* Return to the private room without confusing it with public chat rooms. */
+    .return-club-chat{
+      display:block;width:100%;min-height:52px;
+      border:1.5px solid var(--accent);border-radius:14px;
+      background:color-mix(in srgb,var(--paper) 85%,var(--accent));
+      color:var(--text);font-size:16px;font-weight:800;
+      margin:0 0 18px;padding:10px 12px;text-align:center;
+    }
+    .return-club-chat[hidden]{display:none!important}
+    .return-club-chat:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
   </style>
 </head>
 <body>
@@ -777,6 +788,7 @@
       <div class="eyebrow">MY PROFILE</div>
       <h1>내 정보</h1>
       <p class="lead">기존 복작소 채팅 프로필을 그대로 관리해요. 클럽 가입 여부와는 별개입니다.</p>
+      <button class="return-club-chat" id="returnClubChatBtn" type="button" hidden>↩ 복작소 클럽 채팅방으로 돌아가기</button>
       <div class="my-profile-summary"><span class="profile-preview" id="meProfileAvatar" aria-hidden="true">👤</span><div><strong id="meProfileName">내 프로필 만들기</strong><div class="sub" id="meProfileDesc">닉네임과 사진을 설정할 수 있어요.</div></div></div>
       <button class="home-cta" id="homeProfileEditBtn" type="button">프로필 만들기 · 수정</button>
       <nav class="admin-private-access" aria-label="관리자 전용 로그인">

@@ -26,7 +26,14 @@
  const sendBtn=document.getElementById('clubSendBtn');
  const adminLink=document.getElementById('clubAdminLink');
  const clubTab=document.getElementById('homeTabClub');
+ const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
+ function updateClubReturnButton(){
+   // Preserve the existing private chat while changing bottom tabs.
+   // The button is not an alternative to server-side membership authorization.
+   returnToClubBtn.hidden=pane.hidden||membership!=='approved';
+ }
+
 
  async function request(action,extra={}){
    const response=await fetch('/api/store-inquiries',{
@@ -49,6 +56,7 @@
    clubPanel.classList.remove('club-room-open');
    document.body.classList.remove('club-chat-open');
    chatFeedback.textContent='';
+   updateClubReturnButton();
    if(restoreFocus&&wasOpen)enterBtn.focus();
  }
  function renderMembership(next){
@@ -64,6 +72,7 @@
    intro.hidden=next==='approved';
    approvedEntry.hidden=next!=='approved';
    if(next!=='approved')leaveClubRoom();
+   updateClubReturnButton();
    if(next==='pending'||next==='approved'||next==='suspended')applyForm.hidden=true;
    actions.hidden=next==='approved'||next==='pending'||next==='suspended'||!applyForm.hidden;
    applyBtn.textContent=next==='rejected'?'클럽 가입 다시 하기':'클럽 가입하기';
@@ -164,6 +173,7 @@
      pane.hidden=false;
      clubPanel.classList.add('club-room-open');
      document.body.classList.add('club-chat-open');
+     updateClubReturnButton();
      await loadMessages();
      // Do not force-open the virtual keyboard on mobile just for entering a room.
      if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
@@ -175,12 +185,22 @@
    }
  });
  leaveBtn.addEventListener('click',()=>leaveClubRoom(true));
+ // Switching tabs is navigation, not an explicit exit from the private room.
+ // Remove only the page layout class while another panel is displayed.
  for(const tab of document.querySelectorAll('[data-home-tab]')){
    if(tab!==clubTab)tab.addEventListener('click',()=>{
-     if(!pane.hidden)leaveClubRoom();
+     document.body.classList.remove('club-chat-open');
+     updateClubReturnButton();
    });
  }
- clubTab.addEventListener('click',refresh);
+ clubTab.addEventListener('click',()=>{
+   if(!pane.hidden&&membership==='approved'){
+     document.body.classList.add('club-chat-open');
+     loadMessages(); // Each fetch still verifies the user's server-side approval.
+   }
+   refresh(); // Re-check membership whenever the private tab is selected.
+ });
+ returnToClubBtn.addEventListener('click',()=>clubTab.click());
  applyBtn.addEventListener('click',()=>{
    if(membership==='none'||membership==='rejected')openSignupForm();
  });
