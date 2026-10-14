@@ -58,10 +58,25 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .create-room-details[open] .create-room-summary{border-bottom:1px solid var(--line)}
 .create-room-body{padding:10px 16px 20px}
 @media(max-width:450px){.create-room-summary{padding:14px 13px;min-height:70px;font-size:19px}.create-room-body{padding:8px 13px 17px}}
+/* The operator's personal profile replaces the bulky heading. */
+.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.operator-profile{border-bottom:1px solid #e2d4c3;margin-bottom:17px;padding:8px 0 20px;text-align:center}
+.operator-profile-button{display:flex;flex-direction:column;align-items:center;gap:7px;width:100%;border:0;background:transparent;padding:10px 6px;min-height:auto}
+.operator-avatar{display:flex;align-items:center;justify-content:center;width:84px;height:84px;border-radius:50%;border:2px solid var(--line);background:#f7f0e8;font-size:36px;overflow:hidden}
+.operator-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.operator-display-name{font-size:22px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.operator-role-badge{display:inline-block;padding:5px 12px;border-radius:999px;border:1px solid #c5b09a;color:#765637;background:#f7efe4;font-size:13px;font-weight:750}
+.operator-profile-hint{font-size:13px;color:var(--muted)}
+.operator-profile-form{max-width:440px;margin:9px auto 0;padding:15px;text-align:left;background:#f8f2ea;border:1px solid var(--line);border-radius:15px}
+.operator-profile-form label:first-child{margin-top:0}
+.operator-profile-form input[type=file]{height:auto;min-height:52px;padding:12px;font-size:14px}
+.operator-profile-actions{display:flex;gap:10px;margin-top:14px}
+.operator-profile-actions button{flex:1;min-width:0}
+@media(max-width:450px){.operator-profile{padding-top:1px}.operator-avatar{width:78px;height:78px}}
 </style>
 </head>
 <body>
-<header><strong>🔒 복작소 일반 채팅 운영진</strong><a href="/chat.html">채팅방으로 돌아가기</a></header>
+<header><strong>🔒 복작소 운영진</strong><a href="/chat.html">채팅방으로 돌아가기</a></header>
 <main>
 <section class="card" id="loginCard">
   <h1>운영진 로그인</h1>
@@ -72,7 +87,26 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 </section>
 <section id="panelCard" hidden>
   <div class="card">
-    <div class="heading"><div><h1>일반 채팅방 운영</h1><p>방 만들기와 기존 방 관리가 가능해. 영구 삭제·클럽·홈페이지 관리 권한은 없어.</p></div></div>
+    <h1 class="visually-hidden">운영진 관리</h1>
+    <section class="operator-profile" aria-label="운영진 내 프로필">
+      <button type="button" id="profileEditToggle" class="operator-profile-button" aria-expanded="false" aria-controls="operatorProfileForm">
+        <span class="operator-avatar" id="operatorProfileAvatar">👤</span>
+        <span class="operator-display-name" id="operatorDisplayName">운영진</span>
+        <span class="operator-role-badge">공식 운영진</span>
+        <span class="operator-profile-hint">사진·닉네임 수정 <span aria-hidden="true">›</span></span>
+      </button>
+      <form id="operatorProfileForm" class="operator-profile-form" hidden>
+        <label for="operatorNickname">내 닉네임</label>
+        <input id="operatorNickname" type="text" maxlength="20" autocomplete="nickname" placeholder="운영진 닉네임" required>
+        <label for="operatorAvatarFile">프로필 사진 (선택·최대 2MB)</label>
+        <input id="operatorAvatarFile" type="file" accept="image/jpeg,image/png,image/webp">
+        <div class="operator-profile-actions">
+          <button type="button" id="operatorRemoveAvatar">기본 아이콘</button>
+          <button class="primary" type="submit" id="operatorProfileSave">프로필 저장</button>
+        </div>
+        <div id="operatorProfileStatus" class="feedback" role="status"></div>
+      </form>
+    </section>
     <details id="createRoomDetails" class="panel create-room-details" style="margin:17px 0">
       <summary class="create-room-summary">
         <span>새 채팅방 만들기</span>
@@ -99,6 +133,71 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 (function(){
   'use strict';
   const KEY='bokjaksoRegularRoomOperatorSessionV1';
+  let operatorProfile={nickname:'운영진',avatar_url:null},removeOperatorAvatar=false;
+  const profileForm=document.getElementById('operatorProfileForm');
+  const profileFile=document.getElementById('operatorAvatarFile');
+  function paintOperatorProfile(){
+    const el=document.getElementById('operatorProfileAvatar');
+    el.replaceChildren();
+    if(operatorProfile.avatar_url){
+      const img=document.createElement('img');
+      img.alt='운영진 프로필 사진';img.src=operatorProfile.avatar_url;
+      el.appendChild(img);
+    }else{el.textContent='👤'}
+    document.getElementById('operatorDisplayName').textContent=operatorProfile.nickname||'운영진';
+    document.getElementById('operatorNickname').value=operatorProfile.nickname||'운영진';
+  }
+  async function loadOperatorProfile(){
+    const data=await api('operator-profile-get');
+    operatorProfile=data.profile||{nickname:'운영진',avatar_url:null};
+    paintOperatorProfile();
+  }
+  document.getElementById('profileEditToggle').addEventListener('click',()=>{
+    profileForm.hidden=!profileForm.hidden;
+    document.getElementById('profileEditToggle').setAttribute('aria-expanded',String(!profileForm.hidden));
+    if(!profileForm.hidden)document.getElementById('operatorNickname').focus();
+  });
+  document.getElementById('operatorRemoveAvatar').addEventListener('click',()=>{
+    removeOperatorAvatar=true;profileFile.value='';
+    document.getElementById('operatorProfileStatus').textContent='저장하면 기본 아이콘으로 바뀌어.';
+  });
+  profileFile.addEventListener('change',()=>{
+    removeOperatorAvatar=false;
+    document.getElementById('operatorProfileStatus').textContent=profileFile.files?.[0]?'사진을 선택했어. 프로필 저장을 눌러줘.':'';
+  });
+  profileForm.addEventListener('submit',async event=>{
+    event.preventDefault();
+    const nickname=document.getElementById('operatorNickname').value.trim();
+    const status=document.getElementById('operatorProfileStatus');
+    const button=document.getElementById('operatorProfileSave'),file=profileFile.files?.[0];
+    if(!nickname||nickname.length>20||nickname==='관리자'){status.textContent='닉네임을 1~20자로 입력해 줘.';return}
+    if(file&&(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>2*1024*1024)){
+      status.textContent='JPG·PNG·WEBP 사진만 2MB 이하로 올릴 수 있어.';return;
+    }
+    button.disabled=true;status.textContent='프로필 저장 중…';
+    try{
+      const payload={nickname};
+      if(file){
+        const auth=await api('operator-profile-image-auth');
+        const data=new FormData();
+        data.append('file',file,file.name||'operator-avatar.jpg');
+        data.append('publicKey',auth.publicKey);data.append('token',auth.token);
+        data.append('expire',String(auth.expire));data.append('signature',auth.signature);
+        data.append('folder',auth.folder);data.append('useUniqueFileName','true');
+        const uploaded=await fetch(auth.uploadEndpoint,{method:'POST',body:data});
+        const result=await uploaded.json().catch(()=>({}));
+        if(!uploaded.ok||!result.fileId)throw Error(result.message||'사진 업로드에 실패했어.');
+        payload.avatarFileId=result.fileId;
+      }else if(removeOperatorAvatar)payload.avatarFileId='';
+      const saved=await api('operator-profile-save',payload);
+      operatorProfile=saved.profile;paintOperatorProfile();
+      profileFile.value='';removeOperatorAvatar=false;
+      status.textContent='내 프로필을 저장했어. 모든 채팅방에서 사용돼.';
+      profileForm.hidden=true;
+      document.getElementById('profileEditToggle').setAttribute('aria-expanded','false');
+    }catch(error){if(!check(error))status.textContent=error.message||'프로필을 저장하지 못했어.'}
+    finally{button.disabled=false}
+  });
   const loginCard=document.getElementById('loginCard'),panel=document.getElementById('panelCard');
   const loginStatus=document.getElementById('loginStatus'),panelStatus=document.getElementById('panelStatus');
   const roomsEl=document.getElementById('rooms');
@@ -107,6 +206,8 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   function clearToken(){try{sessionStorage.removeItem(KEY)}catch(_){}}
   function showLogin(message=''){
     clearToken();loginCard.hidden=false;panel.hidden=true;
+    profileForm.hidden=true;document.getElementById('profileEditToggle').setAttribute('aria-expanded','false');
+    profileFile.value='';removeOperatorAvatar=false;
     loginStatus.textContent=message;
     document.getElementById('operatorPassword').value='';
   }
@@ -205,7 +306,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
       const mapKey='bokjaksoChatSessionsV2';
       let map={};try{map=JSON.parse(localStorage.getItem(mapKey)||'{}')||{}}catch(_){}
       const code=String(entered.room.code||'').toUpperCase();
-      const saved={room:entered.room,member:entered.member,sessionToken:entered.sessionToken,expiresAt:Date.now()+30*24*3600*1000};
+      const saved={room:entered.room,member:entered.member,sessionToken:entered.sessionToken,operator:true,expiresAt:Date.now()+30*24*3600*1000};
       map[code]=saved;
       localStorage.setItem(mapKey,JSON.stringify(map));
       localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
@@ -264,7 +365,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
       const d=await api('operator-login',{password:document.getElementById('operatorPassword').value},'');
       sessionStorage.setItem(KEY,d.accessToken);
       loginCard.hidden=true;panel.hidden=false;
-      await load();
+      await Promise.all([load(),loadOperatorProfile()]);
     }catch(err){if(err.status!==401&&err.status!==429&&err.status!==503){showLogin(err.message)}else loginStatus.textContent=err.message}
     finally{btn.disabled=false}
   });
@@ -272,7 +373,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
     try{await load()}catch(e){if(!check(e))note(e.message)}
   });
   document.getElementById('logoutBtn').addEventListener('click',()=>showLogin('로그아웃했어.'));
-  if(token()){loginCard.hidden=true;panel.hidden=false;load().catch(e=>{if(!check(e))showLogin(e.message)})}
+  if(token()){loginCard.hidden=true;panel.hidden=false;Promise.all([load(),loadOperatorProfile()]).catch(e=>{if(!check(e))showLogin(e.message)})}
 })();
 </script>
 </body>

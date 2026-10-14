@@ -46,6 +46,34 @@ async function db(path, options = {}) {
 // One dedicated regular-chat operator: room creation and management only.
 // No site content, club administration or irreversible room deletion.
 const OPERATOR_SETTING='chat_operator_account_v1';
+const OPERATOR_PROFILE_SETTING='chat_operator_profile_v1';
+function operatorProfilePublic(profile){
+  return {nickname:normalize(profile?.nickname)||'운영진',avatar_url:profile?.avatar_url||null};
+}
+async function operatorProfileRecord(){
+  const rows=await db('site_settings?key=eq.'+OPERATOR_PROFILE_SETTING+'&select=value&limit=1');
+  return Array.isArray(rows)&&rows[0]?.value&&typeof rows[0].value==='object'?rows[0].value:{nickname:'운영진',avatar_url:null,avatar_file_id:null,member_ids:[]};
+}
+async function operatorProfileSave(value){
+  await db('site_settings?on_conflict=key',{
+    method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify({key:OPERATOR_PROFILE_SETTING,value,updated_at:new Date().toISOString()})
+  });
+}
+async function operatorPhotoDetails(fileId){
+  const privateKey=process.env.IMAGEKIT_PRIVATE_KEY;
+  if(!privateKey||!/^[a-zA-Z0-9_-]{10,100}$/.test(String(fileId||'')))return null;
+  const response=await fetch('https://api.imagekit.io/v1/files/'+encodeURIComponent(fileId)+'/details',{
+    headers:{Authorization:'Basic '+Buffer.from(privateKey+':').toString('base64')}
+  });
+  if(!response.ok)return null;
+  const file=await response.json();
+  const url=String(file.url||'');
+  if(!String(file.filePath||'').startsWith('/bokjakso-chat-operator/avatars/')||
+    !['image','IMAGE'].includes(String(file.fileType||''))||
+    Number(file.size||0)>2*1024*1024||!/^https:\/\//i.test(url))return null;
+  return {url,fileId};
+}
 const OPERATOR_ALLOWED=new Map([
   ['operator-list-rooms','chat-list-rooms'],
   ['operator-create-room','chat-create-room'],
@@ -144,6 +172,48 @@ async function operatorConfigure(action,body,res){
 }
 async function handleOperator(body,res){
   const action=normalize(body.action);
+  if(action==='operator-profile-get'){
+    const profile=await operatorProfileRecord();
+    return res.status(200).json({ok:true,profile:operatorProfilePublic(profile)});
+  }
+  if(action==='operator-profile-image-auth'){
+    const privateKey=process.env.IMAGEKIT_PRIVATE_KEY;
+    if(!privateKey)throw operatorError('프로필 사진 업로드 설정을 확인해 주세요.',503);
+    const token=crypto.randomUUID(),expire=Math.floor(Date.now()/1000)+600;
+    const signature=crypto.createHmac('sha1',privateKey).update(token+expire).digest('hex');
+    return res.status(200).json({ok:true,token,expire,signature,
+      publicKey:'public_JqJ2mArAo76reJ0eTsO5qBRQTk4=',
+      uploadEndpoint:'https://upload.imagekit.io/api/v1/files/upload',
+      folder:'/bokjakso-chat-operator/avatars'});
+  }
+  if(action==='operator-profile-save'){
+    const nickname=normalize(body.nickname);
+    if(!nickname||nickname.length>20||nickname==='관리자')throw operatorError('닉네임은 1~20자로 입력해 주세요. 관리자라는 이름은 사용할 수 없어요.');
+    const previous=await operatorProfileRecord();
+    let url=previous.avatar_url||null,fileId=previous.avatar_file_id||null;
+    const changedPhoto=Object.prototype.hasOwnProperty.call(body,'avatarFileId');
+    if(changedPhoto){
+      const requested=String(body.avatarFileId||'');
+      if(requested){
+        const file=await operatorPhotoDetails(requested);
+        if(!file)throw operatorError('운영진 프로필 사진을 확인하지 못했어. 다시 올려줘.');
+        url=file.url;fileId=file.fileId;
+      }else{url=null;fileId=null}
+    }
+    const memberIds=Array.isArray(previous.member_ids)?previous.member_ids.filter(x=>/^[0-9a-f-]{36}$/i.test(x)).slice(-200):[];
+    const saved={nickname,avatar_url:url,avatar_file_id:fileId,member_ids:memberIds};
+    await operatorProfileSave(saved);
+    if(memberIds.length){
+      await db('chat_members?id=in.('+memberIds.map(encodeURIComponent).join(',')+')',{
+        method:'PATCH',headers:{Prefer:'return=minimal'},
+        body:JSON.stringify({nickname,avatar_url:url,avatar_file_id:fileId})
+      });
+    }
+    if(changedPhoto&&previous.avatar_file_id&&previous.avatar_file_id!==fileId){
+      await deleteImageKitFile(previous.avatar_file_id);
+    }
+    return res.status(200).json({ok:true,profile:operatorProfilePublic(saved)});
+  }
   const delegate=OPERATOR_ALLOWED.get(action);
   if(delegate)return handleChatAdmin({...body,action:delegate},res,'operator');
   if(action==='operator-set-blocked'){
@@ -550,21 +620,29 @@ async function handleChatAdmin(body, res, role='owner') {
       return;
     }
     const sessionToken = crypto.randomBytes(32).toString('hex');
-    const members = await db('chat_members?select=id,room_id,nickname', {
+    const profile=role==='operator'?await operatorProfileRecord():null;
+    const nickname=role==='operator'?operatorProfilePublic(profile).nickname:'관리자';
+    const members = await db('chat_members?select=id,room_id,nickname,avatar_url', {
       method: 'POST',
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         room_id: room.id,
-        nickname: role==='operator' ? '운영진' : '관리자',
+        nickname,
+        ...(role==='operator'?{avatar_url:profile.avatar_url||null,avatar_file_id:profile.avatar_file_id||null}:{}),
         token_hash: chatTokenHash(sessionToken),
         last_seen_at: new Date().toISOString()
       })
     });
     const member = Array.isArray(members) ? members[0] : null;
+    if(!member)throw new Error('운영진 채팅방 입장 정보를 만들지 못했습니다.');
+    if(role==='operator'){
+      const ids=Array.isArray(profile.member_ids)?profile.member_ids.filter(x=>/^[0-9a-f-]{36}$/i.test(x)):[];
+      await operatorProfileSave({...profile,member_ids:[...new Set([...ids,member.id])].slice(-200)});
+    }
     res.status(200).json({
       ok: true,
       room,
-      member: { id: member.id, nickname: member.nickname },
+      member: { id: member.id, nickname: member.nickname, avatar_url: member.avatar_url||null },
       sessionToken
     });
     return;

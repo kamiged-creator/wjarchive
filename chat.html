@@ -976,8 +976,8 @@
       memberNames.set(String(session.member.id),session.member.nickname||'');
     }
     paintAvatar(els.myAvatarIcon,session?.member?.avatar_url||null);
-    paintAvatar(els.headerAvatarIcon,session?.member?.avatar_url||sharedProfile?.avatar_url||null);
-    els.settingsProfileName.textContent=session?.member?.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session?.member?.nickname||'내 프로필');
+    paintAvatar(els.headerAvatarIcon,session?.member?.avatar_url||(session?.operator?null:sharedProfile?.avatar_url)||null);
+    els.settingsProfileName.textContent=session?.operator?(session.member.nickname||'운영진'):(session?.member?.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session?.member?.nickname||'내 프로필'));
     document.body.classList.add('chat-active');
     followLatestAfterEntry=true;
     entryLayoutObserver?.disconnect();
@@ -989,7 +989,7 @@
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);
     pollTimer=setInterval(()=>{if(!document.hidden)loadMessages(false)},CHAT_POLL_MS);
-    if(sharedProfile)syncSharedProfileToRoom().catch(error=>console.warn('공통 프로필 동기화 실패',error));
+    if(sharedProfile&&!session?.operator)syncSharedProfileToRoom().catch(error=>console.warn('공통 프로필 동기화 실패',error));
     refreshPushState();
   }
   function showJoin(preserveRemembered=false){
@@ -1389,6 +1389,9 @@
     }catch(e){alert(e.message||'채팅방 삭제에 실패했습니다.')}
   }
   async function leave(){
+    if(session?.operator&&sessionStorage.getItem('bokjaksoRegularRoomOperatorSessionV1')){
+      location.href='/chat-operator.html';return;
+    }
     const code=session?.room?.code||'';
     showJoin(true);
     if(code)els.roomCode.value=code;
@@ -1523,9 +1526,9 @@
   function openProfileView(){
     if(!session)return;
     profileViewReturnFocus=document.activeElement;
-    const url=sharedProfile?.avatar_url||session.member.avatar_url||null;
+    const url=session.operator?(session.member.avatar_url||null):(sharedProfile?.avatar_url||session.member.avatar_url||null);
     paintAvatar(els.profileViewPhoto,url);
-    const name=session.member.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session.member.nickname);
+    const name=session.operator?(session.member.nickname||'운영진'):(session.member.nickname==='관리자'?'관리자':(sharedProfile?.nickname||session.member.nickname));
     els.profileViewName.textContent=name||'내 프로필';
     els.profileViewPhoto.disabled=!url;
     els.profileViewHint.textContent=url?'사진을 누르면 더 크게 볼 수 있어요.':'사진을 등록하려면 프로필 수정을 눌러 주세요.';
@@ -1551,6 +1554,7 @@
     profileEditorReturnFocus=null;
   }
   function openProfileEditor(){
+    if(session?.operator){location.href='/chat-operator.html';return}
     profileEditorReturnFocus=document.activeElement;
     els.profileStatus.textContent='';
     profileAvatarChoice=null;
@@ -1964,7 +1968,7 @@
     if(invitedRoom){
       const saved=rememberedFor(invitedRoom);
       if(saved){
-        session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken};
+        session={room:saved.room,member:saved.member,sessionToken:saved.sessionToken,operator:saved.operator===true};
         saveSession();
         showChat();
       }
