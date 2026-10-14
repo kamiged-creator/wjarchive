@@ -28,6 +28,7 @@
  const clubTab=document.getElementById('homeTabClub');
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
+ let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
  function updateClubReturnButton(){
    // Preserve the existing private chat while changing bottom tabs.
    // The button is not an alternative to server-side membership authorization.
@@ -51,6 +52,11 @@
  }
  function leaveClubRoom(restoreFocus=false){
    const wasOpen=!pane.hidden;
+   roomGeneration++;
+   confirmedRows=[];
+   optimisticMessage=null;
+   lastRenderKey='';
+   feed.replaceChildren();
    pane.hidden=true;
    landing.hidden=false;
    clubPanel.classList.remove('club-room-open');
@@ -101,60 +107,87 @@
      leaveClubRoom();actions.hidden=true;status.textContent=e.message;
    }
  }
+ function renderMessages(forceBottom=false){
+   if(pane.hidden)return;
+   const items=confirmedRows.slice();
+   if(optimisticMessage&&!items.some(row=>optimisticMessage.id&&String(row.id)===String(optimisticMessage.id))){
+     items.push(optimisticMessage);
+   }
+   // Polling unchanged messages must not rebuild portraits or flicker the
+   // conversation. Only redraw when a row actually changed.
+   const key=JSON.stringify(items.map(row=>[row.id||'',row.nickname||'',row.body||'',
+     row.created_at||'',row.avatarUrl||'',row.isMine===true,row.pending===true]));
+   if(key===lastRenderKey){
+     if(forceBottom)feed.scrollTop=feed.scrollHeight;
+     return;
+   }
+   const atBottom=feed.scrollHeight-feed.clientHeight-feed.scrollTop<100;
+   lastRenderKey=key;
+   feed.replaceChildren();
+   if(!items.length){
+     const empty=document.createElement('p');
+     empty.textContent='첫 인사를 남겨보세요.';
+     feed.appendChild(empty);
+   }
+   for(const row of items){
+     const messageRow=document.createElement('div');
+     messageRow.className='club-message-row';
+     if(row.isMine===true)messageRow.classList.add('mine');
+     const avatar=document.createElement('span');
+     avatar.className='club-post-avatar';
+     avatar.setAttribute('aria-label',(row.isMine===true?'내':(row.nickname||'회원'))+' 프로필 사진');
+     const avatarUrl=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl)?row.avatarUrl:'';
+     if(avatarUrl){
+       const portrait=document.createElement('img');
+       portrait.src=avatarUrl;
+       portrait.alt='';
+       portrait.loading='lazy';
+       portrait.decoding='async';
+       portrait.addEventListener('error',()=>{
+         avatar.replaceChildren();
+         avatar.textContent='👤';
+       },{once:true});
+       avatar.appendChild(portrait);
+     }else{
+       avatar.textContent='👤';
+     }
+     const article=document.createElement('article');
+     article.className='club-post';
+     if(row.isMine===true)article.classList.add('mine');
+     if(row.pending===true)article.classList.add('pending');
+     const meta=document.createElement('div');
+     meta.className='club-post-meta';
+     const name=document.createElement('strong');
+     name.textContent=row.isMine===true?'나':(row.nickname||'회원');
+     const time=document.createElement('time');
+     const date=new Date(row.created_at);
+     time.textContent=row.pending===true?'보내는 중…':
+       (Number.isNaN(date.getTime())?'':date.toLocaleString('ko-KR',{
+         month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'
+       }));
+     const body=document.createElement('p');
+     body.textContent=row.body||'';
+     meta.append(name,time);
+     article.append(meta,body);
+     messageRow.append(avatar,article);
+     feed.appendChild(messageRow);
+   }
+   if(atBottom||forceBottom)feed.scrollTop=feed.scrollHeight;
+ }
  async function loadMessages(){
-   if(busy||membership!=='approved'||pane.hidden)return;
+   if(busy||membership!=='approved'||pane.hidden||sending)return;
    busy=true;
+   const generation=roomGeneration;
    try{
      const result=await request('messages');
-     const atBottom=feed.scrollHeight-feed.clientHeight-feed.scrollTop<80;
-     feed.replaceChildren();
-     const items=Array.isArray(result.messages)?result.messages:[];
-     if(!items.length){
-       const empty=document.createElement('p');
-       empty.textContent='첫 인사를 남겨보세요.';
-       feed.appendChild(empty);
+     if(generation!==roomGeneration||pane.hidden)return;
+     confirmedRows=Array.isArray(result.messages)?result.messages:[];
+     if(optimisticMessage?.id&&confirmedRows.some(row=>String(row.id)===String(optimisticMessage.id))){
+       optimisticMessage=null;
      }
-     for(const row of items){
-       const messageRow=document.createElement('div');
-       messageRow.className='club-message-row';
-       if(row.isMine===true)messageRow.classList.add('mine');
-       const avatar=document.createElement('span');
-       avatar.className='club-post-avatar';
-       avatar.setAttribute('aria-label',(row.isMine===true?'내':(row.nickname||'회원'))+' 프로필 사진');
-       const avatarUrl=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl)?row.avatarUrl:'';
-       if(avatarUrl){
-         const portrait=document.createElement('img');
-         portrait.src=avatarUrl;
-         portrait.alt='';
-         portrait.loading='lazy';
-         portrait.decoding='async';
-         portrait.addEventListener('error',()=>{
-           avatar.replaceChildren();
-           avatar.textContent='👤';
-         },{once:true});
-         avatar.appendChild(portrait);
-       }else{
-         avatar.textContent='👤';
-       }
-       const article=document.createElement('article');
-       article.className='club-post';
-       if(row.isMine===true)article.classList.add('mine');
-       const meta=document.createElement('div');
-       meta.className='club-post-meta';
-       const name=document.createElement('strong');
-       name.textContent=row.isMine===true?'나':(row.nickname||'회원');
-       const time=document.createElement('time');
-       const date=new Date(row.created_at);
-       time.textContent=Number.isNaN(date.getTime())?'':date.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-       const body=document.createElement('p');
-       body.textContent=row.body||'';
-       meta.append(name,time);
-       article.append(meta,body);
-       messageRow.append(avatar,article);
-       feed.appendChild(messageRow);
-     }
-     if(atBottom)feed.scrollTop=feed.scrollHeight;
+     renderMessages();
    }catch(e){
+     if(generation!==roomGeneration)return;
      if(e.statusCode===401||e.statusCode===403){
        leaveClubRoom();
        await refresh();
@@ -278,19 +311,51 @@
  document.getElementById('clubCompose').addEventListener('submit',async e=>{
    e.preventDefault();
    const message=input.value.trim();
-   if(!message||membership!=='approved')return;
+   if(!message||membership!=='approved'||pane.hidden||sending)return;
+   sending=true;
    sendBtn.disabled=true;
-   try{await request('send',{message});input.value='';await loadMessages();}
-   catch(err){
+   const generation=roomGeneration;
+   const draft={
+     id:null,nickname:sharedProfile?.nickname||'나',body:message,
+     created_at:new Date().toISOString(),isMine:true,
+     avatarUrl:sharedProfile?.avatar_url||null,pending:true
+   };
+   optimisticMessage=draft;
+   chatFeedback.textContent='';
+   input.value='';
+   renderMessages(true); // Appear immediately without waiting for the network.
+   try{
+     const response=await request('send',{message});
+     if(generation!==roomGeneration)return;
+     if(response.message?.id){
+       draft.id=response.message.id;
+       draft.created_at=response.message.created_at||draft.created_at;
+     }
+     draft.pending=false;
+     renderMessages(true);
+   }catch(err){
+     if(generation!==roomGeneration)return;
+     optimisticMessage=null;
+     renderMessages();
      if(err.statusCode===401||err.statusCode===403){
        leaveClubRoom();
        await refresh();
-     }else{chatFeedback.textContent=err.message;}
+     }else{
+       // Put the unsent text back, including anything typed during upload.
+       input.value=message+(input.value?' '+input.value:'');
+       chatFeedback.textContent='전송하지 못했어요. 다시 전송해 주세요. '+(err.message||'');
+     }
+   }finally{
+     sending=false;
+     sendBtn.disabled=false;
+     if(generation===roomGeneration&&optimisticMessage&&!pane.hidden){
+       // Reconcile with the authoritative, approved-members-only server.
+       loadMessages();
+     }
    }
-   finally{sendBtn.disabled=false;}
  });
  setInterval(()=>{
    if(document.hidden||document.body.classList.contains('chat-active')||clubTab.getAttribute('aria-selected')!=='true')return;
    if(membership==='pending')refresh();else if(!pane.hidden)loadMessages();
- },4500);
+ },2000);
 })();

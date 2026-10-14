@@ -710,6 +710,11 @@
       .club-room-open .club-message-row .club-post{max-width:calc(100% - 46px)}
     }
 
+    /* Local, unsent text appears immediately and settles after the server
+       confirms it; failures return the text to the input field. */
+    .club-room-open .club-post.pending{opacity:.7}
+    .club-room-open .club-post.pending time{font-style:italic}
+
   </style>
 </head>
 <body>
