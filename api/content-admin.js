@@ -48,9 +48,6 @@ async function db(path, options = {}) {
 const OPERATOR_SETTING='chat_operator_account_v1';
 const OPERATOR_ALLOWED=new Map([
   ['operator-list-rooms','chat-list-rooms'],
-  ['operator-create-room','chat-create-room'],
-  ['operator-admin-enter-room','chat-admin-enter-room'],
-  ['operator-set-archived','chat-set-archived'],
   ['operator-rename-room','chat-rename-room'],
   ['operator-set-active','chat-set-active'],
   ['operator-change-password','chat-change-password'],
