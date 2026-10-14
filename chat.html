@@ -377,7 +377,13 @@
       .chat-image{max-width:min(190px,52vw);max-height:200px}
       .composer{position:sticky;bottom:0;z-index:4;flex:0 0 auto;padding:10px 10px max(10px,env(safe-area-inset-bottom));background:var(--composer-bg)}
     }
-  </style>
+  /* Operator actions stay on one row, even on narrow mobile chat screens. */
+@media(max-width:600px){
+  .chat.operator-room .chat-head{column-gap:5px;padding-left:9px;padding-right:9px}
+  .chat.operator-room .head-actions{max-width:none;flex-wrap:nowrap;gap:4px}
+  .chat.operator-room .invite,.chat.operator-room .leave{min-height:38px;padding:0 8px;font-size:11px;flex:0 0 auto}
+}
+</style>
 </head>
 <body>
 <div class="page">
@@ -986,7 +992,8 @@
     els.messages.innerHTML='<div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div>';
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
     els.roomTitle.textContent=session.room.title||'복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
-    els.leaveBtn.textContent=session?.operator===true?'운영진 관리로':'나가기';
+    els.chatCard.classList.toggle('operator-room',session?.operator===true);
+    els.leaveBtn.textContent=session?.operator===true?'운영진 관리':'나가기';
     els.leaveBtn.setAttribute('aria-label',session?.operator===true?'운영진 관리 페이지로 돌아가기':'채팅방 나가기');
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);
@@ -998,6 +1005,7 @@
     if(els.chatCard.classList.contains('edge-open'))setChatEdgeOpen(false,false);
     stopEntryAutoScroll();
     document.body.classList.remove('chat-active');
+    els.chatCard.classList.remove('operator-room');
     clearInterval(pollTimer);pollTimer=null;lastSyncAt='';els.chatCard.classList.remove('show');els.joinCard.style.display='block';
     if(preserveRemembered){
       session=null;lastId=0;
