@@ -13,6 +13,7 @@
  const resetBtn=document.getElementById('clubResetBtn');
  const reviewEntry=document.getElementById('clubReviewEntry');
  const pane=document.getElementById('clubChat');
+ const clubPanel=document.getElementById('clubPanel');
  const landing=document.getElementById('clubLanding');
  const intro=document.getElementById('clubIntro');
  const approvedEntry=document.getElementById('clubApprovedEntry');
@@ -45,6 +46,7 @@
    const wasOpen=!pane.hidden;
    pane.hidden=true;
    landing.hidden=false;
+   clubPanel.classList.remove('club-room-open');
    chatFeedback.textContent='';
    if(restoreFocus&&wasOpen)enterBtn.focus();
  }
@@ -105,14 +107,18 @@
      for(const row of items){
        const article=document.createElement('article');
        article.className='club-post';
+       if(row.isMine===true)article.classList.add('mine');
+       const meta=document.createElement('div');
+       meta.className='club-post-meta';
        const name=document.createElement('strong');
-       name.textContent=row.nickname||'회원';
+       name.textContent=row.isMine===true?'나':(row.nickname||'회원');
        const time=document.createElement('time');
        const date=new Date(row.created_at);
        time.textContent=Number.isNaN(date.getTime())?'':date.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
        const body=document.createElement('p');
        body.textContent=row.body||'';
-       article.append(name,time,body);
+       meta.append(name,time);
+       article.append(meta,body);
        feed.appendChild(article);
      }
      if(atBottom)feed.scrollTop=feed.scrollHeight;
@@ -155,8 +161,10 @@
      if(data.status!=='approved')return;
      landing.hidden=true;
      pane.hidden=false;
+     clubPanel.classList.add('club-room-open');
      await loadMessages();
-     if(!pane.hidden)input.focus({preventScroll:true});
+     // Do not force-open the virtual keyboard on mobile just for entering a room.
+     if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
    }catch(error){
      leaveClubRoom();
      status.textContent=error.message||'클럽 채팅방에 입장하지 못했어요.';
