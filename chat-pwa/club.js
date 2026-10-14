@@ -31,6 +31,11 @@
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
  const clubMobilePointer=window.matchMedia('(max-width: 560px) and (pointer: coarse)');
  let keyboardScrollScheduled=false;
+ const visibleViewportHeight=()=>window.visualViewport?.height||window.innerHeight;
+ // A focused input is NOT enough to prove that Samsung's keyboard is open:
+ // the Back key can dismiss the IME without blurring the input.
+ let fullClubViewportHeight=visibleViewportHeight();
+ let clubViewportWidth=window.innerWidth;
  function keepLatestVisibleWhileTyping(){
    if(keyboardScrollScheduled||!document.body.classList.contains('club-input-focused'))return;
    keyboardScrollScheduled=true;
@@ -42,18 +47,30 @@
    });
  }
  function syncClubInputFocus(){
-   const typing=clubMobilePointer.matches&&!pane.hidden&&membership==='approved'&&
-     clubTab.getAttribute('aria-selected')==='true'&&document.activeElement===input;
+   const visibleHeight=visibleViewportHeight();
+   if(window.innerWidth!==clubViewportWidth){
+     clubViewportWidth=window.innerWidth;
+     // Rotation or split-screen resizing establishes a new baseline.
+     fullClubViewportHeight=visibleHeight;
+   }
+   const focused=document.activeElement===input;
+   // When the input isn't focused, any viewport size is a legitimate baseline.
+   // While it is focused, only grow the baseline as the keyboard retracts.
+   if(!focused)fullClubViewportHeight=visibleHeight;
+   else fullClubViewportHeight=Math.max(fullClubViewportHeight,visibleHeight);
+   const keyboardOpen=fullClubViewportHeight-visibleHeight>130;
+   const typing=clubMobilePointer.matches&&!document.hidden&&!pane.hidden&&
+     membership==='approved'&&clubTab.getAttribute('aria-selected')==='true'&&
+     focused&&keyboardOpen;
    document.body.classList.toggle('club-input-focused',typing);
    if(typing)keepLatestVisibleWhileTyping();
  }
  input.addEventListener('focus',syncClubInputFocus);
- input.addEventListener('blur',()=>document.body.classList.remove('club-input-focused'));
+ input.addEventListener('blur',syncClubInputFocus);
  window.addEventListener('resize',syncClubInputFocus,{passive:true});
- window.visualViewport?.addEventListener('resize',keepLatestVisibleWhileTyping,{passive:true});
- document.addEventListener('visibilitychange',()=>{
-   if(document.hidden)document.body.classList.remove('club-input-focused');
- });
+ window.visualViewport?.addEventListener('resize',syncClubInputFocus,{passive:true});
+ window.visualViewport?.addEventListener('scroll',syncClubInputFocus,{passive:true});
+ document.addEventListener('visibilitychange',syncClubInputFocus);
  function updateClubReturnButton(){
    // Preserve the existing private chat while changing bottom tabs.
    // The button is not an alternative to server-side membership authorization.

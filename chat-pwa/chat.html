@@ -813,6 +813,28 @@
       }
     }
 
+    /* Approved club, initial state: compact full-height chat as in screenshot 2.
+       The bottom tab bar stays visible until a real mobile keyboard opens. */
+    @media(max-width:560px){
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-top,
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-hint{
+        display:none;
+      }
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat h2{
+        font-size:20px;
+        line-height:1.3;
+        margin:0 0 9px;
+      }
+      body:not(.chat-active).club-chat-open:not(.club-input-focused) .home-tabs{
+        display:grid;
+      }
+      /* Screenshot 1: the message box fills the remaining keyboard viewport. */
+      body:not(.chat-active).club-chat-open.club-input-focused #clubPanel.club-room-open .club-chat h2{
+        font-size:15px;
+        margin:0 0 4px;
+      }
+    }
+
   </style>
 </head>
 <body>
