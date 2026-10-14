@@ -550,8 +550,20 @@ async function handleChatAdmin(body, res, role='owner') {
   }
 
   if (action === 'chat-list-rooms') {
-    const rooms = await db('chat_rooms?select=id,code,title,is_active,is_archived,archived_at,created_at,updated_at,last_activity_at&order=created_at.desc');
-    res.status(200).json({ ok: true, rooms: Array.isArray(rooms) ? rooms : [] });
+    // Mirror the room's live presence rule: a non-blocked member seen in the last two minutes.
+    // This is a snapshot of connected sessions, not a count of all past visitors.
+    const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const [rooms, recentlySeen] = await Promise.all([
+      db('chat_rooms?select=id,code,title,is_active,is_archived,archived_at,created_at,updated_at,last_activity_at&order=created_at.desc'),
+      db('chat_members?is_blocked=eq.false&last_seen_at=gte.' + encodeURIComponent(cutoff) + '&select=room_id&limit=5000')
+    ]);
+    const countByRoom = new Map();
+    for (const member of (Array.isArray(recentlySeen) ? recentlySeen : [])) {
+      countByRoom.set(member.room_id, (countByRoom.get(member.room_id) || 0) + 1);
+    }
+    res.status(200).json({ ok: true, rooms: (Array.isArray(rooms) ? rooms : []).map(room => ({
+      ...room, online_count: countByRoom.get(room.id) || 0
+    })) });
     return;
   }
 

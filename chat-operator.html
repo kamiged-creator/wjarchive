@@ -263,7 +263,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
     const disabled=r.is_archived?' disabled title="먼저 방을 복원해 주세요"':'';
     return '<details class="room" name="operator-room-list" data-room="'+esc(r.id)+'">'+
       '<summary class="room-heading"><span class="room-title-block"><strong>'+esc(r.title)+'</strong>'+
-      '<small>#'+esc(r.code)+' · '+state+'</small></span><span class="room-chevron" aria-hidden="true">⌄</span></summary>'+
+      '<small>#'+esc(r.code)+' · '+state+' · 현재 접속 <span data-online-room-id="'+esc(r.id)+'">'+(Number.isFinite(Number(r.online_count))?Math.max(0,Number(r.online_count)):0)+'</span>명</small></span><span class="room-chevron" aria-hidden="true">⌄</span></summary>'+
       '<div class="room-body"><div class="row"><button data-op="rename">제목 수정</button>'+
       '<button data-op="toggle"'+disabled+'>'+(r.is_active?'방 닫기':'방 열기')+'</button>'+
       '<button data-op="password">비밀번호 변경</button>'+
@@ -286,6 +286,24 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
     }
     note('');
   }
+  // Refresh only the visible counts; do not close any expanded room or erase unsaved forms.
+  let refreshingOnlineCounts=false;
+  async function refreshOnlineCounts(){
+    if(document.hidden||panel.hidden||refreshingOnlineCounts)return;
+    refreshingOnlineCounts=true;
+    try{
+      const response=await api('operator-list-rooms');
+      const counts=new Map((response.rooms||[]).map(room=>[String(room.id),Number(room.online_count)||0]));
+      roomsEl.querySelectorAll('[data-online-room-id]').forEach(el=>{
+        const number=counts.get(el.dataset.onlineRoomId);
+        if(number!==undefined)el.textContent=String(Math.max(0,number));
+      });
+    }catch(error){
+      if(!check(error))console.warn('채팅방 접속 인원 갱신 실패',error);
+    }finally{refreshingOnlineCounts=false}
+  }
+  setInterval(refreshOnlineCounts,45000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshOnlineCounts()});
   async function showMembers(r,detail){
     const {members}=await api('operator-list-members',{roomId:r.id});
     detail.innerHTML='<h4>참여자 차단·해제</h4>'+
