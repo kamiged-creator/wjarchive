@@ -314,14 +314,23 @@ async function handleChat(body, res, req) {
       'chat_rooms?id=in.(' + ids.map(id => encodeURIComponent(id)).join(',') + ')' +
       '&is_active=eq.true&is_archived=eq.false&select=id'
     );
-    const latest = await Promise.all((Array.isArray(activeRooms) ? activeRooms : []).map(async room => {
-      const messages = await supabaseRequest(
-        'chat_messages?room_id=eq.' + encodeURIComponent(room.id) +
-        '&deleted_at=is.null&select=created_at&order=created_at.desc&limit=1'
-      );
-      return {roomId:room.id,lastMessageAt:Array.isArray(messages) ? (messages[0]?.created_at||null) : null};
-    }));
-    res.status(200).json({ok:true,latest});
+    const activeIds=(Array.isArray(activeRooms)?activeRooms:[]).map(room=>room.id);
+    const cutoff=new Date(Date.now()-2*60*1000).toISOString();
+    const [recentMembers,latest]=await Promise.all([
+      activeIds.length?supabaseRequest('chat_members?room_id=in.('+activeIds.map(encodeURIComponent).join(',')+')'+
+        '&is_blocked=eq.false&last_seen_at=gte.'+encodeURIComponent(cutoff)+
+        '&select=room_id&limit=5000'):Promise.resolve([]),
+      Promise.all((Array.isArray(activeRooms)?activeRooms:[]).map(async room=>{
+        const messages=await supabaseRequest('chat_messages?room_id=eq.'+encodeURIComponent(room.id)+
+          '&deleted_at=is.null&select=created_at&order=created_at.desc&limit=1');
+        return {roomId:room.id,lastMessageAt:Array.isArray(messages)?(messages[0]?.created_at||null):null};
+      }))
+    ]);
+    const counts=new Map();
+    for(const member of (Array.isArray(recentMembers)?recentMembers:[])){
+      counts.set(member.room_id,(counts.get(member.room_id)||0)+1);
+    }
+    res.status(200).json({ok:true,latest:latest.map(item=>({...item,onlineCount:counts.get(item.roomId)||0}))});
     return;
   }
 

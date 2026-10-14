@@ -383,6 +383,14 @@
   .chat.operator-room .head-actions{max-width:none;flex-wrap:nowrap;gap:4px}
   .chat.operator-room .invite,.chat.operator-room .leave{min-height:38px;padding:0 8px;font-size:11px;flex:0 0 auto}
 }
+/* Status badges fit the existing 44px entry-button row. */
+.public-room-last{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;min-width:0}
+.public-online-badge,.public-talking-badge{display:inline-flex;align-items:center;flex:0 0 auto;padding:1px 5px;line-height:1.25;font-size:10px;font-weight:650;border-radius:999px}
+.public-online-badge{border:1px solid #dacbb7;background:color-mix(in srgb,var(--paper) 88%,#c5baa7);color:var(--muted)}
+.public-talking-badge{border:1px solid #9bbfa4;background:#eaf5ea;color:#226e40}
+.public-talking-badge[hidden],.public-last-time[hidden]{display:none!important}
+.public-last-time{min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+@media(max-width:450px){.public-room-item{gap:7px}.public-room-last{gap:4px}.public-talking-badge,.public-online-badge{font-size:10px;padding:1px 4px}}
 </style>
 </head>
 <body>
@@ -1613,6 +1621,44 @@
     }
   }
 
+  let refreshingPublicBadges=false;
+  async function refreshVisibleRoomBadges(){
+    if(refreshingPublicBadges)return;
+    const items=[...els.publicRooms.querySelectorAll('[data-room-last-id]')];
+    const ids=items.map(el=>el.dataset.roomLastId).filter(Boolean).slice(0,5);
+    if(!ids.length)return;
+    refreshingPublicBadges=true;
+    try{
+      const result=await api({action:'chat-public-last-activity',roomIds:ids});
+      const stats=new Map((Array.isArray(result.latest)?result.latest:[]).map(item=>[String(item.roomId),item]));
+      const now=Date.now();
+      for(const item of items){
+        const state=stats.get(item.dataset.roomLastId);
+        if(!state)continue;
+        const count=item.querySelector('[data-online-count]');
+        if(count)count.textContent=String(Math.max(0,Number(state.onlineCount)||0));
+        const recent=state.lastMessageAt&&Number.isFinite(Date.parse(state.lastMessageAt))&&
+          now-Date.parse(state.lastMessageAt)>=0&&now-Date.parse(state.lastMessageAt)<=3*60*1000;
+        const talking=item.querySelector('[data-chatting-indicator]');
+        if(talking)talking.hidden=!recent;
+        const last=item.querySelector('[data-last-time]');
+        if(last){
+          const stamp=fmtRoomLastDate(state.lastMessageAt);
+          last.textContent=stamp?'최근 대화 '+stamp:'';
+          last.hidden=Boolean(recent)||!stamp;
+        }
+      }
+    }catch(error){console.warn('채팅방 접속 및 대화 상태 조회 실패',error)}
+    finally{refreshingPublicBadges=false}
+  }
+  setInterval(()=>{
+    if(!document.hidden&&!document.body.classList.contains('admin-mode')&&
+      !els.chatCard.classList.contains('show'))refreshVisibleRoomBadges();
+  },30000);
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&!document.body.classList.contains('admin-mode')&&
+      !els.chatCard.classList.contains('show'))refreshVisibleRoomBadges();
+  });
   async function loadPublicRooms(){
     try{
       const data=await api({action:'chat-public-list-rooms'});
@@ -1631,7 +1677,12 @@
         const slice=rooms.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
         const rows=slice.map(room=>{
           const known=Boolean(remembered[String(room.code).toUpperCase()]);
-          return '<div class="public-room-item'+(known?' remembered':'')+'"><div><div class="public-room-title-row"><div class="public-room-name" title="'+esc(room.title||'채팅방')+'">'+esc(room.title||'채팅방')+'</div>'+(known?'<span class="entered-badge">✓ 이전 입장</span>':'')+'</div><div class="public-room-last" data-room-last-id="'+esc(room.id)+'" hidden></div></div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
+          return '<div class="public-room-item'+(known?' remembered':'')+'"><div><div class="public-room-title-row"><div class="public-room-name" title="'+esc(room.title||'채팅방')+'">'+esc(room.title||'채팅방')+'</div>'+(known?'<span class="entered-badge">✓ 이전 입장</span>':'')+'</div>'+
+            '<div class="public-room-last" data-room-last-id="'+esc(room.id)+'">'+
+            '<span class="public-online-badge">👥 <span data-online-count>–</span>명</span>'+
+            '<span class="public-talking-badge" data-chatting-indicator hidden>● 대화 중</span>'+
+            '<span class="public-last-time" data-last-time hidden></span></div>'+
+            '</div><button class="public-room-enter'+(known?' selected':'')+'" type="button" data-public-room="'+esc(room.code)+'">'+(known?'바로 입장':'입장')+'</button></div>';
         }).join('');
 
         let pager='';
@@ -1644,15 +1695,8 @@
         }
         els.publicRooms.innerHTML=rows+pager;
 
-        // Fetch dates for this page only, without exposing any message contents.
-        api({action:'chat-public-last-activity',roomIds:slice.map(room=>room.id)}).then(result=>{
-          const activity=new Map((Array.isArray(result.latest)?result.latest:[])
-            .map(item=>[String(item.roomId),item.lastMessageAt]));
-          els.publicRooms.querySelectorAll('[data-room-last-id]').forEach(label=>{
-            const stamp=fmtRoomLastDate(activity.get(label.dataset.roomLastId));
-            if(stamp){label.textContent='최근 대화 '+stamp;label.hidden=false}
-          });
-        }).catch(error=>console.warn('최근 대화 날짜 조회 실패',error));
+        // Fetch only visible five rooms and keep the compact layout stable.
+        refreshVisibleRoomBadges();
 
         els.publicRooms.querySelectorAll('[data-public-room]').forEach(btn=>btn.addEventListener('click',()=>{
           const code=String(btn.dataset.publicRoom||'').toUpperCase();
