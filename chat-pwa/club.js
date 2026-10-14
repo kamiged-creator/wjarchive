@@ -29,6 +29,31 @@
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
+ const clubMobilePointer=window.matchMedia('(max-width: 560px) and (pointer: coarse)');
+ let keyboardScrollScheduled=false;
+ function keepLatestVisibleWhileTyping(){
+   if(keyboardScrollScheduled||!document.body.classList.contains('club-input-focused'))return;
+   keyboardScrollScheduled=true;
+   requestAnimationFrame(()=>{
+     keyboardScrollScheduled=false;
+     if(document.body.classList.contains('club-input-focused')&&!pane.hidden){
+       feed.scrollTop=feed.scrollHeight;
+     }
+   });
+ }
+ function syncClubInputFocus(){
+   const typing=clubMobilePointer.matches&&!pane.hidden&&membership==='approved'&&
+     clubTab.getAttribute('aria-selected')==='true'&&document.activeElement===input;
+   document.body.classList.toggle('club-input-focused',typing);
+   if(typing)keepLatestVisibleWhileTyping();
+ }
+ input.addEventListener('focus',syncClubInputFocus);
+ input.addEventListener('blur',()=>document.body.classList.remove('club-input-focused'));
+ window.addEventListener('resize',syncClubInputFocus,{passive:true});
+ window.visualViewport?.addEventListener('resize',keepLatestVisibleWhileTyping,{passive:true});
+ document.addEventListener('visibilitychange',()=>{
+   if(document.hidden)document.body.classList.remove('club-input-focused');
+ });
  function updateClubReturnButton(){
    // Preserve the existing private chat while changing bottom tabs.
    // The button is not an alternative to server-side membership authorization.
@@ -61,6 +86,7 @@
    landing.hidden=false;
    clubPanel.classList.remove('club-room-open');
    document.body.classList.remove('club-chat-open');
+   document.body.classList.remove('club-input-focused');
    chatFeedback.textContent='';
    updateClubReturnButton();
    if(restoreFocus&&wasOpen)enterBtn.focus();
@@ -249,13 +275,14 @@
  // Remove only the page layout class while another panel is displayed.
  for(const tab of document.querySelectorAll('[data-home-tab]')){
    if(tab!==clubTab)tab.addEventListener('click',()=>{
-     document.body.classList.remove('club-chat-open');
+     document.body.classList.remove('club-chat-open','club-input-focused');
      updateClubReturnButton();
    });
  }
  clubTab.addEventListener('click',()=>{
    if(!pane.hidden&&membership==='approved'){
      document.body.classList.add('club-chat-open');
+     syncClubInputFocus();
      loadMessages(); // Each fetch still verifies the user's server-side approval.
    }
    refresh(); // Re-check membership whenever the private tab is selected.
