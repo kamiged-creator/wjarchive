@@ -986,6 +986,8 @@
     els.messages.innerHTML='<div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div>';
     els.joinCard.style.display='none';els.chatCard.classList.add('show');
     els.roomTitle.textContent=session.room.title||'복작소 채팅방';els.roomCodeText.textContent='#'+session.room.code;
+    els.leaveBtn.textContent=session?.operator===true?'운영진 관리로':'나가기';
+    els.leaveBtn.setAttribute('aria-label',session?.operator===true?'운영진 관리 페이지로 돌아가기':'채팅방 나가기');
     els.deleteRoomBtn.classList.toggle('show',Boolean(sessionStorage.getItem(ADMIN_KEY)));
     loadMessages(true);
     pollTimer=setInterval(()=>{if(!document.hidden)loadMessages(false)},CHAT_POLL_MS);
@@ -1389,7 +1391,9 @@
     }catch(e){alert(e.message||'채팅방 삭제에 실패했습니다.')}
   }
   async function leave(){
-    if(session?.operator&&sessionStorage.getItem('bokjaksoRegularRoomOperatorSessionV1')){
+    // A room opened from the operator dashboard always returns to that dashboard,
+    // including when the 30-day login token is kept in localStorage.
+    if(session?.operator===true){
       location.href='/chat-operator.html';return;
     }
     const code=session?.room?.code||'';
