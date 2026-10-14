@@ -108,7 +108,7 @@ async function operatorRequire(req){
   const value=String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');
   const parts=value.split(':');
   if(parts.length!==5||parts[0]!=='op1'||!/^\d{10}$/.test(parts[1])||
-    Number(parts[1])<=Date.now()/1000||Number(parts[1])>Date.now()/1000+5*3600||
+    Number(parts[1])<=Date.now()/1000||Number(parts[1])>Date.now()/1000+30*24*3600+5*60||
     !/^[a-f0-9]{32}$/.test(parts[2])||!/^[a-f0-9-]{36}$/.test(parts[3])){
     throw operatorError('운영진 로그인 시간이 만료됐어요. 다시 로그인해 주세요.',401);
   }
@@ -146,7 +146,8 @@ async function operatorLogin(req,body,res){
     throw operatorError('운영진 비밀번호가 올바르지 않아요.',401);
   }
   await db('site_settings?key=eq.'+key,{method:'DELETE',headers:{Prefer:'return=minimal'}});
-  const expiry=Math.floor(Date.now()/1000)+4*60*60;
+  // Remember-me is opt-in and extends only the signed session token; never store the password.
+  const expiry=Math.floor(Date.now()/1000)+(body.remember===true?30*24*60*60:4*60*60);
   const nonce=crypto.randomBytes(16).toString('hex');
   const version=settings.version;
   res.status(200).json({ok:true,accessToken:['op1',expiry,nonce,version,operatorSign(expiry,nonce,version)].join(':'),expiresAt:expiry});

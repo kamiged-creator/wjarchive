@@ -78,6 +78,11 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .operator-room-list #panelStatus:empty{display:none}
 .operator-room-list #panelStatus:not(:empty){min-height:0;margin:0 0 12px;line-height:1.45}
 .operator-room-list #rooms>.room:first-child{margin-top:0}
+/* Remember-me checkbox, explicit opt-in. */
+.remember-operator{display:flex;align-items:center;gap:11px;cursor:pointer;margin:16px 0 0;font-size:15px;font-weight:700}
+.remember-operator input{width:23px;height:23px;flex:0 0 23px;margin:0;accent-color:var(--accent);cursor:pointer}
+.remember-operator small{font-size:13px;font-weight:550;color:var(--muted)}
+.remember-operator-hint{margin:5px 0 8px 34px;font-size:12px;color:var(--muted);line-height:1.5}
 </style>
 </head>
 <body>
@@ -87,6 +92,11 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   <h1>운영진 로그인</h1>
   <p>최고관리자가 발급한 <b>운영진 전용 비밀번호</b>로 로그인해 줘. 홈페이지 관리자 비밀번호와는 달라.</p>
   <form id="loginForm"><label for="operatorPassword">운영진 비밀번호</label><input id="operatorPassword" type="password" autocomplete="current-password" required minlength="12" placeholder="운영진 비밀번호 입력">
+    <label class="remember-operator" for="rememberOperator">
+      <input id="rememberOperator" type="checkbox">
+      <span>이 기기에서 로그인 유지 <small>(30일)</small></span>
+    </label>
+    <p class="remember-operator-hint">개인 휴대폰에서만 체크해 주세요. 비밀번호는 저장되지 않아요.</p>
     <button class="primary" id="loginBtn" type="submit">로그인</button>
   </form><div id="loginStatus" class="feedback" role="status"></div>
 </section>
@@ -209,8 +219,14 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   const loginStatus=document.getElementById('loginStatus'),panelStatus=document.getElementById('panelStatus');
   const roomsEl=document.getElementById('rooms');
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function token(){try{return sessionStorage.getItem(KEY)||''}catch(_){return ''}}
-  function clearToken(){try{sessionStorage.removeItem(KEY)}catch(_){}}
+  function token(){
+    try{return sessionStorage.getItem(KEY)||localStorage.getItem(KEY)||''}
+    catch(_){try{return sessionStorage.getItem(KEY)||''}catch(__){return ''}}
+  }
+  function clearToken(){
+    try{sessionStorage.removeItem(KEY)}catch(_){}
+    try{localStorage.removeItem(KEY)}catch(_){}
+  }
   function clearOperatorRoomSessions(){
     try{
       const key='bokjaksoChatSessionsV2';
@@ -230,6 +246,7 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
     profileFile.value='';removeOperatorAvatar=false;
     loginStatus.textContent=message;
     document.getElementById('operatorPassword').value='';
+    document.getElementById('rememberOperator').checked=false;
   }
   async function api(action,other={},auth=token()){
     const r=await fetch('/api/content-admin',{method:'POST',cache:'no-store',
@@ -382,8 +399,10 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   document.getElementById('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();const btn=document.getElementById('loginBtn');btn.disabled=true;loginStatus.textContent='확인 중…';
     try{
-      const d=await api('operator-login',{password:document.getElementById('operatorPassword').value},'');
-      sessionStorage.setItem(KEY,d.accessToken);
+      const remember=document.getElementById('rememberOperator').checked;
+      const d=await api('operator-login',{password:document.getElementById('operatorPassword').value,remember},'');
+      clearToken();
+      (remember?localStorage:sessionStorage).setItem(KEY,d.accessToken);
       loginCard.hidden=true;panel.hidden=false;
       await Promise.all([load(),loadOperatorProfile()]);
     }catch(err){if(err.status!==401&&err.status!==429&&err.status!==503){showLogin(err.message)}else loginStatus.textContent=err.message}
