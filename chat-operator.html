@@ -204,8 +204,21 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function token(){try{return sessionStorage.getItem(KEY)||''}catch(_){return ''}}
   function clearToken(){try{sessionStorage.removeItem(KEY)}catch(_){}}
+  function clearOperatorRoomSessions(){
+    try{
+      const key='bokjaksoChatSessionsV2';
+      const rooms=JSON.parse(localStorage.getItem(key)||'{}')||{};
+      let changed=false;
+      for(const code of Object.keys(rooms)){
+        if(rooms[code]?.operator===true){delete rooms[code];changed=true}
+      }
+      if(changed)localStorage.setItem(key,JSON.stringify(rooms));
+      const old=JSON.parse(localStorage.getItem('bokjaksoChatSessionV1')||'null');
+      if(old?.operator===true)localStorage.removeItem('bokjaksoChatSessionV1');
+    }catch(_){}
+  }
   function showLogin(message=''){
-    clearToken();loginCard.hidden=false;panel.hidden=true;
+    clearToken();clearOperatorRoomSessions();loginCard.hidden=false;panel.hidden=true;
     profileForm.hidden=true;document.getElementById('profileEditToggle').setAttribute('aria-expanded','false');
     profileFile.value='';removeOperatorAvatar=false;
     loginStatus.textContent=message;

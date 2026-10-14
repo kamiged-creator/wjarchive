@@ -612,7 +612,7 @@
     els.sharedProfileHelp.textContent=sharedProfile?'모든 채팅방 공통 · 눌러서 수정':'닉네임·사진 한 번 설정, 모든 방에서 사용';
     if(els.nickname&&sharedProfile)els.nickname.value=sharedProfile.nickname;
     if(!session)paintAvatar(els.headerAvatarIcon,sharedProfile?.avatar_url||null);
-    els.settingsProfileName.textContent=sharedProfile?.nickname||session?.member?.nickname||'내 프로필';
+    els.settingsProfileName.textContent=session?.operator?(session.member.nickname||'운영진'):(sharedProfile?.nickname||session?.member?.nickname||'내 프로필');
   }
   function storeSharedProfile(profile,token){
     sharedProfile={id:profile.id,token:token||sharedProfile?.token,
