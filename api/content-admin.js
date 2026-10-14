@@ -43,11 +43,14 @@ async function db(path, options = {}) {
 }
 
 
-// One dedicated regular-chat operator. This credential never grants content,
-// club or room-creation privileges. It is configured only by the owner.
+// One dedicated regular-chat operator: room creation and management only.
+// No site content, club administration or irreversible room deletion.
 const OPERATOR_SETTING='chat_operator_account_v1';
 const OPERATOR_ALLOWED=new Map([
   ['operator-list-rooms','chat-list-rooms'],
+  ['operator-create-room','chat-create-room'],
+  ['operator-admin-enter-room','chat-admin-enter-room'],
+  ['operator-set-archived','chat-set-archived'],
   ['operator-rename-room','chat-rename-room'],
   ['operator-set-active','chat-set-active'],
   ['operator-change-password','chat-change-password'],
@@ -142,7 +145,7 @@ async function operatorConfigure(action,body,res){
 async function handleOperator(body,res){
   const action=normalize(body.action);
   const delegate=OPERATOR_ALLOWED.get(action);
-  if(delegate)return handleChatAdmin({...body,action:delegate},res);
+  if(delegate)return handleChatAdmin({...body,action:delegate},res,'operator');
   if(action==='operator-set-blocked'){
     const roomId=normalize(body.roomId);
     const memberId=normalize(body.memberId);
@@ -446,7 +449,7 @@ async function deleteImageFromVerifiedRoom(fileId, roomId, imageUrl) {
   }
 }
 
-async function handleChatAdmin(body, res) {
+async function handleChatAdmin(body, res, role='owner') {
   const action = normalize(body.action);
 
   if (action === 'chat-get-sound-config') {
@@ -552,7 +555,7 @@ async function handleChatAdmin(body, res) {
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         room_id: room.id,
-        nickname: '관리자',
+        nickname: role==='operator' ? '운영진' : '관리자',
         token_hash: chatTokenHash(sessionToken),
         last_seen_at: new Date().toISOString()
       })
