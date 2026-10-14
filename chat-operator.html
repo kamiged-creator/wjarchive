@@ -73,6 +73,11 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .operator-profile-actions{display:flex;gap:10px;margin-top:14px}
 .operator-profile-actions button{flex:1;min-width:0}
 @media(max-width:450px){.operator-profile{padding-top:1px}.operator-avatar{width:78px;height:78px}}
+/* Keep the refresh control visually attached to the list it updates. */
+.operator-room-tools{margin-bottom:12px}
+.operator-room-list #panelStatus:empty{display:none}
+.operator-room-list #panelStatus:not(:empty){min-height:0;margin:0 0 12px;line-height:1.45}
+.operator-room-list #rooms>.room:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -122,9 +127,11 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
         <div id="createRoomStatus" class="feedback" role="status"></div>
       </form>
     </details>
-    <div class="row"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
-    <div id="panelStatus" class="feedback" role="status"></div>
-    <div id="rooms"></div>
+    <div class="operator-room-list">
+      <div class="row operator-room-tools"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
+      <div id="panelStatus" class="feedback" role="status"></div>
+      <div id="rooms"></div>
+    </div>
     <div class="operator-footer"><button id="logoutBtn" type="button">로그아웃</button></div>
   </div>
 </section>
