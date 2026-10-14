@@ -609,6 +609,36 @@
       .club-room-open .club-compose{gap:8px;margin-top:10px}
       .club-room-open .club-compose button{min-width:72px}
     }
+    /* Keep the club composer above fixed navigation on short/mobile viewports.
+       The message feed, not the composer, gets the remaining height. */
+    @media(max-width:560px){
+      body:not(.chat-active) main > #clubPanel.club-room-open{
+        height:calc(var(--app-height,100dvh) - 174px - env(safe-area-inset-bottom));
+        min-height:0;
+        max-height:none;
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;
+      }
+      body:not(.chat-active) #clubPanel.club-room-open #clubChat{
+        display:flex;
+        flex-direction:column;
+        flex:1 1 auto;
+        min-height:0;
+      }
+      body:not(.chat-active) #clubPanel.club-room-open .club-chat-feed{
+        height:auto;
+        min-height:0;
+        max-height:none;
+        flex:1 1 auto;
+        overflow-y:auto;
+      }
+      body:not(.chat-active) #clubPanel.club-room-open .club-compose{
+        flex:0 0 auto;
+        padding-bottom:2px;
+      }
+    }
+
   </style>
 </head>
 <body>
