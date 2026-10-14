@@ -19,6 +19,11 @@
  const approvedEntry=document.getElementById('clubApprovedEntry');
  const enterBtn=document.getElementById('clubEnterBtn');
  const leaveBtn=document.getElementById('clubLeaveBtn');
+ const onlineCount=document.getElementById('clubOnlineCount');
+ const inviteBtn=document.getElementById('clubInviteBtn');
+ const moreBtn=document.getElementById('clubMoreBtn');
+ const roomMenu=document.getElementById('clubRoomMenu');
+ const roomMenuLeaveBtn=document.getElementById('clubMenuLeaveBtn');
  const chatFeedback=document.getElementById('clubChatFeedback');
  const actions=document.getElementById('clubActions');
  const feed=document.getElementById('clubMessages');
@@ -29,6 +34,77 @@
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
+ let presenceBusy=false;
+ const clubIsVisible=()=>!pane.hidden&&membership==='approved'&&!document.hidden&&
+   !document.body.classList.contains('chat-active')&&
+   clubTab.getAttribute('aria-selected')==='true';
+ function leavePresence(){
+   if(!sharedProfile)return;
+   // Same profile-token verification as every other club action.
+   fetch('/api/store-inquiries',{
+     method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({action:'club-leave',...sharedCredentials()}),
+     keepalive:true
+   }).catch(()=>{});
+ }
+ async function updatePresence(){
+   if(!clubIsVisible()||presenceBusy)return;
+   presenceBusy=true;
+   const generation=roomGeneration;
+   try{
+     const data=await request('presence');
+     if(generation===roomGeneration&&clubIsVisible()){
+       const total=Math.max(0,Number(data.onlineCount)||0);
+       onlineCount.textContent='🟢 접속 '+total+'명';
+     }
+   }catch(err){
+     if(generation===roomGeneration&&clubIsVisible()){
+       onlineCount.textContent='접속 확인 중';
+       if(err.statusCode===401||err.statusCode===403)refresh();
+     }
+   }finally{presenceBusy=false;}
+ }
+ function setRoomMenu(open){
+   roomMenu.hidden=!open;
+   moreBtn.setAttribute('aria-expanded',String(open));
+ }
+ moreBtn.addEventListener('click',()=>setRoomMenu(roomMenu.hidden));
+ roomMenuLeaveBtn.addEventListener('click',()=>{
+   setRoomMenu(false);
+   leaveClubRoom(true);
+ });
+ document.addEventListener('click',event=>{
+   if(!roomMenu.hidden&&!event.target.closest('.club-room-menu-wrap'))setRoomMenu(false);
+ });
+ document.addEventListener('keydown',event=>{
+   if(event.key==='Escape'&&!roomMenu.hidden){
+     setRoomMenu(false);moreBtn.focus();
+   }
+ });
+ inviteBtn.addEventListener('click',async()=>{
+   const link=new URL('/chat.html?tab=club',location.origin).href;
+   const description='복작소 클럽에 초대합니다. 가입 신청 후 최고관리자의 승인을 받으면 채팅할 수 있어요.';
+   try{
+     if(navigator.share){
+       await navigator.share({title:'복작소 클럽 초대',text:description,url:link});
+     }else if(navigator.clipboard?.writeText){
+       await navigator.clipboard.writeText(link);
+       chatFeedback.textContent='초대 링크를 복사했어. 정회원 승인 후 채팅할 수 있어.';
+     }else{
+       window.prompt('클럽 초대 링크를 복사해 주세요.',link);
+     }
+   }catch(error){
+     if(error.name==='AbortError')return;
+     if(navigator.clipboard?.writeText){
+       try{
+         await navigator.clipboard.writeText(link);
+         chatFeedback.textContent='초대 링크를 복사했어. 정회원 승인 후 채팅할 수 있어.';
+         return;
+       }catch(_){}
+     }
+     window.prompt('클럽 초대 링크를 복사해 주세요.',link);
+   }
+ });
  const clubMobilePointer=window.matchMedia('(max-width: 560px) and (pointer: coarse)');
  let keyboardScrollScheduled=false;
  const visibleViewportHeight=()=>window.visualViewport?.height||window.innerHeight;
@@ -94,6 +170,8 @@
  }
  function leaveClubRoom(restoreFocus=false){
    const wasOpen=!pane.hidden;
+   if(wasOpen)leavePresence();
+   setRoomMenu(false);
    roomGeneration++;
    confirmedRows=[];
    optimisticMessage=null;
@@ -293,6 +371,8 @@
      clubPanel.classList.add('club-room-open');
      document.body.classList.add('club-chat-open');
      updateClubReturnButton();
+     onlineCount.textContent='접속 확인 중';
+     updatePresence();
      await loadMessages();
      scrollLatestOnEntry();
      // Do not force-open the virtual keyboard on mobile just for entering a room.
@@ -309,7 +389,9 @@
  // Remove only the page layout class while another panel is displayed.
  for(const tab of document.querySelectorAll('[data-home-tab]')){
    if(tab!==clubTab)tab.addEventListener('click',()=>{
+     if(!pane.hidden)leavePresence();
      document.body.classList.remove('club-chat-open','club-input-focused');
+     setRoomMenu(false);
      updateClubReturnButton();
    });
  }
@@ -317,6 +399,7 @@
    if(!pane.hidden&&membership==='approved'){
      document.body.classList.add('club-chat-open');
      syncClubInputFocus();
+     updatePresence();
      loadMessages(); // Each fetch still verifies the user's server-side approval.
    }
    refresh(); // Re-check membership whenever the private tab is selected.
@@ -424,4 +507,16 @@
    if(document.hidden||document.body.classList.contains('chat-active')||clubTab.getAttribute('aria-selected')!=='true')return;
    if(membership==='pending')refresh();else if(!pane.hidden)loadMessages();
  },2000);
+ // Count members in this private room, not all approved club members.
+ setInterval(updatePresence,20000);
+ document.addEventListener('visibilitychange',()=>{
+   if(document.hidden){
+     if(!pane.hidden)leavePresence();
+   }else if(clubIsVisible()){
+     updatePresence();
+   }
+ });
+ window.addEventListener('pagehide',()=>{
+   if(!pane.hidden)leavePresence();
+ });
 })();
