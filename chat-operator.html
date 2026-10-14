@@ -29,6 +29,23 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .feedback{min-height:18px;font-size:14px;color:#ad332d;margin-top:9px}
 [hidden]{display:none!important}
 @media(max-width:450px){.card{padding:16px 12px}.room{padding:14px 11px}button{min-height:48px}.room .row button{flex:1 1 42%}.member button,.message button{min-width:70px}}
+/* Compact, one-room-at-a-time controls. All rooms start collapsed. */
+.room{padding:0!important;overflow:hidden}
+.room-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:74px;padding:14px 16px;cursor:pointer;list-style:none;user-select:none}
+.room-heading::-webkit-details-marker{display:none}
+.room-heading::marker{content:''}
+.room-heading:focus-visible{outline:3px solid #ae8963;outline-offset:-4px;border-radius:14px}
+.room-title-block{min-width:0;flex:1}
+.room-title-block strong{display:block;font-size:18px;line-height:1.45;overflow-wrap:anywhere}
+.room-title-block small{display:block;color:var(--muted);font-size:13px;margin-top:5px}
+.room-chevron{font-size:24px;line-height:1;color:var(--accent);transition:transform .18s ease}
+.room[open] .room-chevron{transform:rotate(180deg)}
+.room[open] .room-heading{background:#f7f0e7;border-bottom:1px solid #dacaba}
+.room-body{padding:4px 16px 16px}
+.operator-footer{display:flex;justify-content:flex-end;border-top:1px solid #e5dacd;padding-top:22px;margin-top:28px}
+.operator-footer button{background:transparent;font-size:14px;font-weight:650}
+@media(max-width:450px){.room-heading{padding:15px 13px}.room-body{padding:4px 12px 14px}}
+@media(prefers-reduced-motion:reduce){.room-chevron{transition:none}}
 </style>
 </head>
 <body>
@@ -43,10 +60,21 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 </section>
 <section id="panelCard" hidden>
   <div class="card">
-    <div class="heading"><div><h1>기존 채팅방 관리</h1><p>채팅방 만들기·영구 삭제·클럽·홈페이지 수정 권한은 없어.</p></div><button id="logoutBtn" type="button">로그아웃</button></div>
+    <div class="heading"><div><h1>일반 채팅방 운영</h1><p>방 만들기와 기존 방 관리가 가능해. 영구 삭제·클럽·홈페이지 관리 권한은 없어.</p></div></div>
+    <form id="createRoomForm" class="panel" style="margin:17px 0">
+      <h2>＋ 새 채팅방 만들기</h2>
+      <p>방 이름과 입장 비밀번호를 설정하면 코드가 자동으로 만들어져.</p>
+      <label for="newRoomTitle">방 이름</label>
+      <input id="newRoomTitle" type="text" maxlength="50" required placeholder="예: 문학 이야기방" autocomplete="off">
+      <label for="newRoomPassword">방 입장 비밀번호 (8자 이상)</label>
+      <input id="newRoomPassword" type="password" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="참여자에게 따로 알려줄 비밀번호">
+      <button id="createRoomBtn" class="primary" type="submit" style="width:100%;margin-top:14px">채팅방 만들기</button>
+      <div id="createRoomStatus" class="feedback" role="status"></div>
+    </form>
     <div class="row"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
     <div id="panelStatus" class="feedback" role="status"></div>
     <div id="rooms"></div>
+    <div class="operator-footer"><button id="logoutBtn" type="button">로그아웃</button></div>
   </div>
 </section>
 </main>
@@ -77,20 +105,30 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
   function note(text){panelStatus.textContent=text}
   function roomHtml(r){
     const state=r.is_archived?'보관된 방':(r.is_active?'열림':'닫힘');
-    const disabled=r.is_archived?' disabled title="보관된 방은 최고관리자가 복원할 수 있어"':'';
-    return '<section class="room" data-room="'+esc(r.id)+'"><h3>'+esc(r.title)+'</h3><div class="meta">#'+esc(r.code)+' · '+state+'</div>'+
-      '<div class="row"><button data-op="rename">제목 수정</button>'+
+    const disabled=r.is_archived?' disabled title="먼저 방을 복원해 주세요"':'';
+    return '<details class="room" name="operator-room-list" data-room="'+esc(r.id)+'">'+
+      '<summary class="room-heading"><span class="room-title-block"><strong>'+esc(r.title)+'</strong>'+
+      '<small>#'+esc(r.code)+' · '+state+'</small></span><span class="room-chevron" aria-hidden="true">⌄</span></summary>'+
+      '<div class="room-body"><div class="row"><button data-op="rename">제목 수정</button>'+
       '<button data-op="toggle"'+disabled+'>'+(r.is_active?'방 닫기':'방 열기')+'</button>'+
       '<button data-op="password">비밀번호 변경</button>'+
+      '<button data-op="archive">'+(r.is_archived?'방 복원':'보관')+'</button>'+
+      '<button data-op="copy">초대 링크 복사</button>'+
+      (!r.is_archived&&r.is_active?'<button data-op="enter">방 입장</button>':'')+
       '<button data-op="members">참여자 관리</button>'+
       '<button data-op="messages">메시지 관리</button></div>'+
-      '<div class="panel" data-detail hidden></div></section>';
+      '<div class="panel" data-detail hidden></div></div></details>';
   }
   let currentRooms=[];
   async function load(){
+    const expandedRoomId=roomsEl.querySelector('details.room[open]')?.dataset.room||'';
     const d=await api('operator-list-rooms');
     currentRooms=d.rooms||[];
     roomsEl.innerHTML=currentRooms.length?currentRooms.map(roomHtml).join(''):'<p>등록된 일반 채팅방이 없어.</p>';
+    if(expandedRoomId){
+      const room=[...roomsEl.querySelectorAll('details.room')].find(el=>el.dataset.room===expandedRoomId);
+      if(room)room.open=true;
+    }
     note('');
   }
   async function showMembers(r,detail){
@@ -133,6 +171,29 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
     const detail=b.closest('.room').querySelector('[data-detail]');
     if(op==='members'){await showMembers(r,detail);return}
     if(op==='messages'){await showMessages(r,detail);return}
+    if(op==='archive'){
+      if(!confirm('채팅방을 '+(r.is_archived?'복원':'보관')+'할까? 대화 기록은 지워지지 않아.'))return;
+      await api('operator-set-archived',{roomId:r.id,isArchived:!r.is_archived});
+      await load();note(r.is_archived?'보관된 채팅방을 복원했어.':'대화를 보존하면서 방을 보관했어.');return;
+    }
+    if(op==='copy'){
+      const url=new URL('/chat.html',location.origin);url.searchParams.set('room',r.code);
+      try{await navigator.clipboard.writeText(url.toString());note('초대 링크를 복사했어. 방 비밀번호는 따로 전달해 줘.')}
+      catch(_){prompt('초대 링크를 복사해 줘. 방 비밀번호는 따로 알려줘.',url.toString())}
+      return;
+    }
+    if(op==='enter'){
+      const entered=await api('operator-admin-enter-room',{roomId:r.id});
+      if(!entered?.member?.id||!entered?.sessionToken)throw Error('채팅방 입장 정보를 확인하지 못했어.');
+      const mapKey='bokjaksoChatSessionsV2';
+      let map={};try{map=JSON.parse(localStorage.getItem(mapKey)||'{}')||{}}catch(_){}
+      const code=String(entered.room.code||'').toUpperCase();
+      const saved={room:entered.room,member:entered.member,sessionToken:entered.sessionToken,expiresAt:Date.now()+30*24*3600*1000};
+      map[code]=saved;
+      localStorage.setItem(mapKey,JSON.stringify(map));
+      localStorage.setItem('bokjaksoChatSessionV1',JSON.stringify(saved));
+      location.href='/chat.html?room='+encodeURIComponent(code);return;
+    }
     if(op==='rename'){
       const title=prompt('새 채팅방 제목 (최대 50자)',r.title);
       if(title===null||title.trim()===r.title)return;
@@ -160,6 +221,25 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
     b.disabled=true;
     try{await clickRoom(b)}catch(err){if(!check(err))alert(err.message)}
     finally{b.disabled=false}
+  });
+  document.getElementById('createRoomForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const button=document.getElementById('createRoomBtn'),status=document.getElementById('createRoomStatus');
+    const title=document.getElementById('newRoomTitle').value.trim();
+    const password=document.getElementById('newRoomPassword').value;
+    if(!title||password.length<8){status.textContent='방 이름과 8자 이상 비밀번호를 입력해 줘.';return}
+    const digits=new Uint8Array(8);
+    crypto.getRandomValues(digits);
+    const code='ROOM'+Array.from(digits,b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+    button.disabled=true;status.textContent='채팅방 만드는 중…';
+    try{
+      await api('operator-create-room',{title,password,code});
+      document.getElementById('newRoomTitle').value='';
+      document.getElementById('newRoomPassword').value='';
+      status.textContent='채팅방을 만들었어! 목록에서 초대 링크를 복사할 수 있어.';
+      await load();
+    }catch(error){if(!check(error))status.textContent=error.message}
+    finally{button.disabled=false}
   });
   document.getElementById('loginForm').addEventListener('submit',async e=>{
     e.preventDefault();const btn=document.getElementById('loginBtn');btn.disabled=true;loginStatus.textContent='확인 중…';
