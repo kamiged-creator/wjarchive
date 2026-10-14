@@ -639,6 +639,38 @@
       }
     }
 
+    /* When the private club room is open, fill the actual remaining page
+       height instead of subtracting a guessed 174px. The navigation remains
+       fixed, and the composer stays a small gap above it. */
+    @media(max-width:560px){
+      body:not(.chat-active).club-chat-open main{
+        overflow:hidden;
+        padding-bottom:calc(84px + env(safe-area-inset-bottom));
+      }
+      body:not(.chat-active).club-chat-open main > #clubPanel.club-room-open{
+        flex:1 1 auto;
+        height:auto;
+        min-height:0;
+        max-height:none;
+        padding-bottom:8px;
+        overflow:hidden;
+      }
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open #clubChat{
+        flex:1 1 auto;
+        min-height:0;
+      }
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-feed{
+        min-height:0;
+        flex:1 1 auto;
+        height:auto;
+        overflow-y:auto;
+      }
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-compose{
+        flex:0 0 auto;
+        margin-bottom:0;
+      }
+    }
+
   </style>
 </head>
 <body>

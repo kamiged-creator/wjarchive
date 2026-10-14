@@ -47,6 +47,7 @@
    pane.hidden=true;
    landing.hidden=false;
    clubPanel.classList.remove('club-room-open');
+   document.body.classList.remove('club-chat-open');
    chatFeedback.textContent='';
    if(restoreFocus&&wasOpen)enterBtn.focus();
  }
@@ -162,6 +163,7 @@
      landing.hidden=true;
      pane.hidden=false;
      clubPanel.classList.add('club-room-open');
+     document.body.classList.add('club-chat-open');
      await loadMessages();
      // Do not force-open the virtual keyboard on mobile just for entering a room.
      if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
