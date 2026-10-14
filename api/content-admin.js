@@ -70,7 +70,7 @@ function operatorSign(expiry,nonce,version){
   return crypto.createHmac('sha256',secret).update('bokjakso-operator-v1:'+expiry+':'+nonce+':'+version).digest('hex');
 }
 function secureHexEqual(a,b){
-  if(typeof a!=='string'||typeof b!=='string'||!/^[a-f0-9]{64}$/i.test(a)||!/^[a-f0-9]{64}$/i.test(b))return false;
+  if(typeof a!=='string'||typeof b!=='string'||!/^([a-f0-9]{64}|[a-f0-9]{128})$/i.test(a)||a.length!==b.length||!/^([a-f0-9]{64}|[a-f0-9]{128})$/i.test(b))return false;
   return crypto.timingSafeEqual(Buffer.from(a,'hex'),Buffer.from(b,'hex'));
 }
 async function operatorRequire(req){
