@@ -118,6 +118,15 @@
 
   <section class="card" style="text-align:center"><a href="/member-admin.html" style="display:block;padding:15px;border-radius:12px;background:#795738;color:white;font-size:17px;font-weight:800;text-decoration:none">✅ 일반 회원가입 승인 관리</a></section>
   <section class="card" style="text-align:center"><a href="/club-admin.html" style="display:block;padding:15px;border-radius:12px;background:#795738;color:white;font-size:17px;font-weight:800;text-decoration:none">👥 복작소 클럽 회원관리</a></section>
+  <section class="card" aria-labelledby="pushTitle">
+    <h2 id="pushTitle">🔔 가입 신청 휴대폰 알림</h2>
+    <p class="muted" style="font-size:15px;line-height:1.65">최고관리자 휴대폰에서 한 번만 켜 두면 일반 회원과 클럽의 새 가입 신청을 알림으로 받아요. 알림을 누르면 승인 화면으로 이동합니다.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="primary" type="button" id="adminPushOn">가입 신청 알림 켜기</button>
+      <button class="primary" type="button" id="adminPushOff" style="background:#eee;color:#342719;border:1px solid #a89680" hidden>이 기기 알림 끄기</button>
+    </div>
+    <p id="adminPushStatus" class="muted" role="status" aria-live="polite" style="font-size:14px;line-height:1.6;margin:12px 0 0">현재 기기의 알림 상태를 확인하고 있어요.</p>
+  </section>
   <section class="card">
     <h2>채팅방 목록</h2>
     <div class="title-status" id="titleUpdateStatus" role="status" aria-live="polite"></div>
@@ -351,6 +360,92 @@
   });
   loadSoundSettings();
   load();
+</script>
+
+<script>
+/* Only the verified highest administrator can register for signup notifications. */
+(()=>{
+  'use strict';
+  const on=document.getElementById('adminPushOn');
+  const off=document.getElementById('adminPushOff');
+  const status=document.getElementById('adminPushStatus');
+  if(!sessionStorage.getItem('wjarchiveAdminAccessToken'))return;
+  const supported=()=>('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);
+  function display(enabled,message){
+    on.hidden=enabled;
+    off.hidden=!enabled;
+    if(message)status.textContent=message;
+  }
+  async function api(operation,extra={}){
+    const token=sessionStorage.getItem('wjarchiveAdminAccessToken');
+    if(!token)throw Error('최고관리자 로그인이 필요해요.');
+    const response=await fetch('/api/content-admin',{
+      method:'POST',cache:'no-store',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({action:'club-admin-push-'+operation,...extra})
+    });
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(result.message||'가입 알림 설정을 확인하지 못했어요.');
+    return result;
+  }
+  async function registration(){
+    return navigator.serviceWorker.register('/bokjakso-push-sw.js',{scope:'/'});
+  }
+  function vapidKeyBytes(value){
+    const base64=String(value||'');
+    const normalized=(base64+'='.repeat((4-base64.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/');
+    return Uint8Array.from(atob(normalized),ch=>ch.charCodeAt(0));
+  }
+  async function sync(){
+    if(!supported()){
+      on.disabled=true;
+      display(false,'이 브라우저는 휴대폰 푸시 알림을 지원하지 않아요. Chrome 또는 설치된 복작소 앱에서 열어 주세요.');
+      return;
+    }
+    if(Notification.permission==='denied'){
+      on.disabled=true;
+      display(false,'알림이 차단됐어요. 휴대폰의 복작소 사이트 알림 권한을 허용해 주세요.');
+      return;
+    }
+    try{
+      const reg=await registration();
+      const sub=await reg.pushManager.getSubscription();
+      if(!sub){display(false,'이 기기의 가입 신청 알림이 꺼져 있어요.');return;}
+      const result=await api('status',{endpoint:sub.endpoint});
+      display(result.enabled===true,result.enabled?'✅ 가입 신청 알림이 켜져 있어요.':'이 기기의 가입 신청 알림이 꺼져 있어요.');
+    }catch(error){display(false,error.message);}
+  }
+  on.addEventListener('click',async()=>{
+    on.disabled=true;status.textContent='알림 권한을 확인하고 있어요…';
+    try{
+      if(!supported())throw Error('이 브라우저에서는 푸시 알림을 사용할 수 없어요.');
+      const permission=await Notification.requestPermission();
+      if(permission!=='granted')throw Error('알림을 받으려면 휴대폰에서 알림 권한을 허용해 주세요.');
+      const reg=await registration();
+      let sub=await reg.pushManager.getSubscription();
+      if(!sub){
+        const config=await api('config');
+        sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKeyBytes(config.publicKey)});
+      }
+      await api('subscribe',{subscription:sub.toJSON()});
+      display(true,'✅ 가입 신청 푸시 알림을 켰어요. 앱을 닫아도 받을 수 있어요.');
+    }catch(error){display(false,error.message);}
+    finally{on.disabled=false;}
+  });
+  off.addEventListener('click',async()=>{
+    off.disabled=true;status.textContent='이 기기의 가입 신청 알림을 끄고 있어요…';
+    try{
+      const reg=await registration();
+      const sub=await reg.pushManager.getSubscription();
+      if(sub)await api('unsubscribe',{endpoint:sub.endpoint});
+      // Do not unsubscribe the shared browser push subscription:
+      // regular chat rooms may still depend on it.
+      display(false,'이 기기의 가입 신청 알림만 껐어요. 채팅방 알림은 유지돼요.');
+    }catch(error){status.textContent=error.message;}
+    finally{off.disabled=false;}
+  });
+  sync();
+})();
 </script>
 </body>
 </html>
