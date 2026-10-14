@@ -46,6 +46,18 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 .operator-footer button{background:transparent;font-size:14px;font-weight:650}
 @media(max-width:450px){.room-heading{padding:15px 13px}.room-body{padding:4px 12px 14px}}
 @media(prefers-reduced-motion:reduce){.room-chevron{transition:none}}
+/* Chat-room creation opens by tapping ＋ and closes with −. */
+.create-room-details{padding:0!important;overflow:hidden}
+.create-room-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:74px;padding:18px 16px;cursor:pointer;list-style:none;font-size:20px;font-weight:800;color:var(--ink)}
+.create-room-summary::-webkit-details-marker{display:none}
+.create-room-summary::marker{content:''}
+.create-room-summary:focus-visible{outline:3px solid #ae8963;outline-offset:-4px;border-radius:12px}
+.create-room-toggle{display:flex;align-items:center;justify-content:center;flex:0 0 42px;width:42px;height:42px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);font-size:25px;line-height:1;color:var(--accent)}
+.create-room-toggle .create-minus,.create-room-details[open] .create-plus{display:none}
+.create-room-details[open] .create-minus{display:inline}
+.create-room-details[open] .create-room-summary{border-bottom:1px solid var(--line)}
+.create-room-body{padding:10px 16px 20px}
+@media(max-width:450px){.create-room-summary{padding:14px 13px;min-height:70px;font-size:19px}.create-room-body{padding:8px 13px 17px}}
 </style>
 </head>
 <body>
@@ -61,16 +73,21 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 <section id="panelCard" hidden>
   <div class="card">
     <div class="heading"><div><h1>일반 채팅방 운영</h1><p>방 만들기와 기존 방 관리가 가능해. 영구 삭제·클럽·홈페이지 관리 권한은 없어.</p></div></div>
-    <form id="createRoomForm" class="panel" style="margin:17px 0">
-      <h2>＋ 새 채팅방 만들기</h2>
-      <p>방 이름과 입장 비밀번호를 설정하면 코드가 자동으로 만들어져.</p>
-      <label for="newRoomTitle">방 이름</label>
-      <input id="newRoomTitle" type="text" maxlength="50" required placeholder="예: 문학 이야기방" autocomplete="off">
-      <label for="newRoomPassword">방 입장 비밀번호 (8자 이상)</label>
-      <input id="newRoomPassword" type="password" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="참여자에게 따로 알려줄 비밀번호">
-      <button id="createRoomBtn" class="primary" type="submit" style="width:100%;margin-top:14px">채팅방 만들기</button>
-      <div id="createRoomStatus" class="feedback" role="status"></div>
-    </form>
+    <details id="createRoomDetails" class="panel create-room-details" style="margin:17px 0">
+      <summary class="create-room-summary">
+        <span>새 채팅방 만들기</span>
+        <span class="create-room-toggle" aria-hidden="true"><span class="create-plus">＋</span><span class="create-minus">−</span></span>
+      </summary>
+      <form id="createRoomForm" class="create-room-body">
+        <p>방 이름과 입장 비밀번호를 설정하면 코드가 자동으로 만들어져.</p>
+        <label for="newRoomTitle">방 이름</label>
+        <input id="newRoomTitle" type="text" maxlength="50" required placeholder="예: 문학 이야기방" autocomplete="off">
+        <label for="newRoomPassword">방 입장 비밀번호 (8자 이상)</label>
+        <input id="newRoomPassword" type="password" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="참여자에게 따로 알려줄 비밀번호">
+        <button id="createRoomBtn" class="primary" type="submit" style="width:100%;margin-top:14px">채팅방 만들기</button>
+        <div id="createRoomStatus" class="feedback" role="status"></div>
+      </form>
+    </details>
     <div class="row"><button id="refreshBtn" type="button">↻ 목록 새로고침</button></div>
     <div id="panelStatus" class="feedback" role="status"></div>
     <div id="rooms"></div>
