@@ -136,7 +136,12 @@
      const avatar=document.createElement('span');
      avatar.className='club-post-avatar';
      avatar.setAttribute('aria-label',(row.isMine===true?'내':(row.nickname||'회원'))+' 프로필 사진');
-     const avatarUrl=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl)?row.avatarUrl:'';
+     // The photo endpoint may temporarily run an older build. Never turn
+     // the current member's already-saved portrait into a silhouette when a
+     // confirmed message lacks avatarUrl.
+     const ownPhoto=row.isMine===true?sharedProfile?.avatar_url:null;
+     const candidate=typeof row.avatarUrl==='string'&&row.avatarUrl?row.avatarUrl:ownPhoto;
+     const avatarUrl=typeof candidate==='string'&&/^https:\/\//i.test(candidate)?candidate:'';
      if(avatarUrl){
        const portrait=document.createElement('img');
        portrait.src=avatarUrl;
