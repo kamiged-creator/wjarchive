@@ -682,6 +682,34 @@
     .return-club-chat[hidden]{display:none!important}
     .return-club-chat:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
+    /* Each club message uses the existing shared photo (or a neutral
+       silhouette until the member adds one under My Info). */
+    .club-room-open .club-message-row{
+      display:flex;align-items:flex-start;gap:9px;
+      width:100%;min-width:0;
+    }
+    .club-room-open .club-message-row.mine{flex-direction:row-reverse}
+    .club-room-open .club-message-row .club-post{
+      min-width:0;max-width:calc(100% - 49px);
+      align-self:flex-start;
+    }
+    .club-room-open .club-message-row.mine .club-post-meta{justify-content:flex-end}
+    .club-room-open .club-post-avatar{
+      display:flex;align-items:center;justify-content:center;
+      width:40px;height:40px;flex:0 0 40px;
+      border-radius:50%;overflow:hidden;
+      background:var(--soft);border:1px solid var(--line);
+      font-size:21px;line-height:1;
+    }
+    .club-room-open .club-post-avatar img{
+      display:block;width:100%;height:100%;object-fit:cover;
+    }
+    @media(max-width:560px){
+      .club-room-open .club-message-row{gap:8px}
+      .club-room-open .club-post-avatar{width:38px;height:38px;flex-basis:38px}
+      .club-room-open .club-message-row .club-post{max-width:calc(100% - 46px)}
+    }
+
   </style>
 </head>
 <body>

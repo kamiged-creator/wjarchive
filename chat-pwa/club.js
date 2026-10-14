@@ -115,6 +115,27 @@
        feed.appendChild(empty);
      }
      for(const row of items){
+       const messageRow=document.createElement('div');
+       messageRow.className='club-message-row';
+       if(row.isMine===true)messageRow.classList.add('mine');
+       const avatar=document.createElement('span');
+       avatar.className='club-post-avatar';
+       avatar.setAttribute('aria-label',(row.isMine===true?'내':(row.nickname||'회원'))+' 프로필 사진');
+       const avatarUrl=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl)?row.avatarUrl:'';
+       if(avatarUrl){
+         const portrait=document.createElement('img');
+         portrait.src=avatarUrl;
+         portrait.alt='';
+         portrait.loading='lazy';
+         portrait.decoding='async';
+         portrait.addEventListener('error',()=>{
+           avatar.replaceChildren();
+           avatar.textContent='👤';
+         },{once:true});
+         avatar.appendChild(portrait);
+       }else{
+         avatar.textContent='👤';
+       }
        const article=document.createElement('article');
        article.className='club-post';
        if(row.isMine===true)article.classList.add('mine');
@@ -129,7 +150,8 @@
        body.textContent=row.body||'';
        meta.append(name,time);
        article.append(meta,body);
-       feed.appendChild(article);
+       messageRow.append(avatar,article);
+       feed.appendChild(messageRow);
      }
      if(atBottom)feed.scrollTop=feed.scrollHeight;
    }catch(e){
