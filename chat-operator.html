@@ -101,14 +101,23 @@ button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible
 /* Subtle utility action: smaller than primary room controls, still comfortably tappable. */
 .operator-room-tools #refreshBtn{min-height:40px;padding:7px 12px;border-radius:10px;font-size:14px;line-height:1.2;font-weight:650}
 @media(max-width:450px){.operator-room-tools #refreshBtn{min-height:42px;padding:7px 12px;font-size:14px}}
+
+/* Consistent staff/owner login panel: placed near top on desktop and mobile. */
+#loginCard{padding:clamp(18px,4vw,28px);border-radius:20px}
+.login-heading{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.login-mark{width:58px;height:58px;object-fit:contain;flex:0 0 58px}
+.login-heading h1{font-size:24px;line-height:1.3;margin:0;letter-spacing:-.035em;font-weight:850}
+.login-description{font-size:15px;line-height:1.65;margin:6px 0 20px;color:var(--muted)}
+.login-description b{color:var(--ink);font-weight:800}
+@media(max-width:450px){.login-heading{gap:12px}.login-mark{width:54px;height:54px;flex-basis:54px}.login-heading h1{font-size:23px}.login-description{font-size:15px}}
 </style>
 </head>
 <body>
 <header><strong>🔒 복작소 운영진</strong><a href="/chat.html">일반 채팅방 보기</a></header>
 <main>
 <section class="card" id="loginCard">
-  <h1>운영진 로그인</h1>
-  <p>최고관리자가 발급한 <b>운영진 전용 비밀번호</b>로 로그인해 줘. 홈페이지 관리자 비밀번호와는 달라.</p>
+  <div class="login-heading"><img class="login-mark" src="/bokjakso-chat-icon-192.png" alt="" aria-hidden="true"><h1>운영진 로그인</h1></div>
+  <p class="login-description">최고관리자가 발급한 <b>운영진 전용 비밀번호</b>로 로그인해 줘. 최고관리자 비밀번호와는 달라.</p>
   <form id="loginForm"><label for="operatorPassword">운영진 비밀번호</label><input id="operatorPassword" type="password" autocomplete="current-password" required minlength="12" placeholder="운영진 비밀번호 입력">
     <label class="remember-operator" for="rememberOperator">
       <input id="rememberOperator" type="checkbox">

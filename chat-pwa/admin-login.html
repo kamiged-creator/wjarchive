@@ -1,19 +1,55 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#fbf8f4"><title>관리자 로그인 | 복작소 채팅</title>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive"><meta name="theme-color" content="#f6f1ea">
+<title>최고관리자 로그인 | 복작소 채팅</title>
 <link rel="icon" href="/icon-192.png"><link rel="manifest" href="/site.webmanifest">
 <style>
-*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:20px;background:#f8f4ed;font-family:"Pretendard Variable","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#251d18}
-main{background:#fffdfa;width:min(440px,100%);padding:28px;border:1px solid #e6d8ca;border-radius:24px;box-shadow:0 12px 36px #27180b0b}
-.logo{width:80px;height:80px;display:block;margin:0 auto 16px}.center{text-align:center}h1{font-size:23px;margin:0 0 10px}.hint{color:#766b62;font-size:15px;line-height:1.6;margin:0 0 24px}
-label{display:block;font-size:15px;font-weight:700;margin-bottom:8px}input{font:inherit;font-size:17px;display:block;width:100%;height:56px;border:2px solid #d3c1b0;border-radius:14px;background:#fff;padding:0 14px}
-input:focus{outline:3px solid #b99a7c80}button{font:inherit;cursor:pointer}button.submit{width:100%;height:54px;background:#9f7047;border:0;color:#fff;border-radius:14px;font-weight:750;font-size:18px;margin-top:18px}
-a{display:inline-block;padding:14px;color:#765e4a;font-size:15px}#status{color:#a33;min-height:24px;margin:10px 0 0;line-height:1.5}
-</style></head><body><main><img class="logo" src="/icon-192.png" alt="">
-<div class="center"><h1>채팅 관리자 로그인</h1><p class="hint">기존 복작소 관리자 비밀번호로 로그인하면<br>채팅방을 만들고 관리할 수 있어요.</p></div>
-<form id="loginForm"><label for="password">관리자 비밀번호</label><input id="password" type="password" autocomplete="current-password" required placeholder="관리자 비밀번호 입력">
-<button type="submit" class="submit" id="loginButton">관리자 로그인</button><p id="status" role="status"></p></form>
-<div class="center"><a href="/chat.html">채팅방 목록으로 돌아가기</a></div></main>
+:root{color-scheme:light;--bg:#f6f1ea;--paper:#fffefa;--ink:#30261f;--muted:#66594d;--line:#c9b8a5;--accent:#795738}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
+header{background:var(--paper);border-bottom:1px solid var(--line);padding:16px max(16px,calc((100vw - 850px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+header strong{font-size:18px}
+a{color:#604328}
+main{max-width:850px;margin:0 auto;padding:18px 14px 44px}
+.card{background:var(--paper);border:1px solid #dfd0bf;border-radius:18px;padding:20px;margin-bottom:17px;box-shadow:0 3px 14px #30200d0a}
+p{line-height:1.65;margin:9px 0;color:var(--muted)}
+label{display:block;font-weight:750;margin:16px 0 7px}
+input{width:100%;height:53px;border:1.5px solid var(--line);border-radius:12px;background:white;color:var(--ink);font:inherit;font-size:16px;padding:12px}
+button{font:inherit;min-height:45px;border-radius:11px;border:1.5px solid #b6a18c;background:white;color:var(--ink);padding:9px 13px;font-weight:750;cursor:pointer;word-break:keep-all}
+button.primary{border-color:var(--accent);background:var(--accent);color:white}
+button:disabled{opacity:.55;cursor:wait}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #ae8963;outline-offset:2px}
+#loginButton{width:100%;margin-top:16px;min-height:53px;font-size:16px}
+.feedback{min-height:18px;font-size:14px;color:#ad332d;margin-top:9px;line-height:1.55}
+@media(max-width:450px){.card{padding:16px 12px}button{min-height:48px}}
+
+/* Consistent staff/owner login panel: placed near top on desktop and mobile. */
+#loginCard{padding:clamp(18px,4vw,28px);border-radius:20px}
+.login-heading{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.login-mark{width:58px;height:58px;object-fit:contain;flex:0 0 58px}
+.login-heading h1{font-size:24px;line-height:1.3;margin:0;letter-spacing:-.035em;font-weight:850}
+.login-description{font-size:15px;line-height:1.65;margin:6px 0 20px;color:var(--muted)}
+.login-description b{color:var(--ink);font-weight:800}
+@media(max-width:450px){.login-heading{gap:12px}.login-mark{width:54px;height:54px;flex-basis:54px}.login-heading h1{font-size:23px}.login-description{font-size:15px}}
+
+</style>
+</head>
+<body>
+<header><strong>🔐 복작소 최고관리자</strong><a href="/chat.html">일반 채팅방 보기</a></header>
+<main>
+  <section class="card" id="loginCard">
+    <div class="login-heading"><img class="login-mark" src="/icon-192.png" alt="" aria-hidden="true"><h1>최고관리자 로그인</h1></div>
+    <p class="login-description">기존 복작소 <b>최고관리자 비밀번호</b>로 로그인해 줘. 운영진 비밀번호와는 달라.</p>
+    <form id="loginForm">
+      <label for="password">최고관리자 비밀번호</label>
+      <input id="password" type="password" autocomplete="current-password" required placeholder="최고관리자 비밀번호 입력">
+      <button type="submit" class="primary" id="loginButton">로그인</button>
+      <div id="status" class="feedback" role="status" aria-live="polite"></div>
+    </form>
+  </section>
+</main>
 <script>
 const ADMIN_KEY='wjarchiveAdminAccessToken';
 const projectUrl='https://vefeplfczeztbplowjmj.supabase.co';
