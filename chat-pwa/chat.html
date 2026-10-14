@@ -787,6 +787,32 @@
       }
     }
 
+    /* Compact only the private club's header when the mobile IME is open.
+       Preserve a 44px minimum action target and the fixed composer. */
+    @media(max-width:560px){
+      body:not(.chat-active).club-chat-open.club-input-focused header{
+        height:46px;
+        min-height:46px;
+        flex:0 0 46px;
+        padding:0 12px;
+      }
+      body:not(.chat-active).club-chat-open.club-input-focused header .brand{
+        font-size:17px;
+        line-height:1.2;
+      }
+      body:not(.chat-active).club-chat-open.club-input-focused main{
+        padding-top:3px;
+      }
+      body:not(.chat-active).club-chat-open.club-input-focused main > #clubPanel.club-room-open{
+        padding-top:4px;
+      }
+      body:not(.chat-active).club-chat-open.club-input-focused .club-chat h2{
+        font-size:15px;
+        line-height:1.25;
+        margin:0 0 4px;
+      }
+    }
+
   </style>
 </head>
 <body>
