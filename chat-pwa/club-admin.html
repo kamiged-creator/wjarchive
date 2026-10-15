@@ -13,7 +13,12 @@ h1{font-size:27px;letter-spacing:-.04em}h2{font-size:20px}
 .stat{background:#efe4d7;border-radius:12px;padding:14px 20px;min-width:115px}
 .stat strong{display:block;font-size:24px}.stat span{display:block;font-size:13px}
 .member{border-top:1px solid var(--line);padding:18px 0}.member:first-child{border:0}
-.member-name{font-weight:850;font-size:18px}.meta{color:#73665d;font-size:13px;margin:5px 0 10px}
+.member-heading{display:flex;align-items:center;gap:13px;min-width:0}
+.member-avatar{display:flex;align-items:center;justify-content:center;flex:0 0 60px;width:60px;height:60px;border-radius:50%;overflow:hidden;background:#efe4d7;border:1px solid var(--line);color:#786958;font-size:29px}
+.member-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.member-info{min-width:0;flex:1}
+.member-name{font-weight:850;font-size:18px;overflow-wrap:anywhere}
+.member-count{font-size:16px;font-weight:750;color:#796e61;margin-left:6px}.meta{color:#73665d;font-size:13px;margin:5px 0 10px}
 .application-note{padding:12px;margin:10px 0 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
 .buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 button{font:inherit;cursor:pointer;min-height:48px;border-radius:11px;padding:9px 16px;border:1px solid var(--line);background:#fff;color:#21190f;font-weight:800}
@@ -21,14 +26,14 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 button.danger{color:#9c302a;background:#fff4f3;border-color:#d49d94}
 button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visible{outline:3px solid #b6874b;outline-offset:3px}
 .empty{color:#796e61;padding:16px 0}
-@media(prefers-color-scheme:dark){:root{--bg:#141414;--paper:#222;--ink:#f4eee7;--line:#46403b;--accent:#af8156}.stat{background:#302923}.status,.meta,.empty{color:#c4b4a5}.buttons button{background:#302a24;color:#fff}.buttons .primary{background:#95704d}.buttons .danger{background:#4b2928;color:#ffe1dc}}
+@media(prefers-color-scheme:dark){.member-avatar{background:#352d26;color:#e1d3c6}.member-count{color:#c4b4a5}:root{--bg:#141414;--paper:#222;--ink:#f4eee7;--line:#46403b;--accent:#af8156}.stat{background:#302923}.status,.meta,.empty{color:#c4b4a5}.buttons button{background:#302a24;color:#fff}.buttons .primary{background:#95704d}.buttons .danger{background:#4b2928;color:#ffe1dc}}
 </style></head><body>
 <header><strong>👥 복작소 클럽 회원관리</strong><a href="/chat-admin.html">채팅 관리자 화면</a></header>
 <main>
 <h1>가입 신청 · 회원관리</h1>
 <p>클럽은 관리자 승인 회원제입니다. 일반 채팅방은 기존처럼 이용할 수 있어요.</p>
 <section class="card"><div class="stats" id="stats" aria-live="polite"></div><div class="buttons"><button class="primary" id="refresh" type="button">회원 목록 새로고침</button><button id="pendingOnly" type="button" aria-pressed="false">승인 대기만 보기</button></div><p class="status" id="feedback" role="status" aria-live="polite"></p></section>
-<section class="card"><h2>클럽 회원 명단</h2><div id="members" aria-live="polite">회원 목록을 불러오는 중…</div></section>
+<section class="card"><h2>클럽 회원 명단 <span id="memberCount" class="member-count" aria-live="polite">(불러오는 중)</span></h2><div id="members" aria-live="polite">회원 목록을 불러오는 중…</div></section>
 </main>
 <script>
 (()=>{
@@ -36,7 +41,7 @@ button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visi
 const TOKEN_KEY='wjarchiveAdminAccessToken';
 if(!sessionStorage.getItem(TOKEN_KEY)){location.replace('/admin-login.html');return;}
 const feedback=document.getElementById('feedback'),members=document.getElementById('members'),stats=document.getElementById('stats');
-const pendingButton=document.getElementById('pendingOnly');
+const pendingButton=document.getElementById('pendingOnly'),memberCount=document.getElementById('memberCount');
 let entries=[],pendingOnly=false;
 async function api(action,extra={}){
  const t=sessionStorage.getItem(TOKEN_KEY);
@@ -74,16 +79,27 @@ function render(){
  }
  members.replaceChildren();
  const rows=pendingOnly?entries.filter(r=>r.status==='pending'):entries;
+ memberCount.textContent=pendingOnly?'(승인 대기 '+rows.length+'명 / 전체 '+entries.length+'명)':'('+entries.length+'명)';
  if(!rows.length){const empty=document.createElement('p');empty.className='empty';empty.textContent='표시할 회원이 없습니다.';members.appendChild(empty);return;}
  for(const row of rows){
   const article=document.createElement('article');article.className='member';
+  const heading=document.createElement('div');heading.className='member-heading';
+  const avatar=document.createElement('span');avatar.className='member-avatar';avatar.textContent='👤';
+  if(typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl)){
+    const photo=document.createElement('img');
+    photo.src=row.avatarUrl;photo.alt=(row.nickname||'회원')+' 프로필 사진';photo.loading='lazy';photo.decoding='async';photo.referrerPolicy='no-referrer';
+    photo.addEventListener('error',()=>{avatar.textContent='👤';},{once:true});
+    avatar.replaceChildren(photo);
+  }
+  const info=document.createElement('div');info.className='member-info';
   const name=document.createElement('div');name.className='member-name';name.textContent=row.nickname||'이름 없음';
   const meta=document.createElement('div');meta.className='meta';meta.textContent=(label[row.status]||row.status)+' · 신청 '+date(row.requested_at)+(row.reviewed_at?' · 처리 '+date(row.reviewed_at):'');
+  info.append(name,meta);heading.append(avatar,info);
   const controls=document.createElement('div');controls.className='buttons';
   if(row.status!=='approved')controls.appendChild(button('승인','primary',()=>review(row,'approved')));
   if(row.status==='pending')controls.appendChild(button('거절','danger',()=>review(row,'rejected')));
   if(row.status==='approved')controls.appendChild(button('이용 제한','danger',()=>review(row,'suspended')));
-  article.append(name,meta);
+  article.appendChild(heading);
   if(row.application_note){
     const note=document.createElement('div');
     note.className='application-note';
@@ -96,7 +112,7 @@ function render(){
 }
 async function load(){
  try{const data=await api('admin-list');entries=Array.isArray(data.members)?data.members:[];feedback.textContent='회원 정보를 불러왔어요.';render();}
- catch(e){feedback.textContent=e.message;members.textContent='목록을 표시할 수 없습니다.';if(e.message.includes('로그인'))location.replace('/admin-login.html');}
+ catch(e){feedback.textContent=e.message;memberCount.textContent='(조회 실패)';members.textContent='목록을 표시할 수 없습니다.';if(e.message.includes('로그인'))location.replace('/admin-login.html');}
 }
 pendingButton.addEventListener('click',()=>{pendingOnly=!pendingOnly;pendingButton.setAttribute('aria-pressed',String(pendingOnly));pendingButton.textContent=pendingOnly?'모든 회원 보기':'승인 대기만 보기';render();});
 document.getElementById('refresh').addEventListener('click',load);
