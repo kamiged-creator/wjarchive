@@ -23,7 +23,8 @@
     .container{max-width:690px;margin:0 auto;padding:30px 18px calc(122px + env(safe-area-inset-bottom))}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;gap:12px}
     .top-brand{font-size:20px;font-weight:850;letter-spacing:-.04em;margin:0;line-height:normal}
-    .top-caption{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.13em;margin-top:3px}
+    .top-home-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:inherit;text-decoration:none}
+    .top-home-link svg{width:17px;height:17px;flex:none;stroke:var(--accent)}
     /* Prominent in-page installer for returning visitors; never crowd the header. */
     .install-shortcut{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:61px;margin-top:16px;padding:13px 16px;border-radius:18px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:18px;font-weight:850;box-shadow:0 8px 18px rgba(45,29,17,.12);word-break:keep-all}
     .install-shortcut[hidden]{display:none!important}
@@ -124,7 +125,7 @@
 <body>
   <main class="container">
     <header class="top">
-      <div><h1 class="top-brand">복작소</h1><div class="top-caption">BOKJAKSO COMMUNITY</div></div>
+      <h1 class="top-brand"><a class="top-home-link" href="https://bokjakso.com/" target="_blank" rel="noopener noreferrer" aria-label="복작소 홈페이지 새 창으로 열기" title="복작소 홈페이지 열기">복작소<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9"/><path d="M9 21v-7h6v7"/></svg></a></h1>
       <button class="theme" id="themeToggle" type="button" aria-label="화면 테마 변경" title="화면 테마 변경">☾</button>
     </header>
     <section class="hero" aria-label="복작소 소개">
