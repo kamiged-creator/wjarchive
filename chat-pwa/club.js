@@ -543,13 +543,27 @@
       event.clientY<bounds.top||event.clientY>bounds.bottom)return;
    composeForm.requestSubmit(sendBtn);
  });
- // Samsung's Korean IME may use Enter to finish composition. Don't send
- // incomplete text while the keyboard still reports an active composition.
+ // Grow the unified composer from one to three lines without shrinking the chat feed.
+ function resizeClubComposer(){
+   input.style.height='auto';
+   const contentHeight=input.scrollHeight;
+   const nextHeight=Math.min(88,Math.max(40,contentHeight));
+   input.style.height=nextHeight+'px';
+   input.style.overflowY=contentHeight>88?'auto':'hidden';
+   if(document.activeElement===input)keepLatestVisibleWhileTyping();
+ }
+ input.addEventListener('input',resizeClubComposer);
+ // Samsung's Korean IME uses Enter to confirm characters. On touch screens,
+ // Enter adds a new line; the separate Send button submits the message.
  input.addEventListener('keydown',event=>{
-   if(event.key==='Enter'&&(event.isComposing||event.keyCode===229)){
+   if(event.key!=='Enter')return;
+   if(event.isComposing||event.keyCode===229)return;
+   if(!clubMobilePointer.matches&&!event.shiftKey){
      event.preventDefault();
+     if(!sendBtn.disabled)document.getElementById('clubCompose').requestSubmit(sendBtn);
    }
  });
+ resizeClubComposer();
 
  function selectClubPhoto(file){
    if(!file||sending)return;
@@ -595,7 +609,7 @@
      created_at:new Date().toISOString(),isMine:true,
      avatarUrl:sharedProfile?.avatar_url||null,pending:true
    };
-   optimisticMessage=draft;chatFeedback.textContent='';input.value='';
+   optimisticMessage=draft;chatFeedback.textContent='';input.value='';resizeClubComposer();
    renderMessages(true);
    if(wasTyping){input.focus({preventScroll:true});syncClubInputFocus();keepLatestVisibleWhileTyping()}
    try{
@@ -613,7 +627,7 @@
      optimisticMessage=null;renderMessages();
      if(err.statusCode===401||err.statusCode===403){leaveClubRoom();await refresh()}
      else{
-       input.value=message+(input.value?' '+input.value:'');
+       input.value=message+(input.value?' '+input.value:'');resizeClubComposer();
        chatFeedback.textContent='전송하지 못했어요. 다시 시도해 주세요. '+(err.message||'');
      }
    }finally{
