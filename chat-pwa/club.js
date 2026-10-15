@@ -666,6 +666,34 @@
      preview.hidden=false;chatFeedback.textContent='';
    }catch(error){chatFeedback.textContent=error.message||'사진을 선택하지 못했어요.'}
  }
+ // The mobile keyboard's Paste action exposes actual image blobs through
+ // clipboardData. Reuse the existing photo preview and authenticated uploader.
+ // Ordinary text paste remains untouched.
+ function handlePastedClubPhoto(event){
+   if(membership!=='approved'||pane.hidden||sending||event.defaultPrevented)return;
+   const data=event.clipboardData;
+   if(!data)return;
+   const items=Array.from(data.items||[]);
+   let photo=null;
+   for(const item of items){
+     if(item.kind==='file'&&/^image\//i.test(item.type||'')){
+       photo=item.getAsFile?.()||null;
+       if(photo)break;
+     }
+   }
+   if(!photo)photo=Array.from(data.files||[]).find(file=>/^image\//i.test(file.type||''))||null;
+   if(!photo)return; // Keep text, URLs and formatting handled by the browser.
+   event.preventDefault(); // Prevent pasted image HTML or a blob URL appearing as text.
+   const mime=photo.type||'image/png';
+   const extension=mime==='image/jpeg'?'jpg':mime==='image/webp'?'webp':mime==='image/gif'?'gif':'png';
+   const file=new File([photo],'붙여넣은사진-'+Date.now()+'.'+extension,{type:mime});
+   selectClubPhoto(file);
+   if(selectedPhoto===file){
+     chatFeedback.textContent='사진이 첨부됐어. 확인하고 전송을 눌러줘.';
+   }
+   resizeClubComposer();
+ }
+ input.addEventListener('paste',handlePastedClubPhoto);
  attachBtn.addEventListener('click',()=>{
    if(membership!=='approved'||pane.hidden||sending)return;
    const open=attachMenu.hidden;attachMenu.hidden=!open;
