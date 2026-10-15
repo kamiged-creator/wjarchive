@@ -10,12 +10,12 @@
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% 0%,#fffaf1 0,transparent 38%),#f6f1e9}
 button,input{font:inherit}button{cursor:pointer}a{color:inherit}
 .page{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column}
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 17px 12px}
+.top{display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:11px 17px 7px}
 .home{display:inline-flex;align-items:center;gap:8px;min-height:46px;text-decoration:none;font-size:17px;font-weight:850;color:#3c291d}
 .home .arrow{font-size:24px;font-weight:400}.brand{font-weight:900;color:#805d43;font-size:15px}
-.hero{text-align:center;padding:0 17px 13px}.eyebrow{letter-spacing:.17em;color:#95745a;font-size:11px;font-weight:800}
-h1{font-family:"Noto Serif KR",Georgia,serif;font-size:30px;letter-spacing:-.06em;margin:3px 0 7px;color:#513522}
-.lead{font-size:14px;line-height:1.55;color:#796b61;margin:0}
+.hero{text-align:center;padding:2px 17px 6px}.eyebrow{letter-spacing:.17em;color:#95745a;font-size:11px;font-weight:800}
+h1{font-family:"Noto Serif KR",Georgia,serif;font-size:29px;letter-spacing:-.06em;margin:0 0 5px;color:#513522}
+.lead{font-size:14px;line-height:1.5;color:#796b61;margin:0}
 .beta{display:inline-flex;align-items:center;justify-content:center;background:#fdf7ec;color:#704f33;border:1px solid #dcc6ab;font-size:12px;font-weight:750;border-radius:999px;padding:7px 12px;margin-top:12px}
 section.panel{background:#fffdfa;border:1px solid #e2d5c3;border-radius:22px;margin:10px 14px;padding:17px 13px;box-shadow:0 8px 24px #4837220b}
 .panel h2{font-size:17px;margin:0 0 14px;letter-spacing:-.025em}.hint{font-size:12px;color:#827266;line-height:1.5}
@@ -85,12 +85,11 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 </head>
 <body>
 <div class="page">
-  <header class="top"><a class="home" href="/" aria-label="복작소 홈으로"><span class="arrow" aria-hidden="true">←</span> 복작소</a><span class="brand">福 · SAJU CHAT</span></header>
+  <header class="top"><a class="home" href="/" aria-label="복작소 홈으로"><span class="arrow" aria-hidden="true">←</span> 복작소</a></header>
   <main class="selection-view" id="selectionView">
-  <div class="hero"><div class="eyebrow">BOKJAKSO COMMUNITY</div><h1>AI 사주채팅</h1><p class="lead">상담사를 고르고 전문 분야의 대화를 체험해 보세요.</p><span class="beta">체험판 · 실제 AI 및 만세력 계산은 연결 준비 중</span></div>
-  <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택 <span class="hint">· 얼굴을 눌러 변경</span></h2><div class="avatars" id="avatars"></div></section>
-  <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">전문 상담 분야 <span class="hint">· 선택한 상담사 담당 분야</span></h2><div class="topics" id="topics"></div></section>
-  <p class="choose-tip">상담 분야를 누르면 채팅창이 전체 화면으로 열려요.</p>
+  <div class="hero"><h1>AI 사주채팅</h1><p class="lead">상담사와 분야를 선택해 주세요.</p></div>
+  <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
+  <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section>
   <button id="startChat" type="button" class="start-chat">아라와 채팅 시작하기 →</button>
   </main>
   <div id="chatView" class="chat-view" hidden>
