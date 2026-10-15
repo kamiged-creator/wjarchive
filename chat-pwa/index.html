@@ -22,7 +22,7 @@
     button{font:inherit;cursor:pointer}
     .container{max-width:690px;margin:0 auto;padding:30px 18px calc(122px + env(safe-area-inset-bottom))}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;gap:12px}
-    .top-brand{font-size:20px;font-weight:850;letter-spacing:-.04em}
+    .top-brand{font-size:20px;font-weight:850;letter-spacing:-.04em;margin:0;line-height:normal}
     .top-caption{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.13em;margin-top:3px}
     /* Prominent in-page installer for returning visitors; never crowd the header. */
     .install-shortcut{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:61px;margin-top:16px;padding:13px 16px;border-radius:18px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:18px;font-weight:850;box-shadow:0 8px 18px rgba(45,29,17,.12);word-break:keep-all}
@@ -124,12 +124,11 @@
 <body>
   <main class="container">
     <header class="top">
-      <div><div class="top-brand">복작소</div><div class="top-caption">BOKJAKSO COMMUNITY</div></div>
+      <div><h1 class="top-brand">복작소</h1><div class="top-caption">BOKJAKSO COMMUNITY</div></div>
       <button class="theme" id="themeToggle" type="button" aria-label="화면 테마 변경" title="화면 테마 변경">☾</button>
     </header>
-    <section class="hero" aria-labelledby="pageTitle">
+    <section class="hero" aria-label="복작소 소개">
       <img src="/icon-192.png" alt="" class="hero-logo" width="90" height="90">
-      <h1 id="pageTitle">복작소</h1>
       <div class="en">BOKJAKSO COMMUNITY</div>
       <p class="tagline">우리들의 따뜻한 이야기 공간</p>
     </section>
