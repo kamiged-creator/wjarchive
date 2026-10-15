@@ -37,6 +37,7 @@ h2 span{font-size:15px;color:var(--muted)}
 .member-name{font-size:18px;font-weight:850;overflow-wrap:anywhere}
 .member-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .club-member-label{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);font-size:12px;font-weight:800;white-space:nowrap}
+.general-user-label{border-color:var(--line);color:var(--muted)}
 .pager{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:17px}
 .pager[hidden]{display:none!important}
 .pager button{min-width:43px;min-height:43px;padding:8px 11px;border-radius:11px}
@@ -130,9 +131,10 @@ h2 span{font-size:15px;color:var(--muted)}
    const nameRow=document.createElement('div');nameRow.className='member-name-row';
    const name=document.createElement('div');name.className='member-name';name.textContent=row.nickname||'이름 없음';
    nameRow.appendChild(name);
-   if(row.isClubMember===true){
-    const clubLabel=document.createElement('span');clubLabel.className='club-member-label';clubLabel.textContent='클럽 정회원';nameRow.appendChild(clubLabel);
-   }
+   const roleLabel=document.createElement('span');
+   roleLabel.className='club-member-label'+(row.isClubMember===true?'':' general-user-label');
+   roleLabel.textContent=row.isClubMember===true?'클럽 정회원':'일반 이용자';
+   nameRow.appendChild(roleLabel);
    const room=document.createElement('div');room.className='member-meta';room.textContent='채팅방: '+(row.roomTitle||'이전 채팅방')+(row.blocked?' · 이용 제한':'');
    const time=document.createElement('div');time.className='member-meta';time.textContent='입장 기록: '+(formatDate(row.joinedAt)||'날짜 확인 불가');
    info.append(nameRow,room,time);item.append(avatar,info);list.appendChild(item);
