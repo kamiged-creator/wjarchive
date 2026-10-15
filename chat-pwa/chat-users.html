@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>일반 채팅 이용자 명단 | 복작소</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7f2ec;--paper:#fffdfa;--text:#281e18;--muted:#75665a;--line:#dacbbb;--accent:#896344}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 16px;background:var(--paper);border-bottom:1px solid var(--line)}
+header strong{font-size:19px;line-height:1.4}a{color:inherit}header a{font-size:14px;font-weight:800}
+main{width:min(840px,100%);margin:0 auto;padding:22px 14px 55px}
+h1{font-size:26px;margin:0 0 9px;letter-spacing:-.04em}
+.description{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 17px;word-break:keep-all}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:15px}
+.stats{display:flex;gap:9px;flex-wrap:wrap}
+.stat{padding:13px 15px;background:color-mix(in srgb,var(--accent) 10%,var(--paper));border:1px solid var(--line);border-radius:14px;min-width:115px}
+.stat strong{display:block;font-size:25px;font-weight:850}
+.stat span{display:block;color:var(--muted);font-size:13px;margin-top:3px}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px}
+button,input{font:inherit}
+button{min-height:46px;padding:10px 16px;border:1px solid var(--line);border-radius:11px;color:var(--text);background:var(--paper);font-weight:800;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+input{flex:1;min-width:160px;min-height:46px;padding:9px 12px;background:var(--paper);color:var(--text);border:1px solid var(--line);border-radius:11px}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.feedback{min-height:23px;color:var(--muted);font-size:14px;margin:13px 1px 0}
+h2{font-size:19px;margin:1px 0 8px}
+h2 span{font-size:15px;color:var(--muted)}
+.member{display:flex;align-items:center;gap:13px;padding:17px 0;border-top:1px solid var(--line)}
+.member:first-child{border-top:0}
+.member-avatar{display:flex;align-items:center;justify-content:center;flex:0 0 60px;width:60px;height:60px;padding:0;border:1px solid var(--line);border-radius:50%;overflow:hidden;background:color-mix(in srgb,var(--accent) 12%,var(--paper));font-size:29px}
+.member-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.member-avatar.zoomable{cursor:zoom-in}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:18px;font-weight:850;overflow-wrap:anywhere}
+.member-meta{color:var(--muted);line-height:1.5;font-size:13px;margin-top:4px;overflow-wrap:anywhere}
+.note{color:var(--muted);font-size:13px;line-height:1.65;margin:12px 1px 0}
+.empty{color:var(--muted);padding:17px 0}
+.portrait-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.8)}
+.portrait-overlay[hidden]{display:none!important}
+.portrait-dialog{display:flex;flex-direction:column;align-items:center;gap:16px;outline:0}
+.portrait-dialog img{display:block;width:min(76vw,280px);height:min(76vw,280px);border-radius:50%;object-fit:cover;border:3px solid white;box-shadow:0 15px 40px rgba(0,0,0,.4)}
+.portrait-dialog p{margin:0;color:white;font-size:16px;font-weight:750;text-align:center}
+@media(prefers-color-scheme:dark){:root{--bg:#141414;--paper:#232323;--text:#f3ebe4;--muted:#bcb0a5;--line:#47403a;--accent:#aa7d54}}
+</style>
+</head>
+<body>
+<header><strong>👥 일반 채팅 이용자 명단</strong><a href="/chat-admin.html">관리자로 돌아가기</a></header>
+<main>
+<h1>채팅방 이용자 명단</h1>
+<p class="description">일반 채팅방 입장 기록으로 만든 명단이야. 가입 승인은 필요하지 않아. 한 사람이 여러 방에 들어갔거나 다시 입장하면 여러 건으로 표시될 수 있어.</p>
+<section class="card">
+ <div class="stats" id="stats" aria-live="polite"><div class="stat"><strong>—</strong><span>기록 불러오는 중</span></div></div>
+ <div class="toolbar"><input id="search" type="search" placeholder="닉네임 또는 채팅방 검색" aria-label="닉네임 또는 채팅방 검색"><button type="button" class="primary" id="reload">회원 명단 새로고침</button></div>
+ <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+</section>
+<section class="card">
+ <h2>일반 채팅 이용 기록 <span id="listCount">(불러오는 중)</span></h2>
+ <div id="list" aria-live="polite">목록을 불러오는 중…</div>
+ <p class="note">이 명단은 일반 채팅방 이용 기록 기준이며, 클럽 정회원 명단과 별개야. 등록된 프로필 사진이 있으면 함께 표시해.</p>
+</section>
+</main>
+<div class="portrait-overlay" id="portraitOverlay" role="presentation" hidden>
+ <div class="portrait-dialog" role="dialog" aria-modal="true" aria-label="회원 사진 확대" tabindex="-1" id="portraitDialog">
+  <img id="portraitExpanded" alt="">
+  <p id="portraitCaption"></p>
+ </div>
+</div>
+<script>
+(()=>{
+ 'use strict';
+ const TOKEN_KEY='wjarchiveAdminAccessToken';
+ if(!sessionStorage.getItem(TOKEN_KEY)){location.replace('/admin-login.html');return;}
+ const byId=id=>document.getElementById(id);
+ const stats=byId('stats'),list=byId('list'),listCount=byId('listCount'),feedback=byId('feedback'),search=byId('search');
+ const overlay=byId('portraitOverlay'),dialog=byId('portraitDialog'),portrait=byId('portraitExpanded'),caption=byId('portraitCaption');
+ let users=[],profileCount=0,limited=false,trigger=null,priorOverflow='';
+ const formatDate=value=>{if(!value)return '';const d=new Date(value);return Number.isNaN(d.getTime())?'':d.toLocaleString('ko-KR');};
+ function closePhoto(){
+  if(overlay.hidden)return;
+  overlay.hidden=true;portrait.removeAttribute('src');document.body.style.overflow=priorOverflow;
+  const previous=trigger;trigger=null;if(previous?.isConnected)previous.focus({preventScroll:true});
+ }
+ function openPhoto(url,nickname,button){
+  if(typeof url!=='string'||!/^https:\/\//i.test(url))return;
+  trigger=button;priorOverflow=document.body.style.overflow;portrait.src=url;portrait.alt=(nickname||'회원')+' 프로필 사진';caption.textContent=nickname||'회원';overlay.hidden=false;document.body.style.overflow='hidden';dialog.focus({preventScroll:true});
+ }
+ overlay.addEventListener('click',event=>{if(!dialog.contains(event.target))closePhoto();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!overlay.hidden)closePhoto();});
+ function render(){
+  stats.replaceChildren();
+  for(const [label,count] of [['채팅방 입장 기록',users.length],['등록 프로필',profileCount]]){
+   const block=document.createElement('div');block.className='stat';const number=document.createElement('strong');number.textContent=String(count);const title=document.createElement('span');title.textContent=label;block.append(number,title);stats.appendChild(block);
+  }
+  const q=search.value.trim().toLocaleLowerCase('ko-KR');
+  const rows=q?users.filter(u=>(u.nickname+' '+u.roomTitle).toLocaleLowerCase('ko-KR').includes(q)):users;
+  listCount.textContent='('+rows.length+'건'+(q?' / 전체 '+users.length+'건':'')+')';
+  list.replaceChildren();
+  if(!rows.length){const el=document.createElement('p');el.className='empty';el.textContent=q?'검색 결과가 없어.':'일반 채팅방 이용 기록이 없어.';list.appendChild(el);return;}
+  for(const row of rows){
+   const item=document.createElement('article');item.className='member';
+   const hasPhoto=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl);
+   const avatar=document.createElement(hasPhoto?'button':'span');avatar.className='member-avatar'+(hasPhoto?' zoomable':'');avatar.textContent='👤';
+   if(hasPhoto){
+    avatar.type='button';avatar.title='프로필 사진 크게 보기';avatar.setAttribute('aria-label',(row.nickname||'회원')+' 프로필 사진 크게 보기');
+    const img=document.createElement('img');img.src=row.avatarUrl;img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+    img.addEventListener('error',()=>{avatar.textContent='👤';avatar.disabled=true;},{once:true});
+    avatar.replaceChildren(img);avatar.addEventListener('click',()=>openPhoto(row.avatarUrl,row.nickname,avatar));
+   }
+   const info=document.createElement('div');info.className='member-info';
+   const name=document.createElement('div');name.className='member-name';name.textContent=row.nickname||'이름 없음';
+   const room=document.createElement('div');room.className='member-meta';room.textContent='채팅방: '+(row.roomTitle||'이전 채팅방')+(row.blocked?' · 이용 제한':'');
+   const time=document.createElement('div');time.className='member-meta';time.textContent='입장 기록: '+(formatDate(row.joinedAt)||'날짜 확인 불가');
+   info.append(name,room,time);item.append(avatar,info);list.appendChild(item);
+  }
+ }
+ async function load(){
+  feedback.textContent='이용자 명단을 확인하고 있어…';
+  try{
+   const token=sessionStorage.getItem(TOKEN_KEY);
+   if(!token)throw new Error('관리자 로그인이 필요해.');
+   const response=await fetch('/api/content-admin',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'chat-list-users'}),cache:'no-store'});
+   const data=await response.json().catch(()=>({}));
+   if(!response.ok)throw new Error(data.message||'명단을 불러오지 못했어.');
+   users=Array.isArray(data.users)?data.users:[];profileCount=Number(data.profileCount)||0;limited=data.limited===true;
+   render();feedback.textContent='이용자 명단을 불러왔어.'+(limited?' 최근 500건까지만 표시 중이야.':'');
+  }catch(e){feedback.textContent=e.message;listCount.textContent='(조회 실패)';list.textContent='명단을 확인할 수 없어.';if(/관리자 로그인/.test(e.message))location.replace('/admin-login.html');}
+ }
+ search.addEventListener('input',render);byId('reload').addEventListener('click',load);load();
+})();
+</script>
+</body>
+</html>
