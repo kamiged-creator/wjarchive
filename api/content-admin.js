@@ -525,15 +525,17 @@ async function handleChatAdmin(body, res, role='owner') {
 
   if (action === 'chat-get-sound-config') {
     const settings = await db('site_settings?key=eq.chat_sound_default_volume&select=value&limit=1');
-    const saved = Number(Array.isArray(settings) ? settings[0]?.value?.level : 0);
-    res.status(200).json({ ok: true, level: [30, 60, 100].includes(saved) ? saved : 100 });
+    const raw = Array.isArray(settings) ? settings[0]?.value?.level : undefined;
+    const saved = Number(raw);
+    const level = raw !== undefined && raw !== null && Number.isInteger(saved) && saved >= 0 && saved <= 100 ? saved : 100;
+    res.status(200).json({ ok: true, level });
     return;
   }
 
   if (action === 'chat-set-sound-config') {
     const level = Number(body.level);
-    if (![30, 60, 100].includes(level)) {
-      res.status(400).json({ message: '알림 음량은 작게, 보통, 크게 중에서 선택해 주세요.' });
+    if (!Number.isInteger(level) || level < 0 || level > 100 || body.level === null || body.level === undefined) {
+      res.status(400).json({ message: '알림 음량은 0~100% 사이로 설정해 주세요.' });
       return;
     }
     await db('site_settings?on_conflict=key', {
