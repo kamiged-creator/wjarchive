@@ -890,6 +890,59 @@
       body:not(.chat-active).club-chat-open.club-input-focused .club-room-toolbar{display:none}
     }
 
+    /* Club chat: a single familiar top row replaces the generic page header. */
+    body:not(.chat-active).club-chat-open header{display:none!important}
+    body:not(.chat-active).club-chat-open main{padding-top:4px}
+    body:not(.chat-active).club-chat-open main > #clubPanel.club-room-open{padding-top:8px}
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-top{
+      display:flex!important;align-items:center;flex-wrap:nowrap;
+      gap:6px;min-width:0;min-height:44px;margin:0 0 2px;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-back{
+      display:inline-flex;align-items:center;justify-content:center;
+      flex:0 0 42px;width:42px;height:44px;min-height:44px;
+      padding:0;border:0;border-radius:9px;background:transparent;color:var(--text);
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-back svg{
+      display:block;width:27px;height:27px;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-top h2{
+      flex:1 1 auto;min-width:0;margin:0!important;
+      font-size:19px;font-weight:780;line-height:1.25;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-room-toolbar-buttons{
+      display:flex;flex:0 0 auto;gap:5px;margin-left:0;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-invite-button{
+      padding:5px 9px;min-height:40px;font-size:12px;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-more-button{
+      width:40px;min-height:40px;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-room-toolbar{
+      display:flex;align-items:center;min-height:22px;margin:0 0 7px;
+    }
+    body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-online-count{font-size:13px}
+    body:not(.chat-active).club-chat-open .club-chat-back:focus-visible{
+      outline:3px solid var(--accent);outline-offset:2px;
+    }
+    @media(max-width:560px){
+      body:not(.chat-active).club-chat-open.club-input-focused main > #clubPanel.club-room-open{
+        padding-top:4px;
+      }
+      body:not(.chat-active).club-chat-open.club-input-focused #clubPanel.club-room-open .club-chat-top{
+        display:flex!important;min-height:40px;margin-bottom:4px;
+      }
+      body:not(.chat-active).club-chat-open.club-input-focused #clubPanel.club-room-open .club-room-toolbar{
+        display:none!important;
+      }
+    }
+    @media(max-width:370px){
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-top h2{font-size:17px}
+      body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-invite-button{padding:5px 7px}
+    }
+
   </style>
 </head>
 <body>
@@ -981,13 +1034,11 @@
         <a class="club-admin-entry" id="clubAdminLink" href="/club-admin.html" hidden>클럽 회원관리 (관리자 전용)</a>
       </div>
       <section class="club-chat" id="clubChat" hidden aria-label="복작소 정회원 전용 채팅방">
-        <div class="club-chat-top">
-          <button class="club-chat-back" id="clubLeaveBtn" type="button">‹ 클럽으로 돌아가기</button>
-          <span class="club-chat-label">🔒 정회원 전용</span>
-        </div>
-        <h2>복작소 클럽 채팅방</h2>
-        <div class="club-room-toolbar" aria-label="복작소 클럽 채팅방 도구">
-          <span class="club-online-count" id="clubOnlineCount" role="status" aria-live="polite">접속 확인 중</span>
+        <div class="club-chat-top" aria-label="복작소 클럽 채팅 상단 메뉴">
+          <button class="club-chat-back" id="clubLeaveBtn" type="button" aria-label="복작소 클럽으로 돌아가기" title="클럽으로 돌아가기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M20 12H9"/></svg>
+          </button>
+          <h2>복작소 클럽</h2>
           <div class="club-room-toolbar-buttons">
             <button class="club-invite-button" id="clubInviteBtn" type="button" aria-label="클럽 가입 초대 링크 공유">초대하기</button>
             <div class="club-room-menu-wrap">
@@ -997,6 +1048,9 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="club-room-toolbar" aria-label="클럽 접속 상태">
+          <span class="club-online-count" id="clubOnlineCount" role="status" aria-live="polite">접속 확인 중</span>
         </div>
         <p class="club-chat-hint">승인된 정회원 전용 · 일반 채팅방과 대화가 분리돼요.</p>
         <p class="club-chat-feedback" id="clubChatFeedback" role="status" aria-live="polite"></p>
