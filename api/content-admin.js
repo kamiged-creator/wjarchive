@@ -748,6 +748,43 @@ async function handleChatAdmin(body, res, role='owner') {
     return;
   }
 
+  if (action === 'chat-list-users') {
+    // Admin-only roster of real room participation records, not applications
+    // from the optional (currently disabled) general signup approval system.
+    // Multiple room sessions by one guest cannot be proven to be one person.
+    const [roomMembers, rooms] = await Promise.all([
+      db('chat_members?select=id,profile_id,room_id,nickname,avatar_url,is_blocked,joined_at,last_seen_at&order=joined_at.desc&limit=500'),
+      db('chat_rooms?select=id,title')
+    ]);
+    const records=Array.isArray(roomMembers)?roomMembers:[];
+    const roomNames=new Map((Array.isArray(rooms)?rooms:[]).map(row=>[row.id,row.title]));
+    const profileIds=[...new Set(records.map(row=>row.profile_id).filter(id=>/^[0-9a-f-]{36}$/i.test(String(id||''))))];
+    const profileById=new Map();
+    for(let start=0;start<profileIds.length;start+=50){
+      const ids=profileIds.slice(start,start+50);
+      const profiles=await db('chat_profiles?id=in.('+ids.map(encodeURIComponent).join(',')+')&select=id,nickname,avatar_url&limit=50');
+      for(const row of Array.isArray(profiles)?profiles:[])profileById.set(row.id,row);
+    }
+    const users=records.map(member=>{
+      const profile=profileById.get(member.profile_id);
+      const candidate=profile?.avatar_url||member.avatar_url;
+      return {
+        nickname:profile?.nickname||member.nickname||'이름 없음',
+        avatarUrl:typeof candidate==='string'&&/^https:\/\//i.test(candidate)?candidate:null,
+        roomTitle:roomNames.get(member.room_id)||'이전 채팅방',
+        joinedAt:member.joined_at||null,
+        lastSeenAt:member.last_seen_at||null,
+        blocked:member.is_blocked===true,
+        hasProfile:Boolean(profile)
+      };
+    });
+    res.status(200).json({
+      ok:true,users,recordCount:users.length,profileCount:profileById.size,
+      limited:users.length===500
+    });
+    return;
+  }
+
   if (action === 'chat-list-members') {
     const roomId = normalize(body.roomId);
     const members = await db(`chat_members?room_id=eq.${encodeURIComponent(roomId)}&select=id,nickname,is_blocked,joined_at,last_seen_at&order=joined_at.desc&limit=300`);
