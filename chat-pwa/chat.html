@@ -994,6 +994,42 @@
     .club-image-modal img{max-width:95vw;max-height:84dvh;object-fit:contain}
     .club-image-close{position:absolute;right:12px;top:calc(12px + env(safe-area-inset-top));width:45px;height:45px;border:0;border-radius:50%;background:white;color:#3b291c;font-size:29px}
     @media(max-width:560px){.club-room-open .club-compose{gap:6px}.club-room-open .club-compose button.club-attach-btn{width:46px;min-width:46px}.club-room-open .club-compose button#clubSendBtn{min-width:66px;padding:0 9px}}
+
+    /* Kakao-style unified club composer, keeping the existing Bokjakso palette. */
+    .club-room-open .club-compose{
+      display:flex;align-items:flex-end;gap:5px;
+      background:var(--field-bg);border:1.5px solid var(--line);
+      border-radius:25px;padding:5px 6px 5px 7px;
+      width:100%;max-width:100%;min-width:0;
+    }
+    .club-room-open .club-compose:focus-within{border-color:var(--accent)}
+    .club-room-open .club-compose textarea#clubMessageInput{
+      display:block;flex:1 1 auto;min-width:0;height:40px;
+      min-height:40px;max-height:88px;overflow-y:auto;resize:none;
+      border:0!important;outline:0!important;box-shadow:none!important;
+      border-radius:0;padding:8px 4px 7px;margin:0;
+      background:transparent!important;color:var(--text);
+      font:inherit;font-size:16px;line-height:24px;
+      scrollbar-width:thin;overscroll-behavior:contain;
+    }
+    .club-room-open .club-compose textarea#clubMessageInput:focus-visible{outline:0!important}
+    .club-room-open .club-compose button.club-attach-btn{
+      width:40px;min-width:40px;height:40px;min-height:40px;
+      padding:0;align-self:flex-end;border:0;border-radius:50%;
+      background:var(--soft);color:var(--text);
+      font-size:27px;line-height:1;font-weight:450
+    }
+    .club-room-open .club-compose button#clubSendBtn{
+      width:55px;min-width:55px;height:40px;min-height:40px;
+      padding:0 5px;align-self:flex-end;border-radius:20px;
+      font-size:14px;line-height:1.2
+    }
+    .club-room-open .club-compose button:disabled{opacity:.55}
+    @media(max-width:560px){
+      .club-room-open .club-compose{gap:4px;padding:5px}
+      .club-room-open .club-compose button.club-attach-btn{width:40px;min-width:40px}
+      .club-room-open .club-compose button#clubSendBtn{width:54px;min-width:54px;padding:0 5px}
+    }
 </style>
 </head>
 <body>
@@ -1102,7 +1138,7 @@
         <p class="club-chat-feedback" id="clubChatFeedback" role="status" aria-live="polite"></p>
         <div class="club-chat-feed" id="clubMessages" role="log" aria-live="polite"></div>
         <div class="club-attach-preview" id="clubAttachmentPreview" hidden><img id="clubPreviewImage" alt="선택한 사진 미리보기"><div class="club-preview-copy"><strong id="clubPreviewName">사진 1장</strong><small>전송하면 클럽 회원에게 보여요.</small></div><button id="clubRemoveAttachment" type="button" aria-label="선택 사진 제거">×</button></div>
-        <form class="club-compose" id="clubCompose"><span class="club-plus-wrap"><button id="clubAttachBtn" class="club-attach-btn" type="button" aria-label="사진 첨부" aria-expanded="false" aria-controls="clubAttachmentMenu">+</button><span class="club-attach-menu" id="clubAttachmentMenu" hidden><button id="clubChoosePhoto" type="button">🖼️ 사진 선택</button><button id="clubTakePhoto" type="button">📷 카메라</button><button id="clubCancelAttachment" type="button">취소</button></span></span><input id="clubGalleryInput" type="file" accept="image/*" hidden><input id="clubCameraInput" type="file" accept="image/*" capture="environment" hidden><input id="clubMessageInput" maxlength="1000" placeholder="정회원끼리 이야기 나눠요" autocomplete="off" enterkeyhint="send" aria-label="클럽 메시지 입력"><button id="clubSendBtn" type="submit">전송</button></form>
+        <form class="club-compose" id="clubCompose"><span class="club-plus-wrap"><button id="clubAttachBtn" class="club-attach-btn" type="button" aria-label="사진 첨부" aria-expanded="false" aria-controls="clubAttachmentMenu">+</button><span class="club-attach-menu" id="clubAttachmentMenu" hidden><button id="clubChoosePhoto" type="button">🖼️ 사진 선택</button><button id="clubTakePhoto" type="button">📷 카메라</button><button id="clubCancelAttachment" type="button">취소</button></span></span><input id="clubGalleryInput" type="file" accept="image/*" hidden><input id="clubCameraInput" type="file" accept="image/*" capture="environment" hidden><textarea id="clubMessageInput" rows="1" maxlength="1000" placeholder="메시지 입력" autocomplete="off" enterkeyhint="enter" aria-label="클럽 메시지 입력"></textarea><button id="clubSendBtn" type="submit">전송</button></form>
       </section>
     </section>
     <section class="card home-panel" id="mePanel" role="tabpanel" aria-labelledby="homeTabMe" hidden>
