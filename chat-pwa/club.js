@@ -21,10 +21,7 @@
  const leaveBtn=document.getElementById('clubLeaveBtn');
  const onlineCount=document.getElementById('clubOnlineCount');
  const inviteBtn=document.getElementById('clubInviteBtn');
- const moreBtn=document.getElementById('clubMoreBtn');
- const roomMenu=document.getElementById('clubRoomMenu');
- const lightModeBtn=document.getElementById('clubLightModeBtn');
- const darkModeBtn=document.getElementById('clubDarkModeBtn');
+ const clubThemeToggle=document.getElementById('clubThemeToggle');
  const pageThemeToggle=document.getElementById('themeToggle');
  const chatFeedback=document.getElementById('clubChatFeedback');
  const actions=document.getElementById('clubActions');
@@ -66,34 +63,21 @@
      }
    }finally{presenceBusy=false;}
  }
- function syncThemeOptions(){
+ function syncClubThemeIcon(){
    const dark=document.body.classList.contains('dark');
-   lightModeBtn.setAttribute('aria-pressed',String(!dark));
-   darkModeBtn.setAttribute('aria-pressed',String(dark));
+   clubThemeToggle.textContent=dark?'☀':'☾';
+   const label=dark?'라이트모드로 전환':'다크모드로 전환';
+   clubThemeToggle.setAttribute('aria-label',label);
+   clubThemeToggle.setAttribute('title',label);
  }
- function setRoomMenu(open){
-   if(open)syncThemeOptions();
-   roomMenu.hidden=!open;
-   moreBtn.setAttribute('aria-expanded',String(open));
- }
- moreBtn.addEventListener('click',()=>setRoomMenu(roomMenu.hidden));
- function chooseClubTheme(mode){
-   // Reuse the existing app-wide theme handler and saved preference.
-   const currentlyDark=document.body.classList.contains('dark');
-   if((mode==='dark')!==currentlyDark)pageThemeToggle.click();
-   syncThemeOptions();
-   setRoomMenu(false);
- }
- lightModeBtn.addEventListener('click',()=>chooseClubTheme('light'));
- darkModeBtn.addEventListener('click',()=>chooseClubTheme('dark'));
- document.addEventListener('click',event=>{
-   if(!roomMenu.hidden&&!event.target.closest('.club-room-menu-wrap'))setRoomMenu(false);
+ // The existing page toggle owns the saved preference and applies the theme.
+ clubThemeToggle.addEventListener('click',()=>{
+   pageThemeToggle.click();
+   syncClubThemeIcon();
  });
- document.addEventListener('keydown',event=>{
-   if(event.key==='Escape'&&!roomMenu.hidden){
-     setRoomMenu(false);moreBtn.focus();
-   }
- });
+ // Also stay in sync when the main chat header changes the theme.
+ new MutationObserver(syncClubThemeIcon).observe(document.body,{attributes:true,attributeFilter:['class']});
+ syncClubThemeIcon();
  inviteBtn.addEventListener('click',async()=>{
    const link=new URL('/chat.html?tab=club',location.origin).href;
    const description='복작소 클럽에 초대합니다. 가입 신청 후 최고관리자의 승인을 받으면 채팅할 수 있어요.';
@@ -184,7 +168,6 @@
  function leaveClubRoom(restoreFocus=false){
    const wasOpen=!pane.hidden;
    if(wasOpen)leavePresence();
-   setRoomMenu(false);
    roomGeneration++;
    confirmedRows=[];
    optimisticMessage=null;
@@ -421,7 +404,6 @@
    if(tab!==clubTab)tab.addEventListener('click',()=>{
      if(!pane.hidden)leavePresence();
      document.body.classList.remove('club-chat-open','club-input-focused');
-     setRoomMenu(false);
      updateClubReturnButton();
    });
  }

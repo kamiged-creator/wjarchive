@@ -960,6 +960,16 @@
       content:'✓';margin-left:auto;color:var(--accent);font-size:16px;
     }
 
+    /* Single sun/moon switch, just like the main app's original header. */
+    .club-room-open .club-theme-toggle{
+      display:inline-flex;align-items:center;justify-content:center;
+      flex:0 0 40px;width:40px;min-height:40px;
+      padding:0;font-size:23px;line-height:1;
+    }
+    .club-room-open .club-theme-toggle:focus-visible{
+      outline:3px solid var(--accent);outline-offset:2px;
+    }
+
   </style>
 </head>
 <body>
@@ -1058,13 +1068,7 @@
           <h2>복작소 클럽</h2>
           <div class="club-room-toolbar-buttons">
             <button class="club-invite-button" id="clubInviteBtn" type="button" aria-label="클럽 가입 초대 링크 공유">초대하기</button>
-            <div class="club-room-menu-wrap">
-              <button class="club-more-button" id="clubMoreBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="clubRoomMenu" aria-label="클럽 채팅방 메뉴">⋯</button>
-              <div class="club-room-menu" id="clubRoomMenu" hidden role="group" aria-label="화면 모드 변경">
-                <button id="clubLightModeBtn" type="button" aria-pressed="false"><span aria-hidden="true">☀</span> 라이트 모드</button>
-                <button id="clubDarkModeBtn" type="button" aria-pressed="false"><span aria-hidden="true">☾</span> 다크 모드</button>
-              </div>
-            </div>
+            <button class="club-more-button club-theme-toggle" id="clubThemeToggle" type="button" aria-label="다크모드로 전환" title="다크모드로 전환">☾</button>
           </div>
         </div>
         <div class="club-room-toolbar" aria-label="클럽 접속 상태">
