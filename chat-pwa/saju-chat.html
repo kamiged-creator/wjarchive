@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f0e8">
+<title>복작소 AI 사주채팅 · 체험</title>
+<style>
+:root{font-family:Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;color:#35271e;background:#f6f1e9;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% 0%,#fffaf1 0,transparent 38%),#f6f1e9}
+button,input{font:inherit}button{cursor:pointer}a{color:inherit}
+.page{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:17px 17px 12px}
+.home{display:inline-flex;align-items:center;gap:8px;min-height:46px;text-decoration:none;font-size:17px;font-weight:850;color:#3c291d}
+.home .arrow{font-size:24px;font-weight:400}.brand{font-weight:900;color:#805d43;font-size:15px}
+.hero{text-align:center;padding:0 17px 13px}.eyebrow{letter-spacing:.17em;color:#95745a;font-size:11px;font-weight:800}
+h1{font-family:"Noto Serif KR",Georgia,serif;font-size:30px;letter-spacing:-.06em;margin:3px 0 7px;color:#513522}
+.lead{font-size:14px;line-height:1.55;color:#796b61;margin:0}
+.beta{display:inline-flex;align-items:center;justify-content:center;background:#fdf7ec;color:#704f33;border:1px solid #dcc6ab;font-size:12px;font-weight:750;border-radius:999px;padding:7px 12px;margin-top:12px}
+section.panel{background:#fffdfa;border:1px solid #e2d5c3;border-radius:22px;margin:10px 14px;padding:17px 13px;box-shadow:0 8px 24px #4837220b}
+.panel h2{font-size:17px;margin:0 0 14px;letter-spacing:-.025em}.hint{font-size:12px;color:#827266;line-height:1.5}
+.avatars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.avatar{background:transparent;color:#3b2b20;border:2px solid transparent;border-radius:15px;padding:9px 3px 8px;display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0;touch-action:manipulation}
+.avatar[aria-pressed="true"]{background:#f7eee2;border-color:#a77d58}
+.portrait{display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;width:clamp(56px,17vw,100px);height:clamp(56px,17vw,100px);border-radius:50%;border:2px solid #e4d1be;background:linear-gradient(140deg,#fbe4d1,#ceb29c);color:#704d31;font-size:27px;font-weight:900}
+.avatar[aria-pressed="true"] .portrait{border-color:#a57750;box-shadow:0 0 0 3px #f3ddc3}
+.portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar strong{font-size:15px}.avatar small{font-size:11px;line-height:1.3;color:#877061;text-align:center;word-break:keep-all;min-height:28px}
+.topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.topic{border:1.5px solid #e2d3c1;border-radius:14px;background:#fbf7f1;color:#4b3427;display:flex;align-items:center;gap:7px;text-align:left;padding:12px 10px;min-height:61px;font-weight:750;font-size:14px;touch-action:manipulation}
+.topic .symbol{font-size:21px;flex:none}.topic[aria-pressed="true"]{background:#765338;color:white;border-color:#765338}
+.topic:disabled{opacity:.45}.topic small{font-size:11px;font-weight:450;display:block;margin-top:2px}
+.chat-panel{display:flex;flex-direction:column;flex:1;min-height:355px;margin-top:10px!important}
+.chat-heading{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:8px}
+.chat-heading h2{margin:0}.clear{padding:8px;border:1px solid #dbccbb;border-radius:10px;background:#fff;color:#745744;font-size:12px;font-weight:750}
+.disclaimer{font-size:12px;line-height:1.5;border-radius:11px;padding:9px 10px;background:#f8eee0;color:#775b45;margin:0 0 10px}
+.messages{display:flex;flex-direction:column;gap:13px;overflow-y:auto;min-height:240px;max-height:46dvh;padding:8px 2px 14px;overscroll-behavior:contain}
+.message{display:flex;align-items:flex-end;gap:7px}.message.user{justify-content:flex-end}
+.bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;font-size:15px;max-width:min(85%,500px);background:#f4ede4;padding:12px 14px;border-radius:16px 16px 16px 5px}
+.user .bubble{background:#d8b99c;color:#38261b;border-radius:16px 16px 5px 16px}
+.msg-avatar{width:29px;height:29px;border-radius:50%;object-fit:cover;background:#f4dfcc;flex:none}
+.msg-fallback{font-size:14px;background:#e8d0b9;color:#6a4530;display:flex;align-items:center;justify-content:center;font-weight:800}
+.meta{font-size:11px;color:#958678;margin:3px 0 0 36px}
+.composer{display:flex;gap:7px;border-top:1px solid #eee3d6;padding:12px 0 2px;align-items:center}
+.composer input{flex:1;min-width:0;min-height:49px;border-radius:14px;border:1.5px solid #d8c7b5;padding:10px 13px;outline:none;font-size:15px;background:white;color:#382b23}
+.composer input:focus{border-color:#947456;box-shadow:0 0 0 2px #a67b4a22}
+.send{min-width:74px;min-height:49px;border:0;border-radius:14px;background:#765338;color:#fff;font-weight:850}
+.send:disabled{opacity:.5}.tips{margin:8px 0 0;font-size:11px;color:#88766a;line-height:1.55;text-align:center}
+footer{text-align:center;color:#938073;padding:12px 20px 25px;font-size:11px;line-height:1.55}
+button:focus-visible,a:focus-visible{outline:3px solid #9b6e4d;outline-offset:3px}
+@media(min-width:600px){.top{padding-top:22px}.hero{padding-top:10px}.messages{min-height:295px}.portrait{width:96px;height:96px}}
+@media(max-width:355px){.top{padding:11px}.avatar small{font-size:10px}.avatar strong{font-size:14px}.topic{padding:9px 7px;font-size:13px}.panel{margin-left:9px!important;margin-right:9px!important}}
+</style>
+<script src="/saju-avatars.js" defer></script>
+</head>
+<body>
+<div class="page">
+  <header class="top"><a class="home" href="/" aria-label="복작소 홈으로"><span class="arrow" aria-hidden="true">←</span> 복작소</a><span class="brand">福 · SAJU CHAT</span></header>
+  <div class="hero"><div class="eyebrow">BOKJAKSO COMMUNITY</div><h1>AI 사주채팅</h1><p class="lead">상담사를 고르고 전문 분야의 대화를 체험해 보세요.</p><span class="beta">체험판 · 실제 AI 및 만세력 계산은 연결 준비 중</span></div>
+  <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택 <span class="hint">· 얼굴을 눌러 변경</span></h2><div class="avatars" id="avatars"></div></section>
+  <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">전문 상담 분야 <span class="hint">· 선택한 상담사 담당 분야</span></h2><div class="topics" id="topics"></div></section>
+  <section class="panel chat-panel" aria-labelledby="chatTitle">
+    <div class="chat-heading"><h2 id="chatTitle">아라 · 사주</h2><button type="button" id="clearChat" class="clear">대화 지우기</button></div>
+    <p class="disclaimer">현재는 상담 화면과 메시지 전송을 시험하는 안내 대화야. 실제 사주풀이·예측·AI 응답은 제공되지 않아. 생년월일 등 개인정보는 아직 입력하지 마.</p>
+    <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
+    <form class="composer" id="composer"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="상담 질문을 입력해 보세요" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></form>
+    <p class="tips" id="chatTip">체험 대화는 이 브라우저 탭에만 임시 보관돼. 실제 AI와 연결되기 전에는 개인정보 입력을 삼가줘.</p>
+  </section>
+  <footer>복작소 사주채팅 미리보기 · 실제 상담 및 명식 해석 기능은 개발 중이야.</footer>
+</div>
+<script>
+(() => {
+"use strict";
+const advisors=[
+ {id:"ara",name:"아라",specialty:"따뜻한 상담",topics:[["saju","🔮","사주","인생의 흐름"],["daily","☀️","오늘운세","하루의 방향"]],intro:"안녕하세요, 아라예요. 🌸 오늘은 어떤 이야기를 나누고 싶으세요?"},
+ {id:"doyun",name:"도윤",specialty:"정통 사주",topics:[["saju","☯️","사주","타고난 성향"],["decade","📜","대운·세운","시기별 변화"]],intro:"반갑습니다. 도윤입니다. 정통 사주와 인생 흐름에 관한 질문을 남겨 주세요."},
+ {id:"seoyun",name:"서윤",specialty:"궁합·연애운",topics:[["match","💕","궁합","두 사람의 관계"],["love","🌸","연애운","인연과 마음"]],intro:"안녕하세요, 서윤이에요. 💗 관계와 연애에 관해 무엇이 궁금하세요?"},
+ {id:"jian",name:"지안",specialty:"재물·사업운",topics:[["wealth","💰","재물운","돈과 경제생활"],["career","💼","직장·사업운","일과 성장"]],intro:"반갑습니다. 지안입니다. 재물이나 일, 사업에 관해 궁금한 점을 이야기해 주세요."}
+];
+const $=id=>document.getElementById(id);
+let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
+const avatarSources=window.SAJU_AVATARS||{};
+const avatarUrl=id=>typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
+const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
+function msg(role,text){return{role,text:String(text).slice(0,1000)}}
+function greeting(){return msg("bot",selected.intro+"\n현재는 '"+topic[2]+"' 화면을 시험할 수 있어요. 실제 사주 계산과 AI 연결은 준비 중이에요.");}
+function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");return Array.isArray(x)?x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30):[greeting()];}catch(_){return[greeting()]}}
+let conversation=read();
+function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
+function portrait(id,name,cls="portrait"){const holder=document.createElement("span");holder.className=cls;const src=avatarUrl(id);if(src){const img=document.createElement("img");img.src=src;img.alt="";img.loading="eager";holder.append(img)}else{holder.textContent=name.slice(0,1)}return holder;}
+function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(const a of advisors){const b=document.createElement("button");b.type="button";b.className="avatar";b.setAttribute("aria-pressed",String(a.id===selected.id));b.append(portrait(a.id,a.name));const title=document.createElement("strong");title.textContent=a.name;const small=document.createElement("small");small.textContent=a.specialty;b.append(title,small);b.addEventListener("click",()=>{if(a.id===selected.id)return;selected=a;topic=a.topics[0];conversation=read();renderAll()});root.append(b)}}
+function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]===t[0])return;topic=t;conversation=read();renderAll()});root.append(b)}}
+function renderMessages(){const feed=$("messages");feed.replaceChildren();for(const item of conversation){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row)}requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight})}
+function renderAll(){renderAdvisors();renderTopics();$("chatTitle").textContent=selected.name+" · "+topic[2];renderMessages();save();}
+function response(){return selected.name+" 상담방에 질문이 입력됐어.\n\n지금은 "+topic[2]+" 분야의 대화 화면을 미리 보는 체험판이야. 실제 상담사의 AI 답변과 만세력 분석을 연결하면 이 자리에서 질문에 맞춘 풀이를 이어갈 수 있어.";}
+function send(){if(sentBusy)return;const input=$("question");const content=input.value.trim();if(!content)return;sentBusy=true;conversation.push(msg("user",content));input.value="";renderMessages();conversation.push(msg("bot",response()));save();renderMessages();sentBusy=false;}
+const form=$("composer"),input=$("question"),sendBtn=$("send");
+form.addEventListener("submit",e=>{e.preventDefault();send()});
+// Keep focus when tapping Send with the on-screen IME, including Samsung browsers.
+sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
+sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimary)return;const r=sendBtn.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){form.requestSubmit(sendBtn);input.focus({preventScroll:true})}});
+input.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229))e.preventDefault()});
+$("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;conversation=[greeting()];save();renderMessages()});
+renderAll();
+})();
+</script>
+</body>
+</html>
