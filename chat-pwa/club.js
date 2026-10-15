@@ -34,12 +34,17 @@
  const previewName=document.getElementById('clubPreviewName'),removePhotoBtn=document.getElementById('clubRemoveAttachment');
  const imageModal=document.getElementById('clubImageModal'),largeImage=document.getElementById('clubImageLarge');
  const imageCloseBtn=document.getElementById('clubImageClose');
+ const photoActions=document.getElementById('clubPhotoActions');
+ const copyPhotoBtn=document.getElementById('clubCopyPhoto');
+ const deletePhotoBtn=document.getElementById('clubDeletePhoto');
+ const cancelPhotoBtn=document.getElementById('clubClosePhotoActions');
  const adminLink=document.getElementById('clubAdminLink');
  const clubTab=document.getElementById('homeTabClub');
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
  let selectedPhoto=null,photoPreviewUrl=null;
+ let menuPhoto=null,largePhoto=null,photoMenuBusy=false;
  let presenceBusy=false;
  const clubIsVisible=()=>!pane.hidden&&membership==='approved'&&!document.hidden&&
    !document.body.classList.contains('chat-active')&&
@@ -179,11 +184,75 @@
    galleryInput.value='';cameraInput.value='';
  }
  function hideAttachMenu(){attachMenu.hidden=true;attachBtn.setAttribute('aria-expanded','false')}
- function showClubImage(url){
+ function showClubImage(url,row=null){
    if(typeof url!=='string'||!/^https:\/\//i.test(url))return;
-   largeImage.src=url;imageModal.hidden=false;imageCloseBtn.focus();
+   largePhoto=row;largeImage.src=url;imageModal.hidden=false;imageCloseBtn.focus();
  }
- function closeClubImage(){imageModal.hidden=true;largeImage.removeAttribute('src')}
+ function closeClubImage(){imageModal.hidden=true;largePhoto=null;largeImage.removeAttribute('src')}
+ function showPhotoActions(row){
+   if(!row||row.pending===true||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
+   menuPhoto=row;
+   deletePhotoBtn.hidden=!(row.isMine===true&&Number.isSafeInteger(Number(row.id))&&Number(row.id)>0);
+   photoActions.hidden=false;
+   copyPhotoBtn.focus();
+ }
+ function closePhotoActions(){if(photoMenuBusy)return;photoActions.hidden=true;menuPhoto=null}
+ // Ordinary tap expands the image. Holding ~0.5 sec opens the photo menu.
+ function bindPhotoPress(element,readRow,onTap){
+   let pressTimer=null,originX=0,originY=0,held=false;
+   const cancel=()=>{if(pressTimer!==null){clearTimeout(pressTimer);pressTimer=null}};
+   element.addEventListener('pointerdown',event=>{
+     if(event.pointerType==='mouse'&&event.button!==0)return;
+     cancel();held=false;originX=event.clientX;originY=event.clientY;
+     const row=readRow();
+     if(!row||row.pending||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
+     pressTimer=setTimeout(()=>{pressTimer=null;held=true;showPhotoActions(readRow())},550);
+   });
+   element.addEventListener('pointermove',event=>{
+     if(Math.abs(event.clientX-originX)>11||Math.abs(event.clientY-originY)>11)cancel();
+   });
+   element.addEventListener('pointerup',cancel);
+   element.addEventListener('pointercancel',cancel);
+   element.addEventListener('pointerleave',event=>{if(event.pointerType==='mouse')cancel()});
+   element.addEventListener('contextmenu',event=>{
+     const row=readRow();if(!row||row.pending||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
+     event.preventDefault();cancel();held=true;showPhotoActions(row);
+   });
+   element.addEventListener('click',event=>{
+     if(held){event.preventDefault();event.stopPropagation();held=false;return}
+     if(onTap)onTap();
+   });
+ }
+ async function copyPhotoToClipboard(row){
+   const url=String(row?.imageUrl||'');
+   if(!/^https:\/\//i.test(url))throw new Error('복사할 사진을 찾지 못했어.');
+   if(navigator.clipboard?.write&&typeof ClipboardItem!=='undefined'){
+     try{
+       // Chrome can keep a transient user gesture while the PNG promise resolves.
+       const pngBlob=(async()=>{
+         const response=await fetch(url,{mode:'cors'});
+         if(!response.ok)throw new Error('사진 읽기 실패');
+         const bitmap=await createImageBitmap(await response.blob());
+         try{
+           const canvas=document.createElement('canvas');
+           canvas.width=bitmap.width;canvas.height=bitmap.height;
+           canvas.getContext('2d').drawImage(bitmap,0,0);
+           const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+           if(!png)throw new Error('사진 변환 실패');
+           return png;
+         }finally{bitmap.close?.()}
+       })();
+       await navigator.clipboard.write([new ClipboardItem({'image/png':pngBlob})]);
+       return '사진을 복사했어.';
+     }catch(_){/* Some Android browsers block cross-origin image clipboard writes. */}
+   }
+   if(navigator.clipboard?.writeText){
+     try{await navigator.clipboard.writeText(url);return '사진 자체 대신 사진 링크를 복사했어.'}catch(_){}
+   }
+   window.prompt('사진 링크를 길게 눌러 복사해 줘.',url);
+   return '';
+ }
+
  async function compressClubPhoto(file){
    if(!file||!/^image\//.test(file.type))throw new Error('사진 파일만 선택할 수 있어요.');
    if(file.size>12*1024*1024)throw new Error('12MB 이하 사진만 선택할 수 있어요.');
@@ -216,7 +285,7 @@
    confirmedRows=[];
    optimisticMessage=null;
    lastRenderKey='';
-   clearPhotoSelection();hideAttachMenu();closeClubImage();
+   clearPhotoSelection();hideAttachMenu();photoMenuBusy=false;photoActions.hidden=true;menuPhoto=null;closeClubImage();
    feed.replaceChildren();
    pane.hidden=true;
    landing.hidden=false;
@@ -343,7 +412,8 @@
        const photo=document.createElement('img');
        photo.className='club-post-image';photo.src=row.imageUrl;photo.alt='클럽 회원이 보낸 사진';
        photo.loading='lazy';photo.decoding='async';
-       button.append(photo);button.addEventListener('click',()=>showClubImage(row.imageUrl));
+       button.append(photo);
+       bindPhotoPress(button,()=>row,()=>showClubImage(row.imageUrl,row));
        article.append(button);
      }
      if(row.body&&(!row.imageUrl||row.body!=='사진'))article.append(body);
@@ -592,9 +662,44 @@
  document.addEventListener('click',event=>{
    if(!attachMenu.hidden&&!event.target.closest('.club-plus-wrap'))hideAttachMenu();
  });
+ // Long press also works on the enlarged image; the menu overlays either view.
+ bindPhotoPress(largeImage,()=>largePhoto,null);
+ copyPhotoBtn.addEventListener('click',async()=>{
+   if(!menuPhoto||photoMenuBusy)return;
+   const row=menuPhoto;photoMenuBusy=true;copyPhotoBtn.disabled=true;deletePhotoBtn.disabled=true;
+   try{
+     const notice=await copyPhotoToClipboard(row);
+     photoActions.hidden=true;menuPhoto=null;
+     if(notice)chatFeedback.textContent=notice;
+   }catch(error){chatFeedback.textContent=error.message||'복사하지 못했어.'}
+   finally{photoMenuBusy=false;copyPhotoBtn.disabled=false;deletePhotoBtn.disabled=false}
+ });
+ deletePhotoBtn.addEventListener('click',async()=>{
+   const row=menuPhoto;
+   if(!row||row.isMine!==true||!Number.isSafeInteger(Number(row.id))||photoMenuBusy)return;
+   if(!window.confirm('내가 보낸 사진 메시지를 삭제할까?\n함께 쓴 글도 삭제되고 복구할 수 없어.'))return;
+   photoMenuBusy=true;copyPhotoBtn.disabled=true;deletePhotoBtn.disabled=true;
+   try{
+     await request('delete-message',{messageId:row.id});
+     confirmedRows=confirmedRows.filter(item=>String(item.id)!==String(row.id));
+     if(optimisticMessage?.id&&String(optimisticMessage.id)===String(row.id))optimisticMessage=null;
+     lastRenderKey='';renderMessages();
+     photoActions.hidden=true;menuPhoto=null;closeClubImage();
+     chatFeedback.textContent='내 사진 메시지를 삭제했어.';
+     await loadMessages();
+   }catch(error){
+     chatFeedback.textContent=error.message||'사진을 삭제하지 못했어.';
+   }finally{photoMenuBusy=false;copyPhotoBtn.disabled=false;deletePhotoBtn.disabled=false}
+ });
+ cancelPhotoBtn.addEventListener('click',closePhotoActions);
+ photoActions.addEventListener('click',event=>{if(event.target===photoActions)closePhotoActions()});
  imageCloseBtn.addEventListener('click',closeClubImage);
  imageModal.addEventListener('click',event=>{if(event.target===imageModal)closeClubImage()});
- document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!imageModal.hidden)closeClubImage()});
+ document.addEventListener('keydown',event=>{
+   if(event.key!=='Escape')return;
+   if(!photoActions.hidden)closePhotoActions();
+   else if(!imageModal.hidden)closeClubImage();
+ });
  composeForm.addEventListener('submit',async e=>{
    e.preventDefault();
    const message=input.value.trim(),photo=selectedPhoto;
