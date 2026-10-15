@@ -71,6 +71,7 @@
     .member-links{display:grid;grid-template-columns:1fr;gap:10px}
     .member-manage-link{display:flex;align-items:center;justify-content:center;min-height:56px;padding:12px;border-radius:12px;background:#795738;color:#fff;font-size:17px;font-weight:800;text-align:center;text-decoration:none}
     .member-manage-link:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .member-manage-icon{width:24px;height:24px;flex:0 0 24px;display:inline-block;margin-right:7px;color:#fff;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
     @media(min-width:760px){.member-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .volume-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
     .volume-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-size:15px;font-weight:850;cursor:pointer}
@@ -109,8 +110,8 @@
 
   <section class="card" aria-label="회원 관리 바로가기">
     <div class="member-links">
-      <a class="member-manage-link" href="/chat-users.html">👤 일반 채팅 이용자 명단</a>
-      <a class="member-manage-link" href="/club-admin.html">👥 복작소 클럽 회원관리</a>
+      <a class="member-manage-link" href="/chat-users.html"><svg class="member-manage-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-2a7 7 0 0 1 14 0v2"/></svg><span>일반 채팅 이용자 명단</span></a>
+      <a class="member-manage-link" href="/club-admin.html"><svg class="member-manage-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="7.5" r="3"/><path d="M2.5 19v-1.5a6.5 6.5 0 0 1 13 0V19"/><path d="M16.5 4.7a3 3 0 0 1 0 5.6M17 13.3a6.4 6.4 0 0 1 4.5 6"/></svg><span>복작소 클럽 회원관리</span></a>
     </div>
   </section>
 
