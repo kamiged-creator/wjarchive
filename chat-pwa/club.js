@@ -380,7 +380,32 @@
      empty.textContent='첫 인사를 남겨보세요.';
      feed.appendChild(empty);
    }
+   let previousDay='';
+   // All visitors see club dates in Korean Standard Time.
+   const roomDay=new Intl.DateTimeFormat('sv-SE',{
+     timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'
+   });
+   const roomDayLabel=new Intl.DateTimeFormat('ko-KR',{
+     timeZone:'Asia/Seoul',year:'numeric',month:'long',day:'numeric',weekday:'long'
+   });
    for(const row of items){
+     const date=new Date(row.created_at);
+     if(Number.isFinite(date.getTime())){
+       const day=roomDay.format(date);
+       if(day!==previousDay){
+         const divider=document.createElement('div');
+         divider.className='club-date-divider';
+         divider.setAttribute('role','separator');
+         const label=roomDayLabel.format(date);
+         divider.setAttribute('aria-label',label);
+         const dateText=document.createElement('time');
+         dateText.dateTime=day;
+         dateText.textContent=label;
+         divider.append(dateText);
+         feed.append(divider);
+         previousDay=day;
+       }
+     }
      const messageRow=document.createElement('div');
      messageRow.className='club-message-row';
      if(row.isMine===true)messageRow.classList.add('mine');
@@ -416,7 +441,6 @@
      const name=document.createElement('strong');
      name.textContent=row.nickname||'회원';
      const time=document.createElement('time');
-     const date=new Date(row.created_at);
      time.textContent=row.pending===true?'보내는 중…':
        (Number.isNaN(date.getTime())?'':date.toLocaleString('ko-KR',{
          month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'
