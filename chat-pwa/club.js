@@ -487,10 +487,19 @@
       event.clientY<bounds.top||event.clientY>bounds.bottom)return;
    composeForm.requestSubmit(sendBtn);
  });
+ // Samsung's Korean IME may use Enter to finish composition. Don't send
+ // incomplete text while the keyboard still reports an active composition.
+ input.addEventListener('keydown',event=>{
+   if(event.key==='Enter'&&(event.isComposing||event.keyCode===229)){
+     event.preventDefault();
+   }
+ });
  composeForm.addEventListener('submit',async e=>{
    e.preventDefault();
    const message=input.value.trim();
    if(!message||membership!=='approved'||pane.hidden||sending)return;
+   // KakaoTalk-style send: keep the IME open if the visitor was typing.
+   const wasTyping=document.activeElement===input&&clubMobilePointer.matches;
    sending=true;
    sendBtn.disabled=true;
    const generation=roomGeneration;
@@ -502,7 +511,13 @@
    optimisticMessage=draft;
    chatFeedback.textContent='';
    input.value='';
-   renderMessages(true); // Appear immediately without waiting for the network.
+   renderMessages(true); // New bubble appears immediately without a network wait.
+   if(wasTyping){
+     // Do not let a touch-triggered layout shift dismiss the Samsung keyboard.
+     input.focus({preventScroll:true});
+     syncClubInputFocus();
+     keepLatestVisibleWhileTyping();
+   }
    try{
      const response=await request('send',{message});
      if(generation!==roomGeneration)return;
