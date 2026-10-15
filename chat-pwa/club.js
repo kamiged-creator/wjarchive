@@ -44,6 +44,7 @@
  let membership='none',busy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
  let selectedPhoto=null,photoPreviewUrl=null;
+ let entryFollowCleanup=null;
  let menuPhoto=null,largePhoto=null,photoMenuBusy=false;
  let presenceBusy=false;
  const clubIsVisible=()=>!pane.hidden&&membership==='approved'&&!document.hidden&&
@@ -305,6 +306,7 @@
    confirmedRows=[];
    optimisticMessage=null;
    lastRenderKey='';
+   stopEntryFollow();
    clearPhotoSelection();hideAttachMenu();photoMenuBusy=false;photoActions.hidden=true;menuPhoto=null;closeClubImage();
    feed.replaceChildren();
    pane.hidden=true;
@@ -466,22 +468,56 @@
    }
    if(atBottom||forceBottom)feed.scrollTop=feed.scrollHeight;
  }
- // Initial entry needs an extra layout pass: mobile panels resize after
- // the message nodes are painted, so a synchronous scrollTop can stop early.
- // Only run on first entry, never on periodic refresh or manual history scroll.
+ // On entry, photos expand asynchronously and may otherwise push recent
+ // messages out of view. Follow content-height changes until images settle,
+ // but immediately stop following when the visitor interacts with the history.
+ function stopEntryFollow(){
+   if(!entryFollowCleanup)return;
+   const cleanup=entryFollowCleanup;
+   entryFollowCleanup=null;
+   cleanup();
+ }
  function scrollLatestOnEntry(){
+   stopEntryFollow();
    const generation=roomGeneration;
-   const move=()=>{
-     if(generation!==roomGeneration||pane.hidden||
+   let active=true,frame=0;
+   const snap=()=>{
+     frame=0;
+     if(!active||generation!==roomGeneration||pane.hidden||
         clubTab.getAttribute('aria-selected')!=='true')return;
      feed.scrollTop=feed.scrollHeight;
    };
-   move();
-   requestAnimationFrame(()=>{
-     move();
-     requestAnimationFrame(move);
-   });
+   const queueSnap=()=>{
+     if(!active||frame)return;
+     frame=requestAnimationFrame(snap);
+   };
+   const sizes=typeof ResizeObserver==='function'?new ResizeObserver(queueSnap):null;
+   const observeChildren=()=>{
+     if(!sizes)return;
+     for(const child of feed.children)sizes.observe(child);
+   };
+   const mutations=typeof MutationObserver==='function'?new MutationObserver(()=>{
+     observeChildren();
+     queueSnap();
+   }):null;
+   observeChildren();
+   mutations?.observe(feed,{childList:true});
+   const timers=[80,200,500,1000,2000,4000,7000].map(delay=>setTimeout(queueSnap,delay));
+   const stopTimer=setTimeout(stopEntryFollow,10000);
+   entryFollowCleanup=()=>{
+     active=false;
+     sizes?.disconnect();mutations?.disconnect();
+     timers.forEach(clearTimeout);clearTimeout(stopTimer);
+     if(frame)cancelAnimationFrame(frame);
+   };
+   snap();
+   requestAnimationFrame(()=>{snap();requestAnimationFrame(snap)});
  }
+ // Manual scrolling always wins over automatic entry positioning.
+ feed.addEventListener('pointerdown',stopEntryFollow,{passive:true});
+ feed.addEventListener('touchstart',stopEntryFollow,{passive:true});
+ feed.addEventListener('wheel',stopEntryFollow,{passive:true});
+ feed.addEventListener('keydown',stopEntryFollow);
  async function loadMessages(){
    if(busy||membership!=='approved'||pane.hidden||sending)return;
    busy=true;
@@ -573,6 +609,7 @@
  for(const tab of document.querySelectorAll('[data-home-tab]')){
    if(tab!==clubTab)tab.addEventListener('click',()=>{
      if(!pane.hidden)leavePresence();
+     stopEntryFollow();
      document.body.classList.remove('club-chat-open','club-input-focused');
      updateClubReturnButton();
    });
@@ -580,6 +617,7 @@
  clubTab.addEventListener('click',()=>{
    if(!pane.hidden&&membership==='approved'){
      document.body.classList.add('club-chat-open');
+     scrollLatestOnEntry();
      syncClubInputFocus();
      updatePresence();
      loadMessages(); // Each fetch still verifies the user's server-side approval.
