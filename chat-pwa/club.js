@@ -35,9 +35,9 @@
  const imageModal=document.getElementById('clubImageModal'),largeImage=document.getElementById('clubImageLarge');
  const imageCloseBtn=document.getElementById('clubImageClose');
  const photoActions=document.getElementById('clubPhotoActions');
+ const photoActionsCard=document.getElementById('clubPhotoActionsCard');
  const copyPhotoBtn=document.getElementById('clubCopyPhoto');
  const deletePhotoBtn=document.getElementById('clubDeletePhoto');
- const cancelPhotoBtn=document.getElementById('clubClosePhotoActions');
  const adminLink=document.getElementById('clubAdminLink');
  const clubTab=document.getElementById('homeTabClub');
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
@@ -189,12 +189,24 @@
    largePhoto=row;largeImage.src=url;imageModal.hidden=false;imageCloseBtn.focus();
  }
  function closeClubImage(){imageModal.hidden=true;largePhoto=null;largeImage.removeAttribute('src')}
- function showPhotoActions(row){
+ function showPhotoActions(row,source,pointer){
    if(!row||row.pending===true||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
    menuPhoto=row;
    deletePhotoBtn.hidden=!(row.isMine===true&&Number.isSafeInteger(Number(row.id))&&Number(row.id)>0);
    photoActions.hidden=false;
-   copyPhotoBtn.focus();
+   // Position the two small actions over the picture, near where it was held.
+   const rect=source?.getBoundingClientRect();
+   const width=photoActionsCard.offsetWidth||140;
+   const height=photoActionsCard.offsetHeight||54;
+   const viewW=document.documentElement.clientWidth||window.innerWidth;
+   const viewH=window.innerHeight;
+   const xAt=pointer?.x||(rect?(rect.left+rect.right)/2:viewW/2);
+   const yAt=pointer?.y||(rect?rect.top+height+12:viewH/2);
+   const rawX=rect?Math.max(rect.left+5,Math.min(xAt-width/2,rect.right-width-5)):xAt-width/2;
+   const rawY=rect?Math.max(rect.top+6,Math.min(yAt-height-12,rect.bottom-height-6)):yAt-height-12;
+   photoActionsCard.style.left=Math.max(10,Math.min(rawX,viewW-width-10))+'px';
+   photoActionsCard.style.top=Math.max(10,Math.min(rawY,viewH-height-10))+'px';
+   copyPhotoBtn.focus({preventScroll:true});
  }
  function closePhotoActions(){if(photoMenuBusy)return;photoActions.hidden=true;menuPhoto=null}
  // Ordinary tap expands the image. Holding ~0.5 sec opens the photo menu.
@@ -206,7 +218,7 @@
      cancel();held=false;originX=event.clientX;originY=event.clientY;
      const row=readRow();
      if(!row||row.pending||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
-     pressTimer=setTimeout(()=>{pressTimer=null;held=true;showPhotoActions(readRow())},550);
+     pressTimer=setTimeout(()=>{pressTimer=null;held=true;showPhotoActions(readRow(),element,{x:originX,y:originY})},550);
    });
    element.addEventListener('pointermove',event=>{
      if(Math.abs(event.clientX-originX)>11||Math.abs(event.clientY-originY)>11)cancel();
@@ -216,7 +228,7 @@
    element.addEventListener('pointerleave',event=>{if(event.pointerType==='mouse')cancel()});
    element.addEventListener('contextmenu',event=>{
      const row=readRow();if(!row||row.pending||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
-     event.preventDefault();cancel();held=true;showPhotoActions(row);
+     event.preventDefault();cancel();held=true;showPhotoActions(row,element,{x:event.clientX,y:event.clientY});
    });
    element.addEventListener('click',event=>{
      if(held){event.preventDefault();event.stopPropagation();held=false;return}
@@ -691,7 +703,6 @@
      chatFeedback.textContent=error.message||'사진을 삭제하지 못했어.';
    }finally{photoMenuBusy=false;copyPhotoBtn.disabled=false;deletePhotoBtn.disabled=false}
  });
- cancelPhotoBtn.addEventListener('click',closePhotoActions);
  photoActions.addEventListener('click',event=>{if(event.target===photoActions)closePhotoActions()});
  imageCloseBtn.addEventListener('click',closeClubImage);
  imageModal.addEventListener('click',event=>{if(event.target===imageModal)closeClubImage()});
