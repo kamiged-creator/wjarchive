@@ -280,7 +280,7 @@
      const meta=document.createElement('div');
      meta.className='club-post-meta';
      const name=document.createElement('strong');
-     name.textContent=row.isMine===true?'나':(row.nickname||'회원');
+     name.textContent=row.nickname||'회원';
      const time=document.createElement('time');
      const date=new Date(row.created_at);
      time.textContent=row.pending===true?'보내는 중…':
@@ -289,7 +289,8 @@
        }));
      const body=document.createElement('p');
      body.textContent=row.body||'';
-     meta.append(name,time);
+     if(row.isMine!==true)meta.append(name);
+     meta.append(time);
      article.append(meta,body);
      messageRow.append(avatar,article);
      feed.appendChild(messageRow);
