@@ -23,7 +23,9 @@
  const inviteBtn=document.getElementById('clubInviteBtn');
  const moreBtn=document.getElementById('clubMoreBtn');
  const roomMenu=document.getElementById('clubRoomMenu');
- const roomMenuLeaveBtn=document.getElementById('clubMenuLeaveBtn');
+ const lightModeBtn=document.getElementById('clubLightModeBtn');
+ const darkModeBtn=document.getElementById('clubDarkModeBtn');
+ const pageThemeToggle=document.getElementById('themeToggle');
  const chatFeedback=document.getElementById('clubChatFeedback');
  const actions=document.getElementById('clubActions');
  const feed=document.getElementById('clubMessages');
@@ -64,15 +66,26 @@
      }
    }finally{presenceBusy=false;}
  }
+ function syncThemeOptions(){
+   const dark=document.body.classList.contains('dark');
+   lightModeBtn.setAttribute('aria-pressed',String(!dark));
+   darkModeBtn.setAttribute('aria-pressed',String(dark));
+ }
  function setRoomMenu(open){
+   if(open)syncThemeOptions();
    roomMenu.hidden=!open;
    moreBtn.setAttribute('aria-expanded',String(open));
  }
  moreBtn.addEventListener('click',()=>setRoomMenu(roomMenu.hidden));
- roomMenuLeaveBtn.addEventListener('click',()=>{
+ function chooseClubTheme(mode){
+   // Reuse the existing app-wide theme handler and saved preference.
+   const currentlyDark=document.body.classList.contains('dark');
+   if((mode==='dark')!==currentlyDark)pageThemeToggle.click();
+   syncThemeOptions();
    setRoomMenu(false);
-   leaveClubRoom(true);
- });
+ }
+ lightModeBtn.addEventListener('click',()=>chooseClubTheme('light'));
+ darkModeBtn.addEventListener('click',()=>chooseClubTheme('dark'));
  document.addEventListener('click',event=>{
    if(!roomMenu.hidden&&!event.target.closest('.club-room-menu-wrap'))setRoomMenu(false);
  });
