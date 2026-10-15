@@ -15,6 +15,12 @@ button,input{font:inherit}button{cursor:pointer}a{color:inherit}
 .home .arrow{font-size:24px;font-weight:400}.brand{font-weight:900;color:#805d43;font-size:15px}
 .hero{text-align:center;padding:2px 17px 6px}.eyebrow{letter-spacing:.17em;color:#95745a;font-size:11px;font-weight:800}
 h1{font-family:"Noto Serif KR",Georgia,serif;font-size:29px;letter-spacing:-.06em;margin:0 0 5px;color:#513522}
+.saju-modes{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:8px;margin:3px auto 12px;max-width:450px;padding:5px;border-radius:16px;border:1px solid #e4d6c4;background:#fdf9f2}
+.saju-mode{display:flex;align-items:center;justify-content:center;gap:6px;min-height:53px;border-radius:12px;font-size:16px;font-weight:850;letter-spacing:-.03em;white-space:nowrap}
+.saju-mode.active{background:#765338;color:white;box-shadow:0 2px 6px #49331d20}
+.saju-mode.upcoming{color:#8f8073;cursor:default}
+.saju-mode small{font-size:10px;font-weight:700;border:1px solid #ddcabb;border-radius:9px;padding:2px 5px;letter-spacing:0;white-space:nowrap}
+@media(max-width:355px){.saju-modes{gap:2px;padding:3px}.saju-mode{font-size:14px;gap:3px}.saju-mode small{font-size:9px;padding:2px 3px}}
 .lead{font-size:14px;line-height:1.5;color:#796b61;margin:0}
 .beta{display:inline-flex;align-items:center;justify-content:center;background:#fdf7ec;color:#704f33;border:1px solid #dcc6ab;font-size:12px;font-weight:750;border-radius:999px;padding:7px 12px;margin-top:12px}
 section.panel{background:#fffdfa;border:1px solid #e2d5c3;border-radius:22px;margin:10px 14px;padding:17px 13px;box-shadow:0 8px 24px #4837220b}
@@ -109,7 +115,13 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 <div class="page">
   <header class="top"><a class="home" href="/" aria-label="복작소 홈으로"><span class="arrow" aria-hidden="true">←</span> 복작소</a></header>
   <main class="selection-view" id="selectionView">
-  <div class="hero"><h1>AI 사주채팅</h1><p class="lead">상담사와 분야를 선택해 주세요.</p></div>
+  <div class="hero">
+    <nav class="saju-modes" aria-label="사주 상담 방식">
+      <span class="saju-mode active" aria-current="page">AI 사주</span>
+      <span class="saju-mode upcoming" aria-disabled="true">아바타 사주 <small>준비 중</small></span>
+    </nav>
+    <p class="lead">상담사와 분야를 선택해 주세요.</p>
+  </div>
   <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
   <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section>
   <button id="startChat" type="button" class="start-chat">아라와 채팅 시작하기 →</button>
