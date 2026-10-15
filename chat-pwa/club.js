@@ -189,23 +189,31 @@
    largePhoto=row;largeImage.src=url;imageModal.hidden=false;imageCloseBtn.focus();
  }
  function closeClubImage(){imageModal.hidden=true;largePhoto=null;largeImage.removeAttribute('src')}
- function showPhotoActions(row,source,pointer){
+ function showPhotoActions(row,source){
    if(!row||row.pending===true||!/^https:\/\//i.test(String(row.imageUrl||'')))return;
    menuPhoto=row;
    deletePhotoBtn.hidden=!(row.isMine===true&&Number.isSafeInteger(Number(row.id))&&Number(row.id)>0);
    photoActions.hidden=false;
-   // Position the two small actions over the picture, near where it was held.
-   const rect=source?.getBoundingClientRect();
+   // Center over the actual visible photo, not the page or finger position.
+   const actualPhoto=source?.querySelector?.('.club-post-image')||source;
+   const rect=actualPhoto?.getBoundingClientRect();
+   const viewportW=document.documentElement.clientWidth||window.innerWidth;
+   const viewportH=window.innerHeight;
+   const area=!imageModal.hidden?null:feed.getBoundingClientRect();
    const width=photoActionsCard.offsetWidth||140;
    const height=photoActionsCard.offsetHeight||54;
-   const viewW=document.documentElement.clientWidth||window.innerWidth;
-   const viewH=window.innerHeight;
-   const xAt=pointer?.x||(rect?(rect.left+rect.right)/2:viewW/2);
-   const yAt=pointer?.y||(rect?rect.top+height+12:viewH/2);
-   const rawX=rect?Math.max(rect.left+5,Math.min(xAt-width/2,rect.right-width-5)):xAt-width/2;
-   const rawY=rect?Math.max(rect.top+6,Math.min(yAt-height-12,rect.bottom-height-6)):yAt-height-12;
-   photoActionsCard.style.left=Math.max(10,Math.min(rawX,viewW-width-10))+'px';
-   photoActionsCard.style.top=Math.max(10,Math.min(rawY,viewH-height-10))+'px';
+   let centerX=viewportW/2,centerY=viewportH/2;
+   if(rect&&rect.width>0&&rect.height>0){
+     const x1=Math.max(0,rect.left,area?.left??0);
+     const x2=Math.min(viewportW,rect.right,area?.right??viewportW);
+     const y1=Math.max(0,rect.top,area?.top??0);
+     const y2=Math.min(viewportH,rect.bottom,area?.bottom??viewportH);
+     centerX=x2>x1?(x1+x2)/2:(rect.left+rect.right)/2;
+     centerY=y2>y1?(y1+y2)/2:(rect.top+rect.bottom)/2;
+   }
+   photoActionsCard.style.transform='none';
+   photoActionsCard.style.left=Math.round(Math.max(10,Math.min(centerX-width/2,viewportW-width-10)))+'px';
+   photoActionsCard.style.top=Math.round(Math.max(10,Math.min(centerY-height/2,viewportH-height-10)))+'px';
    copyPhotoBtn.focus({preventScroll:true});
  }
  function closePhotoActions(){if(photoMenuBusy)return;photoActions.hidden=true;menuPhoto=null}
