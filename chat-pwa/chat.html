@@ -1433,8 +1433,9 @@
   const volumeLabels={30:'작게',60:'보통',100:'크게'};
   function displaySoundVolume(){
     const current=effectiveSoundVolume();
-    els.volumeMenuBtn.title='알림 음량 · 현재 '+volumeLabels[current];
-    els.volumeMenuBtn.setAttribute('aria-label','알림 음량 설정 · 현재 '+volumeLabels[current]);
+    const description=volumeLabels[current]||current+'%';
+    els.volumeMenuBtn.title='알림 음량 · 현재 '+description;
+    els.volumeMenuBtn.setAttribute('aria-label','알림 음량 설정 · 현재 '+description);
     els.volumeMenu.querySelectorAll('[data-volume]').forEach(button=>{
       button.setAttribute('aria-checked',String(Number(button.dataset.volume)===current));
     });
@@ -1458,7 +1459,7 @@
     try{
       const data=await api({action:'chat-sound-config'});
       const level=Number(data.level);
-      if([30,60,100].includes(level))defaultSoundVolume=level;
+      if(Number.isInteger(level)&&level>=0&&level<=100)defaultSoundVolume=level;
     }catch(error){console.warn('기본 알림 음량 불러오기 실패',error)}
     displaySoundVolume();
   }
