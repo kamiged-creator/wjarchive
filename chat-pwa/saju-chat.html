@@ -80,6 +80,28 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .chat-full .composer input,.chat-full .send{min-height:50px}
 .chat-full .tips{display:none}
 @media(max-width:355px){.chat-full .chat-heading{padding:8px 6px;gap:5px}.chat-info h2{font-size:15px}.chat-full .clear{padding:6px}}
+
+/* Inline birth-information intake inside the chat stream; never sent or persisted. */
+.intake-card{align-self:flex-start;width:min(calc(100% - 40px),490px);margin-left:36px;background:#fffdfa;border:1px solid #deccb8;border-radius:18px;padding:15px 14px;box-shadow:0 4px 14px #56402b10}
+.intake-title{font-weight:850;font-size:15px;color:#61412c;line-height:1.4;margin:0 0 5px}
+.intake-intro{font-size:12px;line-height:1.55;color:#836c59;margin:0 0 12px}
+.intake-section{border-top:1px solid #f0e6d9;padding:12px 0 6px}
+.intake-section:first-of-type{border-top:0;padding-top:2px}
+.intake-person{font-size:13px;font-weight:850;color:#73523a;margin:0 0 10px}
+.intake-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 9px}
+.intake-field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;color:#705b4c;font-weight:750}
+.intake-field.wide{grid-column:1/-1}
+.intake-field input,.intake-field select{width:100%;min-width:0;height:44px;border:1px solid #d6c3ad;border-radius:9px;background:#fff;color:#49372c;padding:5px 8px;font-size:15px}
+.intake-field input:focus-visible,.intake-field select:focus-visible{outline:2px solid #ac815b;outline-offset:1px}
+.intake-check{display:inline-flex;gap:7px;align-items:center;font-size:12px;color:#694e39;min-height:30px;cursor:pointer;white-space:normal}
+.intake-check input{width:17px;height:17px;accent-color:#826045}
+.intake-actions{display:flex;align-items:center;gap:8px;margin-top:12px}
+.intake-action{flex:1;min-height:44px;border:0;border-radius:11px;background:#765338;color:#fff;font-size:14px;font-weight:800}
+.intake-sample{min-height:44px;padding:0 10px;border:1px solid #d5c2ab;border-radius:11px;background:#faf2e7;color:#70513b;font-size:12px;font-weight:800}
+.intake-privacy{font-size:11px;line-height:1.55;color:#92735d;margin:9px 0 0}
+.intake-summary{white-space:pre-wrap;line-height:1.65;font-size:13px;color:#49372e;margin:10px 0}
+.intake-edit{border:1px solid #d5c2ab;color:#6e4e33;background:#fff;border-radius:10px;min-height:37px;padding:5px 14px;font-size:13px;font-weight:800}
+@media(max-width:355px){.intake-card{width:calc(100% - 32px);margin-left:30px;padding:12px}.intake-fields{gap:7px}.intake-field input,.intake-field select{font-size:14px;padding:5px}}
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
@@ -95,9 +117,9 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="clearChat" class="clear">지우기</button></div>
-    <p class="disclaimer">현재는 상담 화면과 메시지 전송을 시험하는 안내 대화야. 실제 사주풀이·예측·AI 응답은 제공되지 않아. 생년월일 등 개인정보는 아직 입력하지 마.</p>
+    <p class="disclaimer">체험판 · 생년월일은 가상 정보로 시험해 줘. 실제 AI와 만세력은 아직 연결되지 않았어.</p>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
-    <form class="composer" id="composer"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="상담 질문을 입력해 보세요" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></form>
+    <form class="composer" id="composer"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="궁금한 점을 질문해 보세요" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></form>
     <p class="tips" id="chatTip">체험 대화는 이 브라우저 탭에만 임시 보관돼. 실제 AI와 연결되기 전에는 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
@@ -114,20 +136,72 @@ const advisors=[
 ];
 const $=id=>document.getElementById(id);
 let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
+const birthProfiles=Object.create(null),birthEditing=new Set();
+const birthKey=()=>selected.id+"."+topic[0];
 const avatarSources=window.SAJU_AVATARS||{};
 const avatarUrl=id=>typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
 function msg(role,text){return{role,text:String(text).slice(0,1000)}}
-function greeting(){return msg("bot",selected.intro+"\n현재는 '"+topic[2]+"' 화면을 시험할 수 있어요. 실제 사주 계산과 AI 연결은 준비 중이에요.");}
+function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"궁합 상담을 위해 두 분의 생년월일을 입력해 주세요.":"먼저 아래에 생년월일을 입력해 주세요.")+"\n가상 정보로 시험할 수 있어요.");}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");return Array.isArray(x)?x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30):[greeting()];}catch(_){return[greeting()]}}
 let conversation=read();
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
 function portrait(id,name,cls="portrait"){const holder=document.createElement("span");holder.className=cls;const src=avatarUrl(id);if(src){const img=document.createElement("img");img.src=src;img.alt="";img.loading="eager";holder.append(img)}else{holder.textContent=name.slice(0,1)}return holder;}
 function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(const a of advisors){const b=document.createElement("button");b.type="button";b.className="avatar";b.setAttribute("aria-pressed",String(a.id===selected.id));const wrap=document.createElement("span");wrap.className="avatar-portrait-wrap";wrap.append(portrait(a.id,a.name));const check=document.createElement("span");check.className="avatar-check";check.textContent="✓";check.setAttribute("aria-hidden","true");wrap.append(check);b.append(wrap);const title=document.createElement("strong");title.textContent=a.name;const small=document.createElement("small");small.textContent=a.specialty;b.append(title,small);b.addEventListener("click",()=>{if(a.id===selected.id)return;selected=a;topic=a.topics[0];conversation=read();renderAll()});root.append(b)}}
 function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]!==t[0]){topic=t;conversation=read();renderAll()}openChat()});root.append(b)}}
-function renderMessages(){const feed=$("messages");feed.replaceChildren();for(const item of conversation){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row)}requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight})}
+
+function makeEl(tag,cls,txt){const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;}
+function makeIntake(){
+ const key=birthKey(),existing=birthProfiles[key]||null;
+ const card=makeEl("div","intake-card");
+ card.append(makeEl("p","intake-title",existing&&!birthEditing.has(key)?"✓ 생년월일 입력 확인":"📅 사주 정보 입력"));
+ if(existing&&!birthEditing.has(key)){
+   const names=existing.length===2?["본인","상대방"]:["본인"];
+   const summary=existing.map((p,i)=>names[i]+" · "+(p.calendar==="lunar"?"음력":"양력")+(p.leap?"(윤달)":"")+" "+p.date.replaceAll("-",".")+" · "+(p.unknown?"태어난 시간 모름":p.time)+(p.gender!=="unspecified"?" · "+p.gender:"")).join("\n");
+   card.append(makeEl("p","intake-summary",summary));
+   card.append(makeEl("p","intake-privacy","입력한 생년월일은 현재 화면에서만 임시 표시돼. 서버 전송·대화 기록 저장은 하지 않아."));
+   const edit=makeEl("button","intake-edit","정보 수정하기");edit.type="button";edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false)});card.append(edit);
+   return card;
+ }
+ card.append(makeEl("p","intake-intro","아래 정보로 입력 화면을 체험해 봐. 실제 개인정보 대신 예시 값을 쓰는 걸 권장해."));
+ const form=makeEl("form","intake-form");const sets=[];
+ const count=topic[0]==="match"?2:1;
+ for(let i=0;i<count;i++){
+   const prev=existing?.[i]||{};
+   const section=makeEl("div","intake-section"),label=makeEl("p","intake-person",count===2?(i===0?"① 본인 정보":"② 상대방 정보"):"출생 정보");
+   section.append(label);
+   const fields=makeEl("div","intake-fields");
+   function field(caption,control,wide){const box=makeEl("label","intake-field"+(wide?" wide":""));box.append(makeEl("span","",caption),control);fields.append(box);}
+   const date=makeEl("input");date.type="date";date.required=true;date.min="1900-01-01";date.max=new Date().toISOString().slice(0,10);date.value=prev.date||"";
+   field("생년월일",date,true);
+   const calendar=makeEl("select");for(const [v,name] of [["solar","양력"],["lunar","음력"]]){const opt=makeEl("option","",name);opt.value=v;calendar.append(opt);}calendar.value=prev.calendar||"solar";
+   field("양력 / 음력",calendar,false);
+   const gender=makeEl("select");for(const [v,name]of [["unspecified","선택 안 함"],["남성","남성"],["여성","여성"]]){const opt=makeEl("option","",name);opt.value=v;gender.append(opt);}gender.value=prev.gender||"unspecified";
+   field("성별 (선택)",gender,false);
+   const time=makeEl("input");time.type="time";time.value=prev.time||"12:00";
+   field("태어난 시간",time,false);
+   const options=makeEl("div","");options.style.display="flex";options.style.flexDirection="column";
+   const unknownLabel=makeEl("label","intake-check");const unknown=makeEl("input");unknown.type="checkbox";unknown.checked=prev.unknown!==false;unknownLabel.append(unknown,makeEl("span","","태어난 시간 모름"));options.append(unknownLabel);
+   const leapLabel=makeEl("label","intake-check");const leap=makeEl("input");leap.type="checkbox";leap.checked=!!prev.leap;leapLabel.append(leap,makeEl("span","","음력 윤달"));options.append(leapLabel);
+   fields.append(options);
+   function update(){time.disabled=unknown.checked;leapLabel.hidden=calendar.value!=="lunar";if(leapLabel.hidden)leap.checked=false;}unknown.addEventListener("change",update);calendar.addEventListener("change",update);update();
+   section.append(fields);form.append(section);
+   sets.push({date,calendar,gender,time,unknown,leap});
+ }
+ const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.date.value=i===0?"1990-03-12":"1992-05-04";p.calendar.value="solar";p.gender.value="unspecified";p.unknown.checked=true;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";actions.append(sample,submit);form.append(actions);
+ form.addEventListener("submit",ev=>{ev.preventDefault();if(!form.reportValidity())return;
+   birthProfiles[key]=sets.map(p=>({date:p.date.value,calendar:p.calendar.value,gender:p.gender.value,unknown:p.unknown.checked,time:p.unknown.checked?"":p.time.value,leap:p.calendar.value==="lunar"&&p.leap.checked}));
+   birthEditing.delete(key);renderMessages(false);
+ });
+ card.append(form,makeEl("p","intake-privacy","테스트용 입력값은 서버로 보내거나 저장하지 않아. 새로고침하면 사라져."));
+ return card;
+}
+
+function renderMessages(scrollToEnd=true){const feed=$("messages");feed.replaceChildren();for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
 function renderAll(){renderAdvisors();renderTopics();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.name+"와 채팅 시작하기 →";renderMessages();save();}
-function syncChatView(){const open=location.hash==="#chat";document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages()}else{$("question").blur();}}
+function syncChatView(){const open=location.hash==="#chat";document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
 function openChat(){if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
 function response(){return selected.name+" 상담방에 질문이 입력됐어.\n\n지금은 "+topic[2]+" 분야의 대화 화면을 미리 보는 체험판이야. 실제 상담사의 AI 답변과 만세력 분석을 연결하면 이 자리에서 질문에 맞춘 풀이를 이어갈 수 있어.";}
@@ -141,7 +215,7 @@ form.addEventListener("submit",e=>{e.preventDefault();send()});
 sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
 sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimary)return;const r=sendBtn.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){form.requestSubmit(sendBtn);input.focus({preventScroll:true})}});
 input.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229))e.preventDefault()});
-$("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;conversation=[greeting()];save();renderMessages()});
+$("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;delete birthProfiles[birthKey()];birthEditing.delete(birthKey());conversation=[greeting()];save();renderMessages(false)});
 renderAll();
 syncChatView();
 })();
