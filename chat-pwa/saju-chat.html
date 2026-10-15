@@ -51,22 +51,53 @@ footer{text-align:center;color:#938073;padding:12px 20px 25px;font-size:11px;lin
 button:focus-visible,a:focus-visible{outline:3px solid #9b6e4d;outline-offset:3px}
 @media(min-width:600px){.top{padding-top:22px}.hero{padding-top:10px}.messages{min-height:295px}.portrait{width:96px;height:96px}}
 @media(max-width:355px){.top{padding:11px}.avatar small{font-size:10px}.avatar strong{font-size:14px}.topic{padding:9px 7px;font-size:13px}.panel{margin-left:9px!important;margin-right:9px!important}}
+
+/* Two-stage mobile flow: adviser/topic selection then viewport-filling chat. */
+[hidden]{display:none!important}
+.selection-view{display:flex;flex-direction:column;padding-bottom:10px}
+.choose-tip{text-align:center;color:#846f5d;font-size:12px;line-height:1.5;margin:8px 18px}
+.start-chat{display:block;margin:7px 14px 8px;min-height:54px;border:0;border-radius:15px;background:#765338;color:white;font-weight:850;font-size:16px}
+body.chat-active{height:100dvh;overflow:hidden}
+.chat-active .page{height:100dvh;min-height:0;max-width:none;overflow:hidden}
+.chat-active footer{display:none}
+.chat-view{display:flex;flex-direction:column;flex:1;min-height:0;height:100%;width:100%;background:#fffaf4}
+section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;max-width:760px;width:100%;height:100%;overflow:hidden;margin:0 auto!important;padding:0;border:0;border-radius:0;background:#fffaf4;box-shadow:none}
+.chat-full .chat-heading{flex-shrink:0;display:flex;gap:9px;align-items:center;margin:0;min-height:66px;padding:9px 12px;background:#fffdfa;border-bottom:1px solid #e7d8c6}
+.back-to-select{width:38px;height:44px;border:0;border-radius:8px;background:none;color:#60442e;font-size:29px;flex:none}
+.header-portrait{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:50%;background:#f4dfcc;color:#674631;font-weight:800}
+.header-portrait img{display:block;width:100%;height:100%;object-fit:cover}
+.chat-info{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.chat-info h2{font-size:17px;margin:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.chat-info small{font-size:11px;color:#856d59;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-full .clear{flex:none;min-height:36px}
+.chat-full .disclaimer{flex:none;border-radius:0;border-bottom:1px solid #eee0ce;margin:0;padding:8px 15px;font-size:11px;background:#fcf1e2}
+.chat-full .messages{flex:1;min-height:0;max-height:none;overflow-y:auto;padding:17px max(14px,calc((100% - 720px)/2)) 20px;gap:14px;background:linear-gradient(160deg,#fffaf4,#f7f0e6);-webkit-overflow-scrolling:touch}
+.chat-full .composer{flex:none;min-height:72px;margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fffdfa;border-top:1px solid #e7d8c6}
+.chat-full .composer input,.chat-full .send{min-height:50px}
+.chat-full .tips{display:none}
+@media(max-width:355px){.chat-full .chat-heading{padding:8px 6px;gap:5px}.chat-info h2{font-size:15px}.chat-full .clear{padding:6px}}
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
 <body>
 <div class="page">
   <header class="top"><a class="home" href="/" aria-label="복작소 홈으로"><span class="arrow" aria-hidden="true">←</span> 복작소</a><span class="brand">福 · SAJU CHAT</span></header>
+  <main class="selection-view" id="selectionView">
   <div class="hero"><div class="eyebrow">BOKJAKSO COMMUNITY</div><h1>AI 사주채팅</h1><p class="lead">상담사를 고르고 전문 분야의 대화를 체험해 보세요.</p><span class="beta">체험판 · 실제 AI 및 만세력 계산은 연결 준비 중</span></div>
   <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택 <span class="hint">· 얼굴을 눌러 변경</span></h2><div class="avatars" id="avatars"></div></section>
   <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">전문 상담 분야 <span class="hint">· 선택한 상담사 담당 분야</span></h2><div class="topics" id="topics"></div></section>
-  <section class="panel chat-panel" aria-labelledby="chatTitle">
-    <div class="chat-heading"><h2 id="chatTitle">아라 · 사주</h2><button type="button" id="clearChat" class="clear">대화 지우기</button></div>
+  <p class="choose-tip">상담 분야를 누르면 채팅창이 전체 화면으로 열려요.</p>
+  <button id="startChat" type="button" class="start-chat">아라와 채팅 시작하기 →</button>
+  </main>
+  <div id="chatView" class="chat-view" hidden>
+  <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
+    <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="clearChat" class="clear">지우기</button></div>
     <p class="disclaimer">현재는 상담 화면과 메시지 전송을 시험하는 안내 대화야. 실제 사주풀이·예측·AI 응답은 제공되지 않아. 생년월일 등 개인정보는 아직 입력하지 마.</p>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <form class="composer" id="composer"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="상담 질문을 입력해 보세요" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></form>
     <p class="tips" id="chatTip">체험 대화는 이 브라우저 탭에만 임시 보관돼. 실제 AI와 연결되기 전에는 개인정보 입력을 삼가줘.</p>
   </section>
+  </div>
   <footer>복작소 사주채팅 미리보기 · 실제 상담 및 명식 해석 기능은 개발 중이야.</footer>
 </div>
 <script>
@@ -90,12 +121,18 @@ let conversation=read();
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
 function portrait(id,name,cls="portrait"){const holder=document.createElement("span");holder.className=cls;const src=avatarUrl(id);if(src){const img=document.createElement("img");img.src=src;img.alt="";img.loading="eager";holder.append(img)}else{holder.textContent=name.slice(0,1)}return holder;}
 function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(const a of advisors){const b=document.createElement("button");b.type="button";b.className="avatar";b.setAttribute("aria-pressed",String(a.id===selected.id));b.append(portrait(a.id,a.name));const title=document.createElement("strong");title.textContent=a.name;const small=document.createElement("small");small.textContent=a.specialty;b.append(title,small);b.addEventListener("click",()=>{if(a.id===selected.id)return;selected=a;topic=a.topics[0];conversation=read();renderAll()});root.append(b)}}
-function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]===t[0])return;topic=t;conversation=read();renderAll()});root.append(b)}}
+function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]!==t[0]){topic=t;conversation=read();renderAll()}openChat()});root.append(b)}}
 function renderMessages(){const feed=$("messages");feed.replaceChildren();for(const item of conversation){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row)}requestAnimationFrame(()=>{feed.scrollTop=feed.scrollHeight})}
-function renderAll(){renderAdvisors();renderTopics();$("chatTitle").textContent=selected.name+" · "+topic[2];renderMessages();save();}
+function renderAll(){renderAdvisors();renderTopics();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.name+"와 채팅 시작하기 →";renderMessages();save();}
+function syncChatView(){const open=location.hash==="#chat";document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages()}else{$("question").blur();}}
+function openChat(){if(location.hash!=="#chat")location.hash="chat";syncChatView();}
+function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
 function response(){return selected.name+" 상담방에 질문이 입력됐어.\n\n지금은 "+topic[2]+" 분야의 대화 화면을 미리 보는 체험판이야. 실제 상담사의 AI 답변과 만세력 분석을 연결하면 이 자리에서 질문에 맞춘 풀이를 이어갈 수 있어.";}
 function send(){if(sentBusy)return;const input=$("question");const content=input.value.trim();if(!content)return;sentBusy=true;conversation.push(msg("user",content));input.value="";renderMessages();conversation.push(msg("bot",response()));save();renderMessages();sentBusy=false;}
 const form=$("composer"),input=$("question"),sendBtn=$("send");
+$("startChat").addEventListener("click",openChat);
+$("backToSelect").addEventListener("click",closeChat);
+window.addEventListener("hashchange",syncChatView);
 form.addEventListener("submit",e=>{e.preventDefault();send()});
 // Keep focus when tapping Send with the on-screen IME, including Samsung browsers.
 sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
@@ -103,6 +140,7 @@ sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimar
 input.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229))e.preventDefault()});
 $("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;conversation=[greeting()];save();renderMessages()});
 renderAll();
+syncChatView();
 })();
 </script>
 </body>
