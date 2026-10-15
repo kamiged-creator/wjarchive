@@ -469,7 +469,25 @@
      await refresh();
    }finally{resetBtn.disabled=false;}
  });
- document.getElementById('clubCompose').addEventListener('submit',async e=>{
+ // Android/Samsung IME: tapping Send used to blur the input first. That
+ // shrinks/reflows the keyboard layout and moves the button before the click,
+ // so the first tap only dismisses the keyboard. Keep focus through the tap,
+ // and submit explicitly on touch/pen release; the submit guard below prevents
+ // a later native click from sending the same message twice.
+ const composeForm=document.getElementById('clubCompose');
+ sendBtn.addEventListener('pointerdown',event=>{
+   if(event.pointerType!=='mouse'&&event.isPrimary&&document.activeElement===input){
+     event.preventDefault();
+   }
+ });
+ sendBtn.addEventListener('pointerup',event=>{
+   if(event.pointerType==='mouse'||!event.isPrimary||sendBtn.disabled)return;
+   const bounds=sendBtn.getBoundingClientRect();
+   if(event.clientX<bounds.left||event.clientX>bounds.right||
+      event.clientY<bounds.top||event.clientY>bounds.bottom)return;
+   composeForm.requestSubmit(sendBtn);
+ });
+ composeForm.addEventListener('submit',async e=>{
    e.preventDefault();
    const message=input.value.trim();
    if(!message||membership!=='approved'||pane.hidden||sending)return;
