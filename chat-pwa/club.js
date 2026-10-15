@@ -337,7 +337,7 @@
      if(row.isMine!==true)meta.append(name);
      meta.append(time);
      article.append(meta);
-     if(row.imageUrl&&/^https:\/\//i.test(row.imageUrl)){
+     if(row.imageUrl&&(/^https:\/\//i.test(row.imageUrl)||(row.pending===true&&row.imageUrl.startsWith('blob:')))){
        const button=document.createElement('button');button.type='button';
        button.className='club-photo-open';button.setAttribute('aria-label','사진 크게 보기');
        const photo=document.createElement('img');
@@ -550,58 +550,75 @@
      event.preventDefault();
    }
  });
+
+ function selectClubPhoto(file){
+   if(!file||sending)return;
+   try{
+     if(!/^image\//.test(file.type)||file.size>12*1024*1024)
+       throw new Error('12MB 이하의 사진만 선택할 수 있어요.');
+     clearPhotoSelection();
+     selectedPhoto=file;photoPreviewUrl=URL.createObjectURL(file);
+     previewImage.src=photoPreviewUrl;previewName.textContent=file.name||'사진 1장';
+     preview.hidden=false;chatFeedback.textContent='';
+   }catch(error){chatFeedback.textContent=error.message||'사진을 선택하지 못했어요.'}
+ }
+ attachBtn.addEventListener('click',()=>{
+   if(membership!=='approved'||pane.hidden||sending)return;
+   const open=attachMenu.hidden;attachMenu.hidden=!open;
+   attachBtn.setAttribute('aria-expanded',String(open));
+   if(open)input.blur();
+ });
+ document.getElementById('clubChoosePhoto').addEventListener('click',()=>{hideAttachMenu();galleryInput.click()});
+ document.getElementById('clubTakePhoto').addEventListener('click',()=>{hideAttachMenu();cameraInput.click()});
+ document.getElementById('clubCancelAttachment').addEventListener('click',hideAttachMenu);
+ for(const picker of [galleryInput,cameraInput]){
+   picker.addEventListener('change',()=>{const file=picker.files?.[0];picker.value='';selectClubPhoto(file)});
+ }
+ removePhotoBtn.addEventListener('click',clearPhotoSelection);
+ document.addEventListener('click',event=>{
+   if(!attachMenu.hidden&&!event.target.closest('.club-plus-wrap'))hideAttachMenu();
+ });
+ imageCloseBtn.addEventListener('click',closeClubImage);
+ imageModal.addEventListener('click',event=>{if(event.target===imageModal)closeClubImage()});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!imageModal.hidden)closeClubImage()});
  composeForm.addEventListener('submit',async e=>{
    e.preventDefault();
-   const message=input.value.trim();
-   if(!message||membership!=='approved'||pane.hidden||sending)return;
-   // KakaoTalk-style send: keep the IME open if the visitor was typing.
+   const message=input.value.trim(),photo=selectedPhoto;
+   if((!message&&!photo)||membership!=='approved'||pane.hidden||sending)return;
    const wasTyping=document.activeElement===input&&clubMobilePointer.matches;
-   sending=true;
-   sendBtn.disabled=true;
+   sending=true;sendBtn.disabled=true;attachBtn.disabled=true;removePhotoBtn.disabled=true;
+   hideAttachMenu();
    const generation=roomGeneration;
    const draft={
-     id:null,nickname:sharedProfile?.nickname||'나',body:message,
+     id:null,nickname:sharedProfile?.nickname||'나',body:message||'사진',
+     imageUrl:photo?photoPreviewUrl:null,
      created_at:new Date().toISOString(),isMine:true,
      avatarUrl:sharedProfile?.avatar_url||null,pending:true
    };
-   optimisticMessage=draft;
-   chatFeedback.textContent='';
-   input.value='';
-   renderMessages(true); // New bubble appears immediately without a network wait.
-   if(wasTyping){
-     // Do not let a touch-triggered layout shift dismiss the Samsung keyboard.
-     input.focus({preventScroll:true});
-     syncClubInputFocus();
-     keepLatestVisibleWhileTyping();
-   }
+   optimisticMessage=draft;chatFeedback.textContent='';input.value='';
+   renderMessages(true);
+   if(wasTyping){input.focus({preventScroll:true});syncClubInputFocus();keepLatestVisibleWhileTyping()}
    try{
-     const response=await request('send',{message});
+     const uploaded=photo?await uploadClubPhoto(photo):null;
+     const response=await request('send',{message,...(uploaded?{imageFileId:uploaded.fileId}:{})});
      if(generation!==roomGeneration)return;
-     if(response.message?.id){
-       draft.id=response.message.id;
-       draft.created_at=response.message.created_at||draft.created_at;
-     }
+     draft.id=response.message?.id||null;
+     draft.created_at=response.message?.created_at||draft.created_at;
+     if(uploaded)draft.imageUrl=response.message?.imageUrl||uploaded.url;
      draft.pending=false;
      renderMessages(true);
+     if(photo)clearPhotoSelection();
    }catch(err){
      if(generation!==roomGeneration)return;
-     optimisticMessage=null;
-     renderMessages();
-     if(err.statusCode===401||err.statusCode===403){
-       leaveClubRoom();
-       await refresh();
-     }else{
-       // Put the unsent text back, including anything typed during upload.
+     optimisticMessage=null;renderMessages();
+     if(err.statusCode===401||err.statusCode===403){leaveClubRoom();await refresh()}
+     else{
        input.value=message+(input.value?' '+input.value:'');
-       chatFeedback.textContent='전송하지 못했어요. 다시 전송해 주세요. '+(err.message||'');
+       chatFeedback.textContent='전송하지 못했어요. 다시 시도해 주세요. '+(err.message||'');
      }
    }finally{
-     sending=false;
-     sendBtn.disabled=false;
-     if(generation===roomGeneration&&optimisticMessage&&!pane.hidden){
-       // Reconcile with the authoritative, approved-members-only server.
-       loadMessages();
-     }
+     sending=false;sendBtn.disabled=false;attachBtn.disabled=false;removePhotoBtn.disabled=false;
+     if(generation===roomGeneration&&optimisticMessage&&!pane.hidden)loadMessages();
    }
  });
  setInterval(()=>{
