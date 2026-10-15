@@ -285,8 +285,10 @@ async function handleChat(body, res, req) {
 
   if (action === 'chat-sound-config') {
     const settings = await supabaseRequest('site_settings?key=eq.chat_sound_default_volume&select=value&limit=1');
-    const saved = Number(Array.isArray(settings) ? settings[0]?.value?.level : 0);
-    res.status(200).json({ ok: true, level: [30, 60, 100].includes(saved) ? saved : 100 });
+    const raw = Array.isArray(settings) ? settings[0]?.value?.level : undefined;
+    const saved = Number(raw);
+    const level = raw !== undefined && raw !== null && Number.isInteger(saved) && saved >= 0 && saved <= 100 ? saved : 100;
+    res.status(200).json({ ok: true, level });
     return;
   }
 
