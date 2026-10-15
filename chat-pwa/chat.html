@@ -1475,6 +1475,7 @@
     if(!preview&&now-lastSoundAt<2500)return;
     lastSoundAt=now;
     const volume=effectiveSoundVolume()/100;
+    if(volume<=0)return; // An administrator-set 0% default means silent.
     function fallbackChime(){
       try{
         const AudioCtx=window.AudioContext||window.webkitAudioContext;
