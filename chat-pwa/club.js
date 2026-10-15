@@ -28,11 +28,18 @@
  const feed=document.getElementById('clubMessages');
  const input=document.getElementById('clubMessageInput');
  const sendBtn=document.getElementById('clubSendBtn');
+ const attachBtn=document.getElementById('clubAttachBtn'),attachMenu=document.getElementById('clubAttachmentMenu');
+ const galleryInput=document.getElementById('clubGalleryInput'),cameraInput=document.getElementById('clubCameraInput');
+ const preview=document.getElementById('clubAttachmentPreview'),previewImage=document.getElementById('clubPreviewImage');
+ const previewName=document.getElementById('clubPreviewName'),removePhotoBtn=document.getElementById('clubRemoveAttachment');
+ const imageModal=document.getElementById('clubImageModal'),largeImage=document.getElementById('clubImageLarge');
+ const imageCloseBtn=document.getElementById('clubImageClose');
  const adminLink=document.getElementById('clubAdminLink');
  const clubTab=document.getElementById('homeTabClub');
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
+ let selectedPhoto=null,photoPreviewUrl=null;
  let presenceBusy=false;
  const clubIsVisible=()=>!pane.hidden&&membership==='approved'&&!document.hidden&&
    !document.body.classList.contains('chat-active')&&
@@ -165,6 +172,43 @@
    }
    return data;
  }
+ function clearPhotoSelection(){
+   if(photoPreviewUrl)URL.revokeObjectURL(photoPreviewUrl);
+   selectedPhoto=null;photoPreviewUrl=null;preview.hidden=true;
+   previewImage.removeAttribute('src');previewName.textContent='사진 1장';
+   galleryInput.value='';cameraInput.value='';
+ }
+ function hideAttachMenu(){attachMenu.hidden=true;attachBtn.setAttribute('aria-expanded','false')}
+ function showClubImage(url){
+   if(typeof url!=='string'||!/^https:\/\//i.test(url))return;
+   largeImage.src=url;imageModal.hidden=false;imageCloseBtn.focus();
+ }
+ function closeClubImage(){imageModal.hidden=true;largeImage.removeAttribute('src')}
+ async function compressClubPhoto(file){
+   if(!file||!/^image\//.test(file.type))throw new Error('사진 파일만 선택할 수 있어요.');
+   if(file.size>12*1024*1024)throw new Error('12MB 이하 사진만 선택할 수 있어요.');
+   let bitmap;try{bitmap=await createImageBitmap(file)}catch(_){throw new Error('읽을 수 없는 사진이에요. JPG나 PNG를 선택해 주세요.')}
+   const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
+   const canvas=document.createElement('canvas');
+   canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+   const ctx=canvas.getContext('2d');
+   if(!ctx){bitmap.close?.();throw new Error('사진 변환에 실패했어요.')}
+   ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+   const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.80));
+   if(!blob||blob.type!=='image/webp'||blob.size>6*1024*1024)throw new Error('사진 압축에 실패했어요.');
+   return new File([blob],'club-'+Date.now()+'.webp',{type:'image/webp'});
+ }
+ async function uploadClubPhoto(file){
+   const prepared=await compressClubPhoto(file);
+   const auth=await request('image-auth');
+   const form=new FormData();
+   for(const [key,value]of Object.entries({fileName:prepared.name,publicKey:auth.publicKey,signature:auth.signature,expire:String(auth.expire),token:auth.token,folder:auth.folder,useUniqueFileName:'true'}))form.append(key,value);
+   form.append('file',prepared);
+   const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok||!result.url||!result.fileId)throw new Error(result.message||'사진 업로드에 실패했어요.');
+   return result;
+ }
  function leaveClubRoom(restoreFocus=false){
    const wasOpen=!pane.hidden;
    if(wasOpen)leavePresence();
@@ -172,6 +216,7 @@
    confirmedRows=[];
    optimisticMessage=null;
    lastRenderKey='';
+   clearPhotoSelection();hideAttachMenu();closeClubImage();
    feed.replaceChildren();
    pane.hidden=true;
    landing.hidden=false;
@@ -233,7 +278,7 @@
    // Polling unchanged messages must not rebuild portraits or flicker the
    // conversation. Only redraw when a row actually changed.
    const key=JSON.stringify(items.map(row=>[row.id||'',row.nickname||'',row.body||'',
-     row.created_at||'',row.avatarUrl||'',row.isMine===true,row.pending===true]));
+     row.created_at||'',row.avatarUrl||'',row.imageUrl||'',row.isMine===true,row.pending===true]));
    if(key===lastRenderKey){
      if(forceBottom)feed.scrollTop=feed.scrollHeight;
      return;
@@ -291,7 +336,17 @@
      body.textContent=row.body||'';
      if(row.isMine!==true)meta.append(name);
      meta.append(time);
-     article.append(meta,body);
+     article.append(meta);
+     if(row.imageUrl&&/^https:\/\//i.test(row.imageUrl)){
+       const button=document.createElement('button');button.type='button';
+       button.className='club-photo-open';button.setAttribute('aria-label','사진 크게 보기');
+       const photo=document.createElement('img');
+       photo.className='club-post-image';photo.src=row.imageUrl;photo.alt='클럽 회원이 보낸 사진';
+       photo.loading='lazy';photo.decoding='async';
+       button.append(photo);button.addEventListener('click',()=>showClubImage(row.imageUrl));
+       article.append(button);
+     }
+     if(row.body&&(!row.imageUrl||row.body!=='사진'))article.append(body);
      messageRow.append(avatar,article);
      feed.appendChild(messageRow);
    }
