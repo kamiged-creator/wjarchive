@@ -35,6 +35,14 @@ h2 span{font-size:15px;color:var(--muted)}
 .member-avatar.zoomable{cursor:zoom-in}
 .member-info{flex:1;min-width:0}
 .member-name{font-size:18px;font-weight:850;overflow-wrap:anywhere}
+.member-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.club-member-label{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid var(--accent);border-radius:999px;color:var(--accent);font-size:12px;font-weight:800;white-space:nowrap}
+.pager{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:17px}
+.pager[hidden]{display:none!important}
+.pager button{min-width:43px;min-height:43px;padding:8px 11px;border-radius:11px}
+.pager button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pager button:disabled{opacity:.4;cursor:default}
+.pager-status{flex:0 0 100%;text-align:center;color:var(--muted);font-size:13px;margin-top:3px}
 .member-meta{color:var(--muted);line-height:1.5;font-size:13px;margin-top:4px;overflow-wrap:anywhere}
 .note{color:var(--muted);font-size:13px;line-height:1.65;margin:12px 1px 0}
 .empty{color:var(--muted);padding:17px 0}
@@ -59,6 +67,7 @@ h2 span{font-size:15px;color:var(--muted)}
 <section class="card">
  <h2>일반 채팅 이용 기록 <span id="listCount">(불러오는 중)</span></h2>
  <div id="list" aria-live="polite">목록을 불러오는 중…</div>
+ <nav id="pagination" class="pager" aria-label="일반 채팅 이용 기록 페이지" hidden></nav>
  <p class="note">이 명단은 일반 채팅방 이용 기록 기준이며, 클럽 정회원 명단과 별개야. 등록된 프로필 사진이 있으면 함께 표시해.</p>
 </section>
 </main>
@@ -74,9 +83,10 @@ h2 span{font-size:15px;color:var(--muted)}
  const TOKEN_KEY='wjarchiveAdminAccessToken';
  if(!sessionStorage.getItem(TOKEN_KEY)){location.replace('/admin-login.html');return;}
  const byId=id=>document.getElementById(id);
- const stats=byId('stats'),list=byId('list'),listCount=byId('listCount'),feedback=byId('feedback'),search=byId('search');
+ const stats=byId('stats'),list=byId('list'),listCount=byId('listCount'),feedback=byId('feedback'),search=byId('search'),pagination=byId('pagination');
  const overlay=byId('portraitOverlay'),dialog=byId('portraitDialog'),portrait=byId('portraitExpanded'),caption=byId('portraitCaption');
- let users=[],profileCount=0,limited=false,trigger=null,priorOverflow='';
+ const PAGE_SIZE=5;
+ let users=[],profileCount=0,limited=false,trigger=null,priorOverflow='',page=1;
  const formatDate=value=>{if(!value)return '';const d=new Date(value);return Number.isNaN(d.getTime())?'':d.toLocaleString('ko-KR');};
  function closePhoto(){
   if(overlay.hidden)return;
@@ -96,10 +106,16 @@ h2 span{font-size:15px;color:var(--muted)}
   }
   const q=search.value.trim().toLocaleLowerCase('ko-KR');
   const rows=q?users.filter(u=>(u.nickname+' '+u.roomTitle).toLocaleLowerCase('ko-KR').includes(q)):users;
+  const totalPages=Math.max(1,Math.ceil(rows.length/PAGE_SIZE));
+  page=Math.min(Math.max(page,1),totalPages);
+  const start=(page-1)*PAGE_SIZE;
+  const visibleRows=rows.slice(start,start+PAGE_SIZE);
   listCount.textContent='('+rows.length+'건'+(q?' / 전체 '+users.length+'건':'')+')';
   list.replaceChildren();
+  pagination.replaceChildren();
+  pagination.hidden=totalPages<=1;
   if(!rows.length){const el=document.createElement('p');el.className='empty';el.textContent=q?'검색 결과가 없어.':'일반 채팅방 이용 기록이 없어.';list.appendChild(el);return;}
-  for(const row of rows){
+  for(const row of visibleRows){
    const item=document.createElement('article');item.className='member';
    const hasPhoto=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl);
    const avatar=document.createElement(hasPhoto?'button':'span');avatar.className='member-avatar'+(hasPhoto?' zoomable':'');avatar.textContent='👤';
@@ -110,10 +126,35 @@ h2 span{font-size:15px;color:var(--muted)}
     avatar.replaceChildren(img);avatar.addEventListener('click',()=>openPhoto(row.avatarUrl,row.nickname,avatar));
    }
    const info=document.createElement('div');info.className='member-info';
+   const nameRow=document.createElement('div');nameRow.className='member-name-row';
    const name=document.createElement('div');name.className='member-name';name.textContent=row.nickname||'이름 없음';
+   nameRow.appendChild(name);
+   if(row.isClubMember===true){
+    const clubLabel=document.createElement('span');clubLabel.className='club-member-label';clubLabel.textContent='클럽 정회원';nameRow.appendChild(clubLabel);
+   }
    const room=document.createElement('div');room.className='member-meta';room.textContent='채팅방: '+(row.roomTitle||'이전 채팅방')+(row.blocked?' · 이용 제한':'');
    const time=document.createElement('div');time.className='member-meta';time.textContent='입장 기록: '+(formatDate(row.joinedAt)||'날짜 확인 불가');
-   info.append(name,room,time);item.append(avatar,info);list.appendChild(item);
+   info.append(nameRow,room,time);item.append(avatar,info);list.appendChild(item);
+  }
+  if(totalPages>1){
+   const goTo=next=>{
+    if(next===page||next<1||next>totalPages)return;
+    page=next;render();list.scrollIntoView({behavior:'smooth',block:'start'});
+   };
+   const navButton=(label,next,disabled,current=false)=>{
+    const b=document.createElement('button');b.type='button';b.textContent=String(label);b.disabled=disabled;
+    if(current)b.setAttribute('aria-current','page');
+    b.setAttribute('aria-label',typeof label==='number'?'페이지 '+label:label);
+    b.addEventListener('click',()=>goTo(next));pagination.appendChild(b);
+   };
+   navButton('이전',page-1,page===1);
+   const first=Math.max(1,Math.min(page-2,totalPages-4));
+   const last=Math.min(totalPages,first+4);
+   for(let n=first;n<=last;n++)navButton(n,n,n===page,n===page);
+   navButton('다음',page+1,page===totalPages);
+   const status=document.createElement('div');status.className='pager-status';
+   status.textContent=page+' / '+totalPages+' 페이지 · 한 페이지 5건';
+   pagination.appendChild(status);
   }
  }
  async function load(){
@@ -124,11 +165,11 @@ h2 span{font-size:15px;color:var(--muted)}
    const response=await fetch('/api/content-admin',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'chat-list-users'}),cache:'no-store'});
    const data=await response.json().catch(()=>({}));
    if(!response.ok)throw new Error(data.message||'명단을 불러오지 못했어.');
-   users=Array.isArray(data.users)?data.users:[];profileCount=Number(data.profileCount)||0;limited=data.limited===true;
+   users=Array.isArray(data.users)?data.users:[];profileCount=Number(data.profileCount)||0;limited=data.limited===true;page=1;
    render();feedback.textContent='이용자 명단을 불러왔어.'+(limited?' 최근 500건까지만 표시 중이야.':'');
   }catch(e){feedback.textContent=e.message;listCount.textContent='(조회 실패)';list.textContent='명단을 확인할 수 없어.';if(/관리자 로그인/.test(e.message))location.replace('/admin-login.html');}
  }
- search.addEventListener('input',render);byId('reload').addEventListener('click',load);load();
+ search.addEventListener('input',()=>{page=1;render();});byId('reload').addEventListener('click',load);load();
 })();
 </script>
 </body>
