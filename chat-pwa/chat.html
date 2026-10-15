@@ -1057,6 +1057,15 @@
       font:inherit;font-size:14px;font-weight:750;
       white-space:nowrap;touch-action:manipulation;
     }
+    /* Prevent Android/Samsung text-selection handles on image action buttons. */
+    .club-photo-actions,
+    .club-photo-actions *,
+    .club-photo-actions-card button{
+      -webkit-user-select:none!important;
+      user-select:none!important;
+      -webkit-touch-callout:none!important;
+      -webkit-tap-highlight-color:transparent;
+    }
     .club-photo-actions-card button.danger{color:#b14c3d}
     .club-photo-actions-card button[hidden]{display:none!important}
     .club-photo-actions-card button:disabled{opacity:.55}
