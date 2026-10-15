@@ -62,10 +62,16 @@
     .volume-card{border:2px solid #d0bfac;background:#fffefa;box-shadow:0 4px 14px rgba(66,44,30,.05)}
     .volume-card h2{font-size:20px;margin-bottom:7px}
     .volume-card .muted{font-size:14px;line-height:1.6;color:#5b4a3d}
-    .volume-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}
-    .volume-choice{min-height:52px;border:2px solid #cbb8a3;border-radius:13px;background:#fff;color:#473628;font-size:16px;font-weight:850;cursor:pointer}
-    .volume-choice[aria-pressed="true"]{background:#795738;border-color:#795738;color:#fff;box-shadow:0 4px 12px rgba(91,57,35,.14)}
-    .volume-choice:focus-visible{outline:3px solid #b58d64;outline-offset:2px}
+    .volume-control{margin:18px 0 13px}
+    .volume-label{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:16px;font-weight:850;color:#473628}
+    .volume-number{font-size:24px;color:#795738;font-weight:900;font-variant-numeric:tabular-nums}
+    input.volume-slider{display:block;width:100%;height:38px;padding:0;margin:8px 0 0;accent-color:#795738;background:transparent;border:0;cursor:pointer;touch-action:pan-y}
+    input.volume-slider:focus-visible{outline:3px solid #b58d64;outline-offset:3px}
+    .volume-scale{display:flex;justify-content:space-between;color:#786858;font-weight:750;font-size:13px;margin-top:2px}
+    .member-links{display:grid;grid-template-columns:1fr;gap:10px}
+    .member-manage-link{display:flex;align-items:center;justify-content:center;min-height:56px;padding:12px;border-radius:12px;background:#795738;color:#fff;font-size:17px;font-weight:800;text-align:center;text-decoration:none}
+    .member-manage-link:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    @media(min-width:760px){.member-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .volume-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
     .volume-actions button{min-height:48px;border-radius:12px;padding:0 18px;font-size:15px;font-weight:850;cursor:pointer}
     .volume-preview{border:1.5px solid #bba48b;background:#fff;color:#513d2c}
@@ -101,24 +107,28 @@
   </section>
 
 
+  <section class="card" aria-label="회원 관리 바로가기">
+    <div class="member-links">
+      <a class="member-manage-link" href="/chat-users.html">👤 일반 채팅 이용자 명단</a>
+      <a class="member-manage-link" href="/club-admin.html">👥 복작소 클럽 회원관리</a>
+    </div>
+  </section>
+
   <section class="card volume-card">
     <h2>🔔 ‘뽁짝’ 기본 알림 음량</h2>
-    <p class="muted">관리자는 새 방문자의 기본 소리를 설정할 수 있어요. 방문자가 직접 고른 음량은 그 기기에서 우선 적용됩니다.</p>
-    <div class="volume-options" role="group" aria-label="관리자 기본 알림 음량">
-      <button class="volume-choice" type="button" data-default-volume="30" aria-pressed="false">작게 30%</button>
-      <button class="volume-choice" type="button" data-default-volume="60" aria-pressed="false">보통 60%</button>
-      <button class="volume-choice" type="button" data-default-volume="100" aria-pressed="true">크게 100%</button>
+    <p class="muted">좌우로 움직여 음량을 고른 뒤 아래 버튼을 누르면 미리 듣고 저장돼요. 방문자가 직접 설정한 음량은 우선 적용됩니다.</p>
+    <div class="volume-control">
+      <label class="volume-label" for="volumeSlider">알림 음량 <output class="volume-number" id="volumePercent" for="volumeSlider">100%</output></label>
+      <input class="volume-slider" id="volumeSlider" type="range" min="0" max="100" step="5" value="100" aria-label="기본 알림 음량 조절">
+      <div class="volume-scale"><span>0% · 무음</span><span>100%</span></div>
     </div>
     <div class="volume-actions">
-      <button class="primary" type="button" id="volumeSave">기본 음량 저장</button>
-      <button class="volume-preview" type="button" id="volumePreview">▶ 소리 미리 듣기</button>
+      <button class="primary" type="button" id="volumeSave">▶ 미리 듣고 저장</button>
     </div>
     <div class="volume-feedback" role="status" aria-live="polite" id="volumeFeedback"></div>
   </section>
 
-  <section class="card" style="text-align:center"><a href="/chat-users.html" style="display:block;padding:15px;border-radius:12px;background:#795738;color:white;font-size:17px;font-weight:800;text-decoration:none">👤 일반 채팅 이용자 명단</a></section>
-  <section class="card" style="text-align:center"><a href="/club-admin.html" style="display:block;padding:15px;border-radius:12px;background:#795738;color:white;font-size:17px;font-weight:800;text-decoration:none">👥 복작소 클럽 회원관리</a></section>
-  <section class="card" aria-labelledby="pushTitle">
+    <section class="card" aria-labelledby="pushTitle">
     <h2 id="pushTitle">🔔 가입 신청 휴대폰 알림</h2>
     <p class="muted" style="font-size:15px;line-height:1.65">최고관리자 휴대폰에서 한 번만 켜 두면 일반 회원과 클럽의 새 가입 신청을 알림으로 받아요. 알림을 누르면 승인 화면으로 이동합니다.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -146,13 +156,14 @@
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
   let selectedVolume=100;
+  const volumeSlider=document.getElementById('volumeSlider');
+  const volumePercent=document.getElementById('volumePercent');
   const volumeFeedback=document.getElementById('volumeFeedback');
   function chooseVolume(level){
-    if(![30,60,100].includes(level))return;
-    selectedVolume=level;
-    document.querySelectorAll('[data-default-volume]').forEach(b=>{
-      b.setAttribute('aria-pressed',String(Number(b.dataset.defaultVolume)===level));
-    });
+    if(!Number.isFinite(level))return;
+    selectedVolume=Math.max(0,Math.min(100,Math.round(level)));
+    volumeSlider.value=String(selectedVolume);
+    volumePercent.textContent=selectedVolume+'%';
   }
   async function loadSoundSettings(){
     try{
@@ -165,6 +176,7 @@
     }
   }
   function previewBokjak(level){
+    if(level===0)return; // 0% is intentionally silent.
     const volume=level/100;
     function chime(){
       try{
@@ -193,26 +205,27 @@
       window.speechSynthesis.speak(u);
     }catch(_){chime()}
   }
-  document.querySelectorAll('[data-default-volume]').forEach(b=>b.addEventListener('click',()=>{
-    chooseVolume(Number(b.dataset.defaultVolume));
+  volumeSlider.addEventListener('input',()=>{
+    chooseVolume(Number(volumeSlider.value));
     volumeFeedback.classList.remove('error');
-    volumeFeedback.textContent='저장 버튼을 누르면 새 기본 음량이 적용돼.';
-  }));
-  document.getElementById('volumePreview').addEventListener('click',()=>previewBokjak(selectedVolume));
+    volumeFeedback.textContent=selectedVolume+'% 선택 · 미리 듣고 저장을 눌러 적용해 주세요.';
+  });
   document.getElementById('volumeSave').addEventListener('click',async()=>{
     const button=document.getElementById('volumeSave');
     button.disabled=true;
-    volumeFeedback.classList.remove('error');volumeFeedback.textContent='저장 중…';
+    volumeFeedback.classList.remove('error');
+    previewBokjak(selectedVolume);
+    volumeFeedback.textContent='미리 듣기 · 저장 중…';
     try{
       await api({action:'chat-set-sound-config',level:selectedVolume});
-      volumeFeedback.textContent='기본 알림 음량 '+selectedVolume+'% 저장 완료!';
+      volumeFeedback.textContent='알림 음량 '+selectedVolume+'% 저장 완료!';
     }catch(error){
       volumeFeedback.classList.add('error');
       volumeFeedback.textContent=error.message||'저장하지 못했습니다.';
     }finally{button.disabled=false}
   });
 
-  function makeRoomCode(title){
+    function makeRoomCode(title){
     const cleaned=String(title||'').trim().toUpperCase()
       .replace(/[^A-Z0-9가-힣]+/g,'')
       .slice(0,8);
