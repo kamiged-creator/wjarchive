@@ -559,6 +559,26 @@
       background:var(--bg);border:1px solid var(--line);border-radius:16px;
       scrollbar-width:thin;
     }
+    /* Kakao-style date markers: a single centered day with subtle side rules. */
+    .club-room-open .club-date-divider{
+      display:flex;align-items:center;justify-content:center;gap:12px;
+      align-self:stretch;flex:0 0 auto;width:100%;max-width:100%;
+      margin:7px 0 3px;padding:3px 0;
+      color:var(--muted);font-size:13px;font-weight:600;line-height:1.5;
+      text-align:center;
+    }
+    .club-room-open .club-date-divider::before,
+    .club-room-open .club-date-divider::after{
+      content:"";display:block;flex:1 1 0;min-width:8px;
+      height:1px;background:var(--line);opacity:.9;
+    }
+    .club-room-open .club-date-divider time{
+      display:block;flex:none;white-space:nowrap;
+      font:inherit;color:inherit;
+    }
+    @media(max-width:355px){
+      .club-room-open .club-date-divider{gap:7px;font-size:12px}
+    }
     .club-room-open .club-chat-feed > p{margin:auto;color:var(--muted);text-align:center;font-size:14px}
     .club-room-open .club-post{
       display:flex;flex-direction:column;align-items:flex-start;gap:4px;
