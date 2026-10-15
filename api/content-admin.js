@@ -760,10 +760,16 @@ async function handleChatAdmin(body, res, role='owner') {
     const roomNames=new Map((Array.isArray(rooms)?rooms:[]).map(row=>[row.id,row.title]));
     const profileIds=[...new Set(records.map(row=>row.profile_id).filter(id=>/^[0-9a-f-]{36}$/i.test(String(id||''))))];
     const profileById=new Map();
+    const approvedClubIds=new Set();
     for(let start=0;start<profileIds.length;start+=50){
       const ids=profileIds.slice(start,start+50);
-      const profiles=await db('chat_profiles?id=in.('+ids.map(encodeURIComponent).join(',')+')&select=id,nickname,avatar_url&limit=50');
+      const list=ids.map(encodeURIComponent).join(',');
+      const [profiles,clubMembers]=await Promise.all([
+        db('chat_profiles?id=in.('+list+')&select=id,nickname,avatar_url&limit=50'),
+        db('bokjakso_club_members?profile_id=in.('+list+')&status=eq.approved&select=profile_id&limit=50')
+      ]);
       for(const row of Array.isArray(profiles)?profiles:[])profileById.set(row.id,row);
+      for(const row of Array.isArray(clubMembers)?clubMembers:[])approvedClubIds.add(row.profile_id);
     }
     const users=records.map(member=>{
       const profile=profileById.get(member.profile_id);
@@ -775,7 +781,9 @@ async function handleChatAdmin(body, res, role='owner') {
         joinedAt:member.joined_at||null,
         lastSeenAt:member.last_seen_at||null,
         blocked:member.is_blocked===true,
-        hasProfile:Boolean(profile)
+        hasProfile:Boolean(profile),
+        // Match by verified profile ID only, never by a possibly shared nickname.
+        isClubMember:Boolean(member.profile_id&&approvedClubIds.has(member.profile_id))
       };
     });
     res.status(200).json({
