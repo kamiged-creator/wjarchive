@@ -38,7 +38,8 @@ section.panel{background:#fffdfa;border:1px solid #e2d5c3;border-radius:22px;mar
 .message{display:flex;align-items:flex-end;gap:7px}.message.user{justify-content:flex-end}
 .bubble{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;font-size:15px;max-width:min(85%,500px);background:#f4ede4;padding:12px 14px;border-radius:16px 16px 16px 5px}
 .user .bubble{background:#d8b99c;color:#38261b;border-radius:16px 16px 5px 16px}
-.msg-avatar{width:29px;height:29px;border-radius:50%;object-fit:cover;background:#f4dfcc;flex:none}
+.msg-avatar{width:29px;height:29px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f4dfcc;flex:none}
+.msg-avatar img{display:block;width:100%;height:100%;object-fit:cover}
 .msg-fallback{font-size:14px;background:#e8d0b9;color:#6a4530;display:flex;align-items:center;justify-content:center;font-weight:800}
 .meta{font-size:11px;color:#958678;margin:3px 0 0 36px}
 .composer{display:flex;gap:7px;border-top:1px solid #eee3d6;padding:12px 0 2px;align-items:center}
