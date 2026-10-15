@@ -16,6 +16,14 @@ h1{font-size:27px;letter-spacing:-.04em}h2{font-size:20px}
 .member-heading{display:flex;align-items:center;gap:13px;min-width:0}
 .member-avatar{display:flex;align-items:center;justify-content:center;flex:0 0 60px;width:60px;height:60px;border-radius:50%;overflow:hidden;background:#efe4d7;border:1px solid var(--line);color:#786958;font-size:29px}
 .member-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+.member-avatar-button{padding:0;min-height:60px;cursor:zoom-in}
+.member-avatar-button:disabled{cursor:default;opacity:1}
+.portrait-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.78)}
+.portrait-overlay[hidden]{display:none!important}
+.portrait-dialog{display:flex;flex-direction:column;align-items:center;gap:18px;max-width:100%;outline:0}
+.portrait-dialog img{display:block;width:min(76vw,280px);height:min(76vw,280px);max-height:65dvh;aspect-ratio:1/1;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.85);box-shadow:0 10px 42px rgba(0,0,0,.34)}
+.portrait-dialog p{margin:0;color:#fff;font-size:16px;font-weight:750;text-align:center;word-break:keep-all}
+.portrait-hint{color:#e9e1d9;font-size:13px;font-weight:500}
 .member-info{min-width:0;flex:1}
 .member-name{font-weight:850;font-size:18px;overflow-wrap:anywhere}
 .member-count{font-size:16px;font-weight:750;color:#796e61;margin-left:6px}.meta{color:#73665d;font-size:13px;margin:5px 0 10px}
@@ -35,6 +43,12 @@ button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,a:focus-visi
 <section class="card"><div class="stats" id="stats" aria-live="polite"></div><div class="buttons"><button class="primary" id="refresh" type="button">회원 목록 새로고침</button><button id="pendingOnly" type="button" aria-pressed="false">승인 대기만 보기</button></div><p class="status" id="feedback" role="status" aria-live="polite"></p></section>
 <section class="card"><h2>클럽 회원 명단 <span id="memberCount" class="member-count" aria-live="polite">(불러오는 중)</span></h2><div id="members" aria-live="polite">회원 목록을 불러오는 중…</div></section>
 </main>
+<div class="portrait-overlay" id="portraitOverlay" role="presentation" hidden>
+ <div class="portrait-dialog" id="portraitDialog" role="dialog" aria-modal="true" aria-label="회원 프로필 사진 확대" tabindex="-1">
+  <img id="portraitExpanded" src="" alt="">
+  <p><span id="portraitCaption"></span><span class="portrait-hint"> · 바깥 화면을 누르면 닫혀요</span></p>
+ </div>
+</div>
 <script>
 (()=>{
 'use strict';
@@ -42,6 +56,34 @@ const TOKEN_KEY='wjarchiveAdminAccessToken';
 if(!sessionStorage.getItem(TOKEN_KEY)){location.replace('/admin-login.html');return;}
 const feedback=document.getElementById('feedback'),members=document.getElementById('members'),stats=document.getElementById('stats');
 const pendingButton=document.getElementById('pendingOnly'),memberCount=document.getElementById('memberCount');
+const portraitOverlay=document.getElementById('portraitOverlay'),portraitDialog=document.getElementById('portraitDialog');
+const portraitExpanded=document.getElementById('portraitExpanded'),portraitCaption=document.getElementById('portraitCaption');
+let entries=[],pendingOnly=false,portraitTrigger=null,previousBodyOverflow='';
+function closePortrait(){
+ if(portraitOverlay.hidden)return;
+ portraitOverlay.hidden=true;
+ portraitExpanded.removeAttribute('src');
+ document.body.style.overflow=previousBodyOverflow;
+ const trigger=portraitTrigger;portraitTrigger=null;
+ if(trigger?.isConnected)trigger.focus({preventScroll:true});
+}
+function openPortrait(url,nickname,trigger){
+ if(typeof url!=='string'||!/^https:\/\//i.test(url))return;
+ previousBodyOverflow=document.body.style.overflow;
+ portraitTrigger=trigger;
+ portraitExpanded.src=url;
+ portraitExpanded.alt=(nickname||'회원')+' 프로필 사진';
+ portraitCaption.textContent=nickname||'회원';
+ portraitOverlay.hidden=false;
+ document.body.style.overflow='hidden';
+ portraitDialog.focus({preventScroll:true});
+}
+portraitOverlay.addEventListener('click',event=>{
+ if(!portraitDialog.contains(event.target))closePortrait();
+});
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&!portraitOverlay.hidden)closePortrait();
+});
 let entries=[],pendingOnly=false;
 async function api(action,extra={}){
  const t=sessionStorage.getItem(TOKEN_KEY);
@@ -84,12 +126,17 @@ function render(){
  for(const row of rows){
   const article=document.createElement('article');article.className='member';
   const heading=document.createElement('div');heading.className='member-heading';
-  const avatar=document.createElement('span');avatar.className='member-avatar';avatar.textContent='👤';
-  if(typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl)){
+  const hasPhoto=typeof row.avatarUrl==='string'&&/^https:\/\//i.test(row.avatarUrl);
+  const avatar=document.createElement(hasPhoto?'button':'span');avatar.className='member-avatar'+(hasPhoto?' member-avatar-button':'');avatar.textContent='👤';
+  if(hasPhoto){
+    avatar.type='button';
+    avatar.setAttribute('aria-label',(row.nickname||'회원')+' 프로필 사진 크게 보기');
+    avatar.title='프로필 사진 크게 보기';
     const photo=document.createElement('img');
-    photo.src=row.avatarUrl;photo.alt=(row.nickname||'회원')+' 프로필 사진';photo.loading='lazy';photo.decoding='async';photo.referrerPolicy='no-referrer';
-    photo.addEventListener('error',()=>{avatar.textContent='👤';},{once:true});
+    photo.src=row.avatarUrl;photo.alt='';photo.loading='lazy';photo.decoding='async';photo.referrerPolicy='no-referrer';
+    photo.addEventListener('error',()=>{avatar.textContent='👤';avatar.disabled=true;},{once:true});
     avatar.replaceChildren(photo);
+    avatar.addEventListener('click',()=>openPortrait(row.avatarUrl,row.nickname,avatar));
   }
   const info=document.createElement('div');info.className='member-info';
   const name=document.createElement('div');name.className='member-name';name.textContent=row.nickname||'이름 없음';
