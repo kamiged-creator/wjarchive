@@ -116,6 +116,8 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .intake-check input{width:17px;height:17px;accent-color:#826045}
 .intake-actions{display:flex;align-items:center;gap:8px;margin-top:12px}
 .intake-action{flex:1;min-height:44px;border:0;border-radius:11px;background:#765338;color:#fff;font-size:14px;font-weight:800}
+.intake-action:disabled{background:#e6ded5;color:#978879;border:1px solid #d9cbbd;cursor:default;opacity:1}
+.intake-field.is-disabled>span{color:#95877a}
 .intake-sample{min-height:44px;padding:0 10px;border:1px solid #d5c2ab;border-radius:11px;background:#faf2e7;color:#70513b;font-size:12px;font-weight:800}
 .intake-privacy{font-size:11px;line-height:1.55;color:#92735d;margin:9px 0 0}
 .intake-summary{white-space:pre-wrap;line-height:1.65;font-size:13px;color:#49372e;margin:10px 0}
@@ -434,6 +436,7 @@ function makeIntake(){
    options.className="intake-time-options";fields.append(options);
    function update(){
      period.disabled=hour.disabled=minute.disabled=unknown.checked;
+     timeField.classList.toggle("is-disabled",unknown.checked);
      period._syncSaju?.();
      leapLabel.hidden=calendar.value!=="lunar";
      if(leapLabel.hidden)leap.checked=false;
@@ -446,9 +449,28 @@ function makeIntake(){
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
  sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
- const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";actions.append(sample,submit);form.append(actions);
+ const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";submit.disabled=true;actions.append(sample,submit);form.append(actions);
+ // Keep incomplete or invalid birth information from enabling confirmation.
+ function canSubmitIntake(){
+   const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+   return sets.every(p=>{
+     const yearText=p.year.value.trim(),y=Number(yearText),m=Number(p.month.value),d=Number(p.day.value);
+     if(!/^[0-9]{4}$/.test(yearText)||y<1900||y>Number(today.slice(0,4)))return false;
+     if(!p.month.value||!p.day.value||m<1||m>12||d<1||d>new Date(y,m,0).getDate())return false;
+     if(yearText+"-"+p.month.value+"-"+p.day.value>today)return false;
+     if(p.unknown.checked)return true;
+     const h=p.hour.value.trim(),min=p.minute.value.trim();
+     return /^[0-9]{1,2}$/.test(h)&&Number(h)>=1&&Number(h)<=12&&
+       /^[0-9]{1,2}$/.test(min)&&Number(min)>=0&&Number(min)<=59;
+   });
+ }
+ function syncSubmitState(){submit.disabled=!canSubmitIntake();}
+ form.addEventListener("input",syncSubmitState);
+ form.addEventListener("change",syncSubmitState);
+ syncSubmitState();
  form.addEventListener("submit",ev=>{
    ev.preventDefault();
+   if(!canSubmitIntake())return;
    const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
    for(const p of sets){
      p.year.setCustomValidity("");p.day.setCustomValidity("");
