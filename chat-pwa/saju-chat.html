@@ -203,6 +203,72 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
  .saju-select-trigger{font-size:15px;padding:7px 8px;min-height:48px}
  .saju-select-option{font-size:16px}
 }
+
+/* Theme switch: light is the established Bokjakso look; dark keeps the same layout. */
+.theme-toggle{flex:none;width:44px;height:44px;padding:0;border:1px solid #dbccbb;border-radius:12px;background:#fffdfa;color:#674831;display:inline-flex;align-items:center;justify-content:center;font-size:27px;line-height:1;font-weight:600;touch-action:manipulation}
+.theme-toggle:focus-visible{outline:3px solid #a67b4a;outline-offset:2px}
+@media(max-width:355px){.chat-full .chat-heading{gap:5px}.theme-toggle{width:40px;height:44px}.chat-full .clear{padding:6px 8px}}
+:root.dark{color-scheme:dark;background:#171513;color:#f5ebdf}
+html.dark body{background:radial-gradient(circle at 100% 0%,#2b251f 0,transparent 38%),#171513;color:#f5ebdf}
+html.dark .home{color:#f2e4d5}
+html.dark .brand,html.dark h1{color:#e9cfaf}
+html.dark .lead,html.dark .hint,html.dark .choose-tip,html.dark .avatar small{color:#c5b5a5}
+html.dark section.panel{background:#24201d;border-color:#5d5147;box-shadow:0 8px 24px #0003}
+html.dark .panel h2,html.dark .avatar,html.dark .avatar strong{color:#f4e9df}
+html.dark .portrait{background:#3a3028;border-color:#907358}
+html.dark .avatar[aria-pressed="true"] .portrait{border-color:#c4a17c;box-shadow:0 0 0 3px #55402e}
+html.dark .avatar[aria-pressed="true"] strong{color:#eecaa4}
+html.dark .avatar-check{background:#9d764e;border-color:#24201d}
+html.dark .topic{background:#322b25;border-color:#705a49;color:#f3e5d6}
+html.dark .topic[aria-pressed="true"]{background:#ac835c;border-color:#ac835c;color:#18120d}
+html.dark .start-chat{background:#ac835c;color:#17110c}
+html.dark .chat-view,html.dark section.panel.chat-full{background:#1c1917}
+html.dark .chat-full .chat-heading{background:#231f1c;border-bottom-color:#57483c}
+html.dark .back-to-select{color:#f4e6d7}
+html.dark .header-portrait,html.dark .msg-avatar{border-color:#c5a17e;background:#3f3228}
+html.dark .chat-info h2{color:#f4e9df}
+html.dark .chat-info small{color:#cdb7a2}
+html.dark .clear,html.dark .theme-toggle{background:#312922;border-color:#705847;color:#f6e6d7}
+html.dark .chat-full .disclaimer{background:#302820;border-bottom-color:#5d4939;color:#f4dcc0}
+html.dark .chat-full .messages{background:linear-gradient(160deg,#1c1917,#241e1a)}
+html.dark .bubble{background:#34302c;color:#f5ede4}
+html.dark .user .bubble{background:#9a724d;color:#fffaf3}
+html.dark .msg-fallback{background:#47382c;color:#f5e4d0}
+html.dark .meta{color:#bdab9c}
+html.dark .chat-full .composer{background:#231f1c;border-top-color:#56493e}
+html.dark .chat-full .composer-inner{background:#322c27;border-color:#716052}
+html.dark .chat-full .composer-inner:focus-within{border-color:#d0a780}
+html.dark .chat-full .composer .composer-inner input{color:#f5e9dc}
+html.dark .chat-full .composer .composer-inner input::placeholder{color:#bcaea0}
+html.dark .chat-full .composer .composer-inner .send{background:#a7825c;color:#17110c}
+html.dark .intake-card{background:#292420;border-color:#655344;box-shadow:0 4px 14px #0003}
+html.dark .intake-title,html.dark .intake-person{color:#e9c6a3}
+html.dark .intake-intro,html.dark .intake-field,html.dark .intake-summary{color:#e5d5c4}
+html.dark .intake-section{border-top-color:#54483e}
+html.dark .intake-field input,html.dark .intake-field select{background:#38312b;border-color:#756250;color:#f5e9da}
+html.dark .intake-field input::placeholder{color:#b8a796}
+html.dark .intake-date-parts input::placeholder{color:#b8a796}
+html.dark .intake-time-parts input::placeholder{color:#b8a796}
+html.dark .intake-field input:focus-visible,html.dark .intake-field select:focus-visible{outline-color:#d5a97f}
+html.dark .intake-check{color:#eadbcb}
+html.dark .intake-check input{accent-color:#b6906b}
+html.dark .intake-field.is-disabled>span{color:#a99a8c}
+html.dark .intake-time-parts input:disabled,html.dark .intake-time-parts select:disabled{background:#292521;color:#958779}
+html.dark .intake-action{background:#a7825c;color:#16110e}
+html.dark .intake-action:disabled{background:#403932;color:#a99a8c;border-color:#655648}
+html.dark .intake-sample,html.dark .intake-edit{background:#393029;border-color:#745c49;color:#f1dbc4}
+html.dark .intake-privacy{color:#beae9e}
+html.dark .saju-select-trigger{background:#38312b;border-color:#756250;color:#f5e9da}
+html.dark .saju-select-trigger::after{border-color:#e2bf98}
+html.dark .saju-select-trigger:disabled{background:#292521;color:#978777}
+html.dark .saju-select-popup{background:#302923;border-color:#77614e;box-shadow:0 10px 26px #0008}
+html.dark .saju-select-option{background:transparent;color:#f1e5d8}
+html.dark .saju-select-option[aria-selected="true"]{background:#604a37;color:#ffe4c7}
+html.dark .saju-select-option[aria-selected="true"]::after{color:#ffe0b8}
+html.dark .saju-select-option:active{background:#4f4033}
+html.dark .beta{background:#302922;border-color:#755c46;color:#f2d9bd}
+html.dark footer{color:#b5a292}
+
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
@@ -217,7 +283,7 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
-    <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="clearChat" class="clear">지우기</button></div>
+    <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <p class="disclaimer">체험판 · 생년월일은 가상 정보로 시험해 줘. 실제 AI와 만세력은 아직 연결되지 않았어.</p>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <form class="composer" id="composer"><div class="composer-inner"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
@@ -528,6 +594,23 @@ sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrima
 sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimary)return;const r=sendBtn.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){form.requestSubmit(sendBtn);input.focus({preventScroll:true})}});
 input.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229))e.preventDefault()});
 $("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;delete birthProfiles[birthKey()];birthEditing.delete(birthKey());conversation=[greeting()];save();renderMessages(false)});
+// The selected appearance is independent of private birth and chat data.
+const sajuThemeKey="bokjakso.saju-theme.v1";
+function setSajuTheme(dark){
+  document.documentElement.classList.toggle("dark",dark);
+  const themeButton=$("themeToggle");
+  themeButton.textContent=dark?"☀":"☾";
+  const nextLabel=dark?"라이트 모드로 전환":"다크 모드로 전환";
+  themeButton.setAttribute("aria-label",nextLabel);
+  themeButton.setAttribute("title",nextLabel);
+  themeButton.setAttribute("aria-pressed",String(dark));
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",dark?"#171513":"#f5f0e8");
+  try{localStorage.setItem(sajuThemeKey,dark?"dark":"light")}catch(_){}
+}
+let savedSajuTheme="light";
+try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="dark"?"dark":"light"}catch(_){}
+setSajuTheme(savedSajuTheme==="dark");
+$("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
 renderAll();
 syncChatView();
 })();
