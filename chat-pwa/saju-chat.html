@@ -345,7 +345,7 @@ function upgradeSajuSelect(select){
     reposition();
     if(selectedButton){
       // Scroll inside the menu only. Do not move the chat/feed itself.
-      popup.scrollTop=Math.max(0,selectedButton.offsetTop-popup.offsetTop-Math.floor(popup.clientHeight/3));
+      popup.scrollTop=Math.max(0,selectedButton.offsetTop-Math.floor(popup.clientHeight/3));
       selectedButton.focus({preventScroll:true});
     }else popup.firstElementChild?.focus({preventScroll:true});
   });
