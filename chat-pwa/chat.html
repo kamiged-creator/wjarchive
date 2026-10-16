@@ -552,6 +552,28 @@
     .club-room-open .club-chat-label{padding:6px 10px}
     .club-room-open .club-chat h2{font-size:21px;line-height:1.3;margin:0 0 3px}
     .club-room-open .club-chat-hint{font-size:12px;line-height:1.45;margin:0 0 10px}
+    /* Compact club announcement: hide completely until the head admin publishes. */
+    .club-notice[hidden],.club-notice-details[hidden]{display:none!important}
+    .club-room-open .club-notice{
+      flex:0 0 auto;width:100%;min-width:0;margin:0 0 8px;
+      border:1px solid var(--line);border-radius:13px;background:var(--paper);overflow:hidden
+    }
+    .club-room-open .club-notice-toggle{
+      width:100%;min-height:43px;display:flex;align-items:center;gap:8px;
+      padding:8px 11px;border:0;border-radius:0;
+      text-align:left;background:transparent;color:var(--text);
+      font:inherit;font-size:14px;font-weight:750;-webkit-tap-highlight-color:transparent
+    }
+    .club-notice-icon{flex:0 0 auto;font-size:16px}
+    .club-notice-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .club-notice-chevron{flex:0 0 auto;color:var(--accent);font-size:22px;line-height:1;transition:transform .2s}
+    .club-notice-toggle[aria-expanded="true"] .club-notice-chevron{transform:rotate(180deg)}
+    .club-notice-details{padding:0 13px 12px;border-top:1px solid var(--line)}
+    .club-notice-body{
+      margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;
+      line-height:1.65;font-size:14px;color:var(--text);
+      max-height:min(32vh,240px);overflow-y:auto
+    }
     .club-room-open .club-chat-feed{
       display:flex;flex-direction:column;gap:12px;
       height:clamp(310px,calc(100dvh - 340px),700px);min-height:280px;
@@ -1193,6 +1215,16 @@
         <div class="club-room-toolbar" aria-label="클럽 접속 상태">
           <span class="club-online-count" id="clubOnlineCount" role="status" aria-live="polite">접속 확인 중</span>
         </div>
+        <section class="club-notice" id="clubNotice" aria-label="복작소 클럽 공지사항" hidden>
+          <button class="club-notice-toggle" id="clubNoticeToggle" type="button" aria-expanded="false" aria-controls="clubNoticeDetails">
+            <span class="club-notice-icon" aria-hidden="true">📢</span>
+            <span class="club-notice-title" id="clubNoticeTitle">클럽 공지사항</span>
+            <span class="club-notice-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="club-notice-details" id="clubNoticeDetails" hidden>
+            <p class="club-notice-body" id="clubNoticeBody"></p>
+          </div>
+        </section>
         <p class="club-chat-hint">승인된 정회원 전용 · 일반 채팅방과 대화가 분리돼요.</p>
         <p class="club-chat-feedback" id="clubChatFeedback" role="status" aria-live="polite"></p>
         <div class="club-chat-feed" id="clubMessages" role="log" aria-live="polite"></div>
