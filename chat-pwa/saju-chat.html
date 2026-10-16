@@ -113,6 +113,46 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .intake-summary{white-space:pre-wrap;line-height:1.65;font-size:13px;color:#49372e;margin:10px 0}
 .intake-edit{border:1px solid #d5c2ab;color:#6e4e33;background:#fff;border-radius:10px;min-height:37px;padding:5px 14px;font-size:13px;font-weight:800}
 @media(max-width:355px){.intake-card{width:calc(100% - 12px);margin-inline:auto;padding:12px}.intake-fields{gap:7px}.intake-field input,.intake-field select{font-size:14px;padding:5px}}
+
+/* 50–60대 회원 가독성 개선: 16px 이상의 입력 글씨와 넉넉한 행간.
+   작은 화면에서도 가로 넘침 없이 상담 카드 구조를 유지한다. */
+.lead{font-size:16px;line-height:1.6;color:#68564a}
+.panel h2{font-size:20px;line-height:1.4}
+.avatar strong{font-size:17px}
+.avatar small{font-size:13px;line-height:1.4;color:#705d4f}
+.topic{font-size:16px;min-height:65px}
+.topic small{font-size:13px;font-weight:500;line-height:1.4}
+.start-chat{font-size:17px;min-height:50px}
+.chat-info h2{font-size:18px}
+.chat-info small{font-size:13px;color:#735d4d}
+.chat-full .clear{font-size:15px;min-height:44px;padding:8px 12px}
+.chat-full .disclaimer{font-size:13px;line-height:1.65;color:#67503d}
+.bubble{font-size:17px;line-height:1.65}
+.composer input{font-size:17px}
+.send{font-size:17px}
+.intake-title{font-size:20px;line-height:1.4}
+.intake-intro{font-size:15px;line-height:1.65;color:#725d4b}
+.intake-person{font-size:16px}
+.intake-field{font-size:15px;line-height:1.5;color:#5c4535}
+.intake-field input,.intake-field select{height:48px;min-height:48px;font-size:16px;padding:6px 8px}
+.intake-date-parts input,.intake-date-parts select,
+.intake-time-parts input,.intake-time-parts select{height:48px;min-height:48px;font-size:16px}
+.intake-date-parts input::placeholder{font-size:14px}
+.intake-check{font-size:15px;line-height:1.5;min-height:36px;color:#604b3c}
+.intake-check input{width:20px;height:20px;flex:none}
+.intake-action,.intake-sample{font-size:16px;min-height:48px}
+.intake-privacy{font-size:13px;line-height:1.65;color:#745d4c}
+.intake-summary{font-size:15px;line-height:1.65}
+.intake-edit{font-size:15px;min-height:44px}
+@media(max-width:355px){
+  .avatar small{font-size:12px}
+  .avatar strong{font-size:16px}
+  .topic{font-size:15px}
+  .topic small{font-size:12px}
+  .intake-field input,.intake-field select{font-size:16px;padding:5px 6px}
+  .intake-date-parts,.intake-time-parts{gap:5px}
+  .intake-date-parts input::placeholder{font-size:12px}
+}
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
