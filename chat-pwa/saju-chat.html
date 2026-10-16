@@ -370,7 +370,7 @@ function makeIntake(){
    const edit=makeEl("button","intake-edit","정보 수정하기");edit.type="button";edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false)});card.append(edit);
    return card;
  }
- card.append(makeEl("p","intake-intro","아래 정보로 입력 화면을 체험해 봐. 실제 개인정보 대신 예시 값을 쓰는 걸 권장해."));
+ card.append(makeEl("p","intake-intro","생년월일과 태어난 시간을 입력해 주세요."));
  const form=makeEl("form","intake-form");const sets=[];
  const count=topic[0]==="match"?2:1;
  for(let i=0;i<count;i++){
