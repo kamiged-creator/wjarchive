@@ -96,6 +96,11 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .intake-date-parts{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.9fr) minmax(0,.9fr);gap:7px;min-width:0}
 .intake-date-parts input,.intake-date-parts select{min-width:0;width:100%;height:44px;font-size:15px}
 .intake-date-parts input::placeholder{font-size:13px;color:#8a7666}
+.intake-time-parts{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:8px;min-width:0}
+.intake-time-parts input,.intake-time-parts select{width:100%;min-width:0;height:44px;font-size:15px}
+.intake-time-parts input::placeholder{color:#8a7666}
+.intake-time-parts input:disabled,.intake-time-parts select:disabled{background:#f5f1eb;color:#8c8178}
+.intake-time-options{grid-column:1/-1}
 @media(max-width:355px){.intake-date-parts{gap:5px;grid-template-columns:minmax(0,1.4fr) minmax(0,.85fr) minmax(0,.85fr)}.intake-date-parts input::placeholder{font-size:12px}}
 .intake-field input,.intake-field select{width:100%;min-width:0;height:44px;border:1px solid #d6c3ad;border-radius:9px;background:#fff;color:#49372c;padding:5px 8px;font-size:15px}
 .intake-field input:focus-visible,.intake-field select:focus-visible{outline:2px solid #ac815b;outline-offset:1px}
@@ -207,18 +212,43 @@ function makeIntake(){
    field("양력 / 음력",calendar,false);
    const gender=makeEl("select");for(const [v,name]of [["unspecified","선택 안 함"],["남성","남성"],["여성","여성"]]){const opt=makeEl("option","",name);opt.value=v;gender.append(opt);}gender.value=prev.gender||"unspecified";
    field("성별 (선택)",gender,false);
-   const time=makeEl("input");time.type="time";time.value=prev.time||"12:00";
-   field("태어난 시간",time,false);
+   // Avoid Samsung's difficult native time wheel. Each part is keyboard-friendly.
+   const savedTime=/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(prev.time||"")?prev.time:"12:00";
+   const savedHour=Number(savedTime.slice(0,2));
+   const timeField=makeEl("div","intake-field wide");
+   timeField.append(makeEl("span","","태어난 시간"));
+   const timeParts=makeEl("div","intake-time-parts");
+   const period=makeEl("select");period.setAttribute("aria-label","오전 또는 오후");
+   for(const [val,title] of [["am","오전"],["pm","오후"]]){
+     const item=makeEl("option","",title);item.value=val;period.append(item);
+   }
+   period.value=savedHour>=12?"pm":"am";
+   const hour=makeEl("input");hour.type="text";hour.inputMode="numeric";hour.pattern="[0-9]{1,2}";hour.maxLength=2;hour.required=true;
+   hour.placeholder="시";hour.autocomplete="off";hour.setAttribute("aria-label","태어난 시, 1부터 12까지");
+   hour.value=String(savedHour%12||12);
+   const minute=makeEl("input");minute.type="text";minute.inputMode="numeric";minute.pattern="[0-9]{1,2}";minute.maxLength=2;minute.required=true;
+   minute.placeholder="분";minute.autocomplete="off";minute.setAttribute("aria-label","태어난 분, 0부터 59까지");
+   minute.value=String(Number(savedTime.slice(3)));
+   hour.addEventListener("input",()=>hour.setCustomValidity(""));
+   minute.addEventListener("input",()=>minute.setCustomValidity(""));
+   timeParts.append(period,hour,minute);timeField.append(timeParts);fields.append(timeField);
    const options=makeEl("div","");options.style.display="flex";options.style.flexDirection="column";
    const unknownLabel=makeEl("label","intake-check");const unknown=makeEl("input");unknown.type="checkbox";unknown.checked=prev.unknown!==false;unknownLabel.append(unknown,makeEl("span","","태어난 시간 모름"));options.append(unknownLabel);
    const leapLabel=makeEl("label","intake-check");const leap=makeEl("input");leap.type="checkbox";leap.checked=!!prev.leap;leapLabel.append(leap,makeEl("span","","음력 윤달"));options.append(leapLabel);
-   fields.append(options);
-   function update(){time.disabled=unknown.checked;leapLabel.hidden=calendar.value!=="lunar";if(leapLabel.hidden)leap.checked=false;}unknown.addEventListener("change",update);calendar.addEventListener("change",update);update();
+   options.className="intake-time-options";fields.append(options);
+   function update(){
+     period.disabled=hour.disabled=minute.disabled=unknown.checked;
+     leapLabel.hidden=calendar.value!=="lunar";
+     if(leapLabel.hidden)leap.checked=false;
+     if(unknown.checked){hour.setCustomValidity("");minute.setCustomValidity("")}
+   }
+   unknown.addEventListener("change",update);
+   calendar.addEventListener("change",update);update();
    section.append(fields);form.append(section);
-   sets.push({year,month,day,calendar,gender,time,unknown,leap});
+   sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap});
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
- sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.unknown.checked=true;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=true;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";actions.append(sample,submit);form.append(actions);
  form.addEventListener("submit",ev=>{
    ev.preventDefault();
@@ -235,9 +265,23 @@ function makeIntake(){
          p.day.setCustomValidity("유효한 출생 날짜를 선택해 주세요.");
        }
      }
+     p.hour.setCustomValidity("");p.minute.setCustomValidity("");
+     if(!p.unknown.checked){
+       const h=p.hour.value.trim(),m=p.minute.value.trim();
+       if(h&&!/^[0-9]{1,2}$/.test(h)||h&&(Number(h)<1||Number(h)>12)){
+         p.hour.setCustomValidity("시간은 1부터 12까지 숫자로 입력해 주세요.");
+       }
+       if(m&&!/^[0-9]{1,2}$/.test(m)||m&&Number(m)>59){
+         p.minute.setCustomValidity("분은 0부터 59까지 숫자로 입력해 주세요.");
+       }
+     }
    }
    if(!form.reportValidity())return;
-   birthProfiles[key]=sets.map(p=>({date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,gender:p.gender.value,unknown:p.unknown.checked,time:p.unknown.checked?"":p.time.value,leap:p.calendar.value==="lunar"&&p.leap.checked}));
+   birthProfiles[key]=sets.map(p=>{
+     const twelve=Number(p.hour.value),h24=twelve%12+(p.period.value==="pm"?12:0);
+     const saved=p.unknown.checked?"":String(h24).padStart(2,"0")+":"+String(Number(p.minute.value)).padStart(2,"0");
+     return {date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,gender:p.gender.value,unknown:p.unknown.checked,time:saved,leap:p.calendar.value==="lunar"&&p.leap.checked};
+   });
    birthEditing.delete(key);renderMessages(false);
  });
  card.append(form,makeEl("p","intake-privacy","테스트용 입력값은 서버로 보내거나 저장하지 않아. 새로고침하면 사라져."));
