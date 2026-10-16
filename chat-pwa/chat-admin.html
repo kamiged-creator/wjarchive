@@ -91,7 +91,20 @@
       .secondary-actions .small{font-size:13px}
     }
     @media(max-width:350px){.secondary-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  </style>
+      .club-notice-admin{background:#fffcf6}
+    .club-notice-admin label{margin:15px 0 8px;font-size:15px;color:#382a21}
+    .club-notice-admin input,.club-notice-admin textarea{
+      width:100%;border:1.5px solid #cbbbaa;border-radius:12px;
+      padding:12px;background:#fff;color:var(--text);font:inherit;font-size:16px;
+    }
+    .club-notice-admin input{height:48px}
+    .club-notice-admin textarea{min-height:125px;line-height:1.6;resize:vertical}
+    .club-notice-admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .club-notice-admin-actions button{min-height:48px;height:auto}
+    .club-notice-admin-actions .club-notice-hide-btn{background:#f0eae3;color:#553d2b;border:1px solid #d2c4b5}
+    .club-notice-admin-feedback{color:var(--muted);font-size:13px;line-height:1.55;min-height:20px;margin:13px 0 0}
+    @media(max-width:450px){.club-notice-admin-actions button{flex:1;min-width:0}}
+</style>
 </head>
 <body>
 <header><strong>관계자 채팅 관리</strong><button class="back" onclick="location.href='/chat.html'">관리자로 돌아가기</button></header>
@@ -113,6 +126,20 @@
       <a class="member-manage-link" href="/chat-users.html"><svg class="member-manage-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20v-2a7 7 0 0 1 14 0v2"/></svg><span>일반 채팅 이용자 명단</span></a>
       <a class="member-manage-link" href="/club-admin.html"><svg class="member-manage-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="7.5" r="3"/><path d="M2.5 19v-1.5a6.5 6.5 0 0 1 13 0V19"/><path d="M16.5 4.7a3 3 0 0 1 0 5.6M17 13.3a6.4 6.4 0 0 1 4.5 6"/></svg><span>복작소 클럽 회원관리</span></a>
     </div>
+  </section>
+
+  <section class="card club-notice-admin" aria-labelledby="clubNoticeAdminTitle">
+    <h2 id="clubNoticeAdminTitle">📢 복작소 클럽 공지 관리</h2>
+    <p class="muted">최고관리자가 공지를 게시하면 승인된 클럽 회원의 채팅 상단에 접힌 상태로 나타나요. 공지를 내리면 영역 자체가 사라져요.</p>
+    <label for="clubNoticeAdminTitleInput">공지 제목</label>
+    <input type="text" id="clubNoticeAdminTitleInput" maxlength="80" value="복작소 클럽 공지사항" placeholder="예: 클럽 모임 안내">
+    <label for="clubNoticeAdminBody">공지 내용</label>
+    <textarea id="clubNoticeAdminBody" rows="4" maxlength="1500" placeholder="회원들에게 안내할 내용을 입력하세요."></textarea>
+    <div class="club-notice-admin-actions">
+      <button class="primary" id="clubNoticePublish" type="button">공지 게시 · 수정</button>
+      <button class="primary club-notice-hide-btn" id="clubNoticeHide" type="button">공지 내리기</button>
+    </div>
+    <p class="club-notice-admin-feedback" id="clubNoticeAdminFeedback" role="status" aria-live="polite">기존 공지를 불러오는 중…</p>
   </section>
 
   <section class="card volume-card">
@@ -459,6 +486,67 @@
     finally{off.disabled=false;}
   });
   sync();
+})();
+</script>
+
+<script>
+/* 최고관리자 전용: 공지 저장·숨기기. 다른 관리자 권한은 부여하지 않음. */
+(()=>{
+  'use strict';
+  const title=document.getElementById('clubNoticeAdminTitleInput');
+  const body=document.getElementById('clubNoticeAdminBody');
+  const publish=document.getElementById('clubNoticePublish');
+  const hide=document.getElementById('clubNoticeHide');
+  const feedback=document.getElementById('clubNoticeAdminFeedback');
+  let saving=false,active=false;
+  async function api(action,data={}){
+    const token=sessionStorage.getItem('wjarchiveAdminAccessToken');
+    if(!token)throw new Error('최고관리자 로그인이 필요합니다.');
+    const res=await fetch('/api/content-admin',{
+      method:'POST',cache:'no-store',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({action:'club-admin-notice-'+action,...data})
+    });
+    const value=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(value.message||'공지 관리 요청이 실패했어요.');
+    return value;
+  }
+  function state(on,message){
+    active=on;hide.disabled=!active||saving;
+    if(message)feedback.textContent=message;
+  }
+  function lock(yes){saving=yes;publish.disabled=yes;hide.disabled=yes||!active;}
+  async function load(){
+    try{
+      const data=await api('get');
+      const notice=data.notice||{};
+      title.value=notice.title||'복작소 클럽 공지사항';
+      body.value=notice.body||'';
+      state(notice.active===true,notice.active?'✅ 공지가 게시 중이에요.':'현재 공지가 없어 회원 화면에는 아무것도 표시되지 않아요.');
+    }catch(e){
+      feedback.textContent=e.message;
+      if(e.message.includes('로그인'))location.replace('/admin-login.html');
+    }
+  }
+  publish.addEventListener('click',async()=>{
+    if(saving)return;
+    const t=title.value.trim()||'복작소 클럽 공지사항',content=body.value.trim();
+    if(!content){feedback.textContent='공지 내용을 먼저 입력해 주세요.';body.focus();return;}
+    if(content.length>1500||t.length>80){feedback.textContent='공지 글자 수 제한을 확인해 주세요.';return;}
+    lock(true);feedback.textContent='공지 게시 중…';
+    try{await api('save',{title:t,content});state(true,'✅ 공지를 게시했어. 클럽 채팅 상단에 접힌 형태로 표시돼요.');}
+    catch(e){feedback.textContent=e.message;}
+    finally{lock(false);state(active);}
+  });
+  hide.addEventListener('click',async()=>{
+    if(saving||!active)return;
+    if(!confirm('클럽 채팅 상단에서 현재 공지를 내릴까요? 내용은 보관돼요.'))return;
+    lock(true);feedback.textContent='공지 내리는 중…';
+    try{await api('hide');state(false,'공지 표시를 중단했어요. 채팅 화면에는 공지 영역이 보이지 않아요.');}
+    catch(e){feedback.textContent=e.message;}
+    finally{lock(false);state(active);}
+  });
+  load();
 })();
 </script>
 </body>
