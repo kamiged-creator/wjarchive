@@ -93,6 +93,10 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .intake-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 9px}
 .intake-field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;color:#705b4c;font-weight:750}
 .intake-field.wide{grid-column:1/-1}
+.intake-date-parts{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.9fr) minmax(0,.9fr);gap:7px;min-width:0}
+.intake-date-parts input,.intake-date-parts select{min-width:0;width:100%;height:44px;font-size:15px}
+.intake-date-parts input::placeholder{font-size:13px;color:#8a7666}
+@media(max-width:355px){.intake-date-parts{gap:5px;grid-template-columns:minmax(0,1.4fr) minmax(0,.85fr) minmax(0,.85fr)}.intake-date-parts input::placeholder{font-size:12px}}
 .intake-field input,.intake-field select{width:100%;min-width:0;height:44px;border:1px solid #d6c3ad;border-radius:9px;background:#fff;color:#49372c;padding:5px 8px;font-size:15px}
 .intake-field input:focus-visible,.intake-field select:focus-visible{outline:2px solid #ac815b;outline-offset:1px}
 .intake-check{display:inline-flex;gap:7px;align-items:center;font-size:12px;color:#694e39;min-height:30px;cursor:pointer;white-space:normal}
@@ -174,8 +178,31 @@ function makeIntake(){
    section.append(label);
    const fields=makeEl("div","intake-fields");
    function field(caption,control,wide){const box=makeEl("label","intake-field"+(wide?" wide":""));box.append(makeEl("span","",caption),control);fields.append(box);}
-   const date=makeEl("input");date.type="date";date.required=true;date.min="1900-01-01";date.max=new Date().toISOString().slice(0,10);date.value=prev.date||"";
-   field("생년월일",date,true);
+   // Samsung/Android date pickers can trap focus on the year segment.
+   // Use a real numeric keyboard for the year and simple selects for month/day.
+   const dateField=makeEl("div","intake-field wide");
+   dateField.append(makeEl("span","","생년월일"));
+   const dateParts=makeEl("div","intake-date-parts");
+   const year=makeEl("input");year.type="text";year.inputMode="numeric";year.pattern="[0-9]{4}";year.maxLength=4;year.autocomplete="off";
+   year.required=true;year.placeholder="연도 4자리";year.value=(prev.date||"").slice(0,4);
+   year.setAttribute("aria-label",count===2?(i===0?"본인 출생 연도":"상대방 출생 연도"):"출생 연도 4자리");
+   const month=makeEl("select");month.required=true;month.setAttribute("aria-label","출생 월");
+   const day=makeEl("select");day.required=true;day.setAttribute("aria-label","출생 일");
+   function addDateOptions(select,placeholder,total,suffix){
+     const empty=makeEl("option","",placeholder);empty.value="";empty.disabled=true;select.append(empty);
+     for(let n=1;n<=total;n++){
+       const option=makeEl("option","",n+suffix);option.value=String(n).padStart(2,"0");select.append(option);
+     }
+   }
+   addDateOptions(month,"월 선택",12,"월");
+   addDateOptions(day,"일 선택",31,"일");
+   month.value=(prev.date||"").slice(5,7);
+   day.value=(prev.date||"").slice(8,10);
+   dateParts.append(year,month,day);dateField.append(dateParts);fields.append(dateField);
+   const clearDateErrors=()=>{year.setCustomValidity("");day.setCustomValidity("")};
+   year.addEventListener("input",clearDateErrors);
+   month.addEventListener("change",clearDateErrors);
+   day.addEventListener("change",clearDateErrors);
    const calendar=makeEl("select");for(const [v,name] of [["solar","양력"],["lunar","음력"]]){const opt=makeEl("option","",name);opt.value=v;calendar.append(opt);}calendar.value=prev.calendar||"solar";
    field("양력 / 음력",calendar,false);
    const gender=makeEl("select");for(const [v,name]of [["unspecified","선택 안 함"],["남성","남성"],["여성","여성"]]){const opt=makeEl("option","",name);opt.value=v;gender.append(opt);}gender.value=prev.gender||"unspecified";
@@ -188,13 +215,29 @@ function makeIntake(){
    fields.append(options);
    function update(){time.disabled=unknown.checked;leapLabel.hidden=calendar.value!=="lunar";if(leapLabel.hidden)leap.checked=false;}unknown.addEventListener("change",update);calendar.addEventListener("change",update);update();
    section.append(fields);form.append(section);
-   sets.push({date,calendar,gender,time,unknown,leap});
+   sets.push({year,month,day,calendar,gender,time,unknown,leap});
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
- sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.date.value=i===0?"1990-03-12":"1992-05-04";p.calendar.value="solar";p.gender.value="unspecified";p.unknown.checked=true;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.unknown.checked=true;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";actions.append(sample,submit);form.append(actions);
- form.addEventListener("submit",ev=>{ev.preventDefault();if(!form.reportValidity())return;
-   birthProfiles[key]=sets.map(p=>({date:p.date.value,calendar:p.calendar.value,gender:p.gender.value,unknown:p.unknown.checked,time:p.unknown.checked?"":p.time.value,leap:p.calendar.value==="lunar"&&p.leap.checked}));
+ form.addEventListener("submit",ev=>{
+   ev.preventDefault();
+   const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+   for(const p of sets){
+     p.year.setCustomValidity("");p.day.setCustomValidity("");
+     const yearText=p.year.value.trim(),y=Number(yearText),m=Number(p.month.value),d=Number(p.day.value);
+     if(yearText&&!/^[0-9]{4}$/.test(yearText)||yearText&&y<1900||yearText&&y>Number(today.slice(0,4))){
+       p.year.setCustomValidity("출생 연도는 1900년부터 올해까지 숫자 4자리로 입력해 주세요.");
+     }else if(yearText&&p.month.value&&p.day.value){
+       const lastDay=new Date(y,m,0).getDate();
+       const iso=yearText+"-"+p.month.value+"-"+p.day.value;
+       if(d>lastDay||iso>today){
+         p.day.setCustomValidity("유효한 출생 날짜를 선택해 주세요.");
+       }
+     }
+   }
+   if(!form.reportValidity())return;
+   birthProfiles[key]=sets.map(p=>({date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,gender:p.gender.value,unknown:p.unknown.checked,time:p.unknown.checked?"":p.time.value,leap:p.calendar.value==="lunar"&&p.leap.checked}));
    birthEditing.delete(key);renderMessages(false);
  });
  card.append(form,makeEl("p","intake-privacy","테스트용 입력값은 서버로 보내거나 저장하지 않아. 새로고침하면 사라져."));
