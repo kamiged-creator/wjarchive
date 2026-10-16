@@ -73,10 +73,10 @@
     .admin-room-item:first-of-type{border-top:0}
     .admin-room-item.remembered,.public-room-item.remembered{background:color-mix(in srgb,var(--paper) 91%,#92bd9e);border-radius:12px;padding-left:10px;padding-right:10px}
     .entered-badge{display:inline-flex;align-items:center;vertical-align:middle;gap:4px;border:1px solid color-mix(in srgb,#388555 45%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--paper) 83%,#a2caaa);color:var(--text);font-size:11px;font-weight:850;line-height:1.3;white-space:nowrap;padding:3px 7px;margin-left:5px}
-    .room-title-line{display:flex;align-items:center;gap:8px;min-width:0}
+    .room-title-line{display:flex;align-items:center;gap:6px;min-width:0}
     .room-title-line .room-title{min-width:0}
-    .room-presence{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;background:color-mix(in srgb,var(--paper) 82%,#99cda9);border:1px solid color-mix(in srgb,#388555 40%,var(--line));border-radius:999px;padding:4px 9px;font-size:11px;font-weight:850;white-space:nowrap}
-    .room-presence::before{content:'';width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#28864e}
+    .room-presence{display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;background:color-mix(in srgb,var(--paper) 82%,#99cda9);border:1px solid color-mix(in srgb,#388555 40%,var(--line));border-radius:999px;padding:3px 7px;font-size:10px;font-weight:800;white-space:nowrap}
+    .room-presence::before{content:'';width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#28864e}
     .admin-room-name{font-weight:850;font-size:16px;line-height:1.4}
     .admin-room-meta{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4}
     .admin-room-enter{display:inline-flex;align-items:center;justify-content:center;justify-self:end;width:104px;min-width:104px;box-sizing:border-box;min-height:52px;border:2px solid #795738;border-radius:15px;background:#795738;color:#fff;padding:10px 16px;font-size:17px;line-height:1.2;font-weight:850;box-shadow:0 5px 13px rgba(93,64,42,.16);cursor:pointer}
@@ -174,7 +174,7 @@
     .chat-edge-panel .volume-menu{top:auto;bottom:calc(100% + 6px)}
     .chat-edge-panel .volume-menu-toggle{height:65px}
     @media(prefers-reduced-motion:reduce){.chat-edge-backdrop,.chat-edge-panel{transition:none}}
-    .chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+    .chat-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
     /* Always-visible safety reminder stays compact; extended guidance remains in settings. */
     .chat-safety-reminder{display:flex;align-items:center;min-height:29px;padding:5px 14px;border-bottom:1px solid var(--line);background:var(--notice);color:var(--notice-text);font-size:12px;line-height:1.45;font-weight:650}
     .chat-safety-reminder span{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -370,19 +370,20 @@
       .join{padding:24px 18px;width:100%;max-height:100%;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
       .join::-webkit-scrollbar{display:none}
       .chat{width:100%;height:100%;max-height:none;min-height:0;overflow:hidden}
-      .chat-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px 12px}
+      /* About 14% shorter header while keeping the room title and buttons readable. */
+      .chat-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px;padding:6px 10px}
       .chat-safety-reminder{min-height:27px;padding:4px 10px;font-size:11px}
       .chat-head>div:first-child{min-width:0}
-      .room-title{font-size:15px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .room-meta{font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .room-title{font-size:14px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .room-meta{font-size:11px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       /* Profile photo lives in the existing header row without adding height. */
       .header-profile-btn{width:36px;height:36px;flex-basis:36px}
       .header-profile-btn .header-avatar{font-size:18px}
       .chat-edge-panel .notice-actions .profile-shortcut{height:52px;font-size:15px;padding:6px 12px;justify-content:flex-start}
       .chat-edge-panel .notice-actions .profile-shortcut .profile-icon{width:36px;height:36px;flex-basis:36px;font-size:20px}
-      .head-actions{gap:6px;max-width:160px;flex-wrap:wrap;justify-content:flex-end}
-      .invite{min-height:40px;padding:0 12px;font-size:12px}
-      .leave{min-height:40px;padding:0 12px;font-size:12px}
+      .head-actions{gap:5px;max-width:160px;flex-wrap:wrap;justify-content:flex-end}
+      .invite{min-height:38px;padding:0 10px;font-size:12px}
+      .leave{min-height:38px;padding:0 10px;font-size:12px}
       .delete-room{min-height:32px;padding:0 9px;font-size:10px}
       /* On small screens admins delete rooms from the dedicated management page. */
       /* Avoid an overcrowded top bar while the administrator is in a chat. */
@@ -390,10 +391,10 @@
       .admin-mode .header-actions{gap:5px!important}
       .admin-mode .admin-room-add{padding:0 7px;min-height:38px;font-size:11px}
       .admin-mode .admin-logout{padding:0 8px;min-height:38px;font-size:12px}
-      .admin-mode .chat-head{min-height:62px}
+      .admin-mode .chat-head{min-height:54px}
       .admin-mode .head-actions{max-width:none;flex-wrap:nowrap;gap:6px}
       .admin-mode .chat-head .delete-room.show{display:none}
-      .admin-mode .invite,.admin-mode .leave{min-height:40px;padding:0 10px;font-size:12px}
+      .admin-mode .invite,.admin-mode .leave{min-height:38px;padding:0 10px;font-size:12px}
       .chat-settings-content{padding:16px 12px 17px}
       .chat-edge-panel .settings-actions{gap:6px;margin-top:16px}
       .chat-edge-panel .setting-action{height:62px;min-height:62px;font-size:11px;padding:6px 2px}
