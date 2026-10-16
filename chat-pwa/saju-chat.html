@@ -80,6 +80,14 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .chat-full .messages{flex:1;min-height:0;max-height:none;overflow-y:auto;padding:17px max(14px,calc((100% - 720px)/2)) 20px;gap:14px;background:linear-gradient(160deg,#fffaf4,#f7f0e6);-webkit-overflow-scrolling:touch}
 .chat-full .composer{flex:none;min-height:72px;margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fffdfa;border-top:1px solid #e7d8c6}
 .chat-full .composer input,.chat-full .send{min-height:50px}
+/* Match the rounded, unified text-entry field in the Bokjakso Club chat. */
+.chat-full .composer{min-height:76px;gap:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fffdfa}
+.chat-full .composer-inner{display:flex;align-items:center;gap:6px;min-width:0;width:100%;min-height:60px;padding:5px 6px 5px 15px;background:#fff;border:1.5px solid #ded4c8;border-radius:30px;box-shadow:0 1px 3px #62483208}
+.chat-full .composer-inner:focus-within{border-color:#a58362}
+.chat-full .composer .composer-inner input{display:block;flex:1;min-width:0;width:100%;height:46px;min-height:46px;padding:0 4px;border:0;border-radius:0;outline:none;background:transparent;color:#382b23;font-size:17px;box-shadow:none}
+.chat-full .composer .composer-inner input:focus{border:0;outline:none;box-shadow:none}
+.chat-full .composer .composer-inner input::placeholder{color:#918980;opacity:1}
+.chat-full .composer .composer-inner .send{flex:none;width:70px;min-width:70px;height:46px;min-height:46px;padding:0 8px;border:0;border-radius:24px;background:#a7825c;color:#fff;font-size:16px;font-weight:850;white-space:nowrap}
 .chat-full .tips{display:none}
 @media(max-width:355px){.chat-full .chat-heading{padding:8px 6px;gap:5px}.chat-info h2{font-size:15px}.chat-full .clear{padding:6px}}
 
@@ -210,7 +218,7 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="clearChat" class="clear">지우기</button></div>
     <p class="disclaimer">체험판 · 생년월일은 가상 정보로 시험해 줘. 실제 AI와 만세력은 아직 연결되지 않았어.</p>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
-    <form class="composer" id="composer"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="궁금한 점을 질문해 보세요" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></form>
+    <form class="composer" id="composer"><div class="composer-inner"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
     <p class="tips" id="chatTip">체험 대화는 이 브라우저 탭에만 임시 보관돼. 실제 AI와 연결되기 전에는 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
