@@ -387,8 +387,8 @@ function makeIntake(){
        const option=makeEl("option","",n+suffix);option.value=String(n).padStart(2,"0");select.append(option);
      }
    }
-   addDateOptions(month,"월 선택",12,"월");
-   addDateOptions(day,"일 선택",31,"일");
+   addDateOptions(month,"월",12,"월");
+   addDateOptions(day,"일",31,"일");
    month.value=(prev.date||"").slice(5,7);
    day.value=(prev.date||"").slice(8,10);
    dateParts.append(year,month,day);dateField.append(dateParts);fields.append(dateField);
