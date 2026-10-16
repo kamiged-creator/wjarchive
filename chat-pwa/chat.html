@@ -264,12 +264,17 @@
     .bubble.is-truncated .read-more{display:block;margin-top:5px;text-align:right;font-size:13px;font-weight:800;color:inherit;opacity:.88;text-decoration:underline;text-underline-offset:3px}
     .bubble.is-truncated:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .time{font-size:11px;color:var(--chat-meta);margin:5px 6px 0}
-    .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--composer-line);background:var(--composer-bg);align-items:flex-end}
-    .composer textarea{flex:1;min-width:0;resize:none;height:46px;min-height:46px;max-height:94px;line-height:24px;overflow-y:hidden;border:1px solid var(--composer-line);border-radius:14px;padding:10px 12px;outline:none;background:var(--composer-input);color:var(--text)}
-    .composer textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 10%,transparent)}
-    .photo{width:46px;height:46px;flex:0 0 46px;border:1px solid var(--composer-line);border-radius:14px;background:var(--composer-input);color:var(--accent);font-size:20px;font-weight:900;display:flex;align-items:center;justify-content:center}
-    .photo:disabled,.send:disabled{opacity:.55;cursor:wait}
-    .send{width:65px;flex:0 0 65px;height:46px;border:0;border-radius:14px;background:color-mix(in srgb,var(--accent) 86%,#d9b995);color:#fff;font-weight:850}
+    /* General chat uses the same compact unified composer as the club. */
+    .composer{display:flex;align-items:flex-end;gap:0;padding:12px;border-top:1px solid var(--composer-line);background:var(--composer-bg)}
+    .composer-inner{display:flex;align-items:flex-end;gap:5px;width:100%;min-width:0;border:1.5px solid var(--line);border-radius:25px;padding:5px 6px 5px 7px;background:var(--field-bg)}
+    .composer-inner:focus-within{border-color:var(--accent)}
+    .composer .composer-inner textarea{display:block;flex:1 1 auto;min-width:0;height:40px;min-height:40px;max-height:88px;resize:none;overflow-y:hidden;border:0;outline:0;box-shadow:none;border-radius:0;padding:8px 4px 7px;margin:0;background:transparent;color:var(--text);font-size:16px;line-height:24px;overscroll-behavior:contain}
+    .composer .composer-inner textarea:focus{border:0;outline:none;box-shadow:none}
+    .composer .photo{width:40px;min-width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:var(--soft);color:var(--text);font-size:27px;font-weight:450;line-height:1;display:flex;align-items:center;justify-content:center}
+    .composer .photo:disabled,.composer .send:disabled{opacity:.55;cursor:wait}
+    .composer .send{width:55px;min-width:55px;height:40px;flex:0 0 55px;border:0;border-radius:20px;background:var(--primary);color:#fff;font-size:14px;font-weight:800;line-height:1.2}
+    .composer .photo:focus-visible,.composer .send:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    @media(max-width:560px){.composer-inner{gap:4px;padding:5px}}
     .image-bubble{max-width:78%;padding:4px;border-radius:16px 16px 16px 4px;background:var(--composer-input);border:1px solid var(--composer-line);box-shadow:0 8px 18px rgba(31,26,23,.05);overflow:hidden}
     .mine .image-bubble{border-radius:16px 16px 4px 16px}
     .chat-image{display:block;max-width:min(220px,65vw);max-height:240px;width:auto;height:auto;object-fit:contain;border-radius:12px;cursor:zoom-in}
@@ -316,7 +321,9 @@
     body.dark .chat .chat-safety-reminder{background:#29231d;color:#e7d7c4;border-bottom-color:#524437}
     body.dark .chat .messages{background:linear-gradient(180deg,#25221f 0%,#292521 100%)}
     body.dark .chat .composer{background:#1c1a18;border-top-color:#52483f;box-shadow:0 -3px 12px rgba(0,0,0,.13)}
-    body.dark .chat .composer textarea,body.dark .chat .photo{background:#292521;border-color:#584d41}
+    body.dark .chat .composer-inner{background:#292521;border-color:#584d41}
+    body.dark .chat .composer-inner textarea{background:transparent;border:0}
+    body.dark .chat .photo{background:#38332d;border:0}
     body.dark .chat .composer textarea::placeholder{color:#B8ADA1;opacity:1}
     /* In desktop dark mode the send action needs clear contrast with its white label. */
     @media(min-width:561px){body.dark .chat .send{background:#835535;color:#fff;font-size:15px;font-weight:750;box-shadow:0 2px 8px rgba(0,0,0,.16)}}
@@ -1280,9 +1287,11 @@
       <div class="messages" id="messages"><div class="empty" id="emptyState">아직 대화가 없습니다. 첫 메시지를 남겨보세요.</div></div>
       <div class="composer">
         <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
-        <button class="photo" id="photoBtn" type="button" aria-label="사진 올리기" title="사진 올리기">＋</button>
-        <textarea id="messageInput" rows="1" maxlength="1000" placeholder="메시지 입력"></textarea>
-        <button class="send" id="sendBtn" type="button">전송</button>
+        <div class="composer-inner">
+          <button class="photo" id="photoBtn" type="button" aria-label="사진 올리기" title="사진 올리기">＋</button>
+          <textarea id="messageInput" rows="1" maxlength="1000" placeholder="메시지 입력" autocomplete="off" enterkeyhint="enter" aria-label="일반 채팅 메시지 입력"></textarea>
+          <button class="send" id="sendBtn" type="button">전송</button>
+        </div>
       </div>
     </section>
   </main>
@@ -2069,10 +2078,10 @@
     // Preserve the user's scroll position if they are editing an earlier sentence.
     const previousScrollTop=input.scrollTop;
     const caretAtEnd=input.selectionStart===input.value.length&&input.selectionEnd===input.value.length;
-    input.style.height='46px';
-    const required=input.scrollHeight+2; // scrollHeight excludes the 1px top/bottom borders
-    const maxHeight=94; // three 24px text lines, plus 20px padding and 2px border
-    input.style.height=Math.min(maxHeight,Math.max(46,required))+'px';
+    input.style.height='40px';
+    const required=input.scrollHeight;
+    const maxHeight=88; // Match the club composer: up to three 24px text lines.
+    input.style.height=Math.min(maxHeight,Math.max(40,required))+'px';
     const overflowing=required>maxHeight;
     input.style.overflowY=overflowing?'auto':'hidden';
     if(!input.value||!overflowing){
@@ -2740,6 +2749,18 @@
     updateSoundToggle();
     if(soundEnabled)playBokjakSound(true);
   });
+  // Prevent the send target from jumping when Samsung's keyboard is open.
+  els.sendBtn.addEventListener('pointerdown',event=>{
+    if(event.pointerType!=='mouse'&&event.isPrimary&&document.activeElement===els.messageInput)
+      event.preventDefault();
+  });
+  els.sendBtn.addEventListener('pointerup',event=>{
+    if(event.pointerType==='mouse'||!event.isPrimary||els.sendBtn.disabled)return;
+    const rect=els.sendBtn.getBoundingClientRect();
+    if(event.clientX<rect.left||event.clientX>rect.right||
+       event.clientY<rect.top||event.clientY>rect.bottom)return;
+    send();
+  });
   els.sendBtn.addEventListener('click',send);
   els.leaveBtn.addEventListener('click',leave);
   els.inviteBtn.addEventListener('click',copyInvite);
@@ -2779,7 +2800,14 @@
   els.messageInput.addEventListener('input',resizeMessageInput);
   window.addEventListener('resize',resizeMessageInput,{passive:true});
   window.visualViewport?.addEventListener('resize',resizeMessageInput,{passive:true});
-  els.messageInput.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  // Match the club on Korean mobile keyboards: Enter confirms IME text or adds a line.
+  els.messageInput.addEventListener('keydown',e=>{
+    if(e.key!=='Enter'||e.isComposing||e.keyCode===229)return;
+    if(!window.matchMedia('(pointer:coarse)').matches&&!e.shiftKey){
+      e.preventDefault();
+      send();
+    }
+  });
 
   // Home tabs operate only on the room-list screen, never inside an open chat.
   const homePanels={
