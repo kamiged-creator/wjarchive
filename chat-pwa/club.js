@@ -20,6 +20,11 @@
  const enterBtn=document.getElementById('clubEnterBtn');
  const leaveBtn=document.getElementById('clubLeaveBtn');
  const onlineCount=document.getElementById('clubOnlineCount');
+ const noticePanel=document.getElementById('clubNotice');
+ const noticeToggle=document.getElementById('clubNoticeToggle');
+ const noticeDetails=document.getElementById('clubNoticeDetails');
+ const noticeTitle=document.getElementById('clubNoticeTitle');
+ const noticeBody=document.getElementById('clubNoticeBody');
  const inviteBtn=document.getElementById('clubInviteBtn');
  const clubThemeToggle=document.getElementById('clubThemeToggle');
  const pageThemeToggle=document.getElementById('themeToggle');
@@ -42,6 +47,7 @@
  const clubTab=document.getElementById('homeTabClub');
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
  let membership='none',busy=false;
+ let noticeKey='',noticeBusy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
  let selectedPhoto=null,photoPreviewUrl=null;
  let entryFollowCleanup=null;
@@ -178,6 +184,44 @@
    }
    return data;
  }
+ function showClubNotice(notice){
+   if(!notice||notice.active!==true||!String(notice.body||'').trim()){
+     noticePanel.hidden=true;noticeDetails.hidden=true;
+     noticeToggle.setAttribute('aria-expanded','false');
+     noticeKey='';
+     return;
+   }
+   const nextKey=JSON.stringify([notice.title,notice.body,notice.updatedAt]);
+   const changed=noticeKey!==nextKey;
+   noticeKey=nextKey;
+   if(changed){
+     noticeTitle.textContent=String(notice.title||'클럽 공지사항');
+     noticeBody.textContent=String(notice.body||'');
+     noticeDetails.hidden=true;
+     noticeToggle.setAttribute('aria-expanded','false');
+   }
+   noticePanel.hidden=false;
+ }
+ async function loadClubNotice(){
+   if(noticeBusy||membership!=='approved'||pane.hidden)return;
+   noticeBusy=true;
+   const generation=roomGeneration;
+   try{
+     const result=await request('notice');
+     if(generation===roomGeneration&&!pane.hidden)showClubNotice(result.notice);
+   }catch(error){
+     if(generation===roomGeneration&&!pane.hidden){
+       // Do not show a stale notice if the server revokes access.
+       if(error.statusCode===401||error.statusCode===403)showClubNotice(null);
+     }
+   }finally{noticeBusy=false}
+ }
+ noticeToggle.addEventListener('click',()=>{
+   if(noticePanel.hidden)return;
+   const expanded=noticeToggle.getAttribute('aria-expanded')==='true';
+   noticeToggle.setAttribute('aria-expanded',String(!expanded));
+   noticeDetails.hidden=expanded;
+ });
  function clearPhotoSelection(){
    if(photoPreviewUrl)URL.revokeObjectURL(photoPreviewUrl);
    selectedPhoto=null;photoPreviewUrl=null;preview.hidden=true;
@@ -306,6 +350,8 @@
    confirmedRows=[];
    optimisticMessage=null;
    lastRenderKey='';
+   noticePanel.hidden=true;noticeDetails.hidden=true;noticeKey='';
+   noticeToggle.setAttribute('aria-expanded','false');
    stopEntryFollow();
    clearPhotoSelection();hideAttachMenu();photoMenuBusy=false;photoActions.hidden=true;menuPhoto=null;closeClubImage();
    feed.replaceChildren();
@@ -593,6 +639,7 @@
      lastRenderKey='';
      renderMessages(true);
      scrollLatestOnEntry();
+     loadClubNotice();
      updatePresence();
      // Do not force-open the virtual keyboard on mobile just for entering a room.
      if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
@@ -618,6 +665,7 @@
    if(!pane.hidden&&membership==='approved'){
      document.body.classList.add('club-chat-open');
      scrollLatestOnEntry();
+     loadClubNotice();
      syncClubInputFocus();
      updatePresence();
      loadMessages(); // Each fetch still verifies the user's server-side approval.
@@ -853,6 +901,8 @@
    if(document.hidden||document.body.classList.contains('chat-active')||clubTab.getAttribute('aria-selected')!=='true')return;
    if(membership==='pending')refresh();else if(!pane.hidden)loadMessages();
  },2000);
+ // Only poll for new notices while the approved club room is visible.
+ setInterval(()=>{if(clubIsVisible())loadClubNotice()},12000);
  // Count members in this private room, not all approved club members.
  setInterval(updatePresence,20000);
  document.addEventListener('visibilitychange',()=>{
