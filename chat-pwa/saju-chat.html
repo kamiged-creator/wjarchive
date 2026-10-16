@@ -319,12 +319,13 @@ function upgradeSajuSelect(select){
       document.removeEventListener("pointerdown",outside,true);
       document.removeEventListener("keydown",onKey,true);
       window.removeEventListener("resize",reposition);
-      window.removeEventListener("scroll",close,true);
+      window.removeEventListener("scroll",onScroll,true);
       if(closeSajuPopup===close)closeSajuPopup=null;
     }
     close._trigger=trigger;
     closeSajuPopup=close;
     function outside(event){if(!popup.contains(event.target)&&!trigger.contains(event.target))close()}
+    function onScroll(event){if(event.target===popup||popup.contains(event.target))return;close()}
     function onKey(event){
       if(event.key==="Escape"){event.preventDefault();close();trigger.focus({preventScroll:true});return}
       if(!popup.contains(document.activeElement))return;
@@ -340,10 +341,11 @@ function upgradeSajuSelect(select){
     document.addEventListener("pointerdown",outside,true);
     document.addEventListener("keydown",onKey,true);
     window.addEventListener("resize",reposition);
-    window.addEventListener("scroll",close,true);
+    window.addEventListener("scroll",onScroll,true);
     reposition();
     if(selectedButton){
-      selectedButton.scrollIntoView({block:"nearest"});
+      // Scroll inside the menu only. Do not move the chat/feed itself.
+      popup.scrollTop=Math.max(0,selectedButton.offsetTop-popup.offsetTop-Math.floor(popup.clientHeight/3));
       selectedButton.focus({preventScroll:true});
     }else popup.firstElementChild?.focus({preventScroll:true});
   });
@@ -478,7 +480,7 @@ function makeIntake(){
  return card;
 }
 
-function renderMessages(scrollToEnd=true){const feed=$("messages");feed.replaceChildren();for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
+function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
 function renderAll(){renderAdvisors();renderTopics();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.name+"와 채팅 시작하기 →";renderMessages();save();}
 function syncChatView(){const open=location.hash==="#chat";document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
 function openChat(){if(location.hash!=="#chat")location.hash="chat";syncChatView();}
