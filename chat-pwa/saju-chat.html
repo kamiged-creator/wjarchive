@@ -233,7 +233,7 @@ function makeIntake(){
    minute.addEventListener("input",()=>minute.setCustomValidity(""));
    timeParts.append(period,hour,minute);timeField.append(timeParts);fields.append(timeField);
    const options=makeEl("div","");options.style.display="flex";options.style.flexDirection="column";
-   const unknownLabel=makeEl("label","intake-check");const unknown=makeEl("input");unknown.type="checkbox";unknown.checked=prev.unknown!==false;unknownLabel.append(unknown,makeEl("span","","태어난 시간 모름"));options.append(unknownLabel);
+   const unknownLabel=makeEl("label","intake-check");const unknown=makeEl("input");unknown.type="checkbox";unknown.checked=prev.unknown===true;unknownLabel.append(unknown,makeEl("span","","태어난 시간 모름"));options.append(unknownLabel);
    const leapLabel=makeEl("label","intake-check");const leap=makeEl("input");leap.type="checkbox";leap.checked=!!prev.leap;leapLabel.append(leap,makeEl("span","","음력 윤달"));options.append(leapLabel);
    options.className="intake-time-options";fields.append(options);
    function update(){
@@ -248,7 +248,7 @@ function makeIntake(){
    sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap});
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
- sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=true;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";actions.append(sample,submit);form.append(actions);
  form.addEventListener("submit",ev=>{
    ev.preventDefault();
