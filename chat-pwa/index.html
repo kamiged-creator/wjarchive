@@ -37,6 +37,11 @@
     .section-title{margin:27px 2px 14px;font-size:16px;font-weight:850;letter-spacing:-.02em}
     .cards{display:grid;gap:12px;margin-top:22px}
     .entry{display:flex;align-items:center;gap:16px;min-height:102px;padding:18px 16px;border:1.5px solid var(--border);border-radius:20px;background:var(--paper);box-shadow:0 5px 18px rgba(0,0,0,.025);transition:transform .15s,border-color .15s}
+    /* Preview card uses the existing layout and does not change the 3 main tabs. */
+    .saju-entry .entry-icon{background:color-mix(in srgb,var(--panel) 78%,#d9b78f 22%)}
+    .entry-test-label{display:inline-block;vertical-align:middle;margin-left:4px;padding:3px 6px;
+      border:1px solid var(--border);border-radius:7px;color:var(--accent);
+      font-size:10px;font-weight:800;line-height:1.2;letter-spacing:0}
     .entry:hover{border-color:var(--accent);transform:translateY(-1px)}
     .entry:active{transform:translateY(1px)}
     .entry-icon{display:grid;place-items:center;flex:0 0 56px;width:56px;height:56px;border-radius:16px;background:var(--panel);font-size:27px}
@@ -142,6 +147,11 @@
       <a class="entry" href="/chat.html?tab=club">
         <span class="entry-icon" aria-hidden="true">👥</span>
         <span class="entry-text"><strong>복작소 클럽</strong><small>가입하기 → 신청서 제출 → 관리자 승인 후 입장</small></span>
+        <span class="arrow" aria-hidden="true">›</span>
+      </a>
+      <a class="entry saju-entry" href="/saju-chat.html" aria-label="AI 사주채팅 체험판 열기">
+        <span class="entry-icon" aria-hidden="true">🔮</span>
+        <span class="entry-text"><strong>AI 사주채팅 <span class="entry-test-label">체험판</span></strong><small>아라 · 도윤 · 서윤 · 지안, 4명의 상담사 만나보기</small></span>
         <span class="arrow" aria-hidden="true">›</span>
       </a>
       <a class="entry" href="/chat.html?tab=me">
