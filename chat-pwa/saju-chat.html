@@ -98,7 +98,7 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .intake-date-parts input::placeholder{font-size:13px;color:#8a7666}
 .intake-time-parts{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:8px;min-width:0}
 .intake-time-parts input,.intake-time-parts select{width:100%;min-width:0;height:44px;font-size:15px}
-.intake-time-parts input::placeholder{color:#8a7666}
+.intake-time-parts input::placeholder{color:#a59a8f;opacity:1;font-weight:500}
 .intake-time-parts input:disabled,.intake-time-parts select:disabled{background:#f5f1eb;color:#8c8178}
 .intake-time-options{grid-column:1/-1}
 @media(max-width:355px){.intake-date-parts{gap:5px;grid-template-columns:minmax(0,1.4fr) minmax(0,.85fr) minmax(0,.85fr)}.intake-date-parts input::placeholder{font-size:12px}}
@@ -401,8 +401,8 @@ function makeIntake(){
    const gender=makeEl("select");for(const [v,name]of [["unspecified","선택 안 함"],["남성","남성"],["여성","여성"]]){const opt=makeEl("option","",name);opt.value=v;gender.append(opt);}gender.value=prev.gender||"unspecified";
    field("성별 (선택)",gender,false);
    // Avoid Samsung's difficult native time wheel. Each part is keyboard-friendly.
-   const savedTime=/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(prev.time||"")?prev.time:"12:00";
-   const savedHour=Number(savedTime.slice(0,2));
+   const savedTime=/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(prev.time||"")?prev.time:"";
+   const savedHour=savedTime?Number(savedTime.slice(0,2)):null;
    const timeField=makeEl("div","intake-field wide");
    timeField.append(makeEl("span","","태어난 시간"));
    const timeParts=makeEl("div","intake-time-parts");
@@ -410,13 +410,13 @@ function makeIntake(){
    for(const [val,title] of [["am","오전"],["pm","오후"]]){
      const item=makeEl("option","",title);item.value=val;period.append(item);
    }
-   period.value=savedHour>=12?"pm":"am";
+   period.value=savedHour===null?"pm":savedHour>=12?"pm":"am";
    const hour=makeEl("input");hour.type="text";hour.inputMode="numeric";hour.pattern="[0-9]{1,2}";hour.maxLength=2;hour.required=true;
    hour.placeholder="시";hour.autocomplete="off";hour.setAttribute("aria-label","태어난 시, 1부터 12까지");
-   hour.value=String(savedHour%12||12);
+   hour.value=savedHour===null?"":String(savedHour%12||12);
    const minute=makeEl("input");minute.type="text";minute.inputMode="numeric";minute.pattern="[0-9]{1,2}";minute.maxLength=2;minute.required=true;
    minute.placeholder="분";minute.autocomplete="off";minute.setAttribute("aria-label","태어난 분, 0부터 59까지");
-   minute.value=String(Number(savedTime.slice(3)));
+   minute.value=savedTime?String(Number(savedTime.slice(3))):"";
    hour.addEventListener("input",()=>hour.setCustomValidity(""));
    minute.addEventListener("input",()=>minute.setCustomValidity(""));
    timeParts.append(period,hour,minute);timeField.append(timeParts);fields.append(timeField);
