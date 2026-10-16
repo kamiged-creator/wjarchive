@@ -153,6 +153,46 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
   .intake-date-parts,.intake-time-parts{gap:5px}
   .intake-date-parts input::placeholder{font-size:12px}
 }
+
+/* Compact, readable, field-anchored selectors instead of oversized Android sheets. */
+.saju-hidden-select{display:none!important}
+.saju-select-wrap{display:block;width:100%;min-width:0}
+.saju-select-trigger{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  width:100%;min-width:0;min-height:48px;padding:8px 11px;
+  border:1px solid #d6c3ad;border-radius:10px;background:#fff;
+  color:#49372c;text-align:left;font:inherit;font-size:16px;line-height:1.3;
+  white-space:nowrap;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent
+}
+.saju-select-trigger::after{
+  content:"";width:8px;height:8px;flex:none;margin-right:3px;
+  border-right:1.7px solid #765338;border-bottom:1.7px solid #765338;
+  transform:translateY(-2px) rotate(45deg)
+}
+.saju-select-trigger:focus-visible{outline:2px solid #947456;outline-offset:2px}
+.saju-select-trigger:disabled{background:#f5f1eb;color:#8c8178;cursor:default}
+.saju-select-popup{
+  position:fixed;z-index:1500;box-sizing:border-box;
+  overflow-y:auto;overscroll-behavior:contain;
+  padding:5px;background:#fffdfa;
+  border:1px solid #d7c3ac;border-radius:14px;
+  box-shadow:0 10px 26px rgba(58,38,23,.20);
+  -webkit-overflow-scrolling:touch
+}
+.saju-select-option{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  width:100%;min-height:48px;padding:9px 12px;
+  border:0;border-radius:9px;background:transparent;
+  color:#49372c;font-size:16px;font-weight:650;text-align:left;cursor:pointer
+}
+.saju-select-option[aria-selected="true"]{background:#f3e9dc;color:#69452a;font-weight:800}
+.saju-select-option[aria-selected="true"]::after{content:"✓";font-size:18px;font-weight:900;color:#765338}
+.saju-select-option:focus-visible{outline:2px solid #9b6e4d;outline-offset:-2px}
+.saju-select-option:active{background:#ead8c5}
+@media(max-width:355px){
+ .saju-select-trigger{font-size:15px;padding:7px 8px;min-height:48px}
+ .saju-select-option{font-size:16px}
+}
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
@@ -202,6 +242,112 @@ function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(con
 function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]!==t[0]){topic=t;conversation=read();renderAll()}openChat()});root.append(b)}}
 
 function makeEl(tag,cls,txt){const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;}
+// Replace OS-wide select sheets with a small in-page menu beside the field.
+// Native select values still drive the existing birth-date and calendar logic.
+let closeSajuPopup=null;
+function upgradeSajuSelect(select){
+  const field=select.closest(".intake-field");
+  const label=select.getAttribute("aria-label")||field?.querySelector("span")?.textContent||"선택";
+  const wrap=document.createElement("span");wrap.className="saju-select-wrap";
+  const trigger=document.createElement("button");
+  trigger.type="button";trigger.className="saju-select-trigger";
+  trigger.setAttribute("aria-label",label);
+  trigger.setAttribute("aria-haspopup","listbox");
+  trigger.setAttribute("aria-expanded","false");
+  wrap.append(trigger);
+  select.after(wrap);
+  // Required month/day are validated by the intake form, not by hidden controls.
+  select.required=false;
+  select.classList.add("saju-hidden-select");
+  select.tabIndex=-1;
+  select.setAttribute("aria-hidden","true");
+  function sync(){
+    const opt=select.options[select.selectedIndex];
+    trigger.textContent=opt?.textContent||"선택";
+    trigger.disabled=select.disabled;
+    if(trigger.disabled && trigger.getAttribute("aria-expanded")==="true")closeSajuPopup?.();
+  }
+  select.addEventListener("change",sync);
+  select._syncSaju=sync;
+  sync();
+  trigger.addEventListener("click",()=>{
+    if(select.disabled)return;
+    if(closeSajuPopup){const existing=closeSajuPopup;existing();if(existing._trigger===trigger)return}
+    const popup=document.createElement("div");
+    popup.className="saju-select-popup";
+    popup.setAttribute("role","listbox");
+    popup.setAttribute("aria-label",label);
+    let selectedButton=null;
+    for(const opt of Array.from(select.options)){
+      if(opt.disabled||opt.value==="")continue;
+      const item=document.createElement("button");
+      item.type="button";item.className="saju-select-option";
+      item.setAttribute("role","option");
+      const isSelected=opt.value===select.value;
+      item.setAttribute("aria-selected",String(isSelected));
+      item.textContent=opt.textContent;
+      if(isSelected)selectedButton=item;
+      item.addEventListener("click",()=>{
+        select.value=opt.value;
+        select.dispatchEvent(new Event("change",{bubbles:true}));
+        closeSajuPopup?.();trigger.focus({preventScroll:true});
+      });
+      popup.append(item);
+    }
+    if(!popup.childElementCount)return;
+    document.body.append(popup);
+    trigger.setAttribute("aria-expanded","true");
+    let closed=false;
+    function reposition(){
+      if(closed)return;
+      const rect=trigger.getBoundingClientRect(),vw=window.innerWidth,vh=window.innerHeight;
+      const width=Math.min(Math.max(rect.width,120),220,vw-24);
+      popup.style.width=width+"px";
+      const maxHeight=Math.min(276,Math.max(150,vh-32));
+      popup.style.maxHeight=maxHeight+"px";
+      const actualHeight=Math.min(popup.scrollHeight,maxHeight);
+      const roomBelow=vh-rect.bottom-12,roomAbove=rect.top-12;
+      const above=roomBelow<actualHeight && roomAbove>roomBelow;
+      const left=Math.max(12,Math.min(rect.left,vw-width-12));
+      const top=above?Math.max(12,rect.top-actualHeight-6):Math.min(vh-actualHeight-12,rect.bottom+6);
+      popup.style.left=Math.round(left)+"px";
+      popup.style.top=Math.round(Math.max(12,top))+"px";
+    }
+    function close(){
+      if(closed)return;
+      closed=true;popup.remove();trigger.setAttribute("aria-expanded","false");
+      document.removeEventListener("pointerdown",outside,true);
+      document.removeEventListener("keydown",onKey,true);
+      window.removeEventListener("resize",reposition);
+      window.removeEventListener("scroll",close,true);
+      if(closeSajuPopup===close)closeSajuPopup=null;
+    }
+    close._trigger=trigger;
+    closeSajuPopup=close;
+    function outside(event){if(!popup.contains(event.target)&&!trigger.contains(event.target))close()}
+    function onKey(event){
+      if(event.key==="Escape"){event.preventDefault();close();trigger.focus({preventScroll:true});return}
+      if(!popup.contains(document.activeElement))return;
+      const options=Array.from(popup.querySelectorAll(".saju-select-option"));
+      const index=options.indexOf(document.activeElement);
+      if(event.key==="ArrowDown"||event.key==="ArrowUp"){
+        event.preventDefault();
+        options[(index+(event.key==="ArrowDown"?1:-1)+options.length)%options.length].focus({preventScroll:true});
+      }else if(event.key==="Home"||event.key==="End"){
+        event.preventDefault();options[event.key==="Home"?0:options.length-1].focus({preventScroll:true});
+      }
+    }
+    document.addEventListener("pointerdown",outside,true);
+    document.addEventListener("keydown",onKey,true);
+    window.addEventListener("resize",reposition);
+    window.addEventListener("scroll",close,true);
+    reposition();
+    if(selectedButton){
+      selectedButton.scrollIntoView({block:"nearest"});
+      selectedButton.focus({preventScroll:true});
+    }else popup.firstElementChild?.focus({preventScroll:true});
+  });
+}
 function makeIntake(){
  const key=birthKey(),existing=birthProfiles[key]||null;
  const card=makeEl("div","intake-card");
@@ -278,6 +424,7 @@ function makeIntake(){
    options.className="intake-time-options";fields.append(options);
    function update(){
      period.disabled=hour.disabled=minute.disabled=unknown.checked;
+     period._syncSaju?.();
      leapLabel.hidden=calendar.value!=="lunar";
      if(leapLabel.hidden)leap.checked=false;
      if(unknown.checked){hour.setCustomValidity("");minute.setCustomValidity("")}
@@ -298,6 +445,8 @@ function makeIntake(){
      const yearText=p.year.value.trim(),y=Number(yearText),m=Number(p.month.value),d=Number(p.day.value);
      if(yearText&&!/^[0-9]{4}$/.test(yearText)||yearText&&y<1900||yearText&&y>Number(today.slice(0,4))){
        p.year.setCustomValidity("출생 연도는 1900년부터 올해까지 숫자 4자리로 입력해 주세요.");
+     }else if(yearText&&(!p.month.value||!p.day.value)){
+       p.year.setCustomValidity("출생 월과 일을 모두 선택해 주세요.");
      }else if(yearText&&p.month.value&&p.day.value){
        const lastDay=new Date(y,m,0).getDate();
        const iso=yearText+"-"+p.month.value+"-"+p.day.value;
@@ -325,6 +474,7 @@ function makeIntake(){
    birthEditing.delete(key);renderMessages(false);
  });
  card.append(form,makeEl("p","intake-privacy","테스트용 입력값은 서버로 보내거나 저장하지 않아. 새로고침하면 사라져."));
+ for(const select of form.querySelectorAll("select"))upgradeSajuSelect(select);
  return card;
 }
 
