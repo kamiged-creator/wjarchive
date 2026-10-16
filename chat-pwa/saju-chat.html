@@ -18,9 +18,11 @@ h1{font-family:"Noto Serif KR",Georgia,serif;font-size:29px;letter-spacing:-.06e
 .lead{font-size:14px;line-height:1.5;color:#796b61;margin:0}
 .beta{display:inline-flex;align-items:center;justify-content:center;background:#fdf7ec;color:#704f33;border:1px solid #dcc6ab;font-size:12px;font-weight:750;border-radius:999px;padding:7px 12px;margin-top:12px}
 section.panel{background:#fffdfa;border:1px solid #e2d5c3;border-radius:22px;margin:10px 14px;padding:17px 13px;box-shadow:0 8px 24px #4837220b}
+/* Keep all four portraits large; trim only excessive space beneath the advisor choices. */
+.selection-view > section.panel:first-of-type{padding-bottom:9px}
 .panel h2{font-size:17px;margin:0 0 14px;letter-spacing:-.025em}.hint{font-size:12px;color:#827266;line-height:1.5}
 .avatars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
-.avatar{background:transparent;color:#3b2b20;border:2px solid transparent;border-radius:15px;padding:9px 3px 8px;display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0;touch-action:manipulation}
+.avatar{background:transparent;color:#3b2b20;border:2px solid transparent;border-radius:15px;padding:9px 3px 5px;display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0;touch-action:manipulation}
 .avatar[aria-pressed="true"]{background:transparent;border-color:transparent}
 .portrait{display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;width:clamp(56px,17vw,100px);height:clamp(56px,17vw,100px);border-radius:50%;border:2px solid #e4d1be;background:linear-gradient(140deg,#fbe4d1,#ceb29c);color:#704d31;font-size:27px;font-weight:900}
 .avatar-portrait-wrap{display:block;position:relative;flex:none}
@@ -60,7 +62,7 @@ button:focus-visible,a:focus-visible{outline:3px solid #9b6e4d;outline-offset:3p
 [hidden]{display:none!important}
 .selection-view{display:flex;flex-direction:column;padding-bottom:10px}
 .choose-tip{text-align:center;color:#846f5d;font-size:12px;line-height:1.5;margin:8px 18px}
-.start-chat{display:block;margin:7px 14px 8px;min-height:54px;border:0;border-radius:15px;background:#765338;color:white;font-weight:850;font-size:16px}
+.start-chat{display:block;margin:7px 14px 8px;min-height:49px;border:0;border-radius:15px;background:#765338;color:white;font-weight:850;font-size:16px}
 body.chat-active{height:100dvh;overflow:hidden}
 .chat-active .page{height:100dvh;min-height:0;max-width:none;overflow:hidden}
 .chat-active footer{display:none}
