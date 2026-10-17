@@ -358,6 +358,7 @@ html.dark .simli-stage{border-color:#735e4b}
   <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
   <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section>
   <button id="startChat" type="button" class="start-chat">아라와 채팅 시작하기 →</button>
+  <p id="harinNewWindowHint" class="choose-tip" hidden>하린 음성 상담은 새 탭에서 크게 열려요. 마이크 사용을 허용해 주세요.</p>
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
@@ -682,9 +683,10 @@ function makeIntake(){
 }
 
 function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
-function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.name+"와 채팅 시작하기 →";renderMessages();save();}
+function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+"와 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
 function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
-function openChat(){if(location.hash!=="#chat")location.hash="chat";syncChatView();}
+function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
+function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
 function response(){return selected.name+" 상담방에 질문이 입력됐어.\n\n지금은 "+topic[2]+" 분야의 대화 화면을 미리 보는 체험판이야. 실제 상담사의 AI 답변과 만세력 분석을 연결하면 이 자리에서 질문에 맞춘 풀이를 이어갈 수 있어.";}
 function send(){if(sentBusy)return;const input=$("question");const content=input.value.trim();if(!content)return;sentBusy=true;conversation.push(msg("user",content));input.value="";renderMessages();conversation.push(msg("bot",response()));save();renderMessages();sentBusy=false;}
@@ -753,36 +755,9 @@ function syncSimliAdvisor(){
   if(!active)stopSimliSession();
   syncSimliControls();
 }
-$("simliConnect").addEventListener("click",async()=>{
-  const button=$("simliConnect");
-  if(selected.id!=="harin"){syncSimliControls();return;}
-  if(button.disabled)return;
-  button.disabled=true;
-  $("simliStatus").textContent="하린 음성 상담 연결을 확인하고 있어요...";
-  const ready=await hasSimliSession();
-  if(selected.id!=="harin"){syncSimliControls();return;}
-  button.disabled=false;
-  if(!ready){
-    $("simliStatus").textContent="연결 주소가 서버에 아직 설정되지 않았어요. 관리자에게 설정을 요청해 주세요.";
-    return;
-  }
-  stopSimliSession();
-  simliActive=true;
-  $("simliViewer").hidden=false;
-  $("simliPanel").classList.add("is-live");
-  $("chatView").classList.add("simli-live");
-  $("simliStop").hidden=false;
-  updateSimliLayout();
-  simliWait.hidden=false;
-  simliWait.querySelector("strong").textContent="아바타 화면을 준비하고 있어요";
-  $("simliStatus").textContent="하린 아바타를 불러오는 중이에요. 생년월일은 대화 중 직접 말씀해 주세요.";
-  updateSimliLayout();
-  simliFrame.src=SIMLI_ENDPOINT;
-  simliSlowNotice=setTimeout(()=>{
-    if(!simliActive||simliWait.hidden)return;
-    simliWait.querySelector("strong").textContent="Simli 연결이 오래 걸리고 있어요";
-    $("simliStatus").textContent="오래 기다려도 화면이 안 나오면 새 창으로 열기를 눌러 주세요.";
-  },20000);
+$("simliConnect").addEventListener("click",()=>{
+  if(selected.id!=="harin")return;
+  openHarinWindow();
 });
 simliFrame.addEventListener("load",()=>{
   if(!simliActive||!simliFrame.hasAttribute("src"))return;
@@ -798,7 +773,7 @@ simliFrame.addEventListener("error",()=>{
 });
 $("simliOpen").addEventListener("click",()=>{
   if(selected.id!=="harin")return;
-  window.open(SIMLI_ENDPOINT,"_blank","noopener,noreferrer");
+  openHarinWindow();
 });
 $("simliStop").addEventListener("click",()=>{
   stopSimliSession();
