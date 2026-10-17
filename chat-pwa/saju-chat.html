@@ -270,6 +270,36 @@ html.dark .saju-select-option:active{background:#4f4033}
 html.dark .beta{background:#302922;border-color:#755c46;color:#f2d9bd}
 html.dark footer{color:#b5a292}
 
+/* Fifth adviser: keep the four existing large portraits unchanged. */
+.avatar-featured{grid-column:1/-1;display:grid;grid-template-columns:70px minmax(0,1fr);grid-template-rows:auto auto;column-gap:14px;row-gap:1px;text-align:left;align-items:center;padding:12px 16px;background:#faf5ee;border:1.5px solid #ddc7ad;border-radius:18px}
+.avatar-featured .avatar-portrait-wrap{grid-row:1/3;grid-column:1}
+.avatar-featured .portrait{width:66px;height:66px}
+.avatar-featured strong{grid-row:1;grid-column:2;font-size:17px}
+.avatar-featured small{grid-row:2;grid-column:2;text-align:left;min-height:0;font-size:13px}
+.avatar-featured[aria-pressed="true"]{background:#f5e7d6;border-color:#b68f69}
+.simli-panel{flex:none;max-height:58dvh;overflow:auto;padding:12px max(14px,calc((100% - 700px)/2));background:#fff9f0;border-bottom:1px solid #e7d8c6;color:#4b3628}
+.simli-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:16px}
+.simli-head span{font-size:12px;color:#805f47;white-space:nowrap}
+.simli-panel p{margin:7px 0;font-size:13px;line-height:1.5;color:#77604d}
+.simli-panel input{box-sizing:border-box;width:100%;min-height:44px;padding:8px 11px;border:1px solid #d7c5b2;border-radius:11px;background:#fff;color:#382b23;font-size:15px}
+.simli-actions{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.simli-actions button{min-height:44px;padding:8px 12px;border:1px solid #a17a56;border-radius:11px;background:#765338;color:#fff;font-size:14px;font-weight:800}
+.simli-actions button:nth-child(2){background:transparent;color:#765338}
+.simli-actions button:disabled{opacity:.45;cursor:default}
+.simli-status{font-size:12px!important}
+.simli-viewer{margin-top:9px}
+.simli-viewer iframe{display:block;width:100%;height:clamp(225px,37dvh,430px);border:1px solid #d7c5b2;border-radius:12px;background:#1e1b19}
+.simli-viewer small{display:block;margin:6px 0;font-size:12px;color:#806b5c}
+html.dark .avatar-featured{background:#322920;border-color:#6f5540}
+html.dark .avatar-featured[aria-pressed="true"]{background:#433325;border-color:#b38d65}
+html.dark .simli-panel{background:#28231f;border-bottom-color:#594b40;color:#f1dfcf}
+html.dark .simli-panel p,html.dark .simli-viewer small{color:#d2bbab}
+html.dark .simli-head span{color:#d3ad87}
+html.dark .simli-panel input{background:#3a312b;border-color:#735e4b;color:#f5e8dc}
+html.dark .simli-panel input::placeholder{color:#b9a99a}
+html.dark .simli-actions button{background:#a7825c;color:#211812;border-color:#b99675}
+html.dark .simli-actions button:nth-child(2){background:transparent;color:#ebcbaa}
+html.dark .simli-viewer iframe{border-color:#735e4b}
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
