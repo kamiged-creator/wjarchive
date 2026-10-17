@@ -687,7 +687,7 @@ function updateSimliLayout(){
   const pad=8;
   const scale=Math.min((w-pad*2)/focus.w,(h-pad*2)/focus.h);
   // Keep the visible portrait + Close button centered without stretching.
-  const offsetX=(w-focus.w*scale)/2-focus.x*scale;
+  const offsetX=(w-focus.w*scale)/2-focus.x*scale+14; // Center the Simli portrait 14px to the right.
   const offsetY=(h-focus.h*scale)/2-focus.y*scale;
   simliStage.style.setProperty("--simli-scale",String(scale));
   simliStage.style.setProperty("--simli-x",offsetX+"px");
