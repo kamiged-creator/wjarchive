@@ -336,6 +336,12 @@ html.dark .simli-stage{border-color:#735e4b}
 .simli-panel.is-live .simli-stage iframe{left:0;top:0;transform:translate(var(--simli-x),var(--simli-y)) scale(var(--simli-scale));transform-origin:top left}
 @media(max-height:650px){.simli-panel.is-live .simli-stage{height:max(220px,calc(100dvh - 215px));min-height:220px}}
 
+
+/* Birth confirmation gates the Simli demo without sending birth details. */
+.intake-voice{display:block;width:100%;margin-top:12px;background:#765338;color:#fff}
+.simli-panel .simli-actions button:disabled{cursor:not-allowed;opacity:.43}
+html.dark .intake-voice{background:#a7825c;color:#1d1713}
+
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
@@ -354,9 +360,9 @@ html.dark .simli-stage{border-color:#735e4b}
     <p class="disclaimer">체험판 · 생년월일은 가상 정보로 시험해 줘. 실제 AI와 만세력은 아직 연결되지 않았어.</p>
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
-      <p>주소 입력 없이 하린과 한국어로 대화해 보세요.</p>
-      <div class="simli-actions"><button type="button" id="simliConnect">음성 상담 시작</button><button type="button" id="simliOpen">새 창으로 열기 ↗</button><button type="button" id="simliStop" hidden>연결 종료</button></div>
-      <p class="simli-status" id="simliStatus" role="status">음성 상담 시작을 누르면 하린을 연결해요.</p>
+      <p id="simliIntro">먼저 아래 사주 정보를 입력하고 ‘입력 확인’을 눌러 주세요.</p>
+      <div class="simli-actions"><button type="button" id="simliConnect" disabled>음성 상담 시작</button><button type="button" id="simliOpen" disabled>새 창으로 열기 ↗</button><button type="button" id="simliStop" hidden>연결 종료</button></div>
+      <p class="simli-status" id="simliStatus" role="status">사주 정보 입력을 확인하면 상담 버튼이 활성화돼요. 입력 정보는 아직 음성 AI에 자동 전달되지 않아요.</p>
       <div id="simliViewer" class="simli-viewer" hidden>
         <div class="simli-stage" id="simliStage">
           <div class="simli-wait" id="simliWait" role="status"><span class="simli-spinner" aria-hidden="true"></span><strong>아바타 화면을 준비하고 있어요</strong><span>Simli 음성 연결에는 잠시 시간이 걸릴 수 있어요.</span></div>
@@ -518,6 +524,18 @@ function makeIntake(){
    card.append(makeEl("p","intake-summary",summary));
    card.append(makeEl("p","intake-privacy","입력한 생년월일은 현재 화면에서만 임시 표시돼. 서버 전송·대화 기록 저장은 하지 않아."));
    const edit=makeEl("button","intake-edit","정보 수정하기");edit.type="button";edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false)});card.append(edit);
+   if(selected.id==="harin"){
+     const note=makeEl("p","intake-privacy","이 정보는 현재 화면에서만 확인돼요. 아직 하린 음성 AI로 자동 전달되지 않아요.");
+     const speak=makeEl("button","intake-action intake-voice","🎙️ 하린 음성 상담 체험 시작");
+     speak.type="button";
+     speak.addEventListener("click",()=>{
+       syncBirthGate();
+       if($("simliConnect").disabled)return;
+       $("simliConnect").click();
+       $("simliPanel").scrollIntoView({block:"start",behavior:"smooth"});
+     });
+     card.append(note,speak);
+   }
    return card;
  }
  card.append(makeEl("p","intake-intro","생년월일과 태어난 시간을 입력해 주세요."));
@@ -658,7 +676,7 @@ function makeIntake(){
  return card;
 }
 
-function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
+function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncBirthGate();requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.name+"와 채팅 시작하기 →";renderMessages();save();}
 function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
 function openChat(){if(location.hash!=="#chat")location.hash="chat";syncChatView();}
@@ -714,13 +732,28 @@ function stopSimliSession(){
   $("chatView").classList.remove("simli-live");
   simliWait.hidden=false;
 }
+function syncBirthGate(){
+  const confirmed=selected.id==="harin"&&Array.isArray(birthProfiles[birthKey()])&&!birthEditing.has(birthKey());
+  if(!simliActive){
+    $("simliConnect").disabled=!confirmed;
+    $("simliOpen").disabled=!confirmed;
+    $("simliIntro").textContent=confirmed
+      ?"입력 확인 완료! 이제 하린과 음성 대화를 시작할 수 있어요."
+      :"먼저 아래 사주 정보를 입력하고 ‘입력 확인’을 눌러 주세요.";
+    $("simliStatus").textContent=confirmed
+      ?"입력 정보는 현재 화면에만 있어요. 아직 하린 음성 AI에는 자동 전달되지 않아요."
+      :"입력 확인을 마치면 상담 버튼이 활성화돼요.";
+  }
+}
 function syncSimliAdvisor(){
   const active=selected.id==="harin";
   $("simliPanel").hidden=!active;
   if(!active)stopSimliSession();
+  syncBirthGate();
 }
 $("simliConnect").addEventListener("click",async()=>{
   const button=$("simliConnect");
+  if(selected.id!=="harin"||!Array.isArray(birthProfiles[birthKey()])||birthEditing.has(birthKey())){syncBirthGate();return;}
   if(button.disabled)return;
   button.disabled=true;
   $("simliStatus").textContent="하린 음성 상담 연결을 확인하고 있어요...";
@@ -739,7 +772,7 @@ $("simliConnect").addEventListener("click",async()=>{
   updateSimliLayout();
   simliWait.hidden=false;
   simliWait.querySelector("strong").textContent="아바타 화면을 준비하고 있어요";
-  $("simliStatus").textContent="하린 아바타를 불러오는 중이에요. 영상과 음성 준비에는 시간이 더 걸릴 수 있어요.";
+  $("simliStatus").textContent="하린 아바타를 불러오는 중이에요. 출생 정보는 아직 음성 AI와 연동되지 않았어요.";
   updateSimliLayout();
   simliFrame.src=SIMLI_ENDPOINT;
   simliSlowNotice=setTimeout(()=>{
@@ -761,11 +794,12 @@ simliFrame.addEventListener("error",()=>{
   $("simliStatus").textContent="새 창으로 열기를 눌러서 연결을 확인해 주세요.";
 });
 $("simliOpen").addEventListener("click",()=>{
+  if(selected.id!=="harin"||!Array.isArray(birthProfiles[birthKey()])||birthEditing.has(birthKey()))return;
   window.open(SIMLI_ENDPOINT,"_blank","noopener,noreferrer");
 });
 $("simliStop").addEventListener("click",()=>{
   stopSimliSession();
-  $("simliStatus").textContent="연결을 종료했어요. 음성 상담 시작을 누르면 다시 연결할 수 있어요.";
+  syncBirthGate();
 });
 const form=$("composer"),input=$("question"),sendBtn=$("send");
 $("startChat").addEventListener("click",openChat);
