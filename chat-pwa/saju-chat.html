@@ -332,7 +332,7 @@ html.dark .simli-stage{border-color:#735e4b}
 .simli-panel.is-live .simli-status{flex:none;font-size:12px!important;line-height:1.4;margin:4px 0 7px}
 .simli-panel.is-live .simli-viewer{display:flex;flex:none;flex-direction:column;width:100%;max-width:600px;min-height:0;margin:2px auto 0}
 .simli-panel.is-live .simli-viewer small{flex:none;margin-top:6px}
-.simli-panel.is-live .simli-stage{flex:none;width:100%;height:min(115vw,calc(100dvh - 245px),660px);min-height:270px;overflow:hidden;--simli-x:0px;--simli-y:0px}
+.simli-panel.is-live .simli-stage{flex:none;width:100%;height:min(107vw,calc(100dvh - 245px),610px);min-height:270px;overflow:hidden;--simli-x:0px;--simli-y:0px}
 .simli-panel.is-live .simli-stage iframe{left:0;top:0;transform:translate(var(--simli-x),var(--simli-y)) scale(var(--simli-scale));transform-origin:top left}
 @media(max-height:650px){.simli-panel.is-live .simli-stage{height:max(220px,calc(100dvh - 215px));min-height:220px}}
 
@@ -355,14 +355,14 @@ html.dark .simli-stage{border-color:#735e4b}
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
       <p>주소 입력 없이 하린과 한국어로 대화해 보세요.</p>
-      <div class="simli-actions"><button type="button" id="simliConnect">음성 상담 시작</button><button type="button" id="simliOpen">새 창으로 열기 ↗</button><button type="button" id="simliZoom" hidden aria-pressed="true">원본 보기</button><button type="button" id="simliStop" hidden>연결 종료</button></div>
+      <div class="simli-actions"><button type="button" id="simliConnect">음성 상담 시작</button><button type="button" id="simliOpen">새 창으로 열기 ↗</button><button type="button" id="simliStop" hidden>연결 종료</button></div>
       <p class="simli-status" id="simliStatus" role="status">음성 상담 시작을 누르면 하린을 연결해요.</p>
       <div id="simliViewer" class="simli-viewer" hidden>
         <div class="simli-stage" id="simliStage">
           <div class="simli-wait" id="simliWait" role="status"><span class="simli-spinner" aria-hidden="true"></span><strong>아바타 화면을 준비하고 있어요</strong><span>Simli 음성 연결에는 잠시 시간이 걸릴 수 있어요.</span></div>
           <iframe id="simliFrame" title="Simli 실시간 말하는 상담사" loading="eager" fetchpriority="high" allow="microphone; camera; autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>
         </div>
-        <small>기본은 확대 화면이야. 조작 버튼이 안 보이면 ‘원본 보기’를 눌러 줘.</small>
+        <small>음성 상담을 마치려면 위의 ‘연결 종료’를 눌러 주세요.</small>
       </div>
     </section>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
@@ -675,17 +675,16 @@ let simliActive=false;
 let simliSlowNotice=null;
 const SIMLI_LAYOUT_WIDTH=1040;
 const SIMLI_LAYOUT_HEIGHT=760;
-// Crop only the displayed iframe viewport: the actual Simli face and Close
-// control are kept intact. The fallback button always restores the full view.
+// Crop the displayed iframe viewport without touching the Simli voice session.
+// Preserve the video portrait and the Simli Close control.
 // These coordinates approximate the Simli share page at a 1040px iframe width.
-const SIMLI_FOCUS={x:288,y:122,w:464,h:540};
-let simliZoomed=true;
+const SIMLI_FOCUS={x:321,y:147,w:434,h:496};
 function updateSimliLayout(){
   const w=simliStage.clientWidth;
   const h=simliStage.clientHeight;
   if(!w||!h)return;
-  const focus=simliZoomed?SIMLI_FOCUS:{x:0,y:0,w:SIMLI_LAYOUT_WIDTH,h:SIMLI_LAYOUT_HEIGHT};
-  const pad=simliZoomed?8:0;
+  const focus=SIMLI_FOCUS;
+  const pad=8;
   const scale=Math.min((w-pad*2)/focus.w,(h-pad*2)/focus.h);
   // Keep the visible portrait + Close button centered without stretching.
   const offsetX=(w-focus.w*scale)/2-focus.x*scale;
@@ -693,13 +692,6 @@ function updateSimliLayout(){
   simliStage.style.setProperty("--simli-scale",String(scale));
   simliStage.style.setProperty("--simli-x",offsetX+"px");
   simliStage.style.setProperty("--simli-y",offsetY+"px");
-}
-function setSimliZoom(zoom){
-  simliZoomed=zoom;
-  simliStage.classList.toggle("is-zoomed",zoom);
-  $("simliZoom").textContent=zoom?"원본 보기":"크게 보기";
-  $("simliZoom").setAttribute("aria-pressed",String(zoom));
-  updateSimliLayout();
 }
 if(typeof ResizeObserver!=="undefined"){
   new ResizeObserver(updateSimliLayout).observe(simliStage);
@@ -718,7 +710,6 @@ function stopSimliSession(){
   simliFrame.removeAttribute("src");
   $("simliViewer").hidden=true;
   $("simliStop").hidden=true;
-  $("simliZoom").hidden=true;
   $("simliPanel").classList.remove("is-live");
   $("chatView").classList.remove("simli-live");
   simliWait.hidden=false;
@@ -745,8 +736,7 @@ $("simliConnect").addEventListener("click",async()=>{
   $("simliPanel").classList.add("is-live");
   $("chatView").classList.add("simli-live");
   $("simliStop").hidden=false;
-  $("simliZoom").hidden=false;
-  setSimliZoom(true);
+  updateSimliLayout();
   simliWait.hidden=false;
   simliWait.querySelector("strong").textContent="아바타 화면을 준비하고 있어요";
   $("simliStatus").textContent="하린 아바타를 불러오는 중이에요. 영상과 음성 준비에는 시간이 더 걸릴 수 있어요.";
@@ -773,7 +763,6 @@ simliFrame.addEventListener("error",()=>{
 $("simliOpen").addEventListener("click",()=>{
   window.open(SIMLI_ENDPOINT,"_blank","noopener,noreferrer");
 });
-$("simliZoom").addEventListener("click",()=>setSimliZoom(!simliZoomed));
 $("simliStop").addEventListener("click",()=>{
   stopSimliSession();
   $("simliStatus").textContent="연결을 종료했어요. 음성 상담 시작을 누르면 다시 연결할 수 있어요.";
