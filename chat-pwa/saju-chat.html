@@ -330,11 +330,11 @@ html.dark .simli-stage{border-color:#735e4b}
 .simli-panel.is-live .simli-actions{flex:none;gap:6px}
 .simli-panel.is-live .simli-actions button{min-height:40px;padding:6px 10px;font-size:13px}
 .simli-panel.is-live .simli-status{flex:none;font-size:12px!important;line-height:1.4;margin:4px 0 7px}
-.simli-panel.is-live .simli-viewer{display:flex;flex-direction:column;flex:1;min-height:300px;margin-top:2px}
+.simli-panel.is-live .simli-viewer{display:flex;flex:none;flex-direction:column;width:100%;max-width:600px;min-height:0;margin:2px auto 0}
 .simli-panel.is-live .simli-viewer small{flex:none;margin-top:6px}
-.simli-panel.is-live .simli-stage{flex:1;min-height:255px;height:auto;overflow:hidden;--simli-x:0px;--simli-y:0px}
+.simli-panel.is-live .simli-stage{flex:none;width:100%;height:min(115vw,calc(100dvh - 245px),660px);min-height:270px;overflow:hidden;--simli-x:0px;--simli-y:0px}
 .simli-panel.is-live .simli-stage iframe{left:0;top:0;transform:translate(var(--simli-x),var(--simli-y)) scale(var(--simli-scale));transform-origin:top left}
-@media(max-height:650px){.simli-panel.is-live .simli-viewer{min-height:230px}.simli-panel.is-live .simli-stage{min-height:190px}}
+@media(max-height:650px){.simli-panel.is-live .simli-stage{height:max(220px,calc(100dvh - 215px));min-height:220px}}
 
 </style>
 <script src="/saju-avatars.js"></script>
@@ -675,18 +675,21 @@ let simliActive=false;
 let simliSlowNotice=null;
 const SIMLI_LAYOUT_WIDTH=1040;
 const SIMLI_LAYOUT_HEIGHT=760;
-// Approximate Simli Studio's centrally positioned portrait and Close control.
-// Simli is cross-origin, so its inner layout can't be styled directly.
+// Crop only the displayed iframe viewport: the actual Simli face and Close
+// control are kept intact. The fallback button always restores the full view.
+// These coordinates approximate the Simli share page at a 1040px iframe width.
+const SIMLI_FOCUS={x:288,y:122,w:464,h:540};
 let simliZoomed=true;
 function updateSimliLayout(){
   const w=simliStage.clientWidth;
   const h=simliStage.clientHeight;
   if(!w||!h)return;
-  const scale=simliZoomed
-    ? Math.min(w*0.92/420,h*0.88/500)
-    : Math.min(w/SIMLI_LAYOUT_WIDTH,h/SIMLI_LAYOUT_HEIGHT);
-  const offsetX=simliZoomed?(w/2-520*scale):(w-SIMLI_LAYOUT_WIDTH*scale)/2;
-  const offsetY=simliZoomed?(h/2-400*scale):(h-SIMLI_LAYOUT_HEIGHT*scale)/2;
+  const focus=simliZoomed?SIMLI_FOCUS:{x:0,y:0,w:SIMLI_LAYOUT_WIDTH,h:SIMLI_LAYOUT_HEIGHT};
+  const pad=simliZoomed?8:0;
+  const scale=Math.min((w-pad*2)/focus.w,(h-pad*2)/focus.h);
+  // Keep the visible portrait + Close button centered without stretching.
+  const offsetX=(w-focus.w*scale)/2-focus.x*scale;
+  const offsetY=(h-focus.h*scale)/2-focus.y*scale;
   simliStage.style.setProperty("--simli-scale",String(scale));
   simliStage.style.setProperty("--simli-x",offsetX+"px");
   simliStage.style.setProperty("--simli-y",offsetY+"px");
