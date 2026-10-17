@@ -307,7 +307,7 @@ html.dark .simli-viewer iframe{border-color:#735e4b}
 .simli-panel{min-height:0;max-height:none;overflow:visible}
 .simli-panel.is-live{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .simli-panel.is-live>.simli-head{margin-bottom:8px}
-.simli-panel.is-live>p:first-of-type,.simli-panel.is-live>#simliShareInput,.simli-panel.is-live #simliConnect{display:none}
+.simli-panel.is-live>p:first-of-type,.simli-panel.is-live #simliConnect{display:none}
 .simli-panel.is-live .simli-actions{margin:0 0 8px}
 #chatView.simli-live .messages,#chatView.simli-live .composer{display:none}
 .simli-stage{position:relative;width:100%;height:320px;overflow:hidden;border:1px solid #d7c5b2;border-radius:15px;background:#201c19;--simli-scale:1}
@@ -340,10 +340,9 @@ html.dark .simli-stage{border-color:#735e4b}
     <p class="disclaimer">체험판 · 생년월일은 가상 정보로 시험해 줘. 실제 AI와 만세력은 아직 연결되지 않았어.</p>
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
-      <p>Simli 공유 링크를 붙여넣고 연결해 봐. 입력 링크는 저장하지 않아.</p>
-      <input id="simliShareInput" type="url" autocomplete="off" spellcheck="false" placeholder="https://app.simli.com/session/..." aria-label="Simli 공유 링크">
-      <div class="simli-actions"><button type="button" id="simliConnect">아바타 연결</button><button type="button" id="simliOpen" disabled>새 창으로 열기 ↗</button><button type="button" id="simliStop" hidden>연결 종료</button></div>
-      <p class="simli-status" id="simliStatus" role="status">복사한 공유 링크를 붙여넣어 줘.</p>
+      <p>주소 입력 없이 하린과 한국어로 대화해 보세요.</p>
+      <div class="simli-actions"><button type="button" id="simliConnect">음성 상담 시작</button><button type="button" id="simliOpen">새 창으로 열기 ↗</button><button type="button" id="simliStop" hidden>연결 종료</button></div>
+      <p class="simli-status" id="simliStatus" role="status">음성 상담 시작을 누르면 하린을 연결해요.</p>
       <div id="simliViewer" class="simli-viewer" hidden>
         <div class="simli-stage" id="simliStage">
           <div class="simli-wait" id="simliWait" role="status"><span class="simli-spinner" aria-hidden="true"></span><strong>아바타 화면을 준비하고 있어요</strong><span>Simli 음성 연결에는 잠시 시간이 걸릴 수 있어요.</span></div>
@@ -652,15 +651,9 @@ function openChat(){if(location.hash!=="#chat")location.hash="chat";syncChatView
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
 function response(){return selected.name+" 상담방에 질문이 입력됐어.\n\n지금은 "+topic[2]+" 분야의 대화 화면을 미리 보는 체험판이야. 실제 상담사의 AI 답변과 만세력 분석을 연결하면 이 자리에서 질문에 맞춘 풀이를 이어갈 수 있어.";}
 function send(){if(sentBusy)return;const input=$("question");const content=input.value.trim();if(!content)return;sentBusy=true;conversation.push(msg("user",content));input.value="";renderMessages();conversation.push(msg("bot",response()));save();renderMessages();sentBusy=false;}
-// Session URLs can grant access: never persist, log, or commit the shared URL.
-function getSimliShareUrl(){
-  try{
-    const url=new URL($("simliShareInput").value.trim());
-    const path=url.pathname.split("/").filter(Boolean);
-    if(url.protocol!=="https:"||url.hostname!=="app.simli.com"||path.length!==3||path[0]!=="session"||path[1].length!==36||path[2].length<30)return null;
-    return url.href;
-  }catch(_){return null;}
-}
+// A same-origin serverless route looks up the Simli share link on Vercel.
+ // The session token is never stored in the HTML or localStorage.
+const SIMLI_ENDPOINT="/api/simli-session";
 const simliStage=$("simliStage");
 const simliFrame=$("simliFrame");
 const simliWait=$("simliWait");
@@ -678,6 +671,14 @@ function updateSimliLayout(){
 if(typeof ResizeObserver!=="undefined"){
   new ResizeObserver(updateSimliLayout).observe(simliStage);
 }else{window.addEventListener("resize",updateSimliLayout);}
+async function hasSimliSession(){
+  try{
+    const response=await fetch(SIMLI_ENDPOINT+"?status=1",{cache:"no-store",credentials:"same-origin"});
+    if(!response.ok)return false;
+    const status=await response.json();
+    return status.ready===true;
+  }catch(_){return false;}
+}
 function stopSimliSession(){
   simliActive=false;
   if(simliSlowNotice!==null){clearTimeout(simliSlowNotice);simliSlowNotice=null;}
@@ -693,51 +694,52 @@ function syncSimliAdvisor(){
   $("simliPanel").hidden=!active;
   if(!active)stopSimliSession();
 }
-$("simliShareInput").addEventListener("input",()=>{
-  const valid=!!getSimliShareUrl();
-  $("simliOpen").disabled=!valid;
-  $("simliStatus").textContent=valid?"공유 링크가 확인됐어. 아바타 연결을 눌러줘.":"Simli 공유 링크를 붙여넣어 줘.";
-});
-$("simliConnect").addEventListener("click",()=>{
-  const url=getSimliShareUrl();
-  if(!url){$("simliStatus").textContent="Simli의 공유 메뉴에서 세션 링크를 복사해 붙여넣어 줘.";return;}
+$("simliConnect").addEventListener("click",async()=>{
+  const button=$("simliConnect");
+  if(button.disabled)return;
+  button.disabled=true;
+  $("simliStatus").textContent="하린 음성 상담 연결을 확인하고 있어요...";
+  const ready=await hasSimliSession();
+  button.disabled=false;
+  if(!ready){
+    $("simliStatus").textContent="연결 주소가 서버에 아직 설정되지 않았어요. 관리자에게 설정을 요청해 주세요.";
+    return;
+  }
   stopSimliSession();
   simliActive=true;
   $("simliViewer").hidden=false;
   $("simliPanel").classList.add("is-live");
   $("chatView").classList.add("simli-live");
   $("simliStop").hidden=false;
-  $("simliOpen").disabled=false;
   simliWait.hidden=false;
   simliWait.querySelector("strong").textContent="아바타 화면을 준비하고 있어요";
-  $("simliStatus").textContent="연결 요청을 보냈어. 영상과 음성 준비에는 시간이 더 걸릴 수 있어.";
+  $("simliStatus").textContent="하린 아바타를 불러오는 중이에요. 영상과 음성 준비에는 시간이 더 걸릴 수 있어요.";
   updateSimliLayout();
-  simliFrame.src=url;
+  simliFrame.src=SIMLI_ENDPOINT;
   simliSlowNotice=setTimeout(()=>{
     if(!simliActive||simliWait.hidden)return;
     simliWait.querySelector("strong").textContent="Simli 연결이 오래 걸리고 있어요";
-    $("simliStatus").textContent="오래 기다려도 화면이 안 나오면 새 창으로 열어봐.";
+    $("simliStatus").textContent="오래 기다려도 화면이 안 나오면 새 창으로 열기를 눌러 주세요.";
   },20000);
 });
 simliFrame.addEventListener("load",()=>{
   if(!simliActive||!simliFrame.hasAttribute("src"))return;
   if(simliSlowNotice!==null){clearTimeout(simliSlowNotice);simliSlowNotice=null;}
   simliWait.hidden=true;
-  $("simliStatus").textContent="화면 불러오기를 마쳤어. 실제 음성 연결이 준비될 때까지 조금 더 기다려 줘.";
+  $("simliStatus").textContent="화면을 불러왔어요. 실제 음성 연결이 준비될 때까지 조금 더 기다려 주세요.";
 });
 simliFrame.addEventListener("error",()=>{
   if(!simliActive)return;
   if(simliSlowNotice!==null){clearTimeout(simliSlowNotice);simliSlowNotice=null;}
   simliWait.querySelector("strong").textContent="아바타 화면을 불러오지 못했어요";
-  $("simliStatus").textContent="새 창으로 열기를 눌러 Simli 연결을 확인해 줘.";
+  $("simliStatus").textContent="새 창으로 열기를 눌러서 연결을 확인해 주세요.";
 });
 $("simliOpen").addEventListener("click",()=>{
-  const url=getSimliShareUrl();
-  if(url)window.open(url,"_blank","noopener,noreferrer");
+  window.open(SIMLI_ENDPOINT,"_blank","noopener,noreferrer");
 });
 $("simliStop").addEventListener("click",()=>{
   stopSimliSession();
-  $("simliStatus").textContent="연결을 종료했어. 다시 시작하려면 아바타 연결을 눌러줘.";
+  $("simliStatus").textContent="연결을 종료했어요. 음성 상담 시작을 누르면 다시 연결할 수 있어요.";
 });
 const form=$("composer"),input=$("question"),sendBtn=$("send");
 $("startChat").addEventListener("click",openChat);
