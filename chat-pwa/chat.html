@@ -40,6 +40,11 @@
     header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(12px);position:sticky;top:0;z-index:5}
     .header-inner{display:flex;align-items:center;justify-content:space-between;width:100%;height:100%;min-width:0}
     .brand{font-weight:850;letter-spacing:-.03em;cursor:pointer}.sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .header-left{display:flex;align-items:center;gap:3px;min-width:0}
+    .header-nav-back{display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;height:40px;padding:0;border:0;border-radius:11px;background:transparent;color:var(--text);cursor:pointer}
+    .header-nav-back svg{display:block;width:24px;height:24px;stroke-width:2.3}
+    .header-nav-back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    .header-nav-back:active{background:var(--soft)}
     .back{border:0;background:transparent;color:var(--muted);font-weight:700}
     /* Match the moon and avatar: clean, recognizable home button without a word label. */
     .back.home-shortcut{width:38px;height:38px;flex:0 0 38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--muted)}
@@ -1240,7 +1245,7 @@
 <div class="page">
   <header>
     <div class="header-inner">
-    <div><div class="brand" id="brandHome" role="link" tabindex="0" aria-label="복작소 홈으로">복작소</div><div class="sub">채팅</div></div>
+    <div class="header-left"><button class="header-nav-back" id="headerNavBack" type="button" aria-label="이전 화면으로 돌아가기" title="이전 화면으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></button><div><div class="brand" id="brandHome" role="link" tabindex="0" aria-label="복작소 홈으로">복작소</div><div class="sub">채팅</div></div></div>
     <div class="header-actions" style="display:flex;gap:8px;align-items:center">
       <button class="admin-room-add" id="adminRoomAddBtn" type="button" aria-label="채팅방 관리">채팅방 관리</button>
       <button class="admin-logout" id="adminLogoutBtn" type="button" aria-label="관리자 로그아웃" title="관리자 로그아웃">로그아웃</button>
@@ -3047,8 +3052,15 @@
     desc.textContent=sharedProfile?'기존 채팅 공통 프로필':'닉네임과 사진을 설정할 수 있어요.';
     paintAvatar(document.getElementById('meProfileAvatar'),sharedProfile?.avatar_url||null);
   }
-  function selectHomeTab(tab){
+  let currentHomeTab=null;
+  const recentHomeTabs=[];
+  function selectHomeTab(tab,recordHistory=true){
     if(!homePanels[tab])return;
+    if(currentHomeTab!==null&&currentHomeTab!==tab&&recordHistory){
+      recentHomeTabs.push(currentHomeTab);
+      if(recentHomeTabs.length>12)recentHomeTabs.shift();
+    }
+    currentHomeTab=tab;
     homePanels.rooms.style.display=tab==='rooms'?'block':'none';
     homePanels.club.hidden=tab!=='club';
     homePanels.magazine.hidden=tab!=='magazine';
@@ -3060,6 +3072,17 @@
   }
   document.querySelectorAll('[data-home-tab]').forEach(button=>{
     button.addEventListener('click',()=>selectHomeTab(button.dataset.homeTab));
+  });
+  document.getElementById('headerNavBack').addEventListener('click',()=>{
+    if(document.body.classList.contains('chat-active')){
+      els.leaveBtn.click();
+      return;
+    }
+    if(recentHomeTabs.length){
+      selectHomeTab(recentHomeTabs.pop(),false);
+      return;
+    }
+    location.assign('/');
   });
   document.querySelectorAll('[data-mag-filter]').forEach(button=>{
     button.addEventListener('click',()=>{
