@@ -1,6 +1,7 @@
 "use strict";
 const {test} = require("node:test");
 const assert = require("node:assert/strict");
+const regions = require("../saju-birthplaces.js");
 const engine = require("../saju-engine.js");
 function library({boundary=false}={}) {
   return {
@@ -198,4 +199,31 @@ test("빈 입력 또는 세 명 이상의 입력은 계산하지 않는다",asyn
   const sample={date:"1992-10-24",calendar:"solar",time:"05:30"};
   await assert.rejects(engine.validateProfiles([],library(),"2026-10-18"));
   await assert.rejects(engine.validateProfiles([sample,sample,sample],library(),"2026-10-18"));
+});
+
+
+test("전국 17개 시도에서 경북·경남·충북·충남의 시군을 선택할 수 있다",()=>{
+  assert.equal(regions.provinces.length,17);
+  const keys=["KR15/고령군","KR11/밀양시","KR08/천안시","KR01/청주시",
+    "KR03/철원군","KR06/전주시","KR05/수원시","KR10/군위군"];
+  for(const k of keys){
+    assert.ok(regions.locations[k],k+" 누락");
+    assert.ok(Number.isFinite(regions.locations[k].longitude),k+" 경도 누락");
+  }
+});
+test("경북 고령군 선택 시 실제 만세력 계산에 경도 보정 파라미터가 전달된다",async()=>{
+  const calls=[];const lib=library();const original=lib.calculateFourPillars;
+  lib.calculateFourPillars=(p)=>{calls.push(p);return original(p);};
+  const profile={date:"1973-07-04",time:"18:20",birthplace:"KR15/고령군"};
+  const out=await engine.calculate(profile,lib);
+  assert.equal(out.input.correctionApplied,true);
+  assert.equal(out.input.placeLabel,"경북 고령군");
+  assert.equal(calls[0].trueSolarTime.longitude,128.284);
+  assert.equal(calls[0].trueSolarTime.applyEquationOfTime,true);
+});
+test("출생 지역을 모르면 보정하지 않고, 잘못된 지역 값은 거부한다",async()=>{
+  const profile={date:"1973-07-04",time:"18:20"};
+  const norm=engine.normalize(profile);
+  assert.equal(norm.correctionApplied,false);
+  assert.throws(()=>engine.normalize({...profile,birthplace:"KR15/없는군"}));
 });
