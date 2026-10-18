@@ -526,7 +526,33 @@
     .magazine-story details p{color:var(--text);font-size:16px;line-height:1.8;margin:10px 0;word-break:keep-all}
     .magazine-note{padding:13px 15px;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:var(--soft);color:var(--muted);font-size:13px;line-height:1.65;margin:25px 0 0}
     .magazine-club-link{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:10px 14px;margin-top:18px;border-radius:14px;background:var(--primary);color:#fff;text-decoration:none;font-size:16px;font-weight:800;line-height:1.35;text-align:center}.magazine-club-link svg{display:block;flex:0 0 26px;width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
-    .magazine-filter:focus-visible,.magazine-story summary:focus-visible,.magazine-club-link:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+    /* Profile-linked, persistent magazine comments */
+    .magazine-comments{border-top:1px solid var(--line);padding:17px 0 5px;margin-top:18px}
+    .magazine-comments h4{font-size:18px;font-weight:850;line-height:1.4;letter-spacing:-.02em;margin:0 0 9px;color:var(--text)}
+    .magazine-comments-note{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 12px}
+    .magazine-comments-feedback{min-height:20px;font-size:14px;line-height:1.6;font-weight:650;color:var(--muted)}
+    .magazine-comments-feedback:empty{display:none}
+    .magazine-comments-list{display:grid;gap:0;margin:10px 0 4px}
+    .magazine-comment{display:flex;gap:10px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
+    .magazine-comment-avatar{width:39px;height:39px;flex:0 0 39px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--soft);overflow:hidden;font-size:21px}
+    .magazine-comment-avatar img{display:block;width:100%;height:100%;object-fit:cover}
+    .magazine-comment-main{min-width:0;flex:1}
+    .magazine-comment-top{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;line-height:1.4}
+    .magazine-comment-top strong{font-size:15px;font-weight:820;color:var(--text)}
+    .magazine-comment-top time{color:var(--muted);font-size:12px}
+    .magazine-comment-body{font-size:16px;line-height:1.65;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0}
+    .magazine-comment-delete{min-height:34px;margin-left:auto;padding:4px 9px;border-radius:8px;border:1px solid var(--line);background:var(--paper);font-size:13px;color:var(--muted);font-weight:750}
+    .magazine-comment-more{min-height:43px;width:100%;margin:11px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--text);font-size:14px;font-weight:800}
+    .magazine-comment-form{margin-top:17px;display:grid;gap:9px}
+    .magazine-comment-form label{font-size:15px;font-weight:800;color:var(--text)}
+    .magazine-comment-form textarea{width:100%;min-height:84px;resize:vertical;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--paper);color:var(--text);font:inherit;font-size:16px;line-height:1.5}
+    .magazine-comment-form textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+    .magazine-comment-form-footer{display:flex;justify-content:space-between;align-items:center;gap:9px}
+    .magazine-comment-form-footer small{font-size:13px;color:var(--muted)}
+    .magazine-comment-send{min-height:46px;min-width:100px;padding:10px 18px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:16px;font-weight:800}
+    .magazine-comment-send:disabled,.magazine-comment-delete:disabled{opacity:.65;cursor:wait}
+    .magazine-comment-join{display:block;margin-top:15px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--text);font-size:15px;line-height:1.55;text-decoration:none;text-align:center;font-weight:800}
+    .magazine-filter:focus-visible,.magazine-story summary:focus-visible,.magazine-club-link:focus-visible,.magazine-comment-send:focus-visible,.magazine-comment-delete:focus-visible,.magazine-comment-join:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     @media(max-width:560px){
       .magazine-panel{padding:22px 15px 24px}
       .magazine-panel h1{font-size:28px}
@@ -1325,7 +1351,7 @@
       <h1>복작소 매거진</h1>
       <p class="magazine-lead">일상에 작은 즐거움을 더하는 책과 문화, 건강한 생활, 우리 동네 이야기.</p>
 
-      <article class="magazine-story magazine-featured" data-mag-category="culture">
+      <article class="magazine-story magazine-featured" data-mag-category="culture" data-mag-article="culture-feature">
         <div class="magazine-story-visual">
           <span class="magazine-fallback" aria-hidden="true">📖</span>
           <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&amp;fit=crop&amp;w=1100&amp;q=78" alt="따뜻한 조명 아래 책이 가득 꽂힌 서가" loading="eager" decoding="async" referrerpolicy="no-referrer">
@@ -1352,7 +1378,7 @@
       </div>
 
       <div class="magazine-stories magazine-story-list" id="magazineStories">
-        <article class="magazine-story" data-mag-category="life">
+        <article class="magazine-story" data-mag-category="life" data-mag-article="life-rest">
           <div class="magazine-story-visual">
             <span class="magazine-fallback" aria-hidden="true">☕</span>
             <img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&amp;fit=crop&amp;w=500&amp;q=78" alt="따뜻한 커피가 놓인 휴식 공간" loading="lazy" decoding="async" referrerpolicy="no-referrer">
@@ -1367,7 +1393,7 @@
             <p>걸을 때는 자신의 몸 상태에 맞게 속도와 거리를 조절하고, 무리하지 않는 것이 중요해요.</p>
           </details>
         </article>
-        <article class="magazine-story" data-mag-category="local">
+        <article class="magazine-story" data-mag-category="local" data-mag-article="local-events">
           <div class="magazine-story-visual">
             <span class="magazine-fallback" aria-hidden="true">🍁</span>
             <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&amp;fit=crop&amp;w=500&amp;q=78" alt="나무와 오솔길이 어우러진 풍경" loading="lazy" decoding="async" referrerpolicy="no-referrer">
@@ -1382,7 +1408,7 @@
             <p>모임에 추천하고 싶은 행사를 발견했다면 정확한 날짜와 공식 안내 링크를 함께 공유해 주세요.</p>
           </details>
         </article>
-        <article class="magazine-story" data-mag-category="club">
+        <article class="magazine-story" data-mag-category="club" data-mag-article="club-welcome">
           <div class="magazine-story-visual">
             <span class="magazine-fallback" aria-hidden="true">💬</span>
             <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&amp;fit=crop&amp;w=500&amp;q=78" alt="친구들이 함께 시간을 보내는 모습" loading="lazy" decoding="async" referrerpolicy="no-referrer">
@@ -1398,7 +1424,7 @@
           </details>
         </article>
       </div>
-      <div class="magazine-note">현재는 화면 확인을 위한 시범 글이야. 실시간 뉴스, 기사 발행, 회원 댓글 기능은 아직 연결되지 않았어. 사진은 Unsplash 이미지를 사용했어.</div>
+      <div class="magazine-note">현재는 화면 확인을 위한 시범 글이야. 실시간 뉴스와 새 기사 발행 기능은 아직 준비 중이야. 댓글은 승인된 클럽 정회원만 작성할 수 있어. 사진은 Unsplash 이미지를 사용했어.</div>
       <a class="magazine-club-link" href="/chat.html?tab=club"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>복작소 클럽에서 이야기 나누기</span></a>
     </section>
     <section class="card home-panel" id="mePanel" role="tabpanel" aria-labelledby="homeTabMe" hidden>
@@ -3159,5 +3185,6 @@
   </div>
 </div>
 <script src="/club.js"></script>
+<script src="/magazine.js" defer></script>
 </body>
 </html>
