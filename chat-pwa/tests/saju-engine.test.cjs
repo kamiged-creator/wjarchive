@@ -8,7 +8,7 @@ function library({boundary=false}={}) {
       let year=params.hour===0&&boundary?"갑진":"을사";
       return {
         toObject(){return {year,month:"경술",day:"계유",hour:"을묘"};},
-        toHanjaObject(){return {year:"乙巳",month:"庚戌",day:"癸酉",hour:"乙卯"};},
+        toHanjaObject(){return {year:{hanja:"乙巳"},month:{hanja:"庚戌"},day:{hanja:"癸酉"},hour:{hanja:"乙卯"}};},
         dayYinYang:{stem:"음"},
         tenGods:{year:{stem:"상관"}},
         luckPillars:{pillars:[{age:8,korean:"임오"}]}
@@ -25,6 +25,7 @@ test("양력 생시 입력은 4주/오행 8글자를 표시한다",async()=>{
   const r=await engine.calculate({date:"1992-10-24",calendar:"solar",unknown:false,time:"05:30",gender:"남성"},library());
   assert.deepEqual(Object.keys(r.pillars),["year","month","day","hour"]);
   assert.equal(r.pillars.day,"계유");
+  assert.equal(r.hanja.day,"癸酉");
   assert.equal(r.dayMaster.element,"수");
   assert.equal(Object.values(r.elements).reduce((a,b)=>a+b,0),8);
   assert.match(engine.format(r),/시주 을묘/);
