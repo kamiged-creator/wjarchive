@@ -523,16 +523,19 @@
     .magazine-story summary::-webkit-details-marker{display:none}
     .magazine-story summary::after{content:"›";font-size:22px;font-weight:400;margin-left:7px;line-height:.6;transition:transform .15s ease}
     .magazine-story details[open] summary::after{transform:rotate(90deg)}
-    .magazine-story details p{color:var(--text);font-size:16px;line-height:1.8;margin:10px 0;word-break:keep-all}
+    .magazine-story > details > p{color:var(--text);font-size:16px;line-height:1.8;margin:10px 0;word-break:keep-all}
     .magazine-note{padding:13px 15px;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:var(--soft);color:var(--muted);font-size:13px;line-height:1.65;margin:25px 0 0}
     .magazine-club-link{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:10px 14px;margin-top:18px;border-radius:14px;background:var(--primary);color:#fff;text-decoration:none;font-size:16px;font-weight:800;line-height:1.35;text-align:center}.magazine-club-link svg{display:block;flex:0 0 26px;width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
     /* Profile-linked, persistent magazine comments */
-    .magazine-comments{border-top:1px solid var(--line);padding:17px 0 5px;margin-top:18px}
-    .magazine-comments h4{font-size:18px;font-weight:850;line-height:1.4;letter-spacing:-.02em;margin:0 0 9px;color:var(--text)}
-    .magazine-comments-note{font-size:14px;line-height:1.6;color:var(--muted);margin:0 0 12px}
-    .magazine-comments-feedback{min-height:20px;font-size:14px;line-height:1.6;font-weight:650;color:var(--muted)}
+    .magazine-comments{border-top:1px solid var(--line);padding:18px 0 3px;margin-top:17px}
+    .magazine-comments h4{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:800;line-height:1.35;letter-spacing:-.015em;margin:0 0 9px;color:var(--text)}
+    .magazine-comment-count{display:inline-flex;align-items:center;justify-content:center;min-width:27px;min-height:25px;padding:2px 8px;border-radius:99px;background:var(--soft);color:var(--accent);font-size:14px;font-weight:800;line-height:1.2;letter-spacing:0}
+    .magazine-comments-hint{font-size:14px;line-height:1.65;color:var(--muted);margin:0 0 9px;letter-spacing:-.01em}
+    .magazine-comments-note{font-size:15px;line-height:1.6;color:var(--muted);font-weight:450;margin:0;letter-spacing:-.01em;word-break:keep-all}
+    .magazine-comments-feedback{font-size:14px;line-height:1.55;font-weight:650;color:var(--muted);margin:4px 0}
     .magazine-comments-feedback:empty{display:none}
-    .magazine-comments-list{display:grid;gap:0;margin:10px 0 4px}
+    .magazine-comments-list{display:grid;gap:0;margin:0 0 8px}
+    .magazine-comments-list>.magazine-comments-note{padding:8px 0 5px}
     .magazine-comment{display:flex;gap:10px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line)}
     .magazine-comment-avatar{width:39px;height:39px;flex:0 0 39px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--soft);overflow:hidden;font-size:21px}
     .magazine-comment-avatar img{display:block;width:100%;height:100%;object-fit:cover}
@@ -543,9 +546,10 @@
     .magazine-comment-body{font-size:16px;line-height:1.65;color:var(--text);white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0}
     .magazine-comment-delete{min-height:34px;margin-left:auto;padding:4px 9px;border-radius:8px;border:1px solid var(--line);background:var(--paper);font-size:13px;color:var(--muted);font-weight:750}
     .magazine-comment-more{min-height:43px;width:100%;margin:11px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--text);font-size:14px;font-weight:800}
-    .magazine-comment-form{margin-top:17px;display:grid;gap:9px}
-    .magazine-comment-form label{font-size:15px;font-weight:800;color:var(--text)}
-    .magazine-comment-form textarea{width:100%;min-height:84px;resize:vertical;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--paper);color:var(--text);font:inherit;font-size:16px;line-height:1.5}
+    .magazine-comment-form{margin-top:13px;display:grid;gap:9px}
+    .magazine-comment-form label{display:block;font-size:16px;font-weight:760;line-height:1.45;color:var(--text);letter-spacing:-.015em}
+    .magazine-comment-form textarea{display:block;box-sizing:border-box;width:100%;min-height:82px;resize:vertical;margin-top:8px;padding:12px 13px;border:1.5px solid var(--line);border-radius:13px;background:var(--paper);color:var(--text);font-family:inherit;font-size:16px;font-weight:450;line-height:1.5;letter-spacing:0}
+    .magazine-comment-form textarea::placeholder{color:var(--muted);font-size:15px;font-weight:400;letter-spacing:-.012em;opacity:1}
     .magazine-comment-form textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
     .magazine-comment-form-footer{display:flex;justify-content:space-between;align-items:center;gap:9px}
     .magazine-comment-form-footer small{font-size:13px;color:var(--muted)}
