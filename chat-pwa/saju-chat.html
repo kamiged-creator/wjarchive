@@ -348,6 +348,28 @@ html.dark .simli-stage{border-color:#735e4b}
 #chatView.harin-chat .simli-panel:not(.is-live) .simli-actions button{font-size:16px;min-height:50px}
 .simli-panel .simli-actions button:disabled{cursor:not-allowed;opacity:.43}
 
+
+/* Keep the mobile adviser selection viewport stable. Scroll only the inner
+   selection area when the device is genuinely too short to show every control. */
+@media (max-width:599px){
+  body:not(.chat-active){height:100dvh;overflow:hidden;overscroll-behavior-y:none}
+  body:not(.chat-active) .page{height:100dvh;min-height:0;overflow:hidden}
+  body:not(.chat-active) .top{flex-shrink:0}
+  body:not(.chat-active) .selection-view{flex:1;min-height:0;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:none}
+  body:not(.chat-active) .selection-view::-webkit-scrollbar{display:none}
+  body:not(.chat-active) footer{flex-shrink:0}
+}
+@media (max-width:599px) and (max-height:760px){
+  .selection-view .hero{padding-bottom:2px}
+  .selection-view > section.panel{margin-top:6px;margin-bottom:6px;padding-top:12px;padding-bottom:12px}
+  .selection-view > section.panel:first-of-type{padding-bottom:7px}
+  .selection-view .panel h2{margin-bottom:8px}
+  .selection-view .avatar{padding-top:5px;padding-bottom:3px;gap:4px}
+  .selection-view .avatar-featured{padding-top:8px;padding-bottom:8px}
+  .selection-view .start-chat{margin-top:4px;margin-bottom:4px}
+  body:not(.chat-active) footer{padding-top:4px;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+}
+
 </style>
 <script src="/saju-avatars.js"></script>
 </head>
