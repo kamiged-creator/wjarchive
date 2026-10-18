@@ -111,7 +111,7 @@
       input:{calendar:input.calendar,unknown:input.unknown,gender:input.gender,
         enteredDate:profile.date,leap:input.isLeapMonth,time:input.unknown?null:profile.time},
       solarDate,lunarDate:lunar,pillars,
-      hanja:{year:hanja.year||"",month:hanja.month||"",day:hanja.day||"",hour:input.unknown?"":(hanja.hour||"")},
+      hanja:{year:hanja.year?.hanja||"",month:hanja.month?.hanja||"",day:hanja.day?.hanja||"",hour:input.unknown?"":(hanja.hour?.hanja||"")},
       dayMaster:{stem:master,element:STEM_ELEMENT[master],yinYang:result.dayYinYang?.stem||null},
       elements,uncertain,tenGods:result.tenGods||null,
       luckPillars:input.unknown?null:(result.luckPillars||null)
@@ -120,7 +120,7 @@
   function format(chart) {
     if (!chart || !chart.pillars) return "";
     const p=chart.pillars;
-    const line="연주 "+p.year+" · 월주 "+p.month+" · 일주 "+p.day+" · 시주 "+(p.hour||"미상");
+    const line=[["year","연주"],["month","월주"],["day","일주"],["hour","시주"]].map(function(entry){const key=entry[0],val=p[key]||"미상",hanja=chart.hanja?.[key];return entry[1]+" "+val+(hanja?"("+hanja+")":"");}).join(" · ");
     const f=Object.entries(chart.elements).map(function(entry){return entry[0]+" "+entry[1]}).join(" / ");
     let result="🔮 만세력 사주팔자\n"+line+"\n"+
       "양력 기준 "+chart.solarDate+" · 일간 "+chart.dayMaster.stem+"("+chart.dayMaster.element+")\n"+
