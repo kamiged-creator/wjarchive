@@ -387,6 +387,29 @@ html.dark .simli-stage{border-color:#735e4b}
   .selection-view > footer{padding-top:4px;padding-bottom:8px}
 }
 
+/* Selected adviser: gold ring + emerald check, without a square frame. */
+.selection-view .avatar[aria-pressed="true"]{background:transparent;border-color:transparent;box-shadow:none}
+.selection-view .avatar[aria-pressed="true"] .portrait{border:3px solid #b48352;box-shadow:0 0 0 3px rgba(212,173,120,.28)}
+.selection-view .avatar[aria-pressed="true"] strong{color:#794d2c;font-weight:900}
+.selection-view .avatar[aria-pressed="true"] strong::after{content:none}
+.selection-view .avatar-check{width:25px;height:25px;right:-2px;bottom:1px;background:#2f7654;border:2px solid #fff5e6;color:#fff;font-size:14px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.23)}
+/* Keep Harin's horizontal full-width option distinct even when selected. */
+.selection-view .avatar-featured[aria-pressed="true"]{background:#f5e7d6;border-color:#b68f69;box-shadow:none}
+.selection-view .topic{position:relative}
+.selection-view .topic[aria-pressed="true"]{background:#ad8358;color:#20160f;border:2px solid #81552d;box-shadow:inset 0 0 0 1px #ead4b4,0 3px 10px #6b493b27}
+.selection-view .topic[aria-pressed="true"]::after{content:"✓";position:absolute;right:7px;top:7px;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#2f7654;color:#fff;font-size:13px;font-weight:900}
+.selection-view .topic:not([aria-pressed="true"]){background:#f5ede2;border-color:#c9b59d}
+.selection-view .start-chat{font-size:clamp(13px,4vw,16px);letter-spacing:-.02em;white-space:nowrap}
+html.dark .selection-view .avatar[aria-pressed="true"]{background:transparent;border-color:transparent;box-shadow:none}
+html.dark .selection-view .avatar[aria-pressed="true"] .portrait{border-color:#d9a66f;box-shadow:0 0 0 3px rgba(130,92,56,.45)}
+html.dark .selection-view .avatar[aria-pressed="true"] strong{color:#ffd6a3}
+html.dark .selection-view .avatar-check{background:#2f7654;border-color:#29201a;color:#fff}
+html.dark .selection-view .avatar-featured[aria-pressed="true"]{background:#433325;border-color:#b38d65;box-shadow:none}
+html.dark .selection-view .topic:not([aria-pressed="true"]){background:#29221e;border-color:#675344;color:#e9dac9}
+html.dark .selection-view .topic[aria-pressed="true"]{background:#d2a46b;color:#20150d;border-color:#f1ca94;box-shadow:inset 0 0 0 1px #f6ddb7,0 3px 12px #0007}
+html.dark .selection-view .topic[aria-pressed="true"]::after{background:#2f7654;color:#fff}
+@media(max-width:355px){.selection-view .avatar-check{width:24px;height:24px;font-size:13px}}
+
 /* Show locally calculated results in the existing intake card. */
 .saju-outcome{margin:12px 0 5px;border-top:1px solid #e4d4c1;padding:12px 0 2px}
 .saju-result{margin:0 0 13px;padding:12px;border:1px solid #dcc9b3;border-radius:13px;background:#faf3e9}
@@ -421,7 +444,7 @@ html.dark .intake-error{color:#f2b18d}
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
-    <p class="disclaimer">만세력 계산은 전통 명리학 기준이야. 자동 해석은 참고용이며 실제 AI 자유대화는 준비 중이야.</p>
+    <p class="disclaimer">개발 미리보기 · 만세력 계산과 전통적 참고 풀이를 시험하고 있어. 자유 질문에 답하는 AI는 아직 연결되지 않았어.</p>
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
       <p id="simliIntro">하린과 바로 음성 대화를 시작할 수 있어요. 생년월일은 상담 중 직접 말씀해 주세요.</p>
@@ -466,7 +489,7 @@ let conversation=read();
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
 function portrait(id,name,cls="portrait"){const holder=document.createElement("span");holder.className=cls;const src=avatarUrl(id);if(src){const img=document.createElement("img");img.alt="";img.loading="eager";if(id==="ara"){img.onerror=()=>{const fallback=avatarSources.ara;if(typeof fallback==="string"&&fallback.startsWith("data:image/webp;base64,")){img.onerror=()=>{img.remove();holder.textContent=name.slice(0,1)};img.src=fallback;}else{img.remove();holder.textContent=name.slice(0,1)}}}img.src=src;holder.append(img)}else{holder.textContent=name.slice(0,1)}return holder;}
 function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(const a of advisors){const b=document.createElement("button");b.type="button";b.className="avatar"+(a.id==="harin"?" avatar-featured":"");b.setAttribute("aria-pressed",String(a.id===selected.id));const wrap=document.createElement("span");wrap.className="avatar-portrait-wrap";wrap.append(portrait(a.id,a.name));const check=document.createElement("span");check.className="avatar-check";check.textContent="✓";check.setAttribute("aria-hidden","true");wrap.append(check);b.append(wrap);const title=document.createElement("strong");title.textContent=a.name;const small=document.createElement("small");small.textContent=a.specialty;b.append(title,small);b.addEventListener("click",()=>{if(a.id===selected.id)return;selected=a;topic=a.topics[0];conversation=read();renderAll()});root.append(b)}}
-function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]!==t[0]){topic=t;conversation=read();renderAll()}openChat()});root.append(b)}}
+function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]!==t[0]){topic=t;conversation=read();renderAll()}});root.append(b)}}
 
 function makeEl(tag,cls,txt){const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;}
 // Replace OS-wide select sheets with a small in-page menu beside the field.
@@ -837,7 +860,7 @@ function makeIntake(){
 }
 
 function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
-function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+"와 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
+function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
 function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
