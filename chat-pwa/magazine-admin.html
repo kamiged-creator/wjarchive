@@ -44,7 +44,7 @@ button.danger{color:#962e28;background:#fff8f6;border-color:#e4b5ae}
 <section class="card"><h2 id="editorTitle">새 글 등록</h2><form id="articleForm">
 <div class="grid">
 <div><label for="category">글 분야</label><select id="category" required><option value="culture">문학·문화</option><option value="life">건강·생활</option><option value="local">지역 소식</option><option value="club">복작소 이야기</option></select></div>
-<div><label for="displayOrder">정렬 순서</label><input id="displayOrder" type="number" min="0" max="9999" value="100" required></div>
+<div><label for="displayOrder">정렬 순서 (1부터)</label><input id="displayOrder" type="number" min="1" max="9999" value="1" required></div>
 </div>
 <label for="articleTitle">기사 제목</label><input id="articleTitle" maxlength="120" required placeholder="예: 오늘의 책 이야기">
 <label for="summary">간단 소개 (목록에 표시)</label><textarea id="summary" maxlength="400" rows="3" required placeholder="두세 문장으로 소개해 주세요"></textarea>
@@ -82,9 +82,13 @@ async function api(action,extras={}){
 }
 const status=(msg)=>$('saveStatus').textContent=msg;
 function photo(url){$('photoPreview').src=url||'/icon-192.png'}
+function nextSortOrder(){
+ const current=articles.map(article=>Number(article.displayOrder)||0);
+ return String(Math.min(9999,Math.max(0,...current)+1));
+}
 function clear(){
  editing=null;selectedFile=null;imageFileId=null;uploadCache=null;
- $('articleForm').reset();$('category').value='culture';$('displayOrder').value='100';$('published').checked=true;
+ $('articleForm').reset();$('category').value='culture';$('displayOrder').value=nextSortOrder();$('published').checked=true;
  $('photoUrl').value='';$('photoInput').value='';$('editorTitle').textContent='새 글 등록';photo(null);status('');
 }
 function element(tag,cl,text){let e=document.createElement(tag);if(cl)e.className=cl;if(text!==undefined)e.textContent=text;return e}
@@ -120,7 +124,12 @@ function editArticle(a){
 }
 async function list(){
  $('articleList').textContent='등록된 글을 불러오는 중…';
- try{articles=(await api('list',{view:'admin'})).articles||[];renderList()}
+ try{
+  articles=(await api('list',{view:'admin'})).articles||[];
+  renderList();
+  // New articles get the next consecutive number; never overwrite an edit.
+  if(!editing&&!$('articleTitle').value.trim())$('displayOrder').value=nextSortOrder();
+ }
  catch(e){$('articleList').textContent=e.message}
 }
 async function uploadImage(file){
