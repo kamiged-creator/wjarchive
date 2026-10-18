@@ -217,6 +217,7 @@
     // Avoid replacing an article while the reader has a story or comment
     // composer open. Explicit category selection still resets the list.
     if(articlesLoading)return;
+    const selectedCategory=currentCategory;
     const now=Date.now();
     if(reset&&now-lastArticlesCheck<15000&&currentCategory===lastCategory)return;
     articlesLoading=true;
@@ -238,8 +239,8 @@
       if(reset){
         // Preserve old articles until the remote request succeeds.
         const hero=panel.querySelector('.magazine-featured');
-        const featureCard=feature?articleCard(feature,true):null;
         sections.clear();
+        const featureCard=feature?articleCard(feature,true):null;
         if(hero)hero.remove();
         listing.replaceChildren();
         if(featureCard)subhead.before(featureCard);
@@ -266,6 +267,11 @@
     }finally{
       articlesLoading=false;
       if(moreButton){moreButton.disabled=false;moreButton.textContent='이전 글 더 보기 ↓';}
+      // A quick category tap while a request was running must not get lost.
+      if(currentCategory!==selectedCategory){
+        lastArticlesCheck=0;
+        loadArticles(true);
+      }
     }
   }
 
