@@ -12,9 +12,10 @@
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% 0%,#fffaf1 0,transparent 38%),#f6f1e9}
 button,input{font:inherit}button{cursor:pointer}a{color:inherit}
 .page{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column}
-.top{display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:11px 17px 7px}
-.home{display:inline-flex;align-items:center;gap:8px;min-height:46px;text-decoration:none;font-size:17px;font-weight:850;color:#3c291d}
-.home .arrow{font-size:24px;font-weight:400}.brand{font-weight:900;color:#805d43;font-size:15px}
+.top{display:flex;align-items:center;justify-content:flex-start;gap:10px;padding:11px 17px 7px;min-height:64px;position:relative}
+.home{position:absolute;top:calc(100% - 3px);left:14px;z-index:2;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;text-decoration:none;border-radius:11px;color:#3c291d}
+.home svg{display:block;width:24px;height:24px;stroke-width:2.3}
+.brand{font-weight:900;color:#805d43;font-size:15px}
 .hero{text-align:center;padding:2px 17px 6px}.eyebrow{letter-spacing:.17em;color:#95745a;font-size:11px;font-weight:800}
 h1{font-family:"Noto Serif KR",Georgia,serif;font-size:29px;letter-spacing:-.06em;margin:0 0 5px;color:#513522}
 .lead{font-size:14px;line-height:1.5;color:#796b61;margin:0}
@@ -57,8 +58,8 @@ section.panel{background:#fffdfa;border:1px solid #e2d5c3;border-radius:22px;mar
 .send:disabled{opacity:.5}.tips{margin:8px 0 0;font-size:11px;color:#88766a;line-height:1.55;text-align:center}
 footer{text-align:center;color:#938073;padding:12px 20px 25px;font-size:11px;line-height:1.55}
 button:focus-visible,a:focus-visible{outline:3px solid #9b6e4d;outline-offset:3px}
-@media(min-width:600px){.top{padding-top:22px}.hero{padding-top:10px}.messages{min-height:295px}.portrait{width:96px;height:96px}}
-@media(max-width:355px){.top{padding:11px}.avatar small{font-size:10px}.avatar strong{font-size:14px}.topic{padding:9px 7px;font-size:13px}.panel{margin-left:9px!important;margin-right:9px!important}}
+@media(min-width:600px){.top{padding-top:22px;min-height:75px}.hero{padding-top:10px}.messages{min-height:295px}.portrait{width:96px;height:96px}}
+@media(max-width:355px){.top{padding:11px;min-height:68px}.avatar small{font-size:10px}.avatar strong{font-size:14px}.topic{padding:9px 7px;font-size:13px}.panel{margin-left:9px!important;margin-right:9px!important}}
 
 /* Two-stage mobile flow: adviser/topic selection then viewport-filling chat. */
 [hidden]{display:none!important}
@@ -352,7 +353,7 @@ html.dark .simli-stage{border-color:#735e4b}
 </head>
 <body>
 <div class="page">
-  <header class="top"><a class="home" href="/" aria-label="복작소 홈으로"><span class="arrow" aria-hidden="true">←</span> 복작소</a></header>
+  <header class="top"><a class="home" href="/" aria-label="복작소 메인으로 돌아가기" title="복작소 메인으로 돌아가기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a></header>
   <main class="selection-view" id="selectionView">
   <div class="hero"><h1>AI 사주채팅</h1><p class="lead">상담사와 분야를 선택해 주세요.</p></div>
   <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
