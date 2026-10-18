@@ -742,6 +742,10 @@ module.exports = async function handler(req, res) {
       await require('../lib/club-handler')(req, res);
       return;
     }
+    if (String(body.action || '').startsWith('magazine-')) {
+      await require('../lib/magazine-handler')(req, res);
+      return;
+    }
     if (String(body.action || '').startsWith('chat-')) {
       await handleChat(body, res, req);
       return;
