@@ -114,3 +114,18 @@ test("일진 계산은 존재하지 않는 날짜를 거부한다",async()=>{
   await assert.rejects(engine.calculateFlows(natal,lib,"2026-13-01"));
   await assert.rejects(engine.calculateFlows(natal,lib,"foo"));
 });
+
+test("궁합은 두 사람의 실제 일간 오행을 비교하며 점수·예언을 만들지 않는다",async()=>{
+  const first=await engine.calculate({date:"1992-10-24",calendar:"solar",time:"05:30"},library());
+  const second=await engine.calculate({date:"1992-05-04",calendar:"solar",time:"09:15"},library());
+  const out=engine.compatibility(first,second);
+  assert.match(out,/본인 일간 계\(수\)/);
+  assert.match(out,/상대 일간 계\(수\)/);
+  assert.match(out,/같은 오행/);
+  assert.match(out,/예측하지 않아/);
+  assert.doesNotMatch(out,/100점|\d+점/);
+});
+test("두 번째 사람의 사주 없이 궁합을 생성하지 않는다",async()=>{
+  const chart=await engine.calculate({date:"1992-10-24",calendar:"solar",time:"05:30"},library());
+  assert.throws(()=>engine.compatibility(chart,null));
+});
