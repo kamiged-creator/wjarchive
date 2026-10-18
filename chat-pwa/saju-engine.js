@@ -161,6 +161,26 @@
       timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"
     }).format(now||new Date());
   }
+  // Validate before accepting a birth profile, rather than confirming a
+  // nonexistent lunar month / leap month and failing only in the result card.
+  // The engine runs locally; this helper does not persist input or call an API.
+  async function validateProfiles(profiles, injectedLibrary, dateLimit) {
+    if(!Array.isArray(profiles)||profiles.length<1||profiles.length>2) {
+      throw new Error("확인할 출생 정보는 한 명 또는 두 명이어야 해.");
+    }
+    const today=dateLimit===undefined?kstDate():dateLimit;
+    if(typeof today!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(today)) {
+      throw new Error("한국 기준 오늘 날짜를 확인하지 못했어.");
+    }
+    const lib=injectedLibrary||await loadEngine();
+    const charts=await Promise.all(profiles.map(profile=>calculate(profile,lib)));
+    for(const chart of charts) {
+      if(chart.solarDate>today) {
+        throw new Error("아직 오지 않은 날짜야. 음력·양력과 윤달을 다시 확인해 줘.");
+      }
+    }
+    return charts;
+  }
   async function calculateFlows(chart, injectedLibrary, dateOverride) {
     if(!chart?.pillars?.day || !chart?.dayMaster?.element){
       throw new Error("사주 원국을 먼저 계산해 줘.");
@@ -301,7 +321,7 @@
     return summary+"\n\n"+note+extra+
       "\n\n※ 명리학의 전통적인 상징 해석이야. 미래 사건·건강·재산을 사실처럼 예측하지 않아.";
   }
-  const api={calculate,calculateFlows,flowReading,compatibility,advisorReading,format,reading,normalize,kstDate,
+  const api={calculate,validateProfiles,calculateFlows,flowReading,compatibility,advisorReading,format,reading,normalize,kstDate,
     BIRTHPLACES,source:"manseryeok@2.0.0"};
   root.BokjaksoSaju=api;
   if (typeof module!=="undefined" && module.exports) module.exports=api;
