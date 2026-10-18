@@ -5,6 +5,14 @@
   const PROFILE_KEY='bokjaksoChatSharedProfileV1';
   const ADMIN_KEY='wjarchiveAdminAccessToken';
   const sections=new Map();
+  // Short-lived in-memory cache, including when magazine cards get redrawn.
+  // Nothing is stored on the server or in persistent browser storage.
+  const commentCache=new Map();
+  const COMMENTS_FRESH_MS=45000;
+  const viewerKey=()=>{
+    const profile=profileCredentials();
+    return profile.profileId||'guest';
+  };
 
   const profileCredentials=()=>{
     try{
@@ -63,7 +71,8 @@
         try{
           await request('delete',{articleKey:section.key,commentId:row.id});
           section.feedback.textContent='댓글을 삭제했어요.';
-          await load(section,false);
+          commentCache.delete(section.key);
+          await load(section,false,true);
         }catch(error){section.feedback.textContent=error.message;del.disabled=false;}
       });
       top.append(del);
@@ -88,12 +97,15 @@
       section.join.textContent='✍️ 댓글 작성은 클럽 승인 정회원만 가능해요. 클럽 가입·상태 확인 ›';
     }
   }
-  async function load(section,older=false){
+  async function load(section,older=false,force=false){
     if(section.loading)return;
+    // A recently opened article is already up to date: show it immediately.
+    if(!older&&!force&&section.hasLoaded&&Date.now()-section.lastLoaded<COMMENTS_FRESH_MS)return;
     section.loading=true;
     if(!older){
-      section.feedback.textContent='댓글을 불러오는 중…';
-      section.more.hidden=true;
+      // Keep existing comments visible while refreshing outdated information.
+      section.feedback.textContent=section.hasLoaded?'':'댓글을 불러오는 중…';
+      if(!section.hasLoaded)section.more.hidden=true;
     }else{
       section.more.disabled=true;section.more.textContent='불러오는 중…';
     }
@@ -106,6 +118,13 @@
       section.canComment=data.canComment===true;
       section.hasMore=data.hasMore===true;
       section.nextBeforeId=data.nextBeforeId||null;
+      section.hasLoaded=true;
+      section.lastLoaded=Date.now();
+      commentCache.set(section.key,{
+        viewer:viewerKey(),at:section.lastLoaded,
+        comments:section.comments.slice(),canComment:section.canComment,
+        hasMore:section.hasMore,nextBeforeId:section.nextBeforeId
+      });
       render(section);
       section.feedback.textContent='';
     }catch(error){
@@ -144,8 +163,19 @@
       join:panel.querySelector('.magazine-comment-join'),
       input:panel.querySelector('textarea'),
       button:panel.querySelector('.magazine-comment-send'),
-      comments:[],hasMore:false,nextBeforeId:null,canComment:false,loading:false
+      comments:[],hasMore:false,nextBeforeId:null,canComment:false,loading:false,
+      hasLoaded:false,lastLoaded:0
     };
+    const cached=commentCache.get(key);
+    if(cached&&cached.viewer===viewerKey()){
+      section.comments=cached.comments.slice();
+      section.hasMore=cached.hasMore;
+      section.nextBeforeId=cached.nextBeforeId;
+      section.canComment=cached.canComment;
+      section.hasLoaded=true;
+      section.lastLoaded=cached.at;
+      render(section);
+    }
     section.more.addEventListener('click',()=>{if(section.nextBeforeId)load(section,true);});
     section.form.addEventListener('submit',async event=>{
       event.preventDefault();
@@ -160,7 +190,8 @@
       try{
         await request('post',{articleKey:key,message});
         section.input.value='';
-        await load(section,false);
+        commentCache.delete(key);
+        await load(section,false,true);
         section.feedback.textContent='댓글을 등록했어요.';
       }catch(error){section.feedback.textContent=error.message;}
       finally{section.button.disabled=false;section.button.textContent='등록';}
@@ -290,6 +321,15 @@
   loadArticles(true);
   document.getElementById('homeTabMagazine')?.addEventListener('click',()=>loadArticles(true));
   window.addEventListener('bokjakso:shared-profile-updated',()=>{
-    for(const section of sections.values())if(section.details.open)load(section,false);
+    // Cached author permissions must never survive a profile change.
+    commentCache.clear();
+    for(const section of sections.values()){
+      section.hasLoaded=false;
+      section.lastLoaded=0;
+      section.canComment=false;
+      section.form.hidden=true;
+      section.join.hidden=true;
+      if(section.details.open)load(section,false,true);
+    }
   });
 })();
