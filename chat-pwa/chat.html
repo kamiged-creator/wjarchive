@@ -1627,6 +1627,9 @@
     localStorage.setItem(SHARED_PROFILE_KEY,JSON.stringify(sharedProfile));
     localStorage.removeItem(SHARED_PROFILE_DELETED_KEY);
     refreshSharedProfileCard();
+    // Notify the private club room so already-rendered portraits update
+    // immediately, without forcing the visitor to leave and re-enter.
+    window.dispatchEvent(new Event('bokjakso:shared-profile-updated'));
   }
   async function ensureSharedProfile(nickname){
     if(sharedProfile)return sharedProfile;
@@ -2838,6 +2841,7 @@
         updateMyAvatar(null);
       }
       refreshSharedProfileCard();
+      window.dispatchEvent(new Event('bokjakso:shared-profile-updated'));
       els.profileNameInput.value='';
       paintAvatar(els.profilePreview,null);
       // Allow the editor to close after the confirmed server deletion.
