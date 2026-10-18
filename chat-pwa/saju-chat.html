@@ -359,19 +359,15 @@ html.dark .simli-stage{border-color:#735e4b}
   body:not(.chat-active) .selection-view{flex:1;min-height:0;overflow:hidden;overscroll-behavior:none;touch-action:pan-x}
   body:not(.chat-active) footer{flex-shrink:0}
 }
-/* Keep the preview notice visible at the bottom of the selection screen.
-   Avoid hiding the footer on short mobile viewports. */
-@media (max-width:599px){
-  body:not(.chat-active) footer{
-    display:block;
-    width:100%;
-    flex-shrink:0;
-    margin-top:auto;
-    padding:4px 12px max(10px,env(safe-area-inset-bottom));
-    font-size:clamp(10px,2.7vw,11px);
-    line-height:1.45;
-    text-align:center;
-  }
+/* Place the preview notice directly beneath the start button, not at the viewport bottom. */
+.selection-view > footer{
+  width:100%;
+  flex:0 0 auto;
+  margin:6px auto 0;
+  padding:4px 12px 8px;
+  font-size:clamp(10px,2.7vw,11px);
+  line-height:1.45;
+  text-align:center;
 }
 @media (max-width:599px) and (max-height:650px){
   .selection-view .portrait{width:clamp(48px,15vw,80px);height:clamp(48px,15vw,80px)}
@@ -388,7 +384,7 @@ html.dark .simli-stage{border-color:#735e4b}
   .selection-view .avatar{padding-top:5px;padding-bottom:3px;gap:4px}
   .selection-view .avatar-featured{padding-top:8px;padding-bottom:8px}
   .selection-view .start-chat{margin-top:4px;margin-bottom:4px}
-  body:not(.chat-active) footer{padding-top:4px;padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  .selection-view > footer{padding-top:4px;padding-bottom:8px}
 }
 
 </style>
@@ -403,6 +399,7 @@ html.dark .simli-stage{border-color:#735e4b}
   <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section>
   <button id="startChat" type="button" class="start-chat">아라와 채팅 시작하기 →</button>
   <p id="harinNewWindowHint" class="choose-tip" hidden>하린 음성 상담은 새 탭에서 크게 열려요. 마이크 사용을 허용해 주세요.</p>
+  <footer>복작소 사주채팅 미리보기 · 실제 상담 및 명식 해석 기능은 개발 중이야.</footer>
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
@@ -426,7 +423,6 @@ html.dark .simli-stage{border-color:#735e4b}
     <p class="tips" id="chatTip">체험 대화는 이 브라우저 탭에만 임시 보관돼. 실제 AI와 연결되기 전에는 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
-  <footer>복작소 사주채팅 미리보기 · 실제 상담 및 명식 해석 기능은 개발 중이야.</footer>
 </div>
 <script>
 (() => {
