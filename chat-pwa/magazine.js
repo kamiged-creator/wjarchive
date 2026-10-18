@@ -222,9 +222,9 @@
       const rest=feature?live.filter(a=>a.articleKey!==feature.articleKey):live;
       // Build before replacing current elements so intermittent API errors
       // cannot leave a partially rendered screen.
+      sections.clear();
       const nextFeature=feature?articleCard(feature,true):null;
       const listItems=rest.map(a=>articleCard(a,false));
-      sections.clear();
       if(oldFeature)oldFeature.remove();
       if(nextFeature)subhead.before(nextFeature);
       listing.replaceChildren(...listItems);
