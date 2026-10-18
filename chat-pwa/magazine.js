@@ -169,6 +169,80 @@
     sections.set(key,section);
   }
   for(const article of document.querySelectorAll('.magazine-story[data-mag-article]'))install(article);
+
+  // Live articles from the highest-administrator CMS. Seed posts reuse their
+  // original article keys so the existing saved comments always stay attached.
+  const categoryName={culture:'문학·문화',life:'건강·생활',local:'지역 소식',club:'복작소 이야기'};
+  const categorySymbol={culture:'📚',life:'☕',local:'🍁',club:'💬'};
+  function articleCard(item,isFeatured){
+    const article=el('article','magazine-story'+(isFeatured?' magazine-featured':''));
+    article.dataset.magArticle=item.articleKey;
+    article.dataset.magCategory=item.category;
+    const picture=el('div','magazine-story-visual');
+    const fallback=el('span','magazine-fallback',categorySymbol[item.category]||'📰');
+    fallback.setAttribute('aria-hidden','true');picture.append(fallback);
+    if(item.imageUrl&&/^https:\/\//i.test(item.imageUrl)){
+      const img=document.createElement('img');
+      img.src=item.imageUrl;img.alt=item.title+' 대표 이미지';
+      img.loading=isFeatured?'eager':'lazy';img.decoding='async';
+      img.referrerPolicy='no-referrer';
+      img.addEventListener('error',()=>img.remove(),{once:true});
+      picture.append(img);
+    }
+    if(isFeatured)picture.append(el('span','magazine-feature-tag','이주의 추천 글'));
+    const body=el('div','magazine-story-body');
+    const sample=['culture-feature','life-rest','local-events','club-welcome'].includes(item.articleKey);
+    body.append(el('span','magazine-story-type',(categoryName[item.category]||'매거진')+(sample?' · 시범 글':'')));
+    body.append(el(isFeatured?'h2':'h3','',item.title||'제목 없는 글'));
+    body.append(el('p','',item.summary||''));
+    const details=document.createElement('details');
+    const summary=el('summary','',isFeatured?'이야기 자세히 읽기':'글 읽기');details.append(summary);
+    const paragraphs=String(item.body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+    for(const p of paragraphs){
+      const node=el('p','',p);node.style.whiteSpace='pre-wrap';details.append(node);
+    }
+    article.append(picture,body,details);
+    install(article);
+    return article;
+  }
+  let lastArticlesCheck=0;
+  let articlesLoading=false;
+  async function loadArticles(){
+    if(articlesLoading||Date.now()-lastArticlesCheck<5000)return;
+    articlesLoading=true;
+    try{
+      const data=await request('posts-list');
+      const live=Array.isArray(data.articles)?data.articles:[];
+      const panel=document.getElementById('magazinePanel');
+      const listing=document.getElementById('magazineStories');
+      const subhead=panel?.querySelector('.magazine-subhead');
+      if(!panel||!listing||!subhead)return;
+      const oldFeature=panel.querySelector('.magazine-featured');
+      const feature=live.find(a=>a.featured)||null;
+      const rest=feature?live.filter(a=>a.articleKey!==feature.articleKey):live;
+      // Build before replacing current elements so intermittent API errors
+      // cannot leave a partially rendered screen.
+      const nextFeature=feature?articleCard(feature,true):null;
+      const listItems=rest.map(a=>articleCard(a,false));
+      sections.clear();
+      if(oldFeature)oldFeature.remove();
+      if(nextFeature)subhead.before(nextFeature);
+      listing.replaceChildren(...listItems);
+      if(!live.length)listing.append(el('p','magazine-comments-note','아직 공개된 글이 없어요.'));
+      const filter=document.querySelector('[data-mag-filter][aria-pressed="true"]')?.dataset.magFilter||'all';
+      panel.querySelectorAll('.magazine-story').forEach(story=>{
+        story.hidden=filter!=='all'&&story.dataset.magCategory!==filter;
+      });
+      lastArticlesCheck=Date.now();
+    }catch(error){
+      console.warn('매거진 글 갱신 실패',error);
+      const note=document.querySelector('.magazine-note');
+      if(note)note.textContent='최신 매거진 글을 불러오지 못했어요. 새로고침하면 다시 시도해요. 기존 시범 글과 댓글은 서버에 보존돼 있어요.';
+    }finally{articlesLoading=false}
+  }
+
+  loadArticles();
+  document.getElementById('homeTabMagazine')?.addEventListener('click',loadArticles);
   window.addEventListener('bokjakso:shared-profile-updated',()=>{
     for(const section of sections.values())if(section.details.open)load(section,false);
   });
