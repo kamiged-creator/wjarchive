@@ -8,6 +8,8 @@ on:
       - 'chat-pwa/saju-chat.html'
       - 'chat-pwa/tests/saju-engine.test.cjs'
       - 'chat-pwa/tests/saju-real-integration.test.cjs'
+      - 'chat-pwa/api/saju-ai.js'
+      - 'chat-pwa/tests/saju-ai-route.test.cjs'
       - '.github/workflows/saju-engine-check.yml'
   workflow_dispatch:
 
@@ -26,7 +28,7 @@ jobs:
         with:
           node-version: '22'
       - name: Run offline adapter regression tests
-        run: node --test chat-pwa/tests/saju-engine.test.cjs
+        run: node --test chat-pwa/tests/saju-engine.test.cjs chat-pwa/tests/saju-ai-route.test.cjs
       - name: Install pinned real calculation library for CI only
         run: |
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund --prefix "$RUNNER_TEMP/saju-deps" manseryeok@2.0.0
