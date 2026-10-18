@@ -531,9 +531,13 @@
     .magazine-story summary::after{content:"›";font-size:22px;font-weight:400;margin-left:7px;line-height:.6;transition:transform .15s ease}
     .magazine-story details[open] summary::after{transform:rotate(90deg)}
     .magazine-story > details > p{color:var(--text);font-size:16px;line-height:1.8;margin:10px 0;word-break:keep-all}
-    .magazine-load-more{display:block;width:100%;min-height:52px;margin:18px 0 0;padding:11px 15px;border:1.5px solid var(--line);border-radius:13px;background:var(--soft);color:var(--text);font-size:16px;font-weight:850}
-    .magazine-load-more:disabled{opacity:.65;cursor:wait}
-    .magazine-load-more[hidden]{display:none!important}
+    .magazine-pagination{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;margin:19px 0 6px}
+    .magazine-pagination[hidden]{display:none!important}
+    .magazine-page-button{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--paper);color:var(--text);font-size:15px;line-height:1.2;font-weight:800;white-space:nowrap}
+    .magazine-page-button[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:#fff}
+    .magazine-page-button:disabled{opacity:.43;cursor:default}
+    .magazine-page-button[aria-current="page"]:disabled{opacity:1}
+    .magazine-page-button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     .magazine-note{padding:13px 15px;border-left:3px solid var(--accent);border-radius:0 10px 10px 0;background:var(--soft);color:var(--muted);font-size:13px;line-height:1.65;margin:25px 0 0}
     .magazine-club-link{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:10px 14px;margin-top:18px;border-radius:14px;background:var(--primary);color:#fff;text-decoration:none;font-size:16px;font-weight:800;line-height:1.35;text-align:center}.magazine-club-link svg{display:block;flex:0 0 26px;width:26px;height:26px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
     /* Profile-linked, persistent magazine comments */
@@ -1442,7 +1446,7 @@
           </details>
         </article>
       </div>
-      <button type="button" class="magazine-load-more" id="magazineMore" hidden>이전 글 더 보기 ↓</button>
+      <nav class="magazine-pagination" id="magazinePages" aria-label="매거진 페이지 이동" hidden></nav>
       <div class="magazine-note">매거진 글은 복작소 최고관리자가 등록·수정해요. 댓글은 클럽 승인 정회원만 작성할 수 있어요. 기존 시범 글은 새 기사로 차차 교체할 예정이야.</div>
       <a class="magazine-club-link" href="/chat.html?tab=club"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>복작소 클럽에서 이야기 나누기</span></a>
     </section>
