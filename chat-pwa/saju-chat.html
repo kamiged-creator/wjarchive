@@ -580,14 +580,19 @@ function makeIntake(){
  card.append(makeEl("p","intake-title",existing&&!birthEditing.has(key)?"✓ 생년월일 입력 확인":"📅 사주 정보 입력"));
  if(existing&&!birthEditing.has(key)){
    const names=existing.length===2?["본인","상대방"]:["본인"];
-   const summary=existing.map((p,i)=>names[i]+" · "+(p.calendar==="lunar"?"음력":"양력")+(p.leap?"(윤달)":"")+" "+p.date.replaceAll("-",".")+" · "+(p.unknown?"태어난 시간 모름":p.time)+(p.gender!=="unspecified"?" · "+p.gender:"")).join("\n");
+   const summary=existing.map((p,i)=>{
+     const locationLabel=window.BokjaksoSaju?.BIRTHPLACES?.[p.birthplace]?.label||(p.birthplace==="custom"?"직접 입력":"");
+     return names[i]+" · "+(p.calendar==="lunar"?"음력":"양력")+(p.leap?"(윤달)":"")+" "+p.date.replaceAll("-",".")+
+       " · "+(p.unknown?"태어난 시간 모름":p.time)+(p.gender!=="unspecified"?" · "+p.gender:"")+
+       (locationLabel?" · 출생 지역 "+locationLabel:"");
+   }).join("\n");
    card.append(makeEl("p","intake-summary",summary));
    const outcome=makeEl("div","saju-outcome");
    outcome.append(makeEl("p","intake-privacy","만세력 사주팔자를 계산하는 중이야…"));
    card.append(outcome);
    const engine=window.BokjaksoSaju;
    if(!engine) outcome.textContent="만세력 모듈을 불러오지 못했어. 잠시 뒤 새로고침해 줘.";
-   else Promise.all(existing.map(p=>engine.calculate(p))).then(charts=>{
+   else Promise.all(existing.map(p=>engine.calculate(p))).then(async charts=>{
      if(!card.isConnected)return;
      outcome.replaceChildren();
      for(let i=0;i<charts.length;i++){
@@ -596,7 +601,16 @@ function makeIntake(){
        box.append(makeEl("p","saju-result-title",label+" · 계산된 사주팔자"));
        box.append(makeEl("p","saju-result-pillar",engine.format(chart)));
        box.append(makeEl("p","saju-result-reading",engine.reading(chart,topic[0])));
-       box.append(makeEl("p","saju-result-warning","기준: 한국 만세력 · 자정 일 경계 · 진태양시 미보정. 한국 밖 출생자는 추가 보정이 필요해."));
+       try{
+         const flow=await engine.calculateFlows(chart);
+         if(!card.isConnected)return;
+         box.append(makeEl("p","saju-result-title","오늘 일진 · 올해 세운"));
+         box.append(makeEl("p","saju-result-reading",engine.flowReading(chart,flow,topic[0])));
+         box.append(makeEl("p","saju-result-warning","일진·세운 계산 날짜: "+flow.date+" (한국 표준시)"));
+       }catch(_){
+         box.append(makeEl("p","saju-result-warning","일진·세운 계산에 실패했어. 원국 결과만 표시해."));
+       }
+       box.append(makeEl("p","saju-result-warning","기준: 자정 일 경계 · 출생 지역 선택 시에만 시간 보정. 국내 출생 기준."));
        outcome.append(box);
      }
    }).catch(error=>{if(card.isConnected)outcome.textContent=error.message||"만세력 계산 실패. 날짜를 확인해 줘.";});
@@ -654,6 +668,29 @@ function makeIntake(){
    field("양력 / 음력",calendar,false);
    const gender=makeEl("select");for(const [v,name]of [["unspecified","선택 안 함"],["남성","남성"],["여성","여성"]]){const opt=makeEl("option","",name);opt.value=v;gender.append(opt);}gender.value=prev.gender||"unspecified";
    field("성별 (선택)",gender,false);
+   // Optional birth location: correction applied only if time is known.
+   const birthplace=makeEl("select");birthplace.setAttribute("aria-label","출생 지역");
+   for(const [value,title] of [
+     ["none","보정하지 않음"],["seoul","서울"],["incheon","인천"],["daegu","대구"],
+     ["busan","부산"],["daejeon","대전"],["gwangju","광주"],["jeju","제주"],
+     ["custom","경도 직접 입력"]
+   ]){
+     const option=makeEl("option","",title);option.value=value;birthplace.append(option);
+   }
+   birthplace.value=prev.birthplace||"none";
+   field("출생 지역 (시간 보정 선택)",birthplace,true);
+   const longitudeField=makeEl("label","intake-field wide");
+   longitudeField.append(makeEl("span","","출생지 경도 (동경 124~132°)"));
+   const longitude=makeEl("input");longitude.type="text";longitude.inputMode="decimal";
+   longitude.placeholder="예: 128.6014";longitude.autocomplete="off";
+   longitude.setAttribute("aria-label","출생지 경도");longitude.value=prev.longitude==null?"":String(prev.longitude);
+   longitudeField.append(longitude);fields.append(longitudeField);
+   function updateLocation(){
+     longitudeField.hidden=birthplace.value!=="custom";
+     longitude.disabled=longitudeField.hidden;
+     longitude.setCustomValidity("");
+   }
+   birthplace.addEventListener("change",updateLocation);updateLocation();
    // Avoid Samsung's difficult native time wheel. Each part is keyboard-friendly.
    const savedTime=/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(prev.time||"")?prev.time:"";
    const savedHour=savedTime?Number(savedTime.slice(0,2)):null;
@@ -680,6 +717,8 @@ function makeIntake(){
    options.className="intake-time-options";fields.append(options);
    function update(){
      period.disabled=hour.disabled=minute.disabled=unknown.checked;
+     birthplace.disabled=unknown.checked;
+     longitude.disabled=unknown.checked||birthplace.value!=="custom";
      timeField.classList.toggle("is-disabled",unknown.checked);
      period._syncSaju?.();
      leapLabel.hidden=calendar.value!=="lunar";
@@ -689,10 +728,10 @@ function makeIntake(){
    unknown.addEventListener("change",update);
    calendar.addEventListener("change",update);update();
    section.append(fields);form.append(section);
-   sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap});
+   sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap,birthplace,longitude});
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
- sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.birthplace.value="none";p.longitude.value="";p.birthplace.dispatchEvent(new Event("change"));p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";submit.disabled=true;actions.append(sample,submit);form.append(actions);
  // Keep incomplete or invalid birth information from enabling confirmation.
  function canSubmitIntake(){
@@ -702,6 +741,10 @@ function makeIntake(){
      if(!/^[0-9]{4}$/.test(yearText)||y<1900||y>Number(today.slice(0,4)))return false;
      if(!p.month.value||!p.day.value||m<1||m>12||d<1||d>(p.calendar.value==="lunar"?30:new Date(y,m,0).getDate()))return false;
      if(p.calendar.value!=="lunar"&&yearText+"-"+p.month.value+"-"+p.day.value>today)return false;
+     if(p.birthplace.value==="custom"&&!p.unknown.checked){
+       const text=p.longitude.value.trim(),lon=Number(text);
+       if(!text||!Number.isFinite(lon)||lon<124||lon>132)return false;
+     }
      if(p.unknown.checked)return true;
      const h=p.hour.value.trim(),min=p.minute.value.trim();
      return /^[0-9]{1,2}$/.test(h)&&Number(h)>=1&&Number(h)<=12&&
@@ -746,7 +789,11 @@ function makeIntake(){
    birthProfiles[key]=sets.map(p=>{
      const twelve=Number(p.hour.value),h24=twelve%12+(p.period.value==="pm"?12:0);
      const saved=p.unknown.checked?"":String(h24).padStart(2,"0")+":"+String(Number(p.minute.value)).padStart(2,"0");
-     return {date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,gender:p.gender.value,unknown:p.unknown.checked,time:saved,leap:p.calendar.value==="lunar"&&p.leap.checked};
+     return {date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,
+       gender:p.gender.value,unknown:p.unknown.checked,time:saved,
+       leap:p.calendar.value==="lunar"&&p.leap.checked,
+       birthplace:p.unknown.checked?"none":p.birthplace.value,
+       longitude:p.unknown.checked||p.birthplace.value!=="custom"?null:Number(p.longitude.value.trim())};
    });
    birthEditing.delete(key);renderMessages(false);
  });
@@ -767,7 +814,9 @@ async function response(){
   const engine=window.BokjaksoSaju;
   if(!engine)throw new Error("만세력 모듈이 아직 로드되지 않았어.");
   const chart=await engine.calculate(profiles[0]);
-  return engine.reading(chart,topic[0]);
+  const flow=await engine.calculateFlows(chart);
+  return "※ 현재는 입력한 질문을 이해하는 자유대화 AI가 연결되지 않았어. 아래는 사주에 근거한 기본 풀이야.\n\n"+
+    engine.reading(chart,topic[0])+"\n\n"+engine.flowReading(chart,flow,topic[0]);
 }
 async function send(){
   if(sentBusy)return;
