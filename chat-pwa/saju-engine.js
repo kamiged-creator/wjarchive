@@ -206,6 +206,52 @@
       (themes[topic]||themes.saju)+"\n"+
       "※ 일진·세운은 전통 명리 계산값이고, 그 관계는 상징적 해석이야. 실제 운이나 사건의 발생을 검증하거나 보장하지 않아.";
   }
+  // Advisor-specific responses use only calculated facts and reflective prompts.
+  // They are not LLM responses and do not predict events or diagnose conditions.
+  function advisorReading(chart,topic,advisorId){
+    if(!chart?.pillars?.day||!chart?.dayMaster?.element) {
+      throw new Error("사주팔자를 먼저 계산해 줘.");
+    }
+    const stem=chart.dayMaster.stem,element=chart.dayMaster.element,p=chart.pillars;
+    const base=reading(chart,topic);
+    const leading=Object.entries(chart.elements).sort((a,b)=>b[1]-a[1])[0][0];
+    const theme={
+      saju:"타고난 성향을 탐색하는 질문",
+      daily:"오늘 선택할 행동 한 가지",
+      decade:"인생 시기의 변화에 대한 관점",
+      match:"서로의 차이를 존중하는 방법",
+      love:"관계에서 원하는 가치",
+      wealth:"소비·저축·위험 관리의 우선순위",
+      career:"일과 성장의 방향"
+    }[topic]||"지금 중요하게 여기는 가치";
+    if(advisorId==="ara"){
+      return "🌸 아라 · 따뜻한 상담\n"+stem+"("+element+") 일간을 중심으로 차근차근 살펴볼게. "+
+        "지금은 "+theme+"을(를) 생각해 보는 게 좋겠어.\n\n"+base+
+        "\n\n아라의 질문: 이번 주에 실천해 볼 작은 변화는 무엇일까?";
+    }
+    if(advisorId==="doyun"){
+      return "☯️ 도윤 · 정통 사주 구조 해설\n"+
+        "원국: 년주 "+p.year+" / 월주 "+p.month+" / 일주 "+p.day+
+        " / 시주 "+(p.hour||"미상")+"\n"+
+        "월주는 계절적 배경, 일간 "+stem+"은 해석 기준이야. "+
+        "겉글자 오행 중 "+leading+"의 빈도가 가장 높아. 지장간의 분포는 포함하지 않았어.\n\n"+
+        base+"\n\n절입 시각과 출생시각에 따라 일부 간지가 달라질 수 있어.";
+    }
+    if(advisorId==="seoyun"){
+      return "💕 서윤 · 관계와 연애 상담\n"+
+        "명리학에서 일간 "+stem+"("+element+")은 자신을 바라보는 한 가지 상징적 출발점이야. "+
+        "이 정보만으로 인연의 성사나 상대의 마음을 판단하지는 않아.\n\n"+
+        base+"\n\n서윤의 질문: 관계에서 가장 중요하게 지키고 싶은 경계와 바람은 무엇일까?";
+    }
+    if(advisorId==="jian"){
+      const action=topic==="career"?"지금 맡은 업무와 성장 목표를 정리":topic==="wealth"?"고정 지출과 위험 허용 범위를 먼저 점검":"이번 달 실행할 한 가지 목표를 정리";
+      return "💰 지안 · 재물과 직장·사업 상담\n"+
+        "일간 "+stem+"("+element+")과 원국에서 드러난 "+leading+" 오행을 전통 상징으로 읽을 수 있어. "+
+        "실제 수익이나 직업 적합성을 보장하는 수치는 아니야.\n\n"+
+        base+"\n\n지안의 제안: "+action+"해 봐. 투자·계약 판단은 객관적인 자료를 우선해야 해.";
+    }
+    return base;
+  }
   function compatibility(a,b) {
     if(!a?.pillars?.day||!b?.pillars?.day||!a?.dayMaster?.element||!b?.dayMaster?.element){
       throw new Error("궁합은 두 사람의 출생 정보를 모두 계산해야 확인할 수 있어.");
@@ -255,7 +301,7 @@
     return summary+"\n\n"+note+extra+
       "\n\n※ 명리학의 전통적인 상징 해석이야. 미래 사건·건강·재산을 사실처럼 예측하지 않아.";
   }
-  const api={calculate,calculateFlows,flowReading,compatibility,format,reading,normalize,kstDate,
+  const api={calculate,calculateFlows,flowReading,compatibility,advisorReading,format,reading,normalize,kstDate,
     BIRTHPLACES,source:"manseryeok@2.0.0"};
   root.BokjaksoSaju=api;
   if (typeof module!=="undefined" && module.exports) module.exports=api;
