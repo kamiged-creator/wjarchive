@@ -162,3 +162,40 @@ test("출생 시각이 없으면 도윤도 시주를 추측해서 보여주지 �
 test("잘못된 계산 객체에는 상담 결과를 만들지 않는다",()=>{
   assert.throws(()=>engine.advisorReading({}, "saju", "ara"));
 });
+
+test("실제 역법 계산을 통과한 생년월일만 확인한다",async()=>{
+  const profile={date:"1992-10-24",calendar:"solar",time:"05:30"};
+  const result=await engine.validateProfiles([profile],library(),"2026-10-18");
+  assert.equal(result.length,1);
+  assert.equal(result[0].pillars.day,"계유");
+});
+test("두 명 모두 유효해야 궁합용 생일 입력이 확인된다",async()=>{
+  const one={date:"1992-10-24",calendar:"solar",time:"05:30"};
+  const two={date:"2020-04-01",calendar:"lunar",leap:true,time:"12:00"};
+  const result=await engine.validateProfiles([one,two],library(),"2026-10-18");
+  assert.equal(result.length,2);
+  assert.equal(result[1].solarDate,"2020-05-23");
+});
+test("음력 윤달이 실제 존재하지 않으면 입력 확인을 차단한다",async()=>{
+  const lib=library();
+  const real=lib.calculateFourPillars;
+  lib.calculateFourPillars=(params)=>{
+    if(params.isLunar&&params.isLeapMonth)throw new RangeError("존재하지 않는 윤달");
+    return real(params);
+  };
+  const invalid={date:"2021-04-01",calendar:"lunar",leap:true,time:"12:00"};
+  await assert.rejects(engine.validateProfiles([invalid],lib,"2026-10-18"));
+});
+test("미래의 양력 및 변환된 미래 음력 날짜는 입력 확인을 차단한다",async()=>{
+  const futureSolar={date:"2026-10-19",calendar:"solar",time:"12:00"};
+  await assert.rejects(engine.validateProfiles([futureSolar],library(),"2026-10-18"));
+  const lib=library();
+  lib.lunarToSolar=()=>({year:2026,month:10,day:19});
+  const futureLunar={date:"2026-09-01",calendar:"lunar",time:"12:00"};
+  await assert.rejects(engine.validateProfiles([futureLunar],lib,"2026-10-18"));
+});
+test("빈 입력 또는 세 명 이상의 입력은 계산하지 않는다",async()=>{
+  const sample={date:"1992-10-24",calendar:"solar",time:"05:30"};
+  await assert.rejects(engine.validateProfiles([],library(),"2026-10-18"));
+  await assert.rejects(engine.validateProfiles([sample,sample,sample],library(),"2026-10-18"));
+});
