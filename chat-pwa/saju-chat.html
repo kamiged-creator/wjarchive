@@ -400,6 +400,9 @@ html.dark .saju-result-title{color:#f0cfab}
 html.dark .saju-result-pillar{color:#f6e5d4}
 html.dark .saju-result-reading{color:#e0cbbb}
 html.dark .saju-result-warning{color:#d0af91}
+.intake-error{margin:8px 0 0;color:#91412a;font-size:13px;line-height:1.6}
+.intake-error:empty{display:none}
+html.dark .intake-error{color:#f2b18d}
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-engine.js"></script>
@@ -739,6 +742,10 @@ function makeIntake(){
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
  sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.birthplace.value="none";p.longitude.value="";p.birthplace.dispatchEvent(new Event("change"));p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";submit.disabled=true;actions.append(sample,submit);form.append(actions);
+ let intakeBusy=false,revision=0;
+ const notice=makeEl("p","intake-error","");
+ notice.setAttribute("role","alert");notice.setAttribute("aria-live","polite");
+ form.append(notice);
  // Keep incomplete or invalid birth information from enabling confirmation.
  function canSubmitIntake(){
    const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
@@ -757,13 +764,14 @@ function makeIntake(){
        /^[0-9]{1,2}$/.test(min)&&Number(min)>=0&&Number(min)<=59;
    });
  }
- function syncSubmitState(){submit.disabled=!canSubmitIntake();}
- form.addEventListener("input",syncSubmitState);
- form.addEventListener("change",syncSubmitState);
+ function syncSubmitState(){submit.disabled=intakeBusy||!canSubmitIntake();}
+ function changed(){revision++;if(!intakeBusy)notice.textContent="";syncSubmitState();}
+ form.addEventListener("input",changed);
+ form.addEventListener("change",changed);
  syncSubmitState();
- form.addEventListener("submit",ev=>{
+ form.addEventListener("submit",async ev=>{
    ev.preventDefault();
-   if(!canSubmitIntake())return;
+   if(intakeBusy||!canSubmitIntake())return;
    const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
    for(const p of sets){
      p.year.setCustomValidity("");p.day.setCustomValidity("");
@@ -792,7 +800,7 @@ function makeIntake(){
      }
    }
    if(!form.reportValidity())return;
-   birthProfiles[key]=sets.map(p=>{
+   const profiles=sets.map(p=>{
      const twelve=Number(p.hour.value),h24=twelve%12+(p.period.value==="pm"?12:0);
      const saved=p.unknown.checked?"":String(h24).padStart(2,"0")+":"+String(Number(p.minute.value)).padStart(2,"0");
      return {date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,
@@ -801,7 +809,27 @@ function makeIntake(){
        birthplace:p.unknown.checked?"none":p.birthplace.value,
        longitude:p.unknown.checked||p.birthplace.value!=="custom"?null:Number(p.longitude.value.trim())};
    });
-   birthEditing.delete(key);renderMessages(false);
+   intakeBusy=true;
+   const submittedRevision=revision;
+   submit.disabled=true;
+   submit.textContent="만세력 확인 중…";
+   notice.textContent="입력한 날짜와 윤달이 실제로 존재하는지 확인하고 있어.";
+   try{
+     const engine=window.BokjaksoSaju;
+     if(!engine?.validateProfiles)throw new Error("만세력 모듈을 불러오지 못했어. 새로고침해 줘.");
+     await engine.validateProfiles(profiles,undefined,today);
+     if(!card.isConnected)return;
+     if(submittedRevision!==revision)throw new Error("확인 중에 입력값이 바뀌었어. 다시 확인해 줘.");
+     birthProfiles[key]=profiles;
+     birthEditing.delete(key);
+     renderMessages(false);
+   }catch(error){
+     if(card.isConnected)notice.textContent=error?.message||"만세력 입력 확인에 실패했어. 다시 시도해 줘.";
+   }finally{
+     intakeBusy=false;
+     submit.textContent="입력 확인";
+     if(card.isConnected)syncSubmitState();
+   }
  });
  card.append(form,makeEl("p","intake-privacy","테스트용 입력값은 서버로 보내거나 저장하지 않아. 새로고침하면 사라져."));
  for(const select of form.querySelectorAll("select"))upgradeSajuSelect(select);
