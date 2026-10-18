@@ -45,6 +45,10 @@
     .header-nav-back svg{display:block;width:24px;height:24px;stroke-width:2.3}
     .header-nav-back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     .header-nav-back:active{background:var(--soft)}
+    /* Magazine-only navigation: clearly visible 44px back target. */
+    body.magazine-active .header-nav-back{width:44px;height:44px;flex:0 0 44px;color:var(--text)}
+    body.magazine-active .header-nav-back svg{width:25px;height:25px;stroke-width:2.5}
+    body.magazine-active .header-left .brand{font-size:17px;white-space:nowrap}
     .back{border:0;background:transparent;color:var(--muted);font-weight:700}
     /* Match the moon and avatar: clean, recognizable home button without a word label. */
     .back.home-shortcut{width:38px;height:38px;flex:0 0 38px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--paper);color:var(--muted)}
@@ -3061,6 +3065,14 @@
       if(recentHomeTabs.length>12)recentHomeTabs.shift();
     }
     currentHomeTab=tab;
+    const isMagazine=tab==='magazine';
+    document.body.classList.toggle('magazine-active',isMagazine);
+    const brand=document.getElementById('brandHome');
+    brand.textContent=isMagazine?'복작소 매거진':'복작소';
+    brand.setAttribute('aria-label',isMagazine?'복작소 매거진에서 메인으로 이동':'복작소 홈으로');
+    const backButton=document.getElementById('headerNavBack');
+    backButton.setAttribute('aria-label',isMagazine?'복작소 메인으로 돌아가기':'이전 화면으로 돌아가기');
+    backButton.title=isMagazine?'복작소 메인으로 돌아가기':'이전 화면으로';
     homePanels.rooms.style.display=tab==='rooms'?'block':'none';
     homePanels.club.hidden=tab!=='club';
     homePanels.magazine.hidden=tab!=='magazine';
@@ -3074,6 +3086,10 @@
     button.addEventListener('click',()=>selectHomeTab(button.dataset.homeTab));
   });
   document.getElementById('headerNavBack').addEventListener('click',()=>{
+    if(currentHomeTab==='magazine'&&!document.body.classList.contains('chat-active')){
+      location.assign('/');
+      return;
+    }
     if(document.body.classList.contains('chat-active')){
       els.leaveBtn.click();
       return;
