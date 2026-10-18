@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>매거진 관리 | 복작소 최고관리자</title><link rel="icon" href="/icon-192.png">
+<style>
+:root{font-family:system-ui,-apple-system,"Pretendard","Noto Sans KR",sans-serif;color:#28221d;background:#f6f1e9}
+*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}
+header{position:sticky;top:0;z-index:4;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(16px,calc((100vw - 1000px)/2));background:#fffdf9;border-bottom:1px solid #ded4c6}
+header strong{font-size:17px}a{color:#765238}header a{font-size:14px;font-weight:750;text-decoration:none}
+main{max-width:980px;margin:20px auto 65px;padding:0 15px}.card{padding:22px;border:1px solid #dfd5c9;border-radius:20px;background:#fffdf9;box-shadow:0 6px 25px #483a2a0b;margin:0 0 18px}
+h1{font-size:26px;letter-spacing:-.04em;margin:3px 0 9px}h2{font-size:21px;margin:0 0 10px}.muted{color:#716b65;font-size:15px;line-height:1.65}
+.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.85fr);gap:16px;align-items:start}
+label{display:block;margin:15px 0 7px;font-size:15px;font-weight:800;color:#42352b}
+input,select,textarea{width:100%;padding:12px;border:1.5px solid #cabcaa;border-radius:12px;background:white;color:#211c18;font-size:16px}
+textarea{min-height:120px;line-height:1.6;resize:vertical}#articleBody{min-height:270px}
+input:focus,select:focus,textarea:focus{outline:2px solid #997553;outline-offset:1px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid label{margin-top:6px}
+.checks{display:flex;flex-wrap:wrap;gap:15px;margin:16px 0 12px}.checks label{display:flex;align-items:center;gap:9px;margin:0;cursor:pointer}.checks input{width:20px;height:20px;accent-color:#886644}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 6px}
+button{min-height:46px;padding:11px 15px;border-radius:12px;border:1px solid #bcac9e;background:#f1e9df;color:#3d2c1f;font-size:15px;font-weight:800;cursor:pointer}
+button.primary{background:#97704e;border-color:#97704e;color:white}
+button:disabled{opacity:.58;cursor:wait}
+button.danger{color:#962e28;background:#fff8f6;border-color:#e4b5ae}
+.status{min-height:26px;font-size:15px;font-weight:700;color:#684b36;line-height:1.6;white-space:pre-wrap}
+.photo-box{margin:10px 0 4px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+#photoPreview{width:125px;height:99px;object-fit:cover;background:#ebe2d7;border-radius:12px;border:1px solid #d5c5b3}
+.photo-actions{flex:1;min-width:170px}.photo-actions button{width:100%;margin-bottom:7px}
+.photo-actions small{display:block;font-size:13px;color:#746b64;line-height:1.5}
+.entry{border:1px solid #dfd2c3;border-radius:14px;padding:13px;margin:10px 0;background:#fff}
+.entry-top{display:flex;align-items:flex-start;gap:12px}.entry img{width:76px;height:68px;border-radius:10px;object-fit:cover;background:#efe5d8}
+.entry-copy{min-width:0;flex:1}.entry-title{font-size:16px;font-weight:800;line-height:1.45;overflow-wrap:anywhere}.entry-meta{font-size:13px;line-height:1.6;color:#766a60;margin-top:4px}
+.entry-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}.entry-actions button{font-size:14px;min-height:40px;padding:7px 11px}
+.pill{display:inline-block;border-radius:999px;background:#e8efdf;color:#3b6540;font-size:12px;font-weight:750;padding:3px 8px}
+.pill.off{background:#eee6df;color:#745950}
+.comment{border-bottom:1px solid #e3d9ce;padding:13px 0}.comment-head{display:flex;gap:8px;align-items:center;justify-content:space-between}.comment strong{font-size:15px}.comment time{font-size:12px;color:#7a6f65}.comment p{font-size:15px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0}
+[hidden]{display:none!important}
+@media(max-width:730px){.layout{grid-template-columns:1fr}.card{padding:18px}header strong{font-size:15px}header a{font-size:13px}.grid{gap:9px}}
+</style></head>
+<body>
+<header><strong>🔐 최고관리자 · 매거진 관리</strong><a href="/chat-admin.html">← 최고관리자 메인</a></header>
+<main>
+<section class="card"><h1>📰 복작소 매거진 관리</h1><p class="muted">이곳은 최고관리자 전용이야. 일반 채팅 운영자는 글을 등록하거나 수정할 수 없어. 작성한 글은 저장 즉시 매거진에 반영돼.</p>
+<a href="/chat.html?tab=magazine" target="_blank" rel="noopener">매거진 화면 보기 ↗</a></section>
+<div class="layout">
+<section class="card"><h2 id="editorTitle">새 글 등록</h2><form id="articleForm">
+<div class="grid">
+<div><label for="category">글 분야</label><select id="category" required><option value="culture">문학·문화</option><option value="life">건강·생활</option><option value="local">지역 소식</option><option value="club">복작소 이야기</option></select></div>
+<div><label for="displayOrder">정렬 순서</label><input id="displayOrder" type="number" min="0" max="9999" value="100" required></div>
+</div>
+<label for="articleTitle">기사 제목</label><input id="articleTitle" maxlength="120" required placeholder="예: 오늘의 책 이야기">
+<label for="summary">간단 소개 (목록에 표시)</label><textarea id="summary" maxlength="400" rows="3" required placeholder="두세 문장으로 소개해 주세요"></textarea>
+<label for="articleBody">기사 본문</label><textarea id="articleBody" maxlength="10000" required placeholder="내용을 적어 주세요. 문단을 나누면 매거진에서도 그대로 표시돼요."></textarea>
+<label>대표 이미지</label>
+<div class="photo-box"><img id="photoPreview" alt="대표 사진 미리보기" src="/icon-192.png">
+<div class="photo-actions"><button type="button" id="photoPick">📷 사진 선택 · 변경</button><button type="button" id="photoRemove">사진 없이 표시</button><small>JPG·PNG·WEBP, 원본 12MB 이하. 저장 시 자동으로 압축·업로드해.</small></div></div>
+<input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp,image/*" hidden>
+<label for="photoUrl">또는 기존 이미지 주소 (선택)</label><input id="photoUrl" type="url" placeholder="https://images.unsplash.com/... 또는 https://ik.imagekit.io/...">
+<div class="checks"><label><input id="published" type="checkbox" checked> 공개하기</label><label><input id="featured" type="checkbox"> 대표 기사로 표시</label></div>
+<div class="actions"><button type="submit" id="save" class="primary">글 저장</button><button type="button" id="clear">새 글 작성</button></div>
+<p id="saveStatus" class="status" role="status" aria-live="polite"></p>
+</form></section>
+<section class="card"><h2>등록된 글</h2><p class="muted">수정해도 해당 글의 댓글은 그대로 남아. 글을 내리려면 ‘비공개’를 눌러줘.</p>
+<button type="button" id="reload">목록 새로고침</button>
+<div id="articleList" aria-live="polite">목록을 불러오는 중…</div>
+</section>
+</div>
+<section class="card" id="commentSection" hidden><h2 id="commentTitle">댓글 관리</h2><p class="muted">글별 댓글을 확인하고 부적절한 댓글만 삭제할 수 있어. 삭제한 댓글은 복구할 수 없어.</p><div id="commentsList"></div><p class="status" id="commentStatus" role="status"></p></section>
+</main>
+<script>
+(()=>{
+const ADMIN_KEY='wjarchiveAdminAccessToken',TOKEN=sessionStorage.getItem(ADMIN_KEY);
+if(!TOKEN){location.replace('/admin-login.html');return}
+const $=id=>document.getElementById(id);
+const CATS={culture:'문학·문화',life:'건강·생활',local:'지역 소식',club:'복작소'};
+let articles=[],editing=null,selectedFile=null,imageFileId=null,busy=false,uploadCache=null;
+async function api(action,extras={}){
+ const response=await fetch('/api/store-inquiries',{method:'POST',cache:'no-store',
+ headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},
+ body:JSON.stringify({action:'magazine-posts-'+action,...extras})});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok){if(response.status===401)throw Error('최고관리자 로그인이 만료됐어. 다시 로그인해 줘.');throw Error(result.message||'요청 처리 실패')}
+ return result;
+}
+const status=(msg)=>$('saveStatus').textContent=msg;
+function photo(url){$('photoPreview').src=url||'/icon-192.png'}
+function clear(){
+ editing=null;selectedFile=null;imageFileId=null;uploadCache=null;
+ $('articleForm').reset();$('category').value='culture';$('displayOrder').value='100';$('published').checked=true;
+ $('photoUrl').value='';$('photoInput').value='';$('editorTitle').textContent='새 글 등록';photo(null);status('');
+}
+function element(tag,cl,text){let e=document.createElement(tag);if(cl)e.className=cl;if(text!==undefined)e.textContent=text;return e}
+function renderList(){
+ const root=$('articleList');root.replaceChildren();
+ if(!articles.length){root.append(element('p','muted','등록된 매거진 글이 없어.'));return}
+ for(const article of articles){
+  const card=element('div','entry'),top=element('div','entry-top');
+  const img=document.createElement('img');img.alt='';img.src=article.imageUrl||'/icon-192.png';
+  const info=element('div','entry-copy');
+  info.append(element('div','entry-title',article.title),element('div','entry-meta',CATS[article.category]+' · 순서 '+article.displayOrder));
+  const tag=element('span','pill'+(article.published?'':' off'),article.published?'공개':'비공개');info.append(tag);
+  if(article.featured)info.append(element('span','pill','대표'));
+  top.append(img,info);
+  const actions=element('div','entry-actions');
+  const edit=element('button','','수정');edit.type='button';edit.addEventListener('click',()=>editArticle(article));actions.append(edit);
+  const visibility=element('button','','');visibility.type='button';
+  visibility.textContent=article.published?'비공개로 전환':'공개로 전환';
+  visibility.addEventListener('click',()=>changeVisible(article));actions.append(visibility);
+  const comments=element('button','','댓글 관리');comments.type='button';comments.addEventListener('click',()=>loadComments(article));actions.append(comments);
+  card.append(top,actions);root.append(card);
+ }
+}
+function editArticle(a){
+ editing=a.articleKey;selectedFile=null;imageFileId=null;uploadCache=null;
+ $('category').value=a.category;$('articleTitle').value=a.title;
+ $('summary').value=a.summary;$('articleBody').value=a.body;
+ $('displayOrder').value=String(a.displayOrder);
+ $('featured').checked=a.featured;$('published').checked=a.published;
+ $('photoUrl').value=a.imageUrl||'';photo(a.imageUrl);$('photoInput').value='';
+ $('editorTitle').textContent='글 수정 · '+a.title;status('내용을 바꾼 뒤 ‘글 저장’을 눌러줘.');
+ window.scrollTo({top:Math.max(0,$('articleForm').getBoundingClientRect().top+window.scrollY-90),behavior:'smooth'});
+}
+async function list(){
+ $('articleList').textContent='등록된 글을 불러오는 중…';
+ try{articles=(await api('list',{view:'admin'})).articles||[];renderList()}
+ catch(e){$('articleList').textContent=e.message}
+}
+async function uploadImage(file){
+ if(uploadCache?.file===file)return uploadCache;
+ if(!/^image\//.test(file.type)||file.size>12*1024*1024)throw Error('12MB 이하 JPG·PNG·WEBP 사진을 선택해 줘.');
+ let bitmap;
+ try{bitmap=await createImageBitmap(file)}catch(_){throw Error('사진을 읽지 못했어. JPG 또는 PNG로 다시 저장해 줘.')}
+ const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+ canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+ const ctx=canvas.getContext('2d');if(!ctx){bitmap.close?.();throw Error('사진 변환에 실패했어.')}
+ ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close?.();
+ const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.80));
+ if(!blob||blob.size>6*1024*1024)throw Error('사진 압축에 실패했어.');
+ const auth=await api('image-auth');
+ const form=new FormData();
+ for(const [key,value] of Object.entries({
+   fileName:'magazine-'+Date.now()+'.webp',publicKey:auth.publicKey,
+   token:auth.token,expire:String(auth.expire),signature:auth.signature,
+   folder:auth.folder,useUniqueFileName:'true'
+ }))form.append(key,value);
+ form.append('file',blob,'magazine.webp');
+ const response=await fetch(auth.uploadEndpoint,{method:'POST',body:form});
+ const saved=await response.json().catch(()=>({}));
+ if(!response.ok||!saved.fileId||!saved.url)throw Error(saved.message||'이미지 업로드에 실패했어.');
+ uploadCache={file,fileId:saved.fileId,url:saved.url};return uploadCache;
+}
+async function save(event){
+ event.preventDefault();if(busy)return;
+ if(!$('articleForm').reportValidity())return;
+ busy=true;$('save').disabled=true;status('글을 저장하고 있어…');
+ try{
+  let url=$('photoUrl').value.trim(),fileId=imageFileId;
+  if(selectedFile){
+   status('대표 이미지를 업로드하고 있어…');const image=await uploadImage(selectedFile);
+   url=image.url;fileId=image.fileId;
+  }
+  status('제목과 본문을 저장하고 있어…');
+  const data=await api('save',{
+   ...(editing?{articleKey:editing}:{}),
+   category:$('category').value,title:$('articleTitle').value,
+   summary:$('summary').value,body:$('articleBody').value,
+   displayOrder:Number($('displayOrder').value),featured:$('featured').checked,
+   published:$('published').checked,imageUrl:url,imageFileId:fileId
+  });
+  await list();editArticle(data.article);
+  status('✅ 저장했어. '+(data.article.published?'매거진에 공개 중이야.':'현재 비공개 상태야.'));
+ }catch(e){status(e.message)}finally{busy=false;$('save').disabled=false}
+}
+async function changeVisible(a){
+ if(!confirm('이 글을 '+(a.published?'비공개로 전환':'다시 공개')+'할까? 기존 댓글은 보존돼.'))return;
+ try{
+  await api('save',{articleKey:a.articleKey,category:a.category,title:a.title,summary:a.summary,
+   body:a.body,displayOrder:a.displayOrder,featured:a.featured,published:!a.published,imageUrl:a.imageUrl});
+  await list();status('공개 상태를 변경했어.');
+ }catch(e){status(e.message)}
+}
+async function loadComments(a){
+ $('commentSection').hidden=false;$('commentTitle').textContent='댓글 관리 · '+a.title;
+ const root=$('commentsList');root.textContent='댓글을 불러오는 중…';$('commentStatus').textContent='';
+ $('commentSection').scrollIntoView({behavior:'smooth',block:'start'});
+ try{
+  const data=await api('comments',{articleKey:a.articleKey});root.replaceChildren();
+  if(!data.comments.length)root.append(element('p','muted','아직 댓글이 없어.'));
+  for(const c of data.comments){
+   const box=element('div','comment'),head=element('div','comment-head');
+   const left=element('span','');left.append(element('strong','',c.nickname),element('time','', ' · '+new Date(c.createdAt).toLocaleString('ko-KR')));
+   const del=element('button','danger','삭제');del.type='button';del.addEventListener('click',async()=>{
+    if(!confirm('이 댓글을 영구 삭제할까?'))return;
+    del.disabled=true;try{await api('comment-delete',{articleKey:a.articleKey,commentId:c.id});box.remove();$('commentStatus').textContent='댓글을 삭제했어.'}
+    catch(e){$('commentStatus').textContent=e.message;del.disabled=false}
+   });
+   head.append(left,del);box.append(head,element('p','',c.body));root.append(box)
+  }
+ }catch(e){root.textContent=e.message}
+}
+$('articleForm').addEventListener('submit',save);
+$('clear').addEventListener('click',clear);
+$('reload').addEventListener('click',list);
+$('photoPick').addEventListener('click',()=>$('photoInput').click());
+$('photoInput').addEventListener('change',()=>{
+ const file=$('photoInput').files?.[0];if(!file)return;
+ if(selectedFile)URL.revokeObjectURL($('photoPreview').src);
+ selectedFile=file;imageFileId=null;uploadCache=null;photo(URL.createObjectURL(file));status('사진 선택 완료. 글 저장을 누르면 업로드돼.');
+});
+$('photoRemove').addEventListener('click',()=>{
+ if(selectedFile&&$('photoPreview').src.startsWith('blob:'))URL.revokeObjectURL($('photoPreview').src);
+ selectedFile=null;imageFileId=null;uploadCache=null;$('photoInput').value='';$('photoUrl').value='';photo(null);status('사진을 빼고 저장할 수 있어.')
+});
+$('photoUrl').addEventListener('change',()=>{if(!selectedFile)photo($('photoUrl').value.trim())});
+clear();list();
+})();
+</script>
+</body></html>
