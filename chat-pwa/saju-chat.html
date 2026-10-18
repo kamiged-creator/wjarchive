@@ -387,25 +387,28 @@ html.dark .simli-stage{border-color:#735e4b}
   .selection-view > footer{padding-top:4px;padding-bottom:8px}
 }
 
-/* Strong selected states; keep original portrait dimensions and row heights. */
-.selection-view .avatar[aria-pressed="true"]{background:#f0e0cc;border-color:#b48251;box-shadow:inset 0 0 0 1px #fff7ea,0 3px 12px #7451332d}
-.selection-view .avatar[aria-pressed="true"] .portrait{border:3px solid #a97542;box-shadow:0 0 0 3px #f0d5b2}
-.selection-view .avatar[aria-pressed="true"] strong{color:#633b1c;font-weight:900}
-.selection-view .avatar[aria-pressed="true"] strong::after{content:" ✓";color:#85572d;font-size:.9em;font-weight:900}
-.selection-view .avatar-check{width:28px;height:28px;right:-4px;bottom:-1px;background:#9e6b39;border:2px solid #fff5e6;color:#fff;font-size:16px}
+/* Selected adviser: gold ring + emerald check, without a square frame. */
+.selection-view .avatar[aria-pressed="true"]{background:transparent;border-color:transparent;box-shadow:none}
+.selection-view .avatar[aria-pressed="true"] .portrait{border:3px solid #b48352;box-shadow:0 0 0 3px rgba(212,173,120,.28)}
+.selection-view .avatar[aria-pressed="true"] strong{color:#794d2c;font-weight:900}
+.selection-view .avatar[aria-pressed="true"] strong::after{content:none}
+.selection-view .avatar-check{width:25px;height:25px;right:-2px;bottom:1px;background:#2f7654;border:2px solid #fff5e6;color:#fff;font-size:14px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.23)}
+/* Keep Harin's horizontal full-width option distinct even when selected. */
+.selection-view .avatar-featured[aria-pressed="true"]{background:#f5e7d6;border-color:#b68f69;box-shadow:none}
 .selection-view .topic{position:relative}
 .selection-view .topic[aria-pressed="true"]{background:#ad8358;color:#20160f;border:2px solid #81552d;box-shadow:inset 0 0 0 1px #ead4b4,0 3px 10px #6b493b27}
-.selection-view .topic[aria-pressed="true"]::after{content:"✓";position:absolute;right:7px;top:7px;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#362319;color:#fff4e2;font-size:13px;font-weight:900}
+.selection-view .topic[aria-pressed="true"]::after{content:"✓";position:absolute;right:7px;top:7px;display:grid;place-items:center;width:21px;height:21px;border-radius:50%;background:#2f7654;color:#fff;font-size:13px;font-weight:900}
 .selection-view .topic:not([aria-pressed="true"]){background:#f5ede2;border-color:#c9b59d}
 .selection-view .start-chat{font-size:clamp(13px,4vw,16px);letter-spacing:-.02em;white-space:nowrap}
-html.dark .selection-view .avatar[aria-pressed="true"]{background:#423021;border-color:#d3a16b;box-shadow:inset 0 0 0 1px #65452e,0 3px 14px #0006}
-html.dark .selection-view .avatar[aria-pressed="true"] .portrait{border-color:#e2b781;box-shadow:0 0 0 3px #795536}
-html.dark .selection-view .avatar[aria-pressed="true"] strong,html.dark .selection-view .avatar[aria-pressed="true"] strong::after{color:#ffdab0}
-html.dark .selection-view .avatar-check{background:#c18e56;border-color:#34261c;color:#24160d}
+html.dark .selection-view .avatar[aria-pressed="true"]{background:transparent;border-color:transparent;box-shadow:none}
+html.dark .selection-view .avatar[aria-pressed="true"] .portrait{border-color:#d9a66f;box-shadow:0 0 0 3px rgba(130,92,56,.45)}
+html.dark .selection-view .avatar[aria-pressed="true"] strong{color:#ffd6a3}
+html.dark .selection-view .avatar-check{background:#2f7654;border-color:#29201a;color:#fff}
+html.dark .selection-view .avatar-featured[aria-pressed="true"]{background:#433325;border-color:#b38d65;box-shadow:none}
 html.dark .selection-view .topic:not([aria-pressed="true"]){background:#29221e;border-color:#675344;color:#e9dac9}
 html.dark .selection-view .topic[aria-pressed="true"]{background:#d2a46b;color:#20150d;border-color:#f1ca94;box-shadow:inset 0 0 0 1px #f6ddb7,0 3px 12px #0007}
-html.dark .selection-view .topic[aria-pressed="true"]::after{background:#382417;color:#ffe8c6}
-@media(max-width:355px){.selection-view .avatar-check{width:25px;height:25px;font-size:14px}}
+html.dark .selection-view .topic[aria-pressed="true"]::after{background:#2f7654;color:#fff}
+@media(max-width:355px){.selection-view .avatar-check{width:24px;height:24px;font-size:13px}}
 
 </style>
 <script src="/saju-avatars.js"></script>
