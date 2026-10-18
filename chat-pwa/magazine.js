@@ -205,44 +205,84 @@
     install(article);
     return article;
   }
-  let lastArticlesCheck=0;
+  let currentCategory='all';
+  let page=1;
+  let hasMore=false;
   let articlesLoading=false;
-  async function loadArticles(){
-    if(articlesLoading||Date.now()-lastArticlesCheck<5000)return;
+  let lastArticlesCheck=0;
+  let lastCategory='all';
+  let loadSequence=0;
+
+  async function loadArticles(reset=true){
+    // Avoid replacing an article while the reader has a story or comment
+    // composer open. Explicit category selection still resets the list.
+    if(articlesLoading)return;
+    const now=Date.now();
+    if(reset&&now-lastArticlesCheck<15000&&currentCategory===lastCategory)return;
     articlesLoading=true;
+    const requestSeq=++loadSequence;
+    const nextPage=reset?1:page+1;
+    const moreButton=document.getElementById('magazineMore');
+    if(moreButton){moreButton.disabled=true;moreButton.textContent='글을 불러오는 중…';}
     try{
-      const data=await request('posts-list');
+      const data=await request('posts-list',{page:nextPage,category:currentCategory});
+      if(loadSequence!==requestSeq)return;
       const live=Array.isArray(data.articles)?data.articles:[];
       const panel=document.getElementById('magazinePanel');
       const listing=document.getElementById('magazineStories');
       const subhead=panel?.querySelector('.magazine-subhead');
       if(!panel||!listing||!subhead)return;
-      const oldFeature=panel.querySelector('.magazine-featured');
-      const feature=live.find(a=>a.featured)||null;
-      const rest=feature?live.filter(a=>a.articleKey!==feature.articleKey):live;
-      // Build before replacing current elements so intermittent API errors
-      // cannot leave a partially rendered screen.
-      sections.clear();
-      const nextFeature=feature?articleCard(feature,true):null;
-      const listItems=rest.map(a=>articleCard(a,false));
-      if(oldFeature)oldFeature.remove();
-      if(nextFeature)subhead.before(nextFeature);
-      listing.replaceChildren(...listItems);
-      if(!live.length)listing.append(el('p','magazine-comments-note','아직 공개된 글이 없어요.'));
-      const filter=document.querySelector('[data-mag-filter][aria-pressed="true"]')?.dataset.magFilter||'all';
-      panel.querySelectorAll('.magazine-story').forEach(story=>{
-        story.hidden=filter!=='all'&&story.dataset.magCategory!==filter;
-      });
+      const feature=data.featured&&
+        (currentCategory==='all'||data.featured.category===currentCategory)
+        ?data.featured:null;
+      if(reset){
+        // Preserve old articles until the remote request succeeds.
+        const hero=panel.querySelector('.magazine-featured');
+        const featureCard=feature?articleCard(feature,true):null;
+        sections.clear();
+        if(hero)hero.remove();
+        listing.replaceChildren();
+        if(featureCard)subhead.before(featureCard);
+      }
+      const currentKeys=new Set(Array.from(listing.querySelectorAll('.magazine-story'))
+        .map(n=>n.dataset.magArticle));
+      for(const article of live){
+        if(currentKeys.has(article.articleKey))continue;
+        listing.append(articleCard(article,false));
+        currentKeys.add(article.articleKey);
+      }
+      if(reset&&!listing.children.length&&!feature){
+        listing.append(el('p','magazine-comments-note','이 분야에 공개된 글이 아직 없어요.'));
+      }
+      page=nextPage;
+      hasMore=data.hasMore===true;
       lastArticlesCheck=Date.now();
+      lastCategory=currentCategory;
+      if(moreButton)moreButton.hidden=!hasMore;
     }catch(error){
       console.warn('매거진 글 갱신 실패',error);
       const note=document.querySelector('.magazine-note');
-      if(note)note.textContent='최신 매거진 글을 불러오지 못했어요. 새로고침하면 다시 시도해요. 기존 시범 글과 댓글은 서버에 보존돼 있어요.';
-    }finally{articlesLoading=false}
+      if(note)note.textContent='최신 매거진 글을 불러오지 못했어요. 잠시 후 다시 열어줘. 기존 글과 댓글 데이터는 보존돼 있어.';
+    }finally{
+      articlesLoading=false;
+      if(moreButton){moreButton.disabled=false;moreButton.textContent='이전 글 더 보기 ↓';}
+    }
   }
 
-  loadArticles();
-  document.getElementById('homeTabMagazine')?.addEventListener('click',loadArticles);
+  // The original home-tab handler only hides currently rendered articles.
+  // Ask the server for the selected category so every older article remains reachable.
+  document.querySelectorAll('[data-mag-filter]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const next=button.dataset.magFilter||'all';
+      if(currentCategory===next)return;
+      currentCategory=next;
+      lastArticlesCheck=0;
+      loadArticles(true);
+    });
+  });
+  document.getElementById('magazineMore')?.addEventListener('click',()=>loadArticles(false));
+  loadArticles(true);
+  document.getElementById('homeTabMagazine')?.addEventListener('click',()=>loadArticles(true));
   window.addEventListener('bokjakso:shared-profile-updated',()=>{
     for(const section of sections.values())if(section.details.open)load(section,false);
   });
