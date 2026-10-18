@@ -5,6 +5,19 @@
   const ENGINE_URL = "https://esm.sh/manseryeok@2.0.0?bundle";
   const STEM_ELEMENT = {갑:"목",을:"목",병:"화",정:"화",무:"토",기:"토",경:"금",신:"금",임:"수",계:"수"};
   const BRANCH_ELEMENT = {자:"수",축:"토",인:"목",묘:"목",진:"토",사:"화",오:"화",미:"토",신:"금",유:"금",술:"토",해:"수"};
+  // Opt-in longitude presets for Korean birth locations (degrees East).
+  // Default "none" retains the person's entered civil birth time.
+  const BIRTHPLACES = Object.freeze({
+    seoul:{label:"서울",longitude:126.9780},
+    incheon:{label:"인천",longitude:126.7052},
+    daegu:{label:"대구",longitude:128.6014},
+    busan:{label:"부산",longitude:129.0756},
+    daejeon:{label:"대전",longitude:127.3845},
+    gwangju:{label:"광주",longitude:126.8526},
+    jeju:{label:"제주",longitude:126.5312}
+  });
+  const ELEMENT_GENERATES={목:"화",화:"토",토:"금",금:"수",수:"목"};
+  const ELEMENT_CONTROLS={목:"토",화:"금",토:"수",금:"목",수:"화"};
   const STEM_CHARACTER = {
     갑:"새롭게 시작하고 방향을 세우려는 나무의 상징",
     을:"유연하게 관계를 잇고 자라나는 풀의 상징",
@@ -56,7 +69,24 @@
       hour=Number(time[1]);minute=Number(time[2]);
     }
     const gender=profile.gender==="남성"?"male":profile.gender==="여성"?"female":null;
-    return {year,month,day,hour,minute,isLunar,isLeapMonth,unknown,gender,calendar:isLunar?"음력":"양력"};
+    const birthplace=typeof profile.birthplace==="string"?profile.birthplace:"none";
+    if(birthplace!=="none"&&birthplace!=="custom"&&!BIRTHPLACES[birthplace]){
+      throw new Error("출생 지역을 다시 선택해 줘.");
+    }
+    let longitude=null,placeLabel="보정 안 함";
+    if(birthplace==="custom"){
+      longitude=Number(profile.longitude);
+      if(profile.longitude===""||profile.longitude==null||!Number.isFinite(longitude)||longitude<124||longitude>132){
+        throw new Error("직접 입력하는 경도는 국내 기준 124~132도 범위여야 해.");
+      }
+      placeLabel="직접 입력 ("+longitude.toFixed(3)+"°E)";
+    } else if(BIRTHPLACES[birthplace]){
+      longitude=BIRTHPLACES[birthplace].longitude;
+      placeLabel=BIRTHPLACES[birthplace].label;
+    }
+    return {year,month,day,hour,minute,isLunar,isLeapMonth,unknown,gender,
+      calendar:isLunar?"음력":"양력",birthplace,longitude,placeLabel,
+      correctionApplied:longitude!==null&&!unknown};
   }
   function isPillar(value) { return typeof value==="string" && /^[가-힣]{2}$/.test(value); }
   async function calculate(profile, injectedLibrary) {
@@ -70,6 +100,11 @@
       isLunar:input.isLunar,isLeapMonth:input.isLeapMonth,dayBoundary:"midnight"
     };
     if (input.gender) params.gender=input.gender;
+    if (input.correctionApplied) {
+      params.trueSolarTime={
+        longitude:input.longitude,applyEquationOfTime:true,applyHistoricalDst:true
+      };
+    }
     let result;
     try { result=lib.calculateFourPillars(params); }
     catch (error) { throw new Error("만세력 계산에 실패했어. 음력 윤달 여부와 날짜를 다시 확인해 줘."); }
@@ -109,13 +144,67 @@
     return {
       source:"manseryeok@2.0.0",
       input:{calendar:input.calendar,unknown:input.unknown,gender:input.gender,
-        enteredDate:profile.date,leap:input.isLeapMonth,time:input.unknown?null:profile.time},
+        enteredDate:profile.date,leap:input.isLeapMonth,time:input.unknown?null:profile.time,
+        birthplace:input.birthplace,placeLabel:input.placeLabel,
+        longitude:input.longitude,correctionApplied:input.correctionApplied},
       solarDate,lunarDate:lunar,pillars,
       hanja:{year:hanja.year?.hanja||"",month:hanja.month?.hanja||"",day:hanja.day?.hanja||"",hour:input.unknown?"":(hanja.hour?.hanja||"")},
       dayMaster:{stem:master,element:STEM_ELEMENT[master],yinYang:result.dayYinYang?.stem||null},
       elements,uncertain,tenGods:result.tenGods||null,
       luckPillars:input.unknown?null:(result.luckPillars||null)
     };
+  }
+  // Flow pillars use *today's Korean civil date*, noon to avoid day-boundary
+  // ambiguity. Year pillar is based on seasonal term (Ipchun), not Jan 1.
+  function kstDate(now) {
+    return new Intl.DateTimeFormat("sv-SE",{
+      timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"
+    }).format(now||new Date());
+  }
+  async function calculateFlows(chart, injectedLibrary, dateOverride) {
+    if(!chart?.pillars?.day || !chart?.dayMaster?.element){
+      throw new Error("사주 원국을 먼저 계산해 줘.");
+    }
+    const date=typeof dateOverride==="string"?dateOverride:kstDate(dateOverride);
+    const match=/^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    if(!match)throw new Error("오늘의 날짜를 확인할 수 없어.");
+    const y=Number(match[1]),m=Number(match[2]),d=Number(match[3]);
+    if(y<1900||y>2100||m<1||m>12||d<1||d>new Date(Date.UTC(y,m,0)).getUTCDate()){
+      throw new Error("세운·일진을 계산할 수 없는 날짜야.");
+    }
+    const lib=injectedLibrary||await loadEngine();
+    const v=lib.calculateFourPillars({
+      year:y,month:m,day:d,hour:12,minute:0,isLunar:false,dayBoundary:"midnight"
+    }).toObject();
+    if(!v || !["year","month","day"].every(key=>isPillar(v[key]))) {
+      throw new Error("세운·일진의 계산 결과를 확인할 수 없어.");
+    }
+    return {date,year:v.year,month:v.month,day:v.day,basis:"한국 표준시 정오 기준"};
+  }
+  function elementRelation(me,other) {
+    if(!me||!other) return "관계를 판단할 수 없음";
+    if(me===other)return "같은 오행";
+    if(ELEMENT_GENERATES[me]===other)return "내 오행이 생하는 관계";
+    if(ELEMENT_GENERATES[other]===me)return "나를 생하는 관계";
+    if(ELEMENT_CONTROLS[me]===other)return "내 오행이 극하는 관계";
+    if(ELEMENT_CONTROLS[other]===me)return "상대 오행이 나를 극하는 관계";
+    return "관계를 판단할 수 없음";
+  }
+  function flowReading(chart,flow,topic) {
+    const mine=chart.dayMaster.element,day=STEM_ELEMENT[flow.day[0]],year=STEM_ELEMENT[flow.year[0]];
+    const themes={
+      daily:"오늘은 진행할 일의 우선순위 한 가지를 점검해 보는 참고 질문으로 활용해 봐.",
+      saju:"사주 원국과 오늘의 상징을 함께 비교하는 보조 자료로 활용해 봐.",
+      decade:"올해의 간지와 대운은 서로 다른 시간 단위야. 대운도 함께 보려면 정확한 생시와 성별이 필요해.",
+      match:"관계의 결과를 단정하기보다 서로의 생각을 확인할 질문으로 활용해 봐.",
+      love:"관계에 관한 중요한 선택은 실제 대화와 상대방의 의사를 우선해 줘.",
+      wealth:"수입·투자 판단에는 실제 계약과 자금 계획을 우선해 줘.",
+      career:"업무 계획은 현재의 역량과 여건을 기준으로 결정해 줘."
+    };
+    return "오늘 일진 "+flow.day+"("+day+") · 일간 "+chart.dayMaster.stem+"("+mine+")과 "+elementRelation(mine,day)+"\n"+
+      "올해 세운 "+flow.year+"("+year+") · 일간과 "+elementRelation(mine,year)+"\n"+
+      (themes[topic]||themes.saju)+"\n"+
+      "※ 일진·세운은 전통 명리 계산값이고, 그 관계는 상징적 해석이야. 실제 운이나 사건의 발생을 검증하거나 보장하지 않아.";
   }
   function format(chart) {
     if (!chart || !chart.pillars) return "";
@@ -125,6 +214,9 @@
     let result="🔮 만세력 사주팔자\n"+line+"\n"+
       "양력 기준 "+chart.solarDate+" · 일간 "+chart.dayMaster.stem+"("+chart.dayMaster.element+")\n"+
       "오행(겉글자 기준) "+f;
+    result+="\n시간 기준: "+(chart.input.correctionApplied
+      ?chart.input.placeLabel+" 경도·균시차·역사시각 보정"
+      :"입력 시각 그대로(진태양시 미보정)")+".";
     if (chart.input.unknown) result+="\n※ 출생시간 미상: 시주는 계산하지 않았어.";
     if (chart.uncertain.length) result+="\n※ 절기 또는 일진 경계에 걸려 "+chart.uncertain.map(x=>({year:"연주",month:"월주",day:"일주"}[x])).join("·")+"가 출생시각에 따라 달라질 수 있어.";
     return result;
@@ -145,7 +237,8 @@
     return summary+"\n\n"+note+extra+
       "\n\n※ 명리학의 전통적인 상징 해석이야. 미래 사건·건강·재산을 사실처럼 예측하지 않아.";
   }
-  const api={calculate,format,reading,normalize,source:"manseryeok@2.0.0"};
+  const api={calculate,calculateFlows,flowReading,format,reading,normalize,kstDate,
+    BIRTHPLACES,source:"manseryeok@2.0.0"};
   root.BokjaksoSaju=api;
   if (typeof module!=="undefined" && module.exports) module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
