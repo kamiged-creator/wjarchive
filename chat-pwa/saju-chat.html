@@ -613,6 +613,12 @@ function makeIntake(){
        box.append(makeEl("p","saju-result-warning","기준: 자정 일 경계 · 출생 지역 선택 시에만 시간 보정. 국내 출생 기준."));
        outcome.append(box);
      }
+     if(charts.length===2 && card.isConnected) {
+       const compare=makeEl("section","saju-result");
+       compare.append(makeEl("p","saju-result-title","두 사람의 궁합 기초 비교"));
+       compare.append(makeEl("p","saju-result-reading",engine.compatibility(charts[0],charts[1])));
+       outcome.append(compare);
+     }
    }).catch(error=>{if(card.isConnected)outcome.textContent=error.message||"만세력 계산 실패. 날짜를 확인해 줘.";});
    card.append(makeEl("p","intake-privacy","생년월일은 이 화면에서 계산해. 서버로 전송하거나 상담 대화 기록에 넣지 않아."));
    const edit=makeEl("button","intake-edit","정보 수정하기");edit.type="button";edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false)});card.append(edit);
@@ -815,8 +821,10 @@ async function response(){
   if(!engine)throw new Error("만세력 모듈이 아직 로드되지 않았어.");
   const chart=await engine.calculate(profiles[0]);
   const flow=await engine.calculateFlows(chart);
+  const compare=profiles.length===2 ? engine.compatibility(chart,await engine.calculate(profiles[1])) : "";
   return "※ 현재는 입력한 질문을 이해하는 자유대화 AI가 연결되지 않았어. 아래는 사주에 근거한 기본 풀이야.\n\n"+
-    engine.reading(chart,topic[0])+"\n\n"+engine.flowReading(chart,flow,topic[0]);
+    engine.reading(chart,topic[0])+"\n\n"+engine.flowReading(chart,flow,topic[0])+
+    (compare?"\n\n"+compare:"");
 }
 async function send(){
   if(sentBusy)return;
