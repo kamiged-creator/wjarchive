@@ -31,6 +31,9 @@
     .theme{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--border);background:var(--paper);color:var(--text);font-size:18px}
     .hero{padding:26px 20px 29px;text-align:center;background:var(--hero);border:1px solid var(--border);border-radius:25px;box-shadow:var(--shadow)}
     .hero-logo{width:90px;height:90px;display:block;margin:0 auto 13px;border-radius:22px;object-fit:cover}
+    /* Blend the icon's pale square with the warm hero surface, without changing
+       the original icon asset or its appearance in dark mode. */
+    body:not(.dark) .hero-logo{mix-blend-mode:darken}
     h1{margin:0 0 7px;font-size:34px;letter-spacing:-.055em;line-height:1.25}
     .en{font-size:11px;letter-spacing:.20em;color:var(--accent);font-weight:850}
     .tagline{margin:15px 0 0;font-size:16px;line-height:1.7;color:var(--muted);word-break:keep-all}
