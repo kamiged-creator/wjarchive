@@ -41,13 +41,11 @@
     .header-inner{display:flex;align-items:center;justify-content:space-between;width:100%;height:100%;min-width:0}
     .brand{font-weight:850;letter-spacing:-.03em;cursor:pointer}.sub{font-size:12px;color:var(--muted);margin-top:2px}
     .header-left{display:flex;align-items:center;gap:3px;min-width:0}
-    .header-nav-back{display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;height:40px;padding:0;border:0;border-radius:11px;background:transparent;color:var(--text);cursor:pointer}
+    .header-nav-back{display:inline-flex;align-items:center;justify-content:center;flex:0 0 44px;width:44px;height:44px;min-height:44px;padding:0;border:0;border-radius:11px;background:transparent;color:var(--text);cursor:pointer}
     .header-nav-back svg{display:block;width:24px;height:24px;stroke-width:2.3}
     .header-nav-back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     .header-nav-back:active{background:var(--soft)}
-    /* Magazine-only navigation: clearly visible 44px back target. */
-    body.magazine-active .header-nav-back{width:44px;height:44px;flex:0 0 44px;color:var(--text)}
-    body.magazine-active .header-nav-back svg{width:25px;height:25px;stroke-width:2.5}
+    /* All screens use the same My Info arrow size and comfortable tap target. */
     body.magazine-active .header-left .brand{font-size:17px;white-space:nowrap}
     .back{border:0;background:transparent;color:var(--muted);font-weight:700}
     /* Match the moon and avatar: clean, recognizable home button without a word label. */
@@ -1070,11 +1068,11 @@
     }
     body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-back{
       display:inline-flex;align-items:center;justify-content:center;
-      flex:0 0 42px;width:42px;height:44px;min-height:44px;
+      flex:0 0 44px;width:44px;height:44px;min-height:44px;
       padding:0;border:0;border-radius:9px;background:transparent;color:var(--text);
     }
     body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-back svg{
-      display:block;width:27px;height:27px;
+      display:block;width:24px;height:24px;stroke-width:2.3;
     }
     body:not(.chat-active).club-chat-open #clubPanel.club-room-open .club-chat-top h2{
       flex:1 1 auto;min-width:0;margin:0!important;
@@ -1337,7 +1335,7 @@
       <section class="club-chat" id="clubChat" hidden aria-label="복작소 정회원 전용 채팅방">
         <div class="club-chat-top" aria-label="복작소 클럽 채팅 상단 메뉴">
           <button class="club-chat-back" id="clubLeaveBtn" type="button" aria-label="복작소 클럽으로 돌아가기" title="클럽으로 돌아가기">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M20 12H9"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg>
           </button>
           <h2>복작소 클럽</h2>
           <div class="club-room-toolbar-buttons">
