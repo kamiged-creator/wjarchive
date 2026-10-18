@@ -426,6 +426,19 @@ html.dark .saju-result-warning{color:#d0af91}
 .intake-error{margin:8px 0 0;color:#91412a;font-size:13px;line-height:1.6}
 .intake-error:empty{display:none}
 html.dark .intake-error{color:#f2b18d}
+/* Preview-only consent and access code. Body scroll stays inside the chat panel. */
+.ai-setup{flex:none;padding:7px 14px 8px;background:#f8efe5;border-bottom:1px solid #e6d6c4;color:#604833}
+.ai-switch{display:flex;align-items:center;gap:9px;min-height:32px;font-size:14px;font-weight:850;line-height:1.4}
+.ai-switch input{width:20px;height:20px;flex:none;accent-color:#387653}
+.ai-switch input:disabled{opacity:.45}
+.ai-pin-row{margin-top:5px}
+.ai-pin-row input{height:39px;max-width:250px;width:100%;padding:6px 11px;border:1px solid #c9b49e;border-radius:9px;background:#fffdf9;color:#3e2d22;font:inherit;font-size:15px}
+.ai-setup p{margin:4px 0 0;line-height:1.5;font-size:12px}
+.ai-privacy{color:#826c59}
+html.dark .ai-setup{background:#29211c;border-bottom-color:#5b493d;color:#f1d6b7}
+html.dark .ai-pin-row input{background:#241c18;color:#f2e1d0;border-color:#785d47}
+html.dark .ai-privacy{color:#c4a993}
+#chatView.harin-chat .ai-setup{display:none}
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-engine.js"></script>
@@ -444,7 +457,13 @@ html.dark .intake-error{color:#f2b18d}
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
-    <p class="disclaimer">개발 미리보기 · 만세력 계산과 전통적 참고 풀이를 시험하고 있어. 자유 질문에 답하는 AI는 아직 연결되지 않았어.</p>
+    <p class="disclaimer">개발 미리보기 · 만세력 기본 풀이 제공. 실제 AI 답변은 시험 기능을 켜고 동의한 경우에만 사용해.</p>
+    <div class="ai-setup" id="aiSetup">
+      <label class="ai-switch"><input type="checkbox" id="aiConsent" disabled> 계산된 사주로 AI에게 질문하기 (선택)</label>
+      <div class="ai-pin-row"><input type="password" id="aiPin" placeholder="AI 시험 비밀번호" aria-label="AI 시험 비밀번호" autocomplete="off" maxlength="64" disabled></div>
+      <p id="aiStatus" role="status">AI 연결 상태를 확인 중이야. 기본 사주 풀이는 계속 이용할 수 있어.</p>
+      <p class="ai-privacy">동의 시 질문·최근 대화·계산된 사주팔자와 오행을 외부 AI로 전송해. 생년월일·출생시간 입력값은 보내지 않아. 질문에 직접 쓴 개인정보는 전송될 수 있어. 대화 문구는 이 탭에 임시 저장돼.</p>
+    </div>
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
       <p id="simliIntro">하린과 바로 음성 대화를 시작할 수 있어요. 생년월일은 상담 중 직접 말씀해 주세요.</p>
@@ -460,7 +479,7 @@ html.dark .intake-error{color:#f2b18d}
     </section>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <form class="composer" id="composer"><div class="composer-inner"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
-    <p class="tips" id="chatTip">체험 대화는 이 브라우저 탭에만 임시 보관돼. 실제 AI와 연결되기 전에는 개인정보 입력을 삼가줘.</p>
+    <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
 </div>
@@ -865,25 +884,77 @@ function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSes
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
-async function response(){
+const AI_ENDPOINT="/api/saju-ai";
+let aiReady=false;
+const aiConsent=$("aiConsent"),aiPin=$("aiPin"),aiStatus=$("aiStatus");
+async function refreshAiState(){
+  try{
+    const response=await fetch(AI_ENDPOINT+"?status=1",{cache:"no-store"});
+    const result=await response.json();
+    aiReady=Boolean(response.ok&&result.ready);
+  }catch(_){aiReady=false;}
+  aiConsent.disabled=!aiReady;
+  aiPin.disabled=!aiReady;
+  if(!aiReady){aiConsent.checked=false;aiPin.value="";}
+  aiStatus.textContent=aiReady
+    ?"AI 시험 연결 준비 완료 · 동의하고 시험 비밀번호를 넣으면 실제 AI가 답해."
+    :"AI 시험 연결 설정 대기 · 현재는 무료 기본 만세력 풀이만 제공해.";
+}
+function aiChart(chart){
+  const p=chart.pillars;
+  return {pillars:{year:p.year,month:p.month,day:p.day,hour:p.hour||null},
+    dayMaster:{stem:chart.dayMaster.stem},
+    elements:chart.elements};
+}
+async function response(question,previous){
   const profiles=birthProfiles[birthKey()];
   if(!profiles||!profiles.length)return "먼저 위에서 출생 정보를 입력해 줘. 입력하면 만세력 사주팔자를 계산해 보여줄게.";
   const engine=window.BokjaksoSaju;
   if(!engine)throw new Error("만세력 모듈이 아직 로드되지 않았어.");
   const chart=await engine.calculate(profiles[0]);
-  const flow=await engine.calculateFlows(chart);
-  const compare=profiles.length===2 ? engine.compatibility(chart,await engine.calculate(profiles[1])) : "";
-  return "※ 현재는 입력한 질문을 이해하는 자유대화 AI가 연결되지 않았어. 아래는 사주에 근거한 기본 풀이야.\n\n"+
-    engine.advisorReading(chart,topic[0],selected.id)+"\n\n"+engine.flowReading(chart,flow,topic[0])+
+  const partner=profiles.length===2?await engine.calculate(profiles[1]):null;
+  let flow=null;
+  try{flow=await engine.calculateFlows(chart);}catch(_){}
+  if(aiReady && aiConsent.checked){
+    const pin=aiPin.value;
+    if(pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
+    const payload={consent:true,question,advisor:selected.id,topic:topic[0],
+      chart:aiChart(chart),partner:partner?aiChart(partner):null,
+      flow:flow?{year:flow.year,day:flow.day}:null,
+      history:previous.filter(x=>x&&["user","bot"].includes(x.role))
+        .slice(-4).map(x=>({role:x.role==="bot"?"assistant":"user",content:x.text.slice(0,350)}))};
+    const response=await fetch(AI_ENDPOINT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-saju-test-pin":pin},
+      body:JSON.stringify(payload),cache:"no-store"
+    });
+    let body={};
+    try{body=await response.json()}catch(_){}
+    if(!response.ok)throw new Error(body.error||"AI 연결에 실패했어.");
+    if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
+    return "✨ AI 상담 · 전통 사주 참고 풀이\n\n"+body.answer;
+  }
+  const compare=partner?engine.compatibility(chart,partner):"";
+  return "📜 기본 만세력 풀이 (질문별 AI 분석 아님)\n\n"+
+    engine.advisorReading(chart,topic[0],selected.id)+
+    (flow?"\n\n"+engine.flowReading(chart,flow,topic[0]):"")+
     (compare?"\n\n"+compare:"");
 }
 async function send(){
   if(sentBusy)return;
   const input=$("question"),content=input.value.trim();if(!content)return;
-  sentBusy=true;conversation.push(msg("user",content));input.value="";save();renderMessages();
-  try{conversation.push(msg("bot",await response()));}
-  catch(e){conversation.push(msg("bot",e.message||"만세력 계산에 실패했어. 다시 시도해 줘."));}
-  finally{save();renderMessages();sentBusy=false;}
+  const oldKey=storageKey(),previous=conversation.slice(-4);
+  sentBusy=true;sendBtn.disabled=true;sendBtn.textContent="대기";
+  conversation.push(msg("user",content));input.value="";save();renderMessages();
+  try{
+    const answer=await response(content,previous);
+    if(storageKey()===oldKey)conversation.push(msg("bot",answer));
+  }catch(e){
+    if(storageKey()===oldKey)conversation.push(msg("bot",e.message||"연결 중 오류가 발생했어. 다시 시도해 줘."));
+  }finally{
+    if(storageKey()===oldKey){save();renderMessages();}
+    sentBusy=false;sendBtn.disabled=false;sendBtn.textContent="전송";
+  }
 }
 // A same-origin serverless route looks up the Simli share link on Vercel.
  // The session token is never stored in the HTML or localStorage.
@@ -1003,6 +1074,7 @@ setSajuTheme(savedSajuTheme==="dark");
 $("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
 renderAll();
 syncChatView();
+refreshAiState();
 })();
 </script>
 </body>
