@@ -129,3 +129,36 @@ test("두 번째 사람의 사주 없이 궁합을 생성하지 않는다",async
   const chart=await engine.calculate({date:"1992-10-24",calendar:"solar",time:"05:30"},library());
   assert.throws(()=>engine.compatibility(chart,null));
 });
+
+test("네 상담사는 실제 계산 결과를 바탕으로 다른 톤으로 풀이한다",async()=>{
+  const chart=await engine.calculate({date:"1992-10-24",calendar:"solar",time:"05:30"},library());
+  const cases=[
+    ["ara","아라 · 따뜻한 상담"],["doyun","도윤 · 정통 사주 구조 해설"],
+    ["seoyun","서윤 · 관계와 연애 상담"],["jian","지안 · 재물과 직장·사업 상담"]
+  ];
+  const outputs=cases.map(([key,expected])=>{
+    const result=engine.advisorReading(chart,"saju",key);
+    assert.ok(result.includes(expected));
+    assert.ok(result.includes("계(수)"));
+    assert.ok(result.includes("예측하지 않아"));
+    return result;
+  });
+  assert.equal(new Set(outputs).size,4);
+});
+test("지안은 재물과 직장 질문에 맞는 서로 다른 실천 관점을 제공한다",async()=>{
+  const chart=await engine.calculate({date:"1992-10-24",calendar:"solar",time:"05:30"},library());
+  const wealth=engine.advisorReading(chart,"wealth","jian");
+  const career=engine.advisorReading(chart,"career","jian");
+  assert.match(wealth,/고정 지출과 위험 허용 범위/);
+  assert.match(career,/업무와 성장 목표/);
+  assert.doesNotMatch(wealth,/반드시 돈을 벌|투자 성공/);
+});
+test("출생 시각이 없으면 도윤도 시주를 추측해서 보여주지 않는다",async()=>{
+  const chart=await engine.calculate({date:"1992-10-24",calendar:"solar",unknown:true},library());
+  const out=engine.advisorReading(chart,"saju","doyun");
+  assert.match(out,/시주 미상/);
+  assert.match(out,/여섯 글자/);
+});
+test("잘못된 계산 객체에는 상담 결과를 만들지 않는다",()=>{
+  assert.throws(()=>engine.advisorReading({}, "saju", "ara"));
+});
