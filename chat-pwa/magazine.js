@@ -29,7 +29,7 @@
     const date=new Date(value);
     if(!Number.isFinite(date.getTime()))return '';
     return date.toLocaleString('ko-KR',{
-      timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'
+      timeZone:'Asia/Seoul',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'
     });
   }
   function el(tag,cls,text){
