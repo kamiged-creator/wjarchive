@@ -441,6 +441,7 @@ html.dark .ai-privacy{color:#c4a993}
 #chatView.harin-chat .ai-setup{display:none}
 </style>
 <script src="/saju-avatars.js"></script>
+<script src="/saju-birthplaces.js"></script>
 <script src="/saju-engine.js"></script>
 </head>
 <body>
@@ -720,28 +721,52 @@ function makeIntake(){
    const gender=makeEl("select");for(const [v,name]of [["unspecified","선택 안 함"],["남성","남성"],["여성","여성"]]){const opt=makeEl("option","",name);opt.value=v;gender.append(opt);}gender.value=prev.gender||"unspecified";
    field("성별 (선택)",gender,false);
    // Optional birth location: correction applied only if time is known.
-   const birthplace=makeEl("select");birthplace.setAttribute("aria-label","출생 지역");
-   for(const [value,title] of [
-     ["none","보정하지 않음"],["seoul","서울"],["incheon","인천"],["daegu","대구"],
-     ["busan","부산"],["daejeon","대전"],["gwangju","광주"],["jeju","제주"],
-     ["custom","경도 직접 입력"]
-   ]){
-     const option=makeEl("option","",title);option.value=value;birthplace.append(option);
+   const regions=window.BokjaksoBirthplaces?.provinces||[];
+   const legacyRegion={seoul:"KR04/서울 (시 중심)",incheon:"KR02/인천 (시 중심)",
+     daegu:"KR10/대구 (시 중심)",busan:"KR13/부산 (시 중심)",
+     daejeon:"KR09/대전 (시 중심)",gwangju:"KR07/광주 (시 중심)",jeju:"KR16/제주시"};
+   const oldLocation=legacyRegion[prev.birthplace]||prev.birthplace||"none";
+   const province=makeEl("select");province.setAttribute("aria-label","태어난 시도");
+   for(const [code,title] of [["none","보정하지 않음"],...regions.map(p=>[p.id,p.label]),["custom","경도 직접 입력"]]){
+     const option=makeEl("option","",title);option.value=code;province.append(option);
    }
-   birthplace.value=prev.birthplace||"none";
-   field("출생 지역 (시간 보정 선택)",birthplace,true);
+   province.value=oldLocation==="none"||oldLocation==="custom"?oldLocation:oldLocation.split("/")[0];
+   if(!province.value)province.value="none";
+   field("태어난 지역 · 시·도 (선택)",province,true);
+   const cityField=makeEl("label","intake-field wide");
+   cityField.append(makeEl("span","","태어난 시·군 (중심 좌표 기준)"));
+   const birthplace=makeEl("select");birthplace.setAttribute("aria-label","태어난 시군");
+   cityField.append(birthplace);fields.append(cityField);
    const longitudeField=makeEl("label","intake-field wide");
    longitudeField.append(makeEl("span","","출생지 경도 (동경 124~132°)"));
    const longitude=makeEl("input");longitude.type="text";longitude.inputMode="decimal";
    longitude.placeholder="예: 128.6014";longitude.autocomplete="off";
    longitude.setAttribute("aria-label","출생지 경도");longitude.value=prev.longitude==null?"":String(prev.longitude);
    longitudeField.append(longitude);fields.append(longitudeField);
-   function updateLocation(){
-     longitudeField.hidden=birthplace.value!=="custom";
-     longitude.disabled=longitudeField.hidden;
-     longitude.setCustomValidity("");
+   function fillMunicipalities(saved){
+     birthplace.replaceChildren();
+     const group=regions.find(p=>p.id===province.value);
+     const empty=makeEl("option","","시·군 선택");empty.value="";birthplace.append(empty);
+     for(const [name] of group?.places||[]){
+       const value=group.id+"/"+name,option=makeEl("option","",name);option.value=value;birthplace.append(option);
+     }
+     birthplace.value=saved&&[...birthplace.options].some(x=>x.value===oldLocation)?oldLocation:"";
+     cityField.hidden=!group;
+     birthplace.disabled=!group;
+     birthplace._syncSaju?.();
    }
-   birthplace.addEventListener("change",updateLocation);updateLocation();
+   function updateLocation(){
+     const custom=province.value==="custom",group=regions.some(p=>p.id===province.value);
+     cityField.hidden=!group;
+     birthplace.disabled=!group;
+     longitudeField.hidden=!custom;
+     longitude.disabled=!custom;
+     longitude.setCustomValidity("");
+     province._syncSaju?.();birthplace._syncSaju?.();
+   }
+   province.addEventListener("change",()=>{fillMunicipalities(false);updateLocation()});
+   fillMunicipalities(true);updateLocation();
+   fields.append(makeEl("p","intake-privacy","시·군 선택 시 중심 경도를 근삿값으로 사용해. 지역을 모르면 보정하지 않음을 선택해 줘."));
    // Avoid Samsung's difficult native time wheel. Each part is keyboard-friendly.
    const savedTime=/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(prev.time||"")?prev.time:"";
    const savedHour=savedTime?Number(savedTime.slice(0,2)):null;
@@ -768,8 +793,10 @@ function makeIntake(){
    options.className="intake-time-options";fields.append(options);
    function update(){
      period.disabled=hour.disabled=minute.disabled=unknown.checked;
-     birthplace.disabled=unknown.checked;
-     longitude.disabled=unknown.checked||birthplace.value!=="custom";
+     province.disabled=unknown.checked;
+     birthplace.disabled=unknown.checked||!regions.some(p=>p.id===province.value);
+     longitude.disabled=unknown.checked||province.value!=="custom";
+     province._syncSaju?.();birthplace._syncSaju?.();
      timeField.classList.toggle("is-disabled",unknown.checked);
      period._syncSaju?.();
      leapLabel.hidden=calendar.value!=="lunar";
@@ -779,10 +806,10 @@ function makeIntake(){
    unknown.addEventListener("change",update);
    calendar.addEventListener("change",update);update();
    section.append(fields);form.append(section);
-   sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap,birthplace,longitude});
+   sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap,province,birthplace,longitude});
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
- sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.birthplace.value="none";p.longitude.value="";p.birthplace.dispatchEvent(new Event("change"));p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.province.value="none";p.province.dispatchEvent(new Event("change"));p.birthplace.value="";p.longitude.value="";p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";submit.disabled=true;actions.append(sample,submit);form.append(actions);
  let intakeBusy=false,revision=0;
  const notice=makeEl("p","intake-error","");
@@ -796,9 +823,12 @@ function makeIntake(){
      if(!/^[0-9]{4}$/.test(yearText)||y<1900||y>Number(today.slice(0,4)))return false;
      if(!p.month.value||!p.day.value||m<1||m>12||d<1||d>(p.calendar.value==="lunar"?30:new Date(y,m,0).getDate()))return false;
      if(p.calendar.value!=="lunar"&&yearText+"-"+p.month.value+"-"+p.day.value>today)return false;
-     if(p.birthplace.value==="custom"&&!p.unknown.checked){
-       const text=p.longitude.value.trim(),lon=Number(text);
-       if(!text||!Number.isFinite(lon)||lon<124||lon>132)return false;
+     if(!p.unknown.checked){
+       if(regions.some(r=>r.id===p.province.value)&&!p.birthplace.value)return false;
+       if(p.province.value==="custom"){
+         const text=p.longitude.value.trim(),lon=Number(text);
+         if(!text||!Number.isFinite(lon)||lon<124||lon>132)return false;
+       }
      }
      if(p.unknown.checked)return true;
      const h=p.hour.value.trim(),min=p.minute.value.trim();
@@ -848,8 +878,8 @@ function makeIntake(){
      return {date:p.year.value.trim()+"-"+p.month.value+"-"+p.day.value,calendar:p.calendar.value,
        gender:p.gender.value,unknown:p.unknown.checked,time:saved,
        leap:p.calendar.value==="lunar"&&p.leap.checked,
-       birthplace:p.unknown.checked?"none":p.birthplace.value,
-       longitude:p.unknown.checked||p.birthplace.value!=="custom"?null:Number(p.longitude.value.trim())};
+       birthplace:p.unknown.checked?"none":p.province.value==="custom"?"custom":p.province.value==="none"?"none":p.birthplace.value,
+       longitude:p.unknown.checked||p.province.value!=="custom"?null:Number(p.longitude.value.trim())};
    });
    intakeBusy=true;
    const submittedRevision=revision;
