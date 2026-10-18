@@ -600,7 +600,7 @@ function makeIntake(){
        const label=existing.length===2?(i===0?"본인":"상대방"):"본인";
        box.append(makeEl("p","saju-result-title",label+" · 계산된 사주팔자"));
        box.append(makeEl("p","saju-result-pillar",engine.format(chart)));
-       box.append(makeEl("p","saju-result-reading",engine.reading(chart,topic[0])));
+       box.append(makeEl("p","saju-result-reading",engine.advisorReading(chart,topic[0],selected.id)));
        try{
          const flow=await engine.calculateFlows(chart);
          if(!card.isConnected)return;
@@ -823,7 +823,7 @@ async function response(){
   const flow=await engine.calculateFlows(chart);
   const compare=profiles.length===2 ? engine.compatibility(chart,await engine.calculate(profiles[1])) : "";
   return "※ 현재는 입력한 질문을 이해하는 자유대화 AI가 연결되지 않았어. 아래는 사주에 근거한 기본 풀이야.\n\n"+
-    engine.reading(chart,topic[0])+"\n\n"+engine.flowReading(chart,flow,topic[0])+
+    engine.advisorReading(chart,topic[0],selected.id)+"\n\n"+engine.flowReading(chart,flow,topic[0])+
     (compare?"\n\n"+compare:"");
 }
 async function send(){
