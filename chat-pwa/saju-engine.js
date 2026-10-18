@@ -226,7 +226,7 @@
     const counts=Object.entries(chart.elements).sort((a,b)=>b[1]-a[1]);
     const major=counts[0][0],max=counts[0][1];
     const summary="일간 "+head+"("+element+")은 전통 명리에서 "+(STEM_CHARACTER[head]||"개인의 중심을 상징하는 글자")+"로 읽어. "+
-      "겉으로 드러난 여덟 글자에서 "+major+" 기운이 "+max+"개로 가장 많이 보여."+
+      "겉으로 드러난 "+(chart.input.unknown?"여섯":"여덟")+" 글자에서 "+major+" 기운이 "+max+"개로 가장 많이 보여."+
       (chart.input.unknown?" 출생시간을 모르므로 시주를 제외한 여섯 글자만 집계했어.":"");
     const note=SUBJECT_NOTE[topic]||SUBJECT_NOTE.saju;
     let extra="";
