@@ -1,0 +1,36 @@
+name: Saju manseryeok validation
+on:
+  push:
+    branches:
+      - feature/saju-manse-engine-v1
+    paths:
+      - 'chat-pwa/saju-engine.js'
+      - 'chat-pwa/saju-chat.html'
+      - 'chat-pwa/tests/saju-engine.test.cjs'
+      - 'chat-pwa/tests/saju-real-integration.test.cjs'
+      - '.github/workflows/saju-engine-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v4
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run offline adapter regression tests
+        run: node --test chat-pwa/tests/saju-engine.test.cjs
+      - name: Install pinned real calculation library for CI only
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund --prefix "$RUNNER_TEMP/saju-deps" manseryeok@2.0.0
+      - name: Run real calendar and solar-term integration tests
+        env:
+          NODE_PATH: ${{ runner.temp }}/saju-deps/node_modules
+        run: node --test chat-pwa/tests/saju-real-integration.test.cjs
