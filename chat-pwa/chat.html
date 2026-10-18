@@ -1620,6 +1620,9 @@
     if(els.nickname&&sharedProfile)els.nickname.value=sharedProfile.nickname;
     if(!session)paintAvatar(els.headerAvatarIcon,sharedProfile?.avatar_url||null);
     els.settingsProfileName.textContent=sharedProfile?.nickname||session?.member?.nickname||'내 프로필';
+    // My Info has its own portrait element. Refresh it as soon as the
+    // shared profile changes, even while the My Info tab is already open.
+    refreshHomeProfile();
   }
   function storeSharedProfile(profile,token){
     sharedProfile={id:profile.id,token:token||sharedProfile?.token,
