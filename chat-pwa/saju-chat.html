@@ -387,8 +387,22 @@ html.dark .simli-stage{border-color:#735e4b}
   .selection-view > footer{padding-top:4px;padding-bottom:8px}
 }
 
+/* Show locally calculated results in the existing intake card. */
+.saju-outcome{margin:12px 0 5px;border-top:1px solid #e4d4c1;padding:12px 0 2px}
+.saju-result{margin:0 0 13px;padding:12px;border:1px solid #dcc9b3;border-radius:13px;background:#faf3e9}
+.saju-result-title{font-size:16px;font-weight:850;color:#715135;margin:0 0 7px}
+.saju-result-pillar{font-size:15px;font-weight:750;color:#4b3324;line-height:1.8;margin:0;white-space:pre-wrap}
+.saju-result-reading{font-size:14px;color:#6a5341;line-height:1.65;margin:8px 0 0;white-space:pre-wrap}
+.saju-result-warning{font-size:12px;line-height:1.5;color:#916d4f;margin:8px 0 0}
+html.dark .saju-outcome{border-top-color:#635141}
+html.dark .saju-result{background:#352d27;border-color:#75604c}
+html.dark .saju-result-title{color:#f0cfab}
+html.dark .saju-result-pillar{color:#f6e5d4}
+html.dark .saju-result-reading{color:#e0cbbb}
+html.dark .saju-result-warning{color:#d0af91}
 </style>
 <script src="/saju-avatars.js"></script>
+<script src="/saju-engine.js"></script>
 </head>
 <body>
 <div class="page">
@@ -404,7 +418,7 @@ html.dark .simli-stage{border-color:#735e4b}
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
-    <p class="disclaimer">체험판 · 생년월일은 가상 정보로 시험해 줘. 실제 AI와 만세력은 아직 연결되지 않았어.</p>
+    <p class="disclaimer">만세력 계산은 전통 명리학 기준이야. 자동 해석은 참고용이며 실제 AI 자유대화는 준비 중이야.</p>
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
       <p id="simliIntro">하린과 바로 음성 대화를 시작할 수 있어요. 생년월일은 상담 중 직접 말씀해 주세요.</p>
@@ -443,7 +457,7 @@ const araStudioPortrait="https://ik.imagekit.io/wonjuart/ara.png?updatedAt=17894
 const avatarUrl=id=>id==="ara"?araStudioPortrait:typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
 function msg(role,text){return{role,text:String(text).slice(0,1000)}}
-function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"궁합 상담을 위해 두 분의 생년월일을 입력해 주세요.":"먼저 아래에 생년월일을 입력해 주세요.")+"\n가상 정보로 시험할 수 있어요.");}
+function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"궁합 상담을 위해 두 분의 생년월일을 입력해 주세요.":"먼저 아래에 생년월일을 입력해 주세요.")+"\n만세력 계산 결과를 보여줄게. 전통적인 해석은 참고용이야.");}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");return Array.isArray(x)?x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30):[greeting()];}catch(_){return[greeting()]}}
 let conversation=read();
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
@@ -568,7 +582,25 @@ function makeIntake(){
    const names=existing.length===2?["본인","상대방"]:["본인"];
    const summary=existing.map((p,i)=>names[i]+" · "+(p.calendar==="lunar"?"음력":"양력")+(p.leap?"(윤달)":"")+" "+p.date.replaceAll("-",".")+" · "+(p.unknown?"태어난 시간 모름":p.time)+(p.gender!=="unspecified"?" · "+p.gender:"")).join("\n");
    card.append(makeEl("p","intake-summary",summary));
-   card.append(makeEl("p","intake-privacy","입력한 생년월일은 현재 화면에서만 임시 표시돼. 서버 전송·대화 기록 저장은 하지 않아."));
+   const outcome=makeEl("div","saju-outcome");
+   outcome.append(makeEl("p","intake-privacy","만세력 사주팔자를 계산하는 중이야…"));
+   card.append(outcome);
+   const engine=window.BokjaksoSaju;
+   if(!engine) outcome.textContent="만세력 모듈을 불러오지 못했어. 잠시 뒤 새로고침해 줘.";
+   else Promise.all(existing.map(p=>engine.calculate(p))).then(charts=>{
+     if(!card.isConnected)return;
+     outcome.replaceChildren();
+     for(let i=0;i<charts.length;i++){
+       const chart=charts[i],box=makeEl("section","saju-result");
+       const label=existing.length===2?(i===0?"본인":"상대방"):"본인";
+       box.append(makeEl("p","saju-result-title",label+" · 계산된 사주팔자"));
+       box.append(makeEl("p","saju-result-pillar",engine.format(chart)));
+       box.append(makeEl("p","saju-result-reading",engine.reading(chart,topic[0])));
+       box.append(makeEl("p","saju-result-warning","기준: 한국 만세력 · 자정 일 경계 · 진태양시 미보정. 한국 밖 출생자는 추가 보정이 필요해."));
+       outcome.append(box);
+     }
+   }).catch(error=>{if(card.isConnected)outcome.textContent=error.message||"만세력 계산 실패. 날짜를 확인해 줘.";});
+   card.append(makeEl("p","intake-privacy","생년월일은 이 화면에서 계산해. 서버로 전송하거나 상담 대화 기록에 넣지 않아."));
    const edit=makeEl("button","intake-edit","정보 수정하기");edit.type="button";edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false)});card.append(edit);
    if(selected.id==="harin"){
      const note=makeEl("p","intake-privacy","이 정보는 현재 화면에서만 확인돼요. 아직 하린 음성 AI로 자동 전달되지 않아요.");
@@ -668,8 +700,8 @@ function makeIntake(){
    return sets.every(p=>{
      const yearText=p.year.value.trim(),y=Number(yearText),m=Number(p.month.value),d=Number(p.day.value);
      if(!/^[0-9]{4}$/.test(yearText)||y<1900||y>Number(today.slice(0,4)))return false;
-     if(!p.month.value||!p.day.value||m<1||m>12||d<1||d>new Date(y,m,0).getDate())return false;
-     if(yearText+"-"+p.month.value+"-"+p.day.value>today)return false;
+     if(!p.month.value||!p.day.value||m<1||m>12||d<1||d>(p.calendar.value==="lunar"?30:new Date(y,m,0).getDate()))return false;
+     if(p.calendar.value!=="lunar"&&yearText+"-"+p.month.value+"-"+p.day.value>today)return false;
      if(p.unknown.checked)return true;
      const h=p.hour.value.trim(),min=p.minute.value.trim();
      return /^[0-9]{1,2}$/.test(h)&&Number(h)>=1&&Number(h)<=12&&
@@ -692,9 +724,10 @@ function makeIntake(){
      }else if(yearText&&(!p.month.value||!p.day.value)){
        p.year.setCustomValidity("출생 월과 일을 모두 선택해 주세요.");
      }else if(yearText&&p.month.value&&p.day.value){
-       const lastDay=new Date(y,m,0).getDate();
+       const lunar=p.calendar.value==="lunar";
+       const lastDay=lunar?30:new Date(y,m,0).getDate();
        const iso=yearText+"-"+p.month.value+"-"+p.day.value;
-       if(d>lastDay||iso>today){
+       if(d>lastDay||(!lunar&&iso>today)){
          p.day.setCustomValidity("유효한 출생 날짜를 선택해 주세요.");
        }
      }
@@ -728,8 +761,22 @@ function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSes
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
-function response(){return selected.name+" 상담방에 질문이 입력됐어.\n\n지금은 "+topic[2]+" 분야의 대화 화면을 미리 보는 체험판이야. 실제 상담사의 AI 답변과 만세력 분석을 연결하면 이 자리에서 질문에 맞춘 풀이를 이어갈 수 있어.";}
-function send(){if(sentBusy)return;const input=$("question");const content=input.value.trim();if(!content)return;sentBusy=true;conversation.push(msg("user",content));input.value="";renderMessages();conversation.push(msg("bot",response()));save();renderMessages();sentBusy=false;}
+async function response(){
+  const profiles=birthProfiles[birthKey()];
+  if(!profiles||!profiles.length)return "먼저 위에서 출생 정보를 입력해 줘. 입력하면 만세력 사주팔자를 계산해 보여줄게.";
+  const engine=window.BokjaksoSaju;
+  if(!engine)throw new Error("만세력 모듈이 아직 로드되지 않았어.");
+  const chart=await engine.calculate(profiles[0]);
+  return engine.reading(chart,topic[0]);
+}
+async function send(){
+  if(sentBusy)return;
+  const input=$("question"),content=input.value.trim();if(!content)return;
+  sentBusy=true;conversation.push(msg("user",content));input.value="";save();renderMessages();
+  try{conversation.push(msg("bot",await response()));}
+  catch(e){conversation.push(msg("bot",e.message||"만세력 계산에 실패했어. 다시 시도해 줘."));}
+  finally{save();renderMessages();sentBusy=false;}
+}
 // A same-origin serverless route looks up the Simli share link on Vercel.
  // The session token is never stored in the HTML or localStorage.
 const SIMLI_ENDPOINT="/api/simli-session";
