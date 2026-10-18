@@ -102,6 +102,7 @@ section.panel.chat-full{display:flex;flex:1;flex-direction:column;min-height:0;m
 .intake-section:first-of-type{border-top:0;padding-top:2px}
 .intake-person{font-size:13px;font-weight:850;color:#73523a;margin:0 0 10px}
 .intake-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 9px}
+.intake-fields>.intake-privacy{grid-column:1/-1;margin:3px 0 0}
 .intake-field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:12px;color:#705b4c;font-weight:750}
 .intake-field.wide{grid-column:1/-1}
 .intake-date-parts{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.9fr) minmax(0,.9fr);gap:7px;min-width:0}
@@ -809,7 +810,7 @@ function makeIntake(){
    sets.push({year,month,day,calendar,gender,period,hour,minute,unknown,leap,province,birthplace,longitude});
  }
  const actions=makeEl("div","intake-actions");const sample=makeEl("button","intake-sample","예시 입력");sample.type="button";
- sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.province.value="none";p.province.dispatchEvent(new Event("change"));p.birthplace.value="";p.longitude.value="";p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
+ sample.addEventListener("click",()=>{sets.forEach((p,i)=>{p.year.value=i===0?"1990":"1992";p.month.value=i===0?"03":"05";p.day.value=i===0?"12":"04";p.year.setCustomValidity("");p.day.setCustomValidity("");p.calendar.value="solar";p.gender.value="unspecified";p.period.value="pm";p.hour.value="12";p.minute.value="0";p.hour.setCustomValidity("");p.minute.setCustomValidity("");p.unknown.checked=false;p.leap.checked=false;p.province.value="none";p.province.dispatchEvent(new Event("change",{bubbles:true}));p.birthplace.value="";p.longitude.value="";p.calendar.dispatchEvent(new Event("change"));p.unknown.dispatchEvent(new Event("change"));});});
  const submit=makeEl("button","intake-action","입력 확인");submit.type="submit";submit.disabled=true;actions.append(sample,submit);form.append(actions);
  let intakeBusy=false,revision=0;
  const notice=makeEl("p","intake-error","");
