@@ -423,6 +423,13 @@
      membershipChecking=false;
    }
  }
+ // Keep portraits in the existing room in sync with My Info, without
+ // requiring a room exit/entry or another paid image upload.
+ window.addEventListener('bokjakso:shared-profile-updated',()=>{
+   if(pane.hidden)return;
+   lastRenderKey='';
+   renderMessages();
+ });
  function renderMessages(forceBottom=false){
    if(pane.hidden)return;
    const items=confirmedRows.slice();
@@ -431,8 +438,10 @@
    }
    // Polling unchanged messages must not rebuild portraits or flicker the
    // conversation. Only redraw when a row actually changed.
-   const key=JSON.stringify(items.map(row=>[row.id||'',row.nickname||'',row.body||'',
-     row.created_at||'',row.avatarUrl||'',row.imageUrl||'',row.isMine===true,row.pending===true]));
+   const ownPortrait=sharedProfile?sharedProfile.avatar_url||'':
+     (localStorage.getItem('bokjaksoChatSharedProfileDeletedV1')==='yes'?'':null);
+   const key=JSON.stringify([ownPortrait,items.map(row=>[row.id||'',row.nickname||'',row.body||'',
+     row.created_at||'',row.avatarUrl||'',row.imageUrl||'',row.isMine===true,row.pending===true])]);
    if(key===lastRenderKey){
      if(forceBottom)feed.scrollTop=feed.scrollHeight;
      return;
@@ -477,11 +486,14 @@
      const avatar=document.createElement('span');
      avatar.className='club-post-avatar';
      avatar.setAttribute('aria-label',(row.isMine===true?'내':(row.nickname||'회원'))+' 프로필 사진');
-     // The photo endpoint may temporarily run an older build. Never turn
-     // the current member's already-saved portrait into a silhouette when a
-     // confirmed message lacks avatarUrl.
-     const ownPhoto=row.isMine===true?sharedProfile?.avatar_url:null;
-     const candidate=typeof row.avatarUrl==='string'&&row.avatarUrl?row.avatarUrl:ownPhoto;
+     // For my own messages, the just-saved shared profile is authoritative.
+     // Message rows can still carry the older avatar URL for a short time.
+     // For other members, use the verified avatar URL from the server.
+     const ownPhoto=row.isMine===true&&sharedProfile
+       ? sharedProfile.avatar_url||null
+       : row.isMine===true&&localStorage.getItem('bokjaksoChatSharedProfileDeletedV1')==='yes'
+         ? null : row.avatarUrl;
+     const candidate=ownPhoto;
      const avatarUrl=typeof candidate==='string'&&/^https:\/\//i.test(candidate)?candidate:'';
      if(avatarUrl){
        const portrait=document.createElement('img');
