@@ -14,7 +14,8 @@
     busan:{label:"부산",longitude:129.0756},
     daejeon:{label:"대전",longitude:127.3845},
     gwangju:{label:"광주",longitude:126.8526},
-    jeju:{label:"제주",longitude:126.5312}
+    jeju:{label:"제주",longitude:126.5312},
+    ...(root.BokjaksoBirthplaces?.locations||{})
   });
   const ELEMENT_GENERATES={목:"화",화:"토",토:"금",금:"수",수:"목"};
   const ELEMENT_CONTROLS={목:"토",화:"금",토:"수",금:"목",수:"화"};
