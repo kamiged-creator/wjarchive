@@ -374,6 +374,8 @@
      suspended:'클럽 이용이 제한되었어요. 관리자에게 문의해 주세요.'
    };
    status.textContent=labels[next]||'회원 상태를 확인할 수 없어요.';
+   // The approval card replaces the redundant status/loading box.
+   status.hidden=next==='approved';
    intro.hidden=true; // New applicants only need the single join action.
    approvedEntry.hidden=next!=='approved';
    if(next!=='approved')leaveClubRoom();
@@ -418,7 +420,7 @@
        status.textContent='이전 테스트 프로필이 초기화됐어요. 클럽 가입하기를 눌러 새로 신청해 주세요.';
        return;
      }
-     leaveClubRoom();actions.hidden=true;status.textContent=e.message;
+     leaveClubRoom();actions.hidden=true;status.hidden=false;status.textContent=e.message;
    }finally{
      membershipChecking=false;
    }
@@ -674,6 +676,7 @@
      if(!pane.hidden&&window.matchMedia('(pointer: fine)').matches)input.focus({preventScroll:true});
    }catch(error){
      leaveClubRoom();
+     status.hidden=false;
      status.textContent=error.message||'클럽 채팅방에 입장하지 못했어요.';
    }finally{
      enterBtn.disabled=false;
