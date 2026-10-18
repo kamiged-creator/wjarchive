@@ -79,7 +79,8 @@
     }else{
       for(const row of section.comments)section.list.append(buildComment(row,section));
     }
-    section.title.textContent='댓글 '+section.comments.length+(section.hasMore?'+':'');
+    section.count.textContent=section.comments.length+(section.hasMore?'+':'');
+    section.hint.hidden=section.comments.length===0;
     section.more.hidden=!section.hasMore;
     section.form.hidden=!section.canComment;
     section.join.hidden=section.canComment;
@@ -121,8 +122,8 @@
     const panel=el('section','magazine-comments');
     panel.setAttribute('aria-label','댓글 목록과 작성');
     panel.innerHTML=
-      '<h4>댓글</h4>'+
-      '<p class="magazine-comments-note">서로의 생각을 존중하며 이야기를 나눠주세요.</p>'+
+      '<h4>댓글 <span class="magazine-comment-count">0</span></h4>'+
+      '<p class="magazine-comments-hint" hidden>서로의 생각을 존중하며 이야기를 나눠주세요.</p>'+
       '<div class="magazine-comments-feedback" role="status" aria-live="polite"></div>'+
       '<div class="magazine-comments-list"></div>'+
       '<button class="magazine-comment-more" type="button" hidden>이전 댓글 더 보기</button>'+
@@ -134,7 +135,8 @@
     details.append(panel);
     const section={
       key,details,
-      title:panel.querySelector('h4'),
+      count:panel.querySelector('.magazine-comment-count'),
+      hint:panel.querySelector('.magazine-comments-hint'),
       feedback:panel.querySelector('.magazine-comments-feedback'),
       list:panel.querySelector('.magazine-comments-list'),
       more:panel.querySelector('.magazine-comment-more'),
