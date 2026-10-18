@@ -56,6 +56,17 @@
     .bottom a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px;border-radius:14px;color:var(--text);font-size:12px;font-weight:750;text-align:center}
     .bottom a .nav-icon{font-size:22px;line-height:1.15}
     .bottom a:hover,.bottom a:focus-visible{background:var(--panel)}
+    /* High-contrast icons for dark mode: retain original emoji in light mode. */
+    .dark-adaptive-icon .dark-icon{display:none}
+    .dark-adaptive-icon .icon-emoji{display:inline-block}
+    .dark-adaptive-icon .dark-icon{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .bottom .nav-icon.dark-adaptive-icon{display:inline-grid;place-items:center;min-height:26px}
+    .bottom .nav-icon.dark-adaptive-icon .dark-icon{width:27px;height:27px}
+    body.dark .dark-adaptive-icon .icon-emoji{display:none}
+    body.dark .dark-adaptive-icon .dark-icon{display:block}
+    body.dark .entry-icon.dark-adaptive-icon{background:#3b332b;color:#f0cda3}
+    body.dark .bottom .nav-icon.dark-adaptive-icon{color:#e8c49a}
+
     a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
     @media(max-width:380px){.container{padding-left:13px;padding-right:13px}.entry{gap:11px}.entry-icon{width:48px;height:48px;flex-basis:48px}.entry-text strong{font-size:18px}.entry-text small{font-size:12px}}
 
@@ -141,12 +152,12 @@
     </section>
     <nav class="cards" aria-label="복작소 서비스 선택">
       <a class="entry" href="/chat.html?tab=club">
-        <span class="entry-icon" aria-hidden="true">👥</span>
+        <span class="entry-icon dark-adaptive-icon" aria-hidden="true"><span class="icon-emoji">👥</span><svg class="dark-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3"/><path d="M2.5 20v-1.3a5.5 5.5 0 0 1 11 0V20"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5a5 5 0 0 1 6 4.5v1h-6"/></svg></span>
         <span class="entry-text"><strong>복작소 클럽</strong><small>가입하기 → 신청서 제출 → 관리자 승인 후 입장</small></span>
         <span class="arrow" aria-hidden="true">›</span>
       </a>
       <a class="entry" href="/chat.html?tab=magazine">
-        <span class="entry-icon" aria-hidden="true">📰</span>
+        <span class="entry-icon dark-adaptive-icon" aria-hidden="true"><span class="icon-emoji">📰</span><svg class="dark-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h4M7 16h4M14 12h3M14 16h3"/></svg></span>
         <span class="entry-text"><strong>복작소 매거진 <span class="entry-test-label">시범판</span></strong><small>문학·문화 · 건강·생활 · 지역 이야기</small></span>
         <span class="arrow" aria-hidden="true">›</span>
       </a>
@@ -156,7 +167,7 @@
         <span class="arrow" aria-hidden="true">›</span>
       </a>
       <a class="entry" href="/chat.html?tab=me">
-        <span class="entry-icon" aria-hidden="true">👤</span>
+        <span class="entry-icon dark-adaptive-icon" aria-hidden="true"><span class="icon-emoji">👤</span><svg class="dark-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7.5" r="4"/><path d="M4 21v-1.5c0-4.5 3.2-7 8-7s8 2.5 8 7V21H4Z"/></svg></span>
         <span class="entry-text"><strong>내 정보</strong><small>닉네임과 프로필 사진 관리</small></span>
         <span class="arrow" aria-hidden="true">›</span>
       </a>
@@ -164,10 +175,10 @@
     <button class="install-shortcut" id="installShortcut" type="button" aria-label="복작소 앱 설치하기">📲 복작소 앱 설치하기 <span aria-hidden="true">›</span></button>
   </main>
   <nav class="bottom" aria-label="하단 바로가기">
-    <a href="/chat.html?tab=club"><span class="nav-icon" aria-hidden="true">👥</span>클럽</a>
-    <a href="/chat.html?tab=magazine"><span class="nav-icon" aria-hidden="true">📰</span>매거진</a>
+    <a href="/chat.html?tab=club"><span class="nav-icon dark-adaptive-icon" aria-hidden="true"><span class="icon-emoji">👥</span><svg class="dark-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="3"/><path d="M2.5 20v-1.3a5.5 5.5 0 0 1 11 0V20"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5a5 5 0 0 1 6 4.5v1h-6"/></svg></span>클럽</a>
+    <a href="/chat.html?tab=magazine"><span class="nav-icon dark-adaptive-icon" aria-hidden="true"><span class="icon-emoji">📰</span><svg class="dark-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h4M7 16h4M14 12h3M14 16h3"/></svg></span>매거진</a>
     <a href="/saju-chat.html"><span class="nav-icon" aria-hidden="true">🔮</span>AI 사주</a>
-    <a href="/chat.html?tab=me"><span class="nav-icon" aria-hidden="true">👤</span>내 정보</a>
+    <a href="/chat.html?tab=me"><span class="nav-icon dark-adaptive-icon" aria-hidden="true"><span class="icon-emoji">👤</span><svg class="dark-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="7.5" r="4"/><path d="M4 21v-1.5c0-4.5 3.2-7 8-7s8 2.5 8 7V21H4Z"/></svg></span>내 정보</a>
   </nav>
   <aside class="install-offer" id="installOffer" aria-label="복작소 앱 설치 안내" hidden>
     <button class="install-close" id="installDismiss" type="button" aria-label="설치 안내 닫기" title="닫기">×</button>
