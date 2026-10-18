@@ -46,7 +46,7 @@
  const adminLink=document.getElementById('clubAdminLink');
  const clubTab=document.getElementById('homeTabClub');
  const returnToClubBtn=document.getElementById('returnClubChatBtn');
- let membership='none',busy=false;
+ let membership='none',busy=false,membershipChecking=false;
  let noticeKey='',noticeBusy=false;
  let sending=false,roomGeneration=0,confirmedRows=[],optimisticMessage=null,lastRenderKey='';
  let selectedPhoto=null,photoPreviewUrl=null;
@@ -374,7 +374,7 @@
      suspended:'클럽 이용이 제한되었어요. 관리자에게 문의해 주세요.'
    };
    status.textContent=labels[next]||'회원 상태를 확인할 수 없어요.';
-   intro.hidden=next==='approved';
+   intro.hidden=true; // New applicants only need the single join action.
    approvedEntry.hidden=next!=='approved';
    if(next!=='approved')leaveClubRoom();
    updateClubReturnButton();
@@ -385,14 +385,29 @@
    reviewEntry.hidden=next!=='pending';
  }
  async function refresh(){
+   if(membershipChecking)return;
+   membershipChecking=true;
    adminLink.hidden=!sessionStorage.getItem(ADMIN_KEY);
-   if(!sharedProfile){
-     renderMembership('none');
-     return;
+   // Hide the signup action while the server checks existing membership.
+   if(pane.hidden){
+     actions.hidden=true;
+     intro.hidden=true;
+     status.textContent='회원 상태를 확인하고 있어요…';
    }
    try{
+     if(!sharedProfile){
+       renderMembership('none');
+       return;
+     }
      const data=await request('status');
      renderMembership(data.status);
+     // Returning approved members skip the signup/approval landing screen.
+     // The entry endpoint checks membership on the server once more.
+     if(data.status==='approved'&&pane.hidden&&!enterBtn.disabled&&
+        clubTab.getAttribute('aria-selected')==='true'&&
+        !document.body.classList.contains('chat-active')){
+       enterBtn.click();
+     }
    }catch(e){
      if(e.statusCode===401){
        // Backend test users were erased: don't keep an invalid profile token.
@@ -404,6 +419,8 @@
        return;
      }
      leaveClubRoom();actions.hidden=true;status.textContent=e.message;
+   }finally{
+     membershipChecking=false;
    }
  }
  function renderMessages(forceBottom=false){
