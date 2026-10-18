@@ -206,6 +206,24 @@
       (themes[topic]||themes.saju)+"\n"+
       "※ 일진·세운은 전통 명리 계산값이고, 그 관계는 상징적 해석이야. 실제 운이나 사건의 발생을 검증하거나 보장하지 않아.";
   }
+  function compatibility(a,b) {
+    if(!a?.pillars?.day||!b?.pillars?.day||!a?.dayMaster?.element||!b?.dayMaster?.element){
+      throw new Error("궁합은 두 사람의 출생 정보를 모두 계산해야 확인할 수 있어.");
+    }
+    const p=a.dayMaster,q=b.dayMaster;
+    const relation=elementRelation(p.element,q.element);
+    const mirrored=elementRelation(q.element,p.element);
+    const sharedElements=Object.keys(a.elements).filter(el=>a.elements[el]>0&&b.elements[el]>0);
+    return [
+      "💕 두 사람의 명리 관계 참고",
+      "본인 일간 "+p.stem+"("+p.element+") · 상대 일간 "+q.stem+"("+q.element+")",
+      "본인에서 본 오행 관계: "+relation,
+      "상대에서 본 오행 관계: "+mirrored,
+      "양쪽 사주에 모두 드러난 오행: "+(sharedElements.join("·")||"없음"),
+      "일간과 겉글자만 비교한 기초 분석이야. 지장간·십성·합충형해·대운은 아직 함께 분석하지 않았어.",
+      "※ 궁합 점수나 연애·결혼 성패를 예측하지 않아. 서로의 존중과 실제 관계 경험이 가장 중요해."
+    ].join("\n");
+  }
   function format(chart) {
     if (!chart || !chart.pillars) return "";
     const p=chart.pillars;
@@ -237,7 +255,7 @@
     return summary+"\n\n"+note+extra+
       "\n\n※ 명리학의 전통적인 상징 해석이야. 미래 사건·건강·재산을 사실처럼 예측하지 않아.";
   }
-  const api={calculate,calculateFlows,flowReading,format,reading,normalize,kstDate,
+  const api={calculate,calculateFlows,flowReading,compatibility,format,reading,normalize,kstDate,
     BIRTHPLACES,source:"manseryeok@2.0.0"};
   root.BokjaksoSaju=api;
   if (typeof module!=="undefined" && module.exports) module.exports=api;
