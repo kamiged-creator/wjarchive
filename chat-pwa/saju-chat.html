@@ -662,6 +662,25 @@ body:not(.chat-active) .selection-view footer{color:#967f6a;padding:15px 5px 22p
 @media(max-width:365px){body:not(.chat-active) .selection-view{padding:13px 10px 8px}body:not(.chat-active) .selection-view .avatars{gap:10px}body:not(.chat-active) .selection-view .avatar strong.advisor-card-name{font-size:13px}}
 @media(prefers-reduced-motion:reduce){body:not(.chat-active) .selection-view .avatar,body:not(.chat-active) .selection-view .advisor-card-art{transition:none!important}}
 
+/* Compact video-consultation entry beside the selection title; keep advisor cards unchanged. */
+body:not(.chat-active) .selection-view .hero-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;min-height:44px;margin:0 0 5px;
+}
+body:not(.chat-active) .selection-view .hero-heading h1{min-width:0;margin:0;white-space:nowrap}
+body:not(.chat-active) .selection-view .video-consult-shortcut{
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;min-height:44px;min-width:44px;
+  padding:7px 9px;border:1px solid rgba(207,162,100,.50);border-radius:11px;
+  background:rgba(63,44,31,.48);color:#e6bf85;text-decoration:none;
+  font-size:13px;font-weight:800;letter-spacing:-.035em;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+}
+body:not(.chat-active) .selection-view .video-consult-shortcut svg{display:block;width:19px;height:19px;flex:none;stroke-width:1.9}
+body:not(.chat-active) .selection-view .video-consult-shortcut:active{background:rgba(167,119,69,.3)}
+@media(max-width:355px){
+  body:not(.chat-active) .selection-view .video-consult-shortcut{font-size:12px;padding-inline:7px;gap:4px}
+  body:not(.chat-active) .selection-view .video-consult-shortcut svg{width:18px;height:18px}
+}
+
 /* Temporary portrait test: use the selected four portraits and crisp black card footers. */
 body:not(.chat-active) .selection-view .avatar:not(.avatar-featured){
   background:#050505;
@@ -700,7 +719,16 @@ body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advis
 <div class="page">
   <header class="top"><a class="home" href="/" aria-label="복작소 메인으로 돌아가기" title="복작소 메인으로 돌아가기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a><strong class="saju-main-brand">복작소 사주</strong><span class="saju-main-deco" aria-hidden="true">✦</span></header>
   <main class="selection-view" id="selectionView">
-  <div class="hero"><h1>상담사 선택</h1><p class="lead">원하는 상담사를 선택해 편하게 이야기를 시작해 보세요.</p></div>
+  <div class="hero">
+    <div class="hero-heading">
+      <h1>상담사 선택</h1>
+      <a class="video-consult-shortcut" href="/api/simli-session" target="_blank" rel="noopener noreferrer" aria-label="AI 영상상담 새 창으로 열기" title="AI 영상상담 새 창으로 열기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>
+        <span>영상상담</span>
+      </a>
+    </div>
+    <p class="lead">원하는 상담사를 선택해 편하게 이야기를 시작해 보세요.</p>
+  </div>
   <section class="panel advisor-main-panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle" class="sr-only">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
   <details class="advisor-topic-details" id="advisorTopicDetails"><summary>다른 상담 분야 선택하기 <span aria-hidden="true">⌄</span></summary><section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section><button id="startChat" type="button" class="start-chat">선택한 분야로 상담 시작하기 →</button></details>
   <p class="advisor-selection-tip">사진을 누르면 해당 상담방으로 바로 들어가요.</p>
