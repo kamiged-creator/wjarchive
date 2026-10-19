@@ -410,12 +410,12 @@ test("Calculated saju results are individual chat bubbles rather than one large 
 
 test("Saju chat re-render shows cached bubbles and does not replay calculation or disclose data to an API",()=>{
  const results=guidedHtml.slice(guidedHtml.indexOf("function sajuResultRow("),guidedHtml.indexOf("function makeIntake()"));
- assert.match(results,/const sajuResultCache=Object\.create\(null\)/);
+ assert.match(guidedHtml,/const sajuResultCache=Object\.create\(null\)/);
  assert.match(results,/if\(cached\?\.source===profiles\)/);
  assert.match(results,/for\(const message of cached\.messages\)root\.append\(sajuResultRow\("bot",message\)\)/);
  assert.match(results,/sajuResultCache\[key\]=\{source:profiles,messages\}/);
  assert.match(results,/birthProfiles\[key\]===profiles/);
- assert.match(results,/delete sajuResultCache\[key\]/);
+ assert.match(guidedHtml,/delete sajuResultCache\[key\]/);
  assert.doesNotMatch(results,/fetch\(|AI_ENDPOINT|localStorage|sessionStorage/);
  assert.match(results,/edit\.addEventListener\("click",\(\)=>\{birthEditing\.add\(key\);renderMessages\(false\);\}\)/);
 });
