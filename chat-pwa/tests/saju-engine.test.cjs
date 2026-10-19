@@ -292,3 +292,16 @@ test("AI preview setup is collapsed by default but consent and status remain acc
   assert.match(guidedHtml,/id="aiStatus"/);
   assert.match(guidedHtml,/#chatView\.harin-chat \.saju-ai-details\{display:none\}/);
 });
+
+
+test("Saju result scroll regression: guide and manual confirmations target result heading",()=>{
+ const guided=guidedHtml.slice(guidedHtml.indexOf("function makeGuidedIntake()"),guidedHtml.indexOf("function makeIntake()"));
+ const manual=guidedHtml.slice(guidedHtml.indexOf("function makeIntake()"),guidedHtml.indexOf("function renderMessages("));
+ const renderer=guidedHtml.slice(guidedHtml.indexOf("function renderMessages("),guidedHtml.indexOf("function renderAll("));
+ assert.match(guided,/birthProfiles\[key\]=profiles;[\s\S]{0,140}renderMessages\("result"\)/);
+ assert.match(manual,/birthProfiles\[key\]=profiles;[\s\S]{0,140}renderMessages\("result"\)/);
+ assert.match(renderer,/scrollToEnd==="result"/);
+ assert.match(renderer,/feed\.querySelector\("\.intake-card"\)/);
+ assert.match(renderer,/feed\.scrollTop=Math\.max\(0,feed\.scrollTop\+offset-12\)/);
+ assert.match(renderer,/else feed\.scrollTop=scrollToEnd\?feed\.scrollHeight:0/);
+});
