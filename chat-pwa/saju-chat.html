@@ -544,7 +544,7 @@ html.dark .guided-intake .guided-manual:focus-visible{
 
 
 /* Gentle phrase-by-phrase fade. Full text is rendered immediately, no typing cursor. */
-.intro-soft-line{display:block;white-space:pre-wrap;animation:welcome-soft-fade 700ms cubic-bezier(.22,.9,.34,1) both}
+.intro-soft-line{display:block;white-space:pre-wrap;animation:welcome-soft-fade 1100ms cubic-bezier(.22,.9,.34,1) both}
 .intro-soft-line+.intro-soft-line{margin-top:.36em}
 @keyframes welcome-soft-fade{
   from{opacity:0;transform:translateY(7px);filter:blur(1.5px)}
@@ -1266,7 +1266,7 @@ function renderSoftWelcome(bubble,text){
   const lines=text.split("\n");
   for(let index=0;index<lines.length;index++){
     const line=makeEl("span","intro-soft-line",lines[index]);
-    line.style.animationDelay=Math.min(index*240,480)+"ms";
+    line.style.animationDelay=Math.min(index*850,1700)+"ms";
     bubble.append(line);
   }
   bubble.classList.add("intro-soft-bubble");
