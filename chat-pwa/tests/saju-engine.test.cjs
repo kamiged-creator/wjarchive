@@ -277,3 +277,18 @@ test("Guided birth interview regression: unknown time never applies location cor
   assert.match(guidedHtml,/지역을 잘 몰라요/);
   assert.match(guidedHtml,/← 이전 질문/);
 });
+
+
+test("Saju chat defaults to dark mode on first visit and preserves light preference",()=>{
+  assert.match(guidedHtml,/let savedSajuTheme="dark"/);
+  assert.match(guidedHtml,/getItem\(sajuThemeKey\)==="light"\?"light":"dark"/);
+  assert.match(guidedHtml,/document\.documentElement\.classList\.toggle\("dark",dark\)/);
+});
+test("AI preview setup is collapsed by default but consent and status remain accessible",()=>{
+  assert.match(guidedHtml,/<details class="saju-ai-details" id="aiSettingsDetails">/);
+  assert.doesNotMatch(guidedHtml,/<details class="saju-ai-details" id="aiSettingsDetails" open/);
+  assert.match(guidedHtml,/<summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기">/);
+  assert.match(guidedHtml,/id="aiConsent"/);
+  assert.match(guidedHtml,/id="aiStatus"/);
+  assert.match(guidedHtml,/#chatView\.harin-chat \.saju-ai-details\{display:none\}/);
+});
