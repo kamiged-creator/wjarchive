@@ -305,3 +305,25 @@ test("Saju result scroll regression: guide and manual confirmations target resul
  assert.match(renderer,/feed\.scrollTop=Math\.max\(0,feed\.scrollTop\+offset-12\)/);
  assert.match(renderer,/else feed\.scrollTop=scrollToEnd\?feed\.scrollHeight:0/);
 });
+
+
+test("Welcome typing regression: initial advisor greeting animates only on chat entry",()=>{
+  const renderer=guidedHtml.slice(guidedHtml.indexOf("function typeIntroMessage("),guidedHtml.indexOf("function renderAll()"));
+  const view=guidedHtml.slice(guidedHtml.indexOf("function syncChatView()"),guidedHtml.indexOf("function openHarinWindow()"));
+  assert.match(renderer,/scrollToEnd==="intro"&&conversation\.length===1/);
+  assert.match(renderer,/requestAnimationFrame\(tick\)/);
+  assert.match(renderer,/currentRun!==introTypingRun/);
+  assert.match(renderer,/scrollToEnd===true\?feed\.scrollHeight:0/);
+  assert.match(renderer,/scrollToEnd==="result"/);
+  assert.match(view,/const justOpened=open&&!chatPreviouslyOpen/);
+  assert.match(view,/if\(justOpened\)\{renderMessages\("intro"\)\}/);
+});
+
+test("Welcome typing regression: allows skip and respects reduced motion",()=>{
+  assert.match(guidedHtml,/"전체 문장 보기"/);
+  assert.match(guidedHtml,/skipButton\.addEventListener\("click",finish/);
+  assert.match(guidedHtml,/prefers-reduced-motion: reduce/);
+  assert.match(guidedHtml,/typed\.setAttribute\("aria-hidden","true"\)/);
+  assert.match(guidedHtml,/textNode\.removeAttribute\("aria-hidden"\)/);
+  assert.match(guidedHtml,/const totalMs=Math\.min\(3200,Math\.max\(1700/);
+});
