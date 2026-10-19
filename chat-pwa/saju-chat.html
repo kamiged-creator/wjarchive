@@ -598,6 +598,22 @@ html.dark .guided-current .guided-hint{color:#d2ac89}
   .guided-quickbar.intro-choices-enter{animation:none}
 }
 
+
+/* Manseryeok result in discreet chat bubbles, not a tall form card. */
+.saju-chat-results{display:flex;flex-direction:column;gap:14px;width:100%;min-width:0}
+.saju-chat-results .message{min-width:0;width:100%;align-items:flex-end}
+.saju-chat-results .message .bubble{max-width:min(85%,500px);white-space:pre-wrap;font-size:15px;line-height:1.75;overflow-wrap:anywhere}
+.saju-chat-results .message.bot .bubble{border:1px solid rgba(162,127,94,.26)}
+.saju-chat-msg{animation:saju-chat-reveal .65s cubic-bezier(.2,.8,.32,1) both}
+.saju-chat-actions{display:flex;justify-content:flex-start;padding:0 0 6px 39px}
+.saju-chat-edit{min-height:42px;padding:7px 14px;border:1px solid #ad8969;border-radius:12px;background:rgba(147,109,73,.12);color:#735338;font:inherit;font-size:14px;font-weight:750}
+.saju-chat-edit:focus-visible{outline:2px solid #c5a079;outline-offset:2px}
+html.dark .saju-chat-results .message.bot .bubble{background:#382b23;color:#f4e7d8;border-color:#624935}
+html.dark .saju-chat-results .message.user .bubble{background:rgba(151,105,66,.7);color:#fff4e9}
+html.dark .saju-chat-edit{background:rgba(183,133,84,.12);color:#edcdaa;border-color:#846448}
+@keyframes saju-chat-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.saju-chat-msg{animation:none}.saju-chat-results .message{scroll-behavior:auto}}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-birthplaces.js"></script>
@@ -986,6 +1002,7 @@ function makeGuidedIntake(){
        const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
        await engine.validateProfiles(profiles,undefined,today);
        if(guidedDrafts[key]!==wizard||birthKey()!==key||!card.isConnected)return;
+       delete sajuResultCache[key];
        birthProfiles[key]=profiles;
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
        renderMessages("result");
@@ -1010,68 +1027,108 @@ function makeGuidedIntake(){
  return card;
 }
 
+/* Calculations still run locally. Only rendered chat bubbles are staged, not AI calls. */
+const sajuResultCache=Object.create(null);
+function sajuResultRow(role,message){
+  const row=makeEl("div","message "+role+" saju-chat-msg");
+  if(role==="bot")row.append(portrait(selected.id,selected.name,"msg-avatar"));
+  const bubble=makeEl("div","bubble",message);
+  row.append(bubble);
+  return row;
+}
+function sajuBirthSummary(profile,label){
+  const place=window.BokjaksoSaju?.BIRTHPLACES?.[profile.birthplace]?.label||"";
+  return label+" · "+(profile.calendar==="lunar"?"음력":"양력")+
+    (profile.leap?" 윤달":"")+" "+profile.date.replaceAll("-",".")+
+    " · "+(profile.unknown?"시간 모름":profile.time)+
+    (profile.gender==="unspecified"?"":" · "+profile.gender)+
+    (place?" · "+place:"");
+}
+function makeSajuChatResults(profiles,key){
+  const root=makeEl("div","saju-chat-results");
+  root.setAttribute("aria-label","만세력 사주 대화형 풀이");
+  const match=profiles.length===2,names=match?["본인","상대방"]:["본인"];
+  const sourceText=profiles.map((p,i)=>sajuBirthSummary(p,names[i])).join("\n");
+  root.append(sajuResultRow("user","제 사주를 봐주세요.\n"+sourceText));
+  const starting=sajuResultRow("bot","출생 정보를 확인했어. 🌸 만세력으로 차근차근 살펴볼게.");
+  root.append(starting);
+  const startingBubble=starting.querySelector(".bubble");
+  const actions=makeEl("div","saju-chat-actions");
+  const edit=makeEl("button","saju-chat-edit","정보 수정하기");
+  edit.type="button";
+  edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false);});
+  actions.append(edit);
+  function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
+  function showMessages(messages,animate){
+    if(!isCurrent())return;
+    const feed=$("messages");
+    const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const revealAll=()=>{if(!isCurrent())return;for(const step of messages)root.append(sajuResultRow("bot",step));root.append(actions);};
+    if(!animate||reduce){revealAll();return;}
+    let index=0;
+    function next(){
+      if(!isCurrent())return;
+      if(index>=messages.length){root.append(actions);return;}
+      const nearBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<95;
+      root.append(sajuResultRow("bot",messages[index++]));
+      if(nearBottom&&location.hash==="#chat"){
+        requestAnimationFrame(()=>{if(isCurrent())feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});});
+      }
+      if(index<messages.length)setTimeout(next,1000);
+      else root.append(actions);
+    }
+    setTimeout(next,550);
+  }
+  const cached=sajuResultCache[key];
+  if(cached?.source===profiles){
+    startingBubble.textContent="이전에 계산한 만세력 풀이를 다시 보여줄게.";
+    showMessages(cached.messages,false);
+    return root;
+  }
+  const engine=window.BokjaksoSaju;
+  if(!engine){
+    startingBubble.textContent="만세력 모듈을 불러오지 못했어. 새로고침하고 다시 시도해 줘.";
+    root.append(actions);return root;
+  }
+  startingBubble.textContent="만세력 사주팔자를 계산하고 있어…";
+  Promise.all(profiles.map(p=>engine.calculate(p))).then(async charts=>{
+    if(!isCurrent())return;
+    const messages=[];
+    for(let i=0;i<charts.length;i++){
+      const chart=charts[i],label=names[i];
+      const formatted=engine.format(chart).split("\n");
+      messages.push("🔮 "+label+"의 사주팔자\n"+(formatted[1]||engine.format(chart)));
+      messages.push("🌿 일간과 오행\n"+formatted.slice(2).join("\n"));
+      const text=engine.advisorReading(chart,topic[0],selected.id).replace(/^[^\n]*\n/,"");
+      const parts=text.split(/\n\s*\n/).filter(Boolean);
+      parts.forEach((part,j)=>messages.push((j===0?"🌸 "+selected.name+"의 풀이\n":"")+part));
+      try{
+        const flow=await engine.calculateFlows(chart);
+        if(!isCurrent())return;
+        messages.push("📅 오늘 일진과 올해 세운\n"+engine.flowReading(chart,flow,topic[0])+
+          "\n계산 날짜: "+flow.date+" (한국 표준시)");
+      }catch(_){
+        messages.push("오늘 일진·올해 세운 계산은 확인하지 못했어. 사주 원국 결과만 참고해 줘.");
+      }
+    }
+    if(charts.length===2)messages.push("🤝 두 사람의 궁합 기초 비교\n"+engine.compatibility(charts[0],charts[1]));
+    messages.push("📜 전통 명리 해석은 참고용이야. 실제 사건이나 미래를 보장하지 않아.\n더 궁금한 점은 아래 채팅으로 질문해 줘.");
+    if(!isCurrent())return;
+    sajuResultCache[key]={source:profiles,messages};
+    startingBubble.textContent="계산을 마쳤어. 🌸 이제 하나씩 이야기해 줄게.";
+    showMessages(messages,true);
+  }).catch(error=>{
+    if(!isCurrent())return;
+    startingBubble.textContent=error?.message||"만세력 계산에 실패했어. 입력 정보를 확인해 줘.";
+    root.append(actions);
+  });
+  return root;
+}
 function makeIntake(){
  const key=birthKey(),existing=birthProfiles[key]||null;
+ if(existing&&!birthEditing.has(key))return makeSajuChatResults(existing,key);
  const card=makeEl("div","intake-card");
- card.append(makeEl("p","intake-title",existing&&!birthEditing.has(key)?"✓ 생년월일 입력 확인":"📅 사주 정보 입력"));
- if(existing&&!birthEditing.has(key)){
-   const names=existing.length===2?["본인","상대방"]:["본인"];
-   const summary=existing.map((p,i)=>{
-     const locationLabel=window.BokjaksoSaju?.BIRTHPLACES?.[p.birthplace]?.label||(p.birthplace==="custom"?"직접 입력":"");
-     return names[i]+" · "+(p.calendar==="lunar"?"음력":"양력")+(p.leap?"(윤달)":"")+" "+p.date.replaceAll("-",".")+
-       " · "+(p.unknown?"태어난 시간 모름":p.time)+(p.gender!=="unspecified"?" · "+p.gender:"")+
-       (locationLabel?" · 출생 지역 "+locationLabel:"");
-   }).join("\n");
-   card.append(makeEl("p","intake-summary",summary));
-   const outcome=makeEl("div","saju-outcome");
-   outcome.append(makeEl("p","intake-privacy","만세력 사주팔자를 계산하는 중이야…"));
-   card.append(outcome);
-   const engine=window.BokjaksoSaju;
-   if(!engine) outcome.textContent="만세력 모듈을 불러오지 못했어. 잠시 뒤 새로고침해 줘.";
-   else Promise.all(existing.map(p=>engine.calculate(p))).then(async charts=>{
-     if(!card.isConnected)return;
-     outcome.replaceChildren();
-     for(let i=0;i<charts.length;i++){
-       const chart=charts[i],box=makeEl("section","saju-result");
-       const label=existing.length===2?(i===0?"본인":"상대방"):"본인";
-       box.append(makeEl("p","saju-result-title",label+" · 계산된 사주팔자"));
-       box.append(makeEl("p","saju-result-pillar",engine.format(chart)));
-       box.append(makeEl("p","saju-result-reading",engine.advisorReading(chart,topic[0],selected.id)));
-       try{
-         const flow=await engine.calculateFlows(chart);
-         if(!card.isConnected)return;
-         box.append(makeEl("p","saju-result-title","오늘 일진 · 올해 세운"));
-         box.append(makeEl("p","saju-result-reading",engine.flowReading(chart,flow,topic[0])));
-         box.append(makeEl("p","saju-result-warning","일진·세운 계산 날짜: "+flow.date+" (한국 표준시)"));
-       }catch(_){
-         box.append(makeEl("p","saju-result-warning","일진·세운 계산에 실패했어. 원국 결과만 표시해."));
-       }
-       box.append(makeEl("p","saju-result-warning","기준: 자정 일 경계 · 출생 지역 선택 시에만 시간 보정. 국내 출생 기준."));
-       outcome.append(box);
-     }
-     if(charts.length===2 && card.isConnected) {
-       const compare=makeEl("section","saju-result");
-       compare.append(makeEl("p","saju-result-title","두 사람의 궁합 기초 비교"));
-       compare.append(makeEl("p","saju-result-reading",engine.compatibility(charts[0],charts[1])));
-       outcome.append(compare);
-     }
-   }).catch(error=>{if(card.isConnected)outcome.textContent=error.message||"만세력 계산 실패. 날짜를 확인해 줘.";});
-   card.append(makeEl("p","intake-privacy","생년월일은 이 화면에서 계산해. 서버로 전송하거나 상담 대화 기록에 넣지 않아."));
-   const edit=makeEl("button","intake-edit","정보 수정하기");edit.type="button";edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false)});card.append(edit);
-   if(selected.id==="harin"){
-     const note=makeEl("p","intake-privacy","이 정보는 현재 화면에서만 확인돼요. 아직 하린 음성 AI로 자동 전달되지 않아요.");
-     const speak=makeEl("button","intake-action intake-voice","🎙️ 하린 음성 상담 체험 시작");
-     speak.type="button";
-     speak.addEventListener("click",()=>{
-       syncSimliControls();
-       if($("simliConnect").disabled)return;
-       $("simliConnect").click();
-       $("simliPanel").scrollIntoView({block:"start",behavior:"smooth"});
-     });
-     card.append(note,speak);
-   }
-   return card;
- }
+ card.append(makeEl("p","intake-title","📅 사주 정보 입력"));
  if(!guidedManualMode.has(key)&&!birthEditing.has(key))return makeGuidedIntake();
  card.append(makeEl("p","intake-intro","생년월일과 태어난 시간을 입력해 주세요."));
  const form=makeEl("form","intake-form");const sets=[];
@@ -1283,6 +1340,7 @@ function makeIntake(){
      await engine.validateProfiles(profiles,undefined,today);
      if(!card.isConnected)return;
      if(submittedRevision!==revision)throw new Error("확인 중에 입력값이 바뀌었어. 다시 확인해 줘.");
+     delete sajuResultCache[key];
      birthProfiles[key]=profiles;
      birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
      renderMessages("result");
@@ -1381,7 +1439,7 @@ function renderMessages(scrollToEnd=true){
     if(currentRun!==introTypingRun)return;
     if(scrollToEnd==="result"){
       // Show the title at the top of the result card, not its last paragraph.
-      const card=feed.querySelector(".intake-card");
+      const card=feed.querySelector(".saju-chat-results")||feed.querySelector(".intake-card");
       if(card){
         const offset=card.getBoundingClientRect().top-feed.getBoundingClientRect().top;
         feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
