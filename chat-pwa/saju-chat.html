@@ -583,6 +583,21 @@ html.dark .guided-current .guided-hint{color:#d2ac89}
 @media(max-width:355px){.guided-quickbar{padding:8px 9px}.guided-quickbar .guided-choice{font-size:14px;min-height:44px}}
 @media(prefers-reduced-motion:reduce){.guided-chat-flow .message{animation:none}}
 
+
+/* Sequence the first question after the full opening greeting, never before it. */
+.messages.intro-await-question .guided-current{visibility:hidden}
+.guided-quickbar.intro-await-question{visibility:hidden;pointer-events:none}
+.messages.intro-question-enter .guided-current{animation:guided-following-fade .7s cubic-bezier(.22,.85,.35,1) both}
+.guided-quickbar.intro-choices-enter{animation:guided-following-fade .6s cubic-bezier(.22,.85,.35,1) both}
+@keyframes guided-following-fade{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .messages.intro-question-enter .guided-current,
+  .guided-quickbar.intro-choices-enter{animation:none}
+}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-birthplaces.js"></script>
@@ -1305,6 +1320,10 @@ function renderMessages(scrollToEnd=true){
   closeSajuPopup?.();
   const feed=$("messages");
   const quickbar=$("guidedQuickbar");
+  feed.classList.remove("intro-await-question","intro-question-enter");
+  quickbar.classList.remove("intro-await-question","intro-choices-enter");
+  quickbar.inert=false;
+  quickbar.removeAttribute("aria-hidden");
   quickbar.replaceChildren();quickbar.hidden=true;
   feed.replaceChildren();
   if(selected.id==="harin"){syncSimliControls();return;}
@@ -1330,6 +1349,28 @@ function renderMessages(scrollToEnd=true){
       feed.append(row);
     }
     if(index===0)feed.append(makeIntake());
+  }
+  // On first entry, let the whole greeting finish before revealing the next
+  // question and quick choices. Re-renders and reduced-motion remain instant.
+  const sequenceWelcome=animateWelcome&&
+    !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches&&
+    Boolean(feed.querySelector(".guided-current"));
+  if(sequenceWelcome){
+    feed.classList.add("intro-await-question");
+    quickbar.classList.add("intro-await-question");
+    quickbar.inert=true;
+    quickbar.setAttribute("aria-hidden","true");
+    const phraseCount=conversation[0].text.split("\n").length;
+    const greetingMs=Math.min((phraseCount-1)*850,1700)+1100+140;
+    setTimeout(()=>{
+      if(currentRun!==introTypingRun||!feed.isConnected||location.hash!=="#chat")return;
+      feed.classList.remove("intro-await-question");
+      quickbar.classList.remove("intro-await-question");
+      feed.classList.add("intro-question-enter");
+      quickbar.classList.add("intro-choices-enter");
+      quickbar.inert=false;
+      quickbar.removeAttribute("aria-hidden");
+    },greetingMs);
   }
   syncSimliControls();
   const ready=Boolean(birthProfiles[birthKey()]);
