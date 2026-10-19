@@ -349,13 +349,15 @@ test("Messenger saju intake uses speech bubbles and a bottom quick-choice bar in
   assert.match(render,/if\(index===0\)feed\.append\(makeIntake\(\)\)/);
 });
 
-test("Messenger intake keeps existing match, manual entry, answer backtracking and result scroll",()=>{
+test("Messenger intake preserves match, answer backtracking and result scroll without toolbar",()=>{
   const guided=guidedHtml.slice(guidedHtml.indexOf("function makeGuidedIntake()"),guidedHtml.indexOf("function makeIntake()"));
   const intake=guidedHtml.slice(guidedHtml.indexOf("function makeIntake()"),guidedHtml.indexOf("function renderSoftWelcome("));
   assert.match(guided,/quickbar\.append\(back\)/);
   assert.match(guided,/wizard\.back\.pop\(\)/);
   assert.match(guided,/wizard\.replies\.push\(\{note:"첫 번째 분의 정보/);
-  assert.match(guided,/guidedManualMode\.add\(key\);birthEditing\.add\(key\)/);
+  assert.doesNotMatch(guided,/guided-tools|guided-status|한눈에 입력하기|progressList/);
+  assert.doesNotMatch(guidedHtml,/\.guided-quickbar \.guided-tools/);
+  assert.match(guidedHtml,/\.guided-quickbar \.guided-error:empty\{display:none\}/);
   assert.match(guided,/birthProfiles\[key\]=profiles;[\s\S]{0,140}renderMessages\("result"\)/);
   assert.match(intake,/if\(!guidedManualMode\.has\(key\)&&!birthEditing\.has\(key\)\)return makeGuidedIntake\(\)/);
   assert.match(guidedHtml,/\.guided-quickbar\[hidden\]\{display:none!important\}/);
