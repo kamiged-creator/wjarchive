@@ -1905,12 +1905,12 @@ let savedSajuTheme="dark";
 try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="light"?"light":"dark"}catch(_){}
 setSajuTheme(savedSajuTheme==="dark");
 $("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
-/* Size main adviser portraits to the available phone height, without
-   shrinking text. Scroll only if even the smallest safe portraits won't fit. */
+/* Choice A: preserve full-width adviser portrait cards on mobile.
+   Keep vertical scrolling available when the footer exceeds short screens. */
 function fitAdvisorSelection(){
   if(window.innerWidth>=600)return;
   const view=$("selectionView");
-  for(const percentage of [90,88,86,84,82,80]){
+  for(const percentage of [100]){
     view.style.setProperty("--advisor-mobile-card-width",percentage+"%");
     if(view.scrollHeight<=view.clientHeight+2)break;
   }
