@@ -933,7 +933,7 @@ function makeGuidedIntake(){
        if(guidedDrafts[key]!==wizard||birthKey()!==key||!card.isConnected)return;
        birthProfiles[key]=profiles;
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
-       renderMessages(true);
+       renderMessages("result");
      }catch(err){if(card.isConnected)warn(err?.message||"입력한 날짜를 확인해 주세요.");}
      finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent="✓ 이대로 사주 보기";}}
    });
@@ -1230,7 +1230,7 @@ function makeIntake(){
      if(submittedRevision!==revision)throw new Error("확인 중에 입력값이 바뀌었어. 다시 확인해 줘.");
      birthProfiles[key]=profiles;
      birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
-     renderMessages(false);
+     renderMessages("result");
    }catch(error){
      if(card.isConnected)notice.textContent=error?.message||"만세력 입력 확인에 실패했어. 다시 시도해 줘.";
    }finally{
@@ -1244,7 +1244,17 @@ function makeIntake(){
  return card;
 }
 
-function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();const ready=Boolean(birthProfiles[birthKey()]);$("question").disabled=!ready;$("send").disabled=!ready;$("question").placeholder=ready?"메시지 입력":"먼저 상담사 질문에 답해 주세요";requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
+function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();const ready=Boolean(birthProfiles[birthKey()]);$("question").disabled=!ready;$("send").disabled=!ready;$("question").placeholder=ready?"메시지 입력":"먼저 상담사 질문에 답해 주세요";requestAnimationFrame(()=>{
+  if(scrollToEnd==="result"){
+    // Show the start of the result card rather than its last paragraph.
+    // The feed owns scrolling; do not scroll the entire page/composer.
+    const card=feed.querySelector(".intake-card");
+    if(card){
+      const offset=card.getBoundingClientRect().top-feed.getBoundingClientRect().top;
+      feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
+    }else feed.scrollTop=0;
+  }else feed.scrollTop=scrollToEnd?feed.scrollHeight:0;
+})}
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
 function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
