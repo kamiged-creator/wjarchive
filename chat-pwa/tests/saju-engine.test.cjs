@@ -307,23 +307,26 @@ test("Saju result scroll regression: guide and manual confirmations target resul
 });
 
 
-test("Welcome typing regression: initial advisor greeting animates only on chat entry",()=>{
-  const renderer=guidedHtml.slice(guidedHtml.indexOf("function typeIntroMessage("),guidedHtml.indexOf("function renderAll()"));
+test("Soft welcome regression: fades in complete phrases on initial chat entry only",()=>{
+  const renderer=guidedHtml.slice(guidedHtml.indexOf("function renderSoftWelcome("),guidedHtml.indexOf("function renderAll()"));
   const view=guidedHtml.slice(guidedHtml.indexOf("function syncChatView()"),guidedHtml.indexOf("function openHarinWindow()"));
+  assert.match(renderer,/text\.split\("\\n"\)/);
+  assert.match(renderer,/line\.style\.animationDelay=Math\.min\(index\*240,480\)/);
+  assert.match(renderer,/bubble\.classList\.add\("intro-soft-bubble"\)/);
   assert.match(renderer,/scrollToEnd==="intro"&&conversation\.length===1/);
-  assert.match(renderer,/requestAnimationFrame\(tick\)/);
-  assert.match(renderer,/currentRun!==introTypingRun/);
-  assert.match(renderer,/scrollToEnd===true\?feed\.scrollHeight:0/);
+  assert.match(renderer,/renderSoftWelcome\(bubble,item\.text\)/);
+  assert.doesNotMatch(renderer,/typeIntroMessage|requestAnimationFrame\(tick\)|intro-typed-copy/);
   assert.match(renderer,/scrollToEnd==="result"/);
+  assert.match(renderer,/feed\.scrollTop=scrollToEnd===true\?feed\.scrollHeight:0/);
   assert.match(view,/const justOpened=open&&!chatPreviouslyOpen/);
   assert.match(view,/if\(justOpened\)\{renderMessages\("intro"\)\}/);
 });
 
-test("Welcome typing regression: allows skip and respects reduced motion",()=>{
-  assert.match(guidedHtml,/"전체 문장 보기"/);
-  assert.match(guidedHtml,/skipButton\.addEventListener\("click",finish/);
-  assert.match(guidedHtml,/prefers-reduced-motion: reduce/);
-  assert.match(guidedHtml,/typed\.setAttribute\("aria-hidden","true"\)/);
-  assert.match(guidedHtml,/textNode\.removeAttribute\("aria-hidden"\)/);
-  assert.match(guidedHtml,/const totalMs=Math\.min\(3200,Math\.max\(1700/);
+test("Soft welcome regression: full text remains accessible and reduced-motion is respected",()=>{
+  assert.match(guidedHtml,/\.intro-soft-line\{display:block;white-space:pre-wrap;animation:welcome-soft-fade 700ms/);
+  assert.match(guidedHtml,/@keyframes welcome-soft-fade/);
+  assert.match(guidedHtml,/\.intro-soft-line\{animation:none!important\}/);
+  assert.match(guidedHtml,/prefers-reduced-motion:reduce/);
+  assert.match(guidedHtml,/makeEl\("span","intro-soft-line",lines\[index\]\)/);
+  assert.doesNotMatch(guidedHtml,/\"전체 문장 보기\"|intro-skip/);
 });
