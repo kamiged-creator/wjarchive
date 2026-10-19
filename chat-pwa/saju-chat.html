@@ -631,8 +631,8 @@ body:not(.chat-active) .selection-view .hero .lead{font-size:clamp(13px,3.6vw,16
 body:not(.chat-active) .selection-view .advisor-main-panel{background:transparent;border:0;box-shadow:none;border-radius:0;margin:0!important;padding:0!important}
 body:not(.chat-active) .selection-view .avatars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
 body:not(.chat-active) .selection-view .avatar{display:flex;flex-direction:column;align-items:stretch;min-width:0;gap:0;padding:0;background:linear-gradient(160deg,#30251e,#171310);border:1px solid rgba(223,182,126,.58);border-radius:20px;overflow:hidden;color:#f6e9d6;box-shadow:0 4px 18px #0004;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
-body:not(.chat-active) .selection-view .avatar:active,body:not(.chat-active) .selection-view .avatar.avatar-entering{transform:scale(.965);border-color:#ffd59c;box-shadow:0 0 0 2px #bd926575,0 0 26px #c69b6240}
-body:not(.chat-active) .selection-view .avatar-portrait-wrap{width:100%;height:auto;aspect-ratio:175/190;background:#352820;position:relative;overflow:hidden;display:block}
+body:not(.chat-active) .selection-view .avatar:active,body:not(.chat-active) .selection-view .avatar.avatar-entering{transform:scale(1.02);z-index:1;border-color:#ffd59c;box-shadow:0 0 0 2px #bd926575,0 0 26px #c69b6240}
+body:not(.chat-active) .selection-view .avatar-portrait-wrap{width:100%;height:auto;aspect-ratio:1;background:#352820;position:relative;overflow:hidden;display:block}
 body:not(.chat-active) .selection-view .advisor-card-art{display:block;width:100%;height:100%;background-size:200% 200%;background-repeat:no-repeat;transition:transform .3s ease}
 body:not(.chat-active) .selection-view .avatar.avatar-entering .advisor-card-art{transform:scale(1.055)}
 body:not(.chat-active) .selection-view .advisor-card-ara{background-position:0% 0%}
@@ -746,6 +746,14 @@ function selectAdvisorCard(advisor,button){
   selected=advisor;
   topic=advisor.topics[0];
   conversation=read();
+  // Open the separate voice window synchronously from the user's tap;
+  // deferring it would trigger mobile popup blockers.
+  if(advisor.id==="harin"){
+    advisorCardTransition=false;
+    renderAll();
+    openHarinWindow();
+    return;
+  }
   button.classList.add("avatar-entering");
   // Respect reduced motion and avoid trapping users inside the transition.
   const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -773,12 +781,9 @@ function renderAdvisors(){
     }
     b.append(wrap);
     const title=makeEl("strong","advisor-card-name");
-    const icon={ara:"🌸",doyun:"☯️",seoyun:"💕",jian:"💰",harin:"🎙️"}[a.id];
-    title.textContent=icon+" "+a.name+" · "+({
-      ara:"마음 상담",doyun:"정통 사주",seoyun:"연애·궁합",jian:"재물·사업",harin:"음성 상담"
-    }[a.id]||a.specialty);
+    title.textContent=a.id==="harin"?"🎙️ 하린 음성 상담":a.name+" 상담방";
     const small=makeEl("small","advisor-card-desc",({
-      ara:"편안하게 마음을 나누는 시간",doyun:"사주팔자·대운·세운",seoyun:"연애운·두 사람의 궁합",jian:"재물운·직장·사업운",harin:"음성 아바타 상담 체험"
+      ara:"따뜻한 마음·인생 상담",doyun:"정통 사주·대운·세운",seoyun:"연애운·궁합",jian:"재물운·사업운",harin:"음성 아바타 상담 체험"
     }[a.id]||a.specialty));
     b.append(title,small);
     b.addEventListener("click",()=>selectAdvisorCard(a,b));
