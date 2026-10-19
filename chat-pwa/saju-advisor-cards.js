@@ -6,3 +6,6 @@ window.SAJU_CARD_SPRITE = "data:image/webp;base64,UklGRngaAABXRUJQVlA4IGwaAADQsg
 // Existing embedded images remain a fallback if the temporary host is unavailable.
 window.SAJU_CARD_FALLBACK = window.SAJU_CARD_SPRITE;
 window.SAJU_CARD_SPRITE = "https://aicreatortrends.wordpress.com/wp-content/uploads/2026/10/bokjakso-saju-advisors-temporary.webp";
+
+// Borderless selection cards are test-only; the chat interface is unaffected.
+{const style=document.createElement("style");style.textContent="\n/* Advisor portrait test: rectangular, without a permanent frame. */\nbody:not(.chat-active) .selection-view .avatar:not(.avatar-featured){\nborder:1px solid transparent;border-radius:13px;box-shadow:0 5px 16px #0005;\n}\nbody:not(.chat-active) .selection-view .avatar:not(.avatar-featured) .avatar-portrait-wrap{\nborder:0;border-radius:0;\n}\nbody:not(.chat-active) .selection-view .avatar:not(.avatar-featured):is(:active,.avatar-entering){\nborder-color:#e4b977;box-shadow:0 0 0 2px #e0b26b59,0 0 23px #e0b26b40;transform:scale(1.02);z-index:1;\n}\nbody:not(.chat-active) .selection-view .avatar:not(.avatar-featured):focus-visible{\noutline:3px solid #e4b977;outline-offset:3px;\n}";document.head.appendChild(style);}
