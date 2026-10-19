@@ -330,3 +330,33 @@ test("Soft welcome regression: full text remains accessible and reduced-motion i
   assert.match(guidedHtml,/makeEl\("span","intro-soft-line",lines\[index\]\)/);
   assert.doesNotMatch(guidedHtml,/\"전체 문장 보기\"|intro-skip/);
 });
+
+
+test("Messenger saju intake uses speech bubbles and a bottom quick-choice bar instead of a large card",()=>{
+  const guided=guidedHtml.slice(guidedHtml.indexOf("function makeGuidedIntake()"),guidedHtml.indexOf("function makeIntake()"));
+  const render=guidedHtml.slice(guidedHtml.indexOf("function renderMessages("),guidedHtml.indexOf("function renderAll("));
+  assert.match(guidedHtml,/<div class="guided-quickbar" id="guidedQuickbar"[^>]* hidden><\/div>/);
+  assert.match(guided,/const card=makeEl\("div","guided-chat-flow"\)/);
+  assert.match(guided,/const quickbar=\$\("guidedQuickbar"\)/);
+  assert.match(guided,/quickbar\.append\(controls\)/);
+  assert.match(guided,/makeEl\("div","message user"\)/);
+  assert.match(guided,/wizard\.replies\.push\(\{question:activeQuestion,answer\}\)/);
+  assert.match(guided,/ask\(titlePerson\+" 생일은 양력이세요, 음력이세요\?"/);
+  assert.match(guided,/btn\("☀️ 양력"/);
+  assert.match(guided,/btn\("🌙 음력"/);
+  assert.match(guided,/btn\("잘 모르겠어요"/);
+  assert.match(render,/quickbar\.replaceChildren\(\);quickbar\.hidden=true/);
+  assert.match(render,/if\(index===0\)feed\.append\(makeIntake\(\)\)/);
+});
+
+test("Messenger intake keeps existing match, manual entry, answer backtracking and result scroll",()=>{
+  const guided=guidedHtml.slice(guidedHtml.indexOf("function makeGuidedIntake()"),guidedHtml.indexOf("function makeIntake()"));
+  const intake=guidedHtml.slice(guidedHtml.indexOf("function makeIntake()"),guidedHtml.indexOf("function renderSoftWelcome("));
+  assert.match(guided,/quickbar\.append\(back\)/);
+  assert.match(guided,/wizard\.back\.pop\(\)/);
+  assert.match(guided,/wizard\.replies\.push\(\{note:"첫 번째 분의 정보/);
+  assert.match(guided,/guidedManualMode\.add\(key\);birthEditing\.add\(key\)/);
+  assert.match(guided,/birthProfiles\[key\]=profiles;[\s\S]{0,140}renderMessages\("result"\)/);
+  assert.match(intake,/if\(!guidedManualMode\.has\(key\)&&!birthEditing\.has\(key\)\)return makeGuidedIntake\(\)/);
+  assert.match(guidedHtml,/\.guided-quickbar\[hidden\]\{display:none!important\}/);
+});
