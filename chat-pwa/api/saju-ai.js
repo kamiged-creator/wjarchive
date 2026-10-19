@@ -77,7 +77,7 @@ module.exports=async function handler(req,res){
   const question=cleanText(data.question,351),advisor=cleanText(data.advisor,30),topic=cleanText(data.topic,30);
   const chart=readChart(data.chart),partner=data.partner==null?null:readChart(data.partner),flow=readFlow(data.flow);
   if(!question||question.length>350||!ADVISERS[advisor]||!TOPICS.has(topic)||
-     (advisor==="ara"?(topic!=="talk"||data.chart!=null||data.partner!=null||data.flow!=null):(!chart||topic==="talk"))||
+     (advisor==="ara"?(topic==="talk"?(data.chart!=null||data.partner!=null||data.flow!=null):!chart):(!chart||topic==="talk"))||
      (data.partner!=null&&!partner)){
     return send(res,400,{error:"질문이나 만세력 데이터 형식을 확인해 줘."});
   }
