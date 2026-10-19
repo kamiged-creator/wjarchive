@@ -542,6 +542,13 @@ html.dark .guided-intake .guided-manual:focus-visible{
   outline-offset:2px;
 }
 
+
+/* Initial greeting appears at reading pace; users can reveal it immediately. */
+.intro-typed-copy{white-space:pre-wrap}
+.intro-skip{display:block;min-height:36px;margin-top:7px;padding:4px 9px;border:1px solid rgba(140,110,85,.48);border-radius:9px;background:rgba(122,93,68,.08);font:inherit;font-size:13px;font-weight:700;color:#765438;cursor:pointer}
+.intro-skip:focus-visible{outline:2px solid #bd9977;outline-offset:2px}
+html.dark .intro-skip{color:#e8c4a0;background:rgba(201,163,121,.12);border-color:rgba(201,163,121,.5)}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-birthplaces.js"></script>
@@ -613,6 +620,7 @@ function msg(role,text){return{role,text:String(text).slice(0,1000)}}
 function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"두 분의 생일을 차례대로 여쭤볼게요.":"제가 하나씩 여쭤볼게요. 편하게 답해 주세요.")+"\n만세력 계산 결과는 참고용이에요.");}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");if(!Array.isArray(x))return[greeting()];const list=x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30);if(!list.length)return[greeting()];if(list[0].role==="bot"&&list[0].text.includes("먼저 아래에 생년월일을 입력해 주세요"))list[0]=greeting();return list;}catch(_){return[greeting()]}}
 let conversation=read();
+let introTypingRun=0,chatPreviouslyOpen=false;
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
 function portrait(id,name,cls="portrait"){const holder=document.createElement("span");holder.className=cls;const src=avatarUrl(id);if(src){const img=document.createElement("img");img.alt="";img.loading="eager";if(id==="ara"){img.onerror=()=>{const fallback=avatarSources.ara;if(typeof fallback==="string"&&fallback.startsWith("data:image/webp;base64,")){img.onerror=()=>{img.remove();holder.textContent=name.slice(0,1)};img.src=fallback;}else{img.remove();holder.textContent=name.slice(0,1)}}}img.src=src;holder.append(img)}else{holder.textContent=name.slice(0,1)}return holder;}
 function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(const a of advisors){const b=document.createElement("button");b.type="button";b.className="avatar"+(a.id==="harin"?" avatar-featured":"");b.setAttribute("aria-pressed",String(a.id===selected.id));const wrap=document.createElement("span");wrap.className="avatar-portrait-wrap";wrap.append(portrait(a.id,a.name));const check=document.createElement("span");check.className="avatar-check";check.textContent="✓";check.setAttribute("aria-hidden","true");wrap.append(check);b.append(wrap);const title=document.createElement("strong");title.textContent=a.name;const small=document.createElement("small");small.textContent=a.specialty;b.append(title,small);b.addEventListener("click",()=>{if(a.id===selected.id)return;selected=a;topic=a.topics[0];conversation=read();renderAll()});root.append(b)}}
@@ -1244,19 +1252,90 @@ function makeIntake(){
  return card;
 }
 
-function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();const ready=Boolean(birthProfiles[birthKey()]);$("question").disabled=!ready;$("send").disabled=!ready;$("question").placeholder=ready?"메시지 입력":"먼저 상담사 질문에 답해 주세요";requestAnimationFrame(()=>{
-  if(scrollToEnd==="result"){
-    // Show the start of the result card rather than its last paragraph.
-    // The feed owns scrolling; do not scroll the entire page/composer.
-    const card=feed.querySelector(".intake-card");
-    if(card){
-      const offset=card.getBoundingClientRect().top-feed.getBoundingClientRect().top;
-      feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
-    }else feed.scrollTop=0;
-  }else feed.scrollTop=scrollToEnd?feed.scrollHeight:0;
-})}
+
+/* Welcome type-on effect: entirely local UI. No TTS/API calls or data transmission.
+   Only animate on entering an untouched chat; re-renders and accessibility skip it. */
+function typeIntroMessage(textNode,fullText,skipButton,feed,runId){
+  const characters=Array.from(fullText);
+  const totalMs=Math.min(3200,Math.max(1700,characters.length*27));
+  let started=null,shown=0;
+  function finish(){
+    if(introTypingRun!==runId||!textNode.isConnected)return;
+    textNode.textContent=fullText;
+    textNode.removeAttribute("aria-hidden");
+    textNode.parentElement.removeAttribute("aria-label");
+    skipButton.remove();
+  }
+  skipButton.addEventListener("click",finish,{once:true});
+  function tick(now){
+    if(introTypingRun!==runId||!textNode.isConnected)return;
+    if(started===null)started=now;
+    const count=Math.min(characters.length,Math.max(1,Math.floor((now-started)*characters.length/totalMs)));
+    if(count!==shown){shown=count;textNode.textContent=characters.slice(0,count).join("");}
+    if(count===characters.length)finish();
+    else requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderMessages(scrollToEnd=true){
+  introTypingRun++;
+  const currentRun=introTypingRun;
+  closeSajuPopup?.();
+  const feed=$("messages");
+  feed.replaceChildren();
+  if(selected.id==="harin"){syncSimliControls();return;}
+  const animateWelcome=scrollToEnd==="intro"&&conversation.length===1&&
+    conversation[0]?.role==="bot"&&!birthProfiles[birthKey()]&&
+    !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  for(const [index,item] of conversation.entries()){
+    const row=document.createElement("div");
+    row.className="message "+(item.role==="user"?"user":"bot");
+    if(item.role==="bot"){
+      const avatar=portrait(selected.id,selected.name,"msg-avatar");
+      if(avatar.textContent)avatar.classList.add("msg-fallback");
+      row.append(avatar);
+    }
+    const bubble=document.createElement("div");
+    bubble.className="bubble";
+    if(index===0&&animateWelcome){
+      const typed=makeEl("span","intro-typed-copy","");
+      const skip=makeEl("button","intro-skip","전체 문장 보기");
+      skip.type="button";
+      bubble.setAttribute("aria-label",item.text);
+      typed.setAttribute("aria-hidden","true");
+      bubble.append(typed,skip);
+      row.append(bubble);
+      feed.append(row);
+      typeIntroMessage(typed,item.text,skip,feed,currentRun);
+    }else{
+      bubble.textContent=item.text;
+      row.append(bubble);
+      feed.append(row);
+    }
+    if(index===0)feed.append(makeIntake());
+  }
+  syncSimliControls();
+  const ready=Boolean(birthProfiles[birthKey()]);
+  $("question").disabled=!ready;
+  $("send").disabled=!ready;
+  $("question").placeholder=ready?"메시지 입력":"먼저 상담사 질문에 답해 주세요";
+  requestAnimationFrame(()=>{
+    if(currentRun!==introTypingRun)return;
+    if(scrollToEnd==="result"){
+      // Show the title at the top of the result card, not its last paragraph.
+      const card=feed.querySelector(".intake-card");
+      if(card){
+        const offset=card.getBoundingClientRect().top-feed.getBoundingClientRect().top;
+        feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
+      }else feed.scrollTop=0;
+    }else{
+      feed.scrollTop=scrollToEnd===true?feed.scrollHeight:0;
+    }
+  });
+}
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
+function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){renderMessages("intro")}else if(!open){introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
