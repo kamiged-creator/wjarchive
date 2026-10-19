@@ -465,3 +465,42 @@ test("Preview-only Ara API does not require birth data while specialist readings
  assert.match(apiSource,/process\.env\.VERCEL_ENV==="preview"/);
  assert.match(apiSource,/process\.env\.SAJU_AI_ENABLED==="1"/);
 });
+
+
+test("Advisor selection main uses user chosen four portraits and preserves existing chat view",()=>{
+ const sprite=guidedFs.readFileSync(guidedPath.join(__dirname,"../saju-advisor-cards.js"),"utf8");
+ const match=sprite.match(/data:image\/webp;base64,([A-Za-z0-9+/=]+)/);
+ assert.ok(match,"the portrait sprite must be embedded");
+ const bytes=Buffer.from(match[1],"base64");
+ assert.equal(bytes.length,6784);
+ assert.equal(require("node:crypto").createHash("sha256").update(bytes).digest("hex"),
+   "deb95097f29bb41ae58cd54998ed2e80226ac72e1307414d9309eb1c82ed4464");
+ assert.match(guidedHtml,/<strong class="saju-main-brand">복작소 사주<\/strong>/);
+ assert.match(guidedHtml,/<div class="hero"><h1>상담사 선택<\/h1>/);
+ assert.match(guidedHtml,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ for(const id of ["ara","doyun","seoyun","jian"]){
+   assert.match(guidedHtml,new RegExp("advisor-card-"+id+"\\{background-position:"));
+ }
+ assert.match(guidedHtml,/window\.SAJU_CARD_SPRITE\)image\.style\.backgroundImage/);
+ assert.match(guidedHtml,/<div id="chatView" class="chat-view" hidden>/);
+ assert.match(guidedHtml,/<div class="messages" id="messages"/);
+ assert.match(guidedHtml,/<form class="composer" id="composer">/);
+});
+
+test("Advisor cards enter existing chat after short animation; voice opens immediately",()=>{
+ const cardCode=guidedHtml.slice(guidedHtml.indexOf("function selectAdvisorCard("),guidedHtml.indexOf("function renderTopics()"));
+ assert.match(cardCode,/selected=advisor;/);
+ assert.match(cardCode,/topic=advisor\.topics\[0\]/);
+ assert.match(cardCode,/conversation=read\(\)/);
+ assert.match(cardCode,/if\(advisor\.id==="harin"\)\{/);
+ assert.match(cardCode,/openHarinWindow\(\)/);
+ assert.match(cardCode,/setTimeout\(\(\)=>\{/);
+ assert.match(cardCode,/renderAll\(\);\s*openChat\(\)/);
+ assert.match(cardCode,/reduced\?0:340/);
+ assert.match(cardCode,/a\.name\+" 상담방"/);
+ assert.match(cardCode,/따뜻한 마음·인생 상담/);
+ assert.match(cardCode,/정통 사주·대운·세운/);
+ assert.match(cardCode,/연애운·궁합/);
+ assert.match(cardCode,/재물운·사업운/);
+ assert.match(guidedHtml,/@media\(prefers-reduced-motion:reduce\)\{body:not\(\.chat-active\) \.selection-view \.avatar/);
+});
