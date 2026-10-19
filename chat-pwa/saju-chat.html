@@ -681,12 +681,17 @@ body:not(.chat-active) .selection-view .video-consult-shortcut:active{background
   body:not(.chat-active) .selection-view .video-consult-shortcut svg{width:18px;height:18px}
 }
 
-/* Temporary portrait test: use the selected four portraits and crisp black card footers. */
+/* Gold outline test: all four full-size adviser cards, without changing images or layout. */
 body:not(.chat-active) .selection-view .avatar:not(.avatar-featured){
   background:#050505;
-  border:1px solid #bd995e;
+  border:1.5px solid #d0a770;
   border-radius:20px;
-  box-shadow:0 4px 18px #0008;
+  box-shadow:0 0 0 .5px rgba(245,208,148,.3),0 4px 18px #0008;
+}
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured):active,
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured).avatar-entering{
+  border-color:#f0c991;
+  box-shadow:0 0 0 2px rgba(221,166,94,.28),0 6px 20px #0009;
 }
 body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) .avatar-portrait-wrap{
   aspect-ratio:300/318;
