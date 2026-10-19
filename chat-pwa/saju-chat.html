@@ -734,10 +734,11 @@ function makeGuidedIntake(){
      step:wizard.step,replies:wizard.replies.slice()});
    wizard.error="";
  }
- function submitAnswer(field,value,answer,next){
+ function submitAnswer(field,value,answer,next,extra){
    capture();
    const oldStep=wizard.step;
    current[field]=value;
+   if(extra)Object.assign(current,extra);
    wizard.replies.push({question:({calendar:"양력인가요, 음력인가요?",year:"태어난 연도는?",month:"태어난 월은?",day:"태어난 날짜는?",leap:"음력 윤달인가요?",gender:"성별은?",time:"태어난 시간은?",province:"출생 지역은?",city:"태어난 시·군은?"})[oldStep],answer});
    if(next==="done"){
      if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.replies.push({question:"첫 번째 분의 정보",answer:"확인했어요. 이제 상대방 정보를 여쭤볼게요."});}
@@ -824,11 +825,10 @@ function makeGuidedIntake(){
      const h=hour.value.trim(),m=minute.value.trim();
      if(!/^[0-9]{1,2}$/.test(h)||Number(h)<1||Number(h)>12||!/^[0-9]{1,2}$/.test(m)||Number(m)>59)return warn("시간은 1~12시, 분은 0~59분으로 입력해 주세요.");
      const h24=Number(h)%12+(part.value==="pm"?12:0);
-     current.unknown=false;
-     submitAnswer("time",String(h24).padStart(2,"0")+":"+m.padStart(2,"0"),(part.value==="am"?"오전 ":"오후 ")+h+"시 "+m+"분","province");
+     submitAnswer("time",String(h24).padStart(2,"0")+":"+m.padStart(2,"0"),(part.value==="am"?"오전 ":"오후 ")+h+"시 "+m+"분","province",{unknown:false});
    };
    btn("시간 확인 →",go);
-   btn("태어난 시간 모름",()=>{current.unknown=true;submitAnswer("time","","태어난 시간 모름","done");},true);
+   btn("태어난 시간 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true}),true);
    break;
  }
  case "province":{
