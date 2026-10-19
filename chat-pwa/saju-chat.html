@@ -516,6 +516,32 @@ html.dark .guided-back{color:#ddbb91}
 @media(prefers-reduced-motion:reduce){.guided-intake,.guided-prompt-text{animation:none}.guided-progress-fill{transition:none}}
 @keyframes guided-up{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 
+/* Soft translucent buttons for dark-mode birth interview. */
+html.dark .guided-intake .guided-choice:not(.secondary){
+  background:rgba(150,105,67,.72);
+  border-color:rgba(196,154,112,.72);
+  color:#fff7ef;
+  box-shadow:inset 0 1px 0 rgba(255,243,228,.08);
+}
+html.dark .guided-intake .guided-choice.secondary{
+  background:rgba(255,248,239,.065);
+  border-color:rgba(207,173,141,.6);
+  color:#f4dfc8;
+}
+html.dark .guided-intake .guided-manual{
+  background:rgba(255,248,239,.06);
+  border-color:rgba(214,186,160,.56);
+  color:#f1dcc5;
+}
+html.dark .guided-intake .guided-choice:not(:disabled):active{
+  background:rgba(176,126,82,.88);
+}
+html.dark .guided-intake .guided-choice:focus-visible,
+html.dark .guided-intake .guided-manual:focus-visible{
+  outline:2px solid rgba(217,176,125,.95);
+  outline-offset:2px;
+}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-birthplaces.js"></script>
