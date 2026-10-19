@@ -362,3 +362,29 @@ test("Messenger intake preserves match, answer backtracking and result scroll wi
   assert.match(intake,/if\(!guidedManualMode\.has\(key\)&&!birthEditing\.has\(key\)\)return makeGuidedIntake\(\)/);
   assert.match(guidedHtml,/\.guided-quickbar\[hidden\]\{display:none!important\}/);
 });
+
+
+test("Opening greeting finishes before the next saju question appears",()=>{
+  const renderer=guidedHtml.slice(guidedHtml.indexOf("function renderMessages("),guidedHtml.indexOf("function renderAll()"));
+  assert.match(renderer,/const sequenceWelcome=animateWelcome&&/);
+  assert.match(renderer,/const phraseCount=conversation\[0\]\.text\.split\("\\n"\)\.length/);
+  assert.match(renderer,/const greetingMs=Math\.min\(\(phraseCount-1\)\*850,1700\)\+1100\+140/);
+  assert.match(renderer,/feed\.classList\.add\("intro-await-question"\)/);
+  assert.match(renderer,/quickbar\.classList\.add\("intro-await-question"\)/);
+  assert.match(renderer,/quickbar\.inert=true/);
+  assert.match(renderer,/quickbar\.setAttribute\("aria-hidden","true"\)/);
+  assert.match(renderer,/setTimeout\(\(\)=>\{/);
+  assert.match(renderer,/if\(currentRun!==introTypingRun\|\|!feed\.isConnected\|\|location\.hash!=="#chat"\)return/);
+  assert.match(renderer,/feed\.classList\.add\("intro-question-enter"\)/);
+  assert.match(renderer,/quickbar\.classList\.add\("intro-choices-enter"\)/);
+});
+test("New saju question and controls reveal gently; re-render or reduced motion skips delay",()=>{
+  const renderer=guidedHtml.slice(guidedHtml.indexOf("function renderMessages("),guidedHtml.indexOf("function renderAll()"));
+  assert.match(renderer,/quickbar\.inert=false/);
+  assert.match(renderer,/feed\.classList\.remove\("intro-await-question","intro-question-enter"\)/);
+  assert.match(renderer,/prefers-reduced-motion: reduce/);
+  assert.match(guidedHtml,/\.messages\.intro-await-question \.guided-current\{visibility:hidden\}/);
+  assert.match(guidedHtml,/\.guided-quickbar\.intro-await-question\{visibility:hidden;pointer-events:none\}/);
+  assert.match(guidedHtml,/@keyframes guided-following-fade/);
+  assert.match(guidedHtml,/\.guided-quickbar\.intro-choices-enter\{animation:guided-following-fade/);
+});
