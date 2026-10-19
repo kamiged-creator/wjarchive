@@ -906,7 +906,7 @@ function renderAdvisors(){
       b.style.position="relative";
       const frame=makeEl("span","advisor-gold-frame");
       frame.setAttribute("aria-hidden","true");
-      frame.style.cssText="position:absolute;inset:0;z-index:3;pointer-events:none;box-sizing:border-box;border:1.5px solid #d9b47f;border-radius:19px;box-shadow:none;";
+      frame.style.cssText="position:absolute;inset:0;z-index:3;pointer-events:none;box-sizing:border-box;border:1.5px solid #c69a62;border-radius:19px;box-shadow:inset 0 0 0 .6px rgba(27,19,13,.65);";
       b.append(frame);
     }
     b.addEventListener("click",()=>selectAdvisorCard(a,b));
