@@ -481,7 +481,7 @@ test("Advisor selection main uses user chosen four portraits and preserves exist
  for(const id of ["ara","doyun","seoyun","jian"]){
    assert.match(guidedHtml,new RegExp("advisor-card-"+id+"\\{background-position:"));
  }
- assert.match(guidedHtml,/window\.SAJU_CARD_SPRITE\)image\.style\.backgroundImage/);
+ assert.match(guidedHtml,/if\(window\.SAJU_CARD_SPRITE\)\{[\s\S]*?image\.style\.backgroundImage=/);
  assert.match(guidedHtml,/<div id="chatView" class="chat-view" hidden>/);
  assert.match(guidedHtml,/<div class="messages" id="messages"/);
  assert.match(guidedHtml,/<form class="composer" id="composer">/);
