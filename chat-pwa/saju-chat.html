@@ -662,6 +662,34 @@ body:not(.chat-active) .selection-view footer{color:#967f6a;padding:15px 5px 22p
 @media(max-width:365px){body:not(.chat-active) .selection-view{padding:13px 10px 8px}body:not(.chat-active) .selection-view .avatars{gap:10px}body:not(.chat-active) .selection-view .avatar strong.advisor-card-name{font-size:13px}}
 @media(prefers-reduced-motion:reduce){body:not(.chat-active) .selection-view .avatar,body:not(.chat-active) .selection-view .advisor-card-art{transition:none!important}}
 
+/* Temporary portrait test: use the selected four portraits and crisp black card footers. */
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured){
+  background:#050505;
+  border:1px solid #bd995e;
+  border-radius:20px;
+  box-shadow:0 4px 18px #0008;
+}
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) .avatar-portrait-wrap{
+  aspect-ratio:300/318;
+  background:#0b0806;
+}
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) .advisor-card-art{
+  background-size:200% 200%;
+  background-repeat:no-repeat;
+}
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) strong.advisor-card-name{
+  color:#fffaf3;
+  margin-top:12px;
+}
+body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advisor-card-desc{
+  color:#d4ceca;
+  margin-bottom:13px;
+}
+@media(max-width:370px){
+  body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) strong.advisor-card-name{font-size:15px}
+  body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advisor-card-desc{font-size:11px}
+}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
