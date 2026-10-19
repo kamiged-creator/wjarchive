@@ -311,7 +311,7 @@ test("Soft welcome regression: fades in complete phrases on initial chat entry o
   const renderer=guidedHtml.slice(guidedHtml.indexOf("function renderSoftWelcome("),guidedHtml.indexOf("function renderAll()"));
   const view=guidedHtml.slice(guidedHtml.indexOf("function syncChatView()"),guidedHtml.indexOf("function openHarinWindow()"));
   assert.match(renderer,/text\.split\("\\n"\)/);
-  assert.match(renderer,/line\.style\.animationDelay=Math\.min\(index\*240,480\)/);
+  assert.match(renderer,/line\.style\.animationDelay=Math\.min\(index\*850,1700\)/);
   assert.match(renderer,/bubble\.classList\.add\("intro-soft-bubble"\)/);
   assert.match(renderer,/scrollToEnd==="intro"&&conversation\.length===1/);
   assert.match(renderer,/renderSoftWelcome\(bubble,item\.text\)/);
@@ -323,7 +323,7 @@ test("Soft welcome regression: fades in complete phrases on initial chat entry o
 });
 
 test("Soft welcome regression: full text remains accessible and reduced-motion is respected",()=>{
-  assert.match(guidedHtml,/\.intro-soft-line\{display:block;white-space:pre-wrap;animation:welcome-soft-fade 700ms/);
+  assert.match(guidedHtml,/\.intro-soft-line\{display:block;white-space:pre-wrap;animation:welcome-soft-fade 1100ms/);
   assert.match(guidedHtml,/@keyframes welcome-soft-fade/);
   assert.match(guidedHtml,/\.intro-soft-line\{animation:none!important\}/);
   assert.match(guidedHtml,/prefers-reduced-motion:reduce/);
