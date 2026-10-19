@@ -428,3 +428,40 @@ test("Saju result chat keeps the start-of-result scroll behavior and reduced-mot
  assert.match(guidedHtml,/const reduce=window\.matchMedia\?\.\("\(prefers-reduced-motion: reduce\)"\)\?\.matches/);
  assert.match(guidedHtml,/if\(!animate\|\|reduce\)\{revealAll\(\);return;\}/);
 });
+
+
+test("Ara emotional support uses a free chat input without the birth-date wizard",()=>{
+ const intake=guidedHtml.slice(guidedHtml.indexOf("function makeIntake()"),guidedHtml.indexOf("function renderSoftWelcome("));
+ const render=guidedHtml.slice(guidedHtml.indexOf("function renderMessages("),guidedHtml.indexOf("function renderAll("));
+ const respond=guidedHtml.slice(guidedHtml.indexOf("async function response("),guidedHtml.indexOf("async function send()"));
+ assert.match(guidedHtml,/id:"ara",name:"아라",specialty:"마음·고민 상담",topics:\[\["talk"/);
+ assert.match(guidedHtml,/selected\.id==="ara"\?"편안하게 마음을 들려줘/);
+ assert.match(intake,/if\(selected\.id==="ara"\)return document\.createDocumentFragment\(\)/);
+ assert.match(render,/const ready=selected\.id==="ara"\|\|Boolean\(birthProfiles\[birthKey\(\)\]\)/);
+ assert.match(respond,/if\(selected\.id==="ara"\)\{/);
+ assert.match(respond,/const payload=\{consent:true,question,advisor:"ara",topic:"talk",\s*chart:null,partner:null,flow:null/);
+ assert.match(respond,/if\(aiReady&&aiConsent\.checked\)/);
+ assert.match(respond,/지금은 GPT API가 활성화되지 않아/);
+});
+test("Ara refers technical topics to the correct adviser but listens to emotional worries",()=>{
+ const start=guidedHtml.indexOf("function araSpecialistReferral(");
+ const end=guidedHtml.indexOf("async function response(",start);
+ const referral=new Function(guidedHtml.slice(start,end)+";return araSpecialistReferral;")();
+ assert.match(referral("내 사주팔자 오행을 분석해줘"),/도윤/);
+ assert.match(referral("궁합 알려줘"),/서윤/);
+ assert.match(referral("사업운은 어때"),/지안/);
+ assert.equal(referral("연애 때문에 속상하고 마음이 아파"),null);
+ assert.equal(referral("돈 때문에 너무 힘들어"),null);
+ assert.equal(referral("요즘 마음이 불안해"),null);
+});
+test("Preview-only Ara API does not require birth data while specialist readings still do",()=>{
+ const apiSource=guidedFs.readFileSync(guidedPath.join(__dirname,"../api/saju-ai.js"),"utf8");
+ assert.match(apiSource,/const TOPICS = new Set\(\["talk"/);
+ assert.match(apiSource,/advisor==="ara"\?\(topic!=="talk"\|\|data\.chart!=null/);
+ assert.match(apiSource,/\(!chart\|\|topic==="talk"\)/);
+ assert.match(apiSource,/마음·인생 고민 대화에 집중하는 상담사/);
+ assert.match(apiSource,/감정과 상황을 듣고 공감/);
+ assert.match(apiSource,/chart \? "사주팔자 원국/);
+ assert.match(apiSource,/process\.env\.VERCEL_ENV==="preview"/);
+ assert.match(apiSource,/process\.env\.SAJU_AI_ENABLED==="1"/);
+});
