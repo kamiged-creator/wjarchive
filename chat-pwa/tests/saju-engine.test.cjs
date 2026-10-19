@@ -504,3 +504,13 @@ test("Advisor cards enter existing chat after short animation; voice opens immed
  assert.match(cardCode,/재물운·사업운/);
  assert.match(guidedHtml,/@media\(prefers-reduced-motion:reduce\)\{body:not\(\.chat-active\) \.selection-view \.avatar/);
 });
+
+
+test("Temporary selected four-portrait image is linked with embedded fallback",()=>{
+ const sprite=guidedFs.readFileSync(guidedPath.join(__dirname,"../saju-advisor-cards.js"),"utf8");
+ assert.match(sprite,/window\.SAJU_CARD_FALLBACK = window\.SAJU_CARD_SPRITE/);
+ assert.match(sprite,/window\.SAJU_CARD_SPRITE = "https:\/\/aicreatortrends\.wordpress\.com\/wp-content\/uploads\/2026\/10\/bokjakso-saju-advisors-temporary\.webp"/);
+ assert.match(guidedHtml,/if\(window\.SAJU_CARD_FALLBACK\)image\.style\.backgroundImage\+=",url\("\+window\.SAJU_CARD_FALLBACK\+"\)"/);
+ assert.match(guidedHtml,/aspect-ratio:300\/318/);
+ assert.match(guidedHtml,/body:not\(\.chat-active\) \.selection-view \.avatar:not\(\.avatar-featured\)/);
+});
