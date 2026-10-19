@@ -440,6 +440,53 @@ html.dark .ai-setup{background:#29211c;border-bottom-color:#5b493d;color:#f1d6b7
 html.dark .ai-pin-row input{background:#241c18;color:#f2e1d0;border-color:#785d47}
 html.dark .ai-privacy{color:#c4a993}
 #chatView.harin-chat .ai-setup{display:none}
+
+/* Chat-first, API-free birth intake for older mobile users. */
+.guided-intake{align-self:center;width:min(calc(100% - 32px),460px);border:1px solid #dfccb7;border-radius:19px;background:#fffdf9;padding:16px;box-shadow:0 6px 20px #44312012;animation:guided-up .22s ease both}
+.guided-header,.guided-progress{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.guided-label{font-size:15px;color:#765239;font-weight:850}
+.guided-manual{border:1px solid #dcc9b6;border-radius:9px;background:#fff;color:#70523c;padding:8px 10px;font:inherit;font-size:13px;min-height:40px;white-space:nowrap}
+.guided-progress{color:#80634d;font-size:13px;margin:15px 2px 5px}
+.guided-progress-bar{height:5px;background:#f0e7dc;border-radius:10px;overflow:hidden;margin-bottom:15px}
+.guided-progress-fill{height:100%;background:#b38b5e;transition:width .2s ease}
+.guided-recent{display:flex;flex-direction:column;gap:5px;margin:0 0 14px}
+.guided-recent-q{align-self:flex-start;max-width:88%;font-size:13px;color:#947763}
+.guided-recent-a{align-self:flex-end;max-width:92%;padding:8px 11px;background:#efe0cd;color:#624431;border-radius:13px 13px 4px 13px;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.guided-prompt{display:flex;align-items:flex-start;gap:9px}
+.guided-avatar{flex:0 0 35px;width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#d8c4ad;color:#513824;font-weight:850}
+.guided-avatar img{width:100%;height:100%;object-fit:cover}
+.guided-prompt-text{flex:1;background:#f6efe6;border-radius:5px 14px 14px 14px;padding:12px;min-width:0;animation:guided-up .2s ease both}
+.guided-question{font-size:17px;font-weight:800;color:#493328;line-height:1.6;margin:0;word-break:keep-all}
+.guided-hint{font-size:14px;line-height:1.55;color:#795b45;margin:6px 0 0}
+.guided-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 0}
+.guided-choice{grid-column:span 1;border:1px solid #b79470;border-radius:11px;background:#795638;color:#fff;min-height:48px;padding:10px 5px;font:inherit;font-size:15px;font-weight:750;line-height:1.35;word-break:keep-all}
+.guided-choice.secondary{background:#faf5ed;color:#694c36;border-color:#d9c6af}
+.guided-choice:focus-visible,.guided-manual:focus-visible,.guided-back:focus-visible{outline:2px solid #a67c53;outline-offset:3px}
+.guided-choice:disabled{opacity:.6}
+.guided-input-group{display:flex;grid-column:span 3;flex-direction:column;gap:5px;font-size:14px;font-weight:700;color:#694d38}
+.guided-input{width:100%;min-height:48px;border:1px solid #cbb49d;border-radius:10px;background:#fff;color:#38291f;font:inherit;font-size:17px;padding:9px 12px}
+.guided-select-field{grid-column:span 3}
+.guided-error{grid-column:span 3;color:#a43730;font-size:14px;line-height:1.5;margin:9px 0 0;min-height:0}
+.guided-review{grid-column:span 3;background:#f6f0e7;padding:11px 12px;border-radius:10px;font-size:15px;line-height:1.6;color:#5a4031;margin:0}
+.guided-back{display:block;min-height:44px;padding:9px 6px;border:0;background:transparent;color:#7c5b42;font:inherit;font-size:15px;font-weight:800;margin-top:6px}
+.guided-footer{font-size:12px;line-height:1.55;color:#90725b;margin:11px 0 0}
+.guided-intake .guided-controls:has(.guided-input-group){grid-template-columns:repeat(2,minmax(0,1fr))}
+.guided-intake .guided-controls:has(.guided-input-group)>.guided-choice{grid-column:span 2}
+.guided-intake .guided-controls:has(.guided-select-field)>.guided-choice{grid-column:span 2}
+.guided-intake .guided-controls:has(.guided-review)>.guided-choice{grid-column:span 3}
+.intake-field[hidden]{display:none!important}
+html.dark .guided-intake{background:#28211d;border-color:#73543c;color:#f2dcc6}
+html.dark .guided-prompt-text,html.dark .guided-review{background:#382b23;color:#f6e7d6}
+html.dark .guided-question,html.dark .guided-review{color:#f6e4d1}
+html.dark .guided-hint,html.dark .guided-label,html.dark .guided-progress,html.dark .guided-footer,html.dark .guided-recent-q{color:#d2ac89}
+html.dark .guided-recent-a{background:#5e4534;color:#f8ead9}
+html.dark .guided-input{background:#312721;color:#f9ead9;border-color:#8c6a4e}
+html.dark .guided-manual,html.dark .guided-choice.secondary{background:#362920;color:#f4ddc4;border-color:#8e6d4c}
+html.dark .guided-back{color:#ddbb91}
+@media(max-width:370px){.guided-intake{padding:12px;width:calc(100% - 22px)}.guided-choice{font-size:14px;padding:8px 4px}.guided-question{font-size:16px}.guided-manual{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.guided-intake,.guided-prompt-text{animation:none}.guided-progress-fill{transition:none}}
+@keyframes guided-up{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-birthplaces.js"></script>
@@ -498,13 +545,14 @@ const advisors=[
 const $=id=>document.getElementById(id);
 let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
 const birthProfiles=Object.create(null),birthEditing=new Set();
+const guidedDrafts=Object.create(null),guidedManualMode=new Set();
 const birthKey=()=>selected.id+"."+topic[0];
 const avatarSources=window.SAJU_AVATARS||{};
 const araStudioPortrait="https://ik.imagekit.io/wonjuart/ara.png?updatedAt=1789481607484";
 const avatarUrl=id=>id==="ara"?araStudioPortrait:typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
 function msg(role,text){return{role,text:String(text).slice(0,1000)}}
-function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"궁합 상담을 위해 두 분의 생년월일을 입력해 주세요.":"먼저 아래에 생년월일을 입력해 주세요.")+"\n만세력 계산 결과를 보여줄게. 전통적인 해석은 참고용이야.");}
+function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"두 분의 생일을 차례대로 여쭤볼게요.":"제가 하나씩 여쭤볼게요. 편하게 답해 주세요.")+"\n만세력 계산 결과는 참고용이에요.");}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");return Array.isArray(x)?x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30):[greeting()];}catch(_){return[greeting()]}}
 let conversation=read();
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
@@ -621,6 +669,230 @@ function upgradeSajuSelect(select){
     }else popup.firstElementChild?.focus({preventScroll:true});
   });
 }
+
+/* The guided birth interview is local and rule-based. It never calls an AI API. */
+function newGuidedPerson(){return {calendar:"",year:"",month:"",day:"",leap:false,gender:"unspecified",unknown:false,time:"",province:"none",birthplace:"none"};}
+function guidedProfile(data){
+ return {date:data.year+"-"+data.month+"-"+data.day,
+   calendar:data.calendar,leap:data.calendar==="lunar"&&data.leap,
+   gender:data.gender,unknown:data.unknown,time:data.unknown?"":data.time,
+   birthplace:data.unknown?"none":data.birthplace,longitude:null};
+}
+function guidedDateLabel(data){
+ return (data.calendar==="lunar"?"음력":"양력")+(data.leap?" 윤달":"")+" "+data.year+"년 "+Number(data.month)+"월 "+Number(data.day)+"일";
+}
+function makeGuidedIntake(){
+ const key=birthKey(),isMatch=topic[0]==="match",count=isMatch?2:1;
+ let wizard=guidedDrafts[key];
+ if(!wizard){wizard={values:Array.from({length:count},newGuidedPerson),personIndex:0,step:"calendar",replies:[],back:[],error:"",busy:false};guidedDrafts[key]=wizard;}
+ const current=wizard.values[wizard.personIndex];
+ const titlePerson=isMatch?(wizard.personIndex===0?"본인":"상대방"):"본인";
+ const card=makeEl("div","guided-intake");
+ const head=makeEl("div","guided-header");
+ const badge=makeEl("span","guided-label","🌸 "+selected.name+" 상담사");
+ const change=makeEl("button","guided-manual","한눈에 입력하기");
+ change.type="button";
+ change.addEventListener("click",()=>{guidedManualMode.add(key);birthEditing.add(key);renderMessages(true);});
+ head.append(badge,change);card.append(head);
+ const progressList=["calendar","year","month","day","leap","gender","time","province","city","review"];
+ const idx=Math.max(0,progressList.indexOf(wizard.step));
+ const progress=makeEl("div","guided-progress");
+ progress.append(makeEl("span","",isMatch?(wizard.personIndex===0?"① 본인 정보":"② 상대방 정보"):"출생 정보"));
+ progress.append(makeEl("span","",wizard.step==="review"?"입력 확인":"차근차근 진행 중"));
+ const bar=makeEl("div","guided-progress-bar");
+ const filled=makeEl("div","guided-progress-fill");
+ const completion=wizard.step==="review"?100:Math.max(8,Math.min(95,((wizard.personIndex*9+idx+1)/(count*9))*100));
+ filled.style.width=completion+"%";bar.append(filled);
+ card.append(progress,bar);
+ const recent=wizard.replies.slice(-3);
+ if(recent.length){
+   const transcript=makeEl("div","guided-recent");
+   for(const item of recent){
+     const q=makeEl("div","guided-recent-q",item.question);
+     const a=makeEl("div","guided-recent-a",item.answer);
+     transcript.append(q,a);
+   }
+   card.append(transcript);
+ }
+ const prompt=makeEl("div","guided-prompt");
+ const icon=portrait(selected.id,selected.name,"guided-avatar");
+ const words=makeEl("div","guided-prompt-text");
+ const controls=makeEl("div","guided-controls");
+ const notice=makeEl("div","guided-error",wizard.error||"");
+ notice.setAttribute("role","alert");
+ function ask(question,helper){
+   words.append(makeEl("p","guided-question",question));
+   if(helper)words.append(makeEl("p","guided-hint",helper));
+ }
+ prompt.append(icon,words);card.append(prompt,controls);
+ const nowYear=Number(new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric"}).format(new Date()));
+ function capture(){
+   wizard.back.push({values:wizard.values.map(d=>({...d})),personIndex:wizard.personIndex,
+     step:wizard.step,replies:wizard.replies.slice()});
+   wizard.error="";
+ }
+ function submitAnswer(field,value,answer,next){
+   capture();
+   const oldStep=wizard.step;
+   current[field]=value;
+   wizard.replies.push({question:({calendar:"양력인가요, 음력인가요?",year:"태어난 연도는?",month:"태어난 월은?",day:"태어난 날짜는?",leap:"음력 윤달인가요?",gender:"성별은?",time:"태어난 시간은?",province:"출생 지역은?",city:"태어난 시·군은?"})[oldStep],answer});
+   if(next==="done"){
+     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.replies.push({question:"첫 번째 분의 정보",answer:"확인했어요. 이제 상대방 정보를 여쭤볼게요."});}
+     else wizard.step="review";
+   }else wizard.step=next;
+   renderMessages(true);
+ }
+ function btn(label,run,secondary=false){
+   const b=makeEl("button","guided-choice"+(secondary?" secondary":""),label);
+   b.type="button";b.addEventListener("click",run);controls.append(b);return b;
+ }
+ function textInput(label,hint,value,max,mode){
+   const f=makeEl("label","guided-input-group");
+   f.append(makeEl("span","",label));
+   const input=makeEl("input","guided-input");
+   input.type="text";input.value=value||"";input.placeholder=hint;
+   input.maxLength=max;input.inputMode=mode||"numeric";input.autocomplete="off";
+   f.append(input);controls.append(f);
+   return input;
+ }
+ function selectInput(label,options){
+   const f=makeEl("label","intake-field guided-select-field");
+   f.append(makeEl("span","",label));
+   const select=makeEl("select");
+   for(const [value,name] of options){
+     const opt=makeEl("option","",name);opt.value=value;select.append(opt);
+   }
+   f.append(select);controls.append(f);
+   upgradeSajuSelect(select);
+   return select;
+ }
+ function warn(text){wizard.error=text;notice.textContent=text;}
+ switch(wizard.step){
+ case "calendar":
+   ask(titlePerson+"의 생일은 양력인가요, 음력인가요?","선택하시면 다음 질문으로 넘어가요.");
+   btn("☀️ 양력",()=>submitAnswer("calendar","solar","양력","year"));
+   btn("🌙 음력",()=>submitAnswer("calendar","lunar","음력","year"));
+   btn("잘 모르겠어요",()=>warn("정확한 만세력 계산을 위해 양력인지 음력인지 먼저 확인해 주세요."),true);
+   break;
+ case "year":{
+   ask("몇 년도에 태어나셨나요?","연도 4자리를 입력해 주세요. 예: 1973");
+   const year=textInput("태어난 연도","예: 1973",current.year,4);
+   const next=()=>{
+     const n=Number(year.value.trim());
+     if(!/^[0-9]{4}$/.test(year.value.trim())||n<1900||n>nowYear)return warn("출생 연도는 1900년부터 올해까지 4자리로 입력해 주세요.");
+     submitAnswer("year",String(n),n+"년","month");
+   };
+   btn("다음 →",next);
+   year.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();next();}});
+   break;
+ }
+ case "month":
+   ask("태어난 달은 몇 월인가요?");
+   for(let i=1;i<=12;i++)btn(i+"월",()=>submitAnswer("month",String(i).padStart(2,"0"),i+"월","day"));
+   break;
+ case "day":{
+   ask("며칠에 태어나셨나요?");
+   const y=Number(current.year),m=Number(current.month);
+   const days=current.calendar==="lunar"?30:new Date(y,m,0).getDate();
+   for(let i=1;i<=days;i++)btn(i+"일",()=>submitAnswer("day",String(i).padStart(2,"0"),i+"일",current.calendar==="lunar"?"leap":"gender"));
+   break;
+ }
+ case "leap":
+   ask("음력 생일이 윤달인가요?","음력 윤달이 아니라면 '아니요'를 선택해 주세요.");
+   btn("아니요 · 평달",()=>submitAnswer("leap",false,"평달","gender"));
+   btn("네 · 윤달",()=>submitAnswer("leap",true,"윤달","gender"));
+   break;
+ case "gender":
+   ask("성별도 알려주시겠어요?","선택하지 않아도 기본 사주팔자는 계산할 수 있어요.");
+   btn("남성",()=>submitAnswer("gender","남성","남성","time"));
+   btn("여성",()=>submitAnswer("gender","여성","여성","time"));
+   btn("선택 안 함",()=>submitAnswer("gender","unspecified","선택하지 않음","time"),true);
+   break;
+ case "time":{
+   ask("태어난 시간을 기억하시나요?","기억나면 오전·오후와 시·분을 입력해 주세요. 모르면 건너뛸 수 있어요.");
+   const part=selectInput("오전 / 오후",[["am","오전"],["pm","오후"]]);
+   const hour=textInput("시 (1~12)","예: 6","",2);
+   const minute=textInput("분 (0~59)","예: 20","",2);
+   const go=()=>{
+     const h=hour.value.trim(),m=minute.value.trim();
+     if(!/^[0-9]{1,2}$/.test(h)||Number(h)<1||Number(h)>12||!/^[0-9]{1,2}$/.test(m)||Number(m)>59)return warn("시간은 1~12시, 분은 0~59분으로 입력해 주세요.");
+     const h24=Number(h)%12+(part.value==="pm"?12:0);
+     current.unknown=false;
+     submitAnswer("time",String(h24).padStart(2,"0")+":"+m.padStart(2,"0"),(part.value==="am"?"오전 ":"오후 ")+h+"시 "+m+"분","province");
+   };
+   btn("시간 확인 →",go);
+   btn("태어난 시간 모름",()=>{current.unknown=true;submitAnswer("time","","태어난 시간 모름","done");},true);
+   break;
+ }
+ case "province":{
+   ask("태어난 지역도 알려주시겠어요?","선택 사항이에요. 지역을 선택하면 시간 보정에 참고해요.");
+   const areas=window.BokjaksoBirthplaces?.provinces||[];
+   const p=selectInput("태어난 시·도",[["","시·도 선택"],...areas.map(a=>[a.id,a.label])]);
+   btn("이 지역 선택 →",()=>{
+     if(!p.value)return warn("시·도를 골라 주세요. 모르시면 아래 건너뛰기를 눌러 주세요.");
+     current.birthplace="none";
+     submitAnswer("province",p.value,areas.find(x=>x.id===p.value)?.label||"선택한 지역","city");
+   });
+   btn("지역을 잘 몰라요 · 건너뛰기",()=>{current.birthplace="none";submitAnswer("province","none","보정하지 않음","done");},true);
+   break;
+ }
+ case "city":{
+   const areas=window.BokjaksoBirthplaces?.provinces||[];
+   const area=areas.find(x=>x.id===current.province);
+   ask("어느 시·군에서 태어나셨나요?","군·시 이름을 고르면 해당 지역의 중심 경도로 계산해요.");
+   const loc=selectInput("태어난 시·군",[["","시·군 선택"],...(area?.places||[]).map(a=>[area.id+"/"+a[0],a[0]])]);
+   btn("이 시·군으로 계속 →",()=>{
+     if(!loc.value)return warn("태어난 시·군을 선택해 주세요.");
+     const name=(area?.places||[]).find(x=>area.id+"/"+x[0]===loc.value)?.[0]||"선택한 지역";
+     submitAnswer("birthplace",loc.value,(area?.short||"")+" "+name,"done");
+   });
+   btn("잘 모르겠어요 · 보정하지 않기",()=>{current.birthplace="none";submitAnswer("birthplace","none","지역 보정 안 함","done");},true);
+   break;
+ }
+ case "review":{
+   ask("정보를 확인했어요. 이대로 만세력을 계산해 볼까요?","내용을 바꾸려면 '이전 질문'이나 '한눈에 입력하기'를 눌러 주세요.");
+   for(let i=0;i<count;i++){
+     const value=wizard.values[i],block=makeEl("p","guided-review",
+       (isMatch?(i===0?"본인":"상대방"):"본인")+" · "+guidedDateLabel(value)+" · "+
+       (value.unknown?"태어난 시간 모름":value.time)+
+       (value.gender==="unspecified"?"":" · "+value.gender)+
+       (value.birthplace!=="none"?" · "+(window.BokjaksoBirthplaces?.locations[value.birthplace]?.label||value.birthplace):""));
+     controls.append(block);
+   }
+   const confirm=btn("✓ 이대로 사주 보기",async()=>{
+     if(wizard.busy)return;
+     wizard.error="";wizard.busy=true;confirm.disabled=true;confirm.textContent="만세력 확인 중…";
+     try{
+       const profiles=wizard.values.map(guidedProfile);
+       const engine=window.BokjaksoSaju;
+       if(!engine?.validateProfiles)throw new Error("만세력 모듈을 불러오지 못했어. 다시 시도해 주세요.");
+       const today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+       await engine.validateProfiles(profiles,undefined,today);
+       if(guidedDrafts[key]!==wizard||birthKey()!==key||!card.isConnected)return;
+       birthProfiles[key]=profiles;
+       birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
+       renderMessages(true);
+     }catch(err){if(card.isConnected)warn(err?.message||"입력한 날짜를 확인해 주세요.");}
+     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent="✓ 이대로 사주 보기";}}
+   });
+   break;
+ }
+ }
+ if(wizard.back.length){
+   const back=makeEl("button","guided-back","← 이전 질문");
+   back.type="button";
+   back.addEventListener("click",()=>{
+     const prev=wizard.back.pop();
+     if(!prev)return;
+     wizard.values=prev.values;wizard.personIndex=prev.personIndex;wizard.step=prev.step;
+     wizard.replies=prev.replies;wizard.error="";renderMessages(true);
+   });
+   card.append(back);
+ }
+ card.append(notice,makeEl("p","guided-footer","입력 정보는 기기 안에서만 계산하며, GPT API를 사용하지 않아요."));
+ return card;
+}
+
 function makeIntake(){
  const key=birthKey(),existing=birthProfiles[key]||null;
  const card=makeEl("div","intake-card");
@@ -683,6 +955,7 @@ function makeIntake(){
    }
    return card;
  }
+ if(!guidedManualMode.has(key)&&!birthEditing.has(key))return makeGuidedIntake();
  card.append(makeEl("p","intake-intro","생년월일과 태어난 시간을 입력해 주세요."));
  const form=makeEl("form","intake-form");const sets=[];
  const count=topic[0]==="match"?2:1;
@@ -894,7 +1167,7 @@ function makeIntake(){
      if(!card.isConnected)return;
      if(submittedRevision!==revision)throw new Error("확인 중에 입력값이 바뀌었어. 다시 확인해 줘.");
      birthProfiles[key]=profiles;
-     birthEditing.delete(key);
+     birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
      renderMessages(false);
    }catch(error){
      if(card.isConnected)notice.textContent=error?.message||"만세력 입력 확인에 실패했어. 다시 시도해 줘.";
@@ -909,7 +1182,7 @@ function makeIntake(){
  return card;
 }
 
-function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
+function renderMessages(scrollToEnd=true){closeSajuPopup?.();const feed=$("messages");feed.replaceChildren();if(selected.id==="harin"){syncSimliControls();return;}for(const [index,item] of conversation.entries()){const row=document.createElement("div");row.className="message "+(item.role==="user"?"user":"bot");if(item.role==="bot"){const avatar=portrait(selected.id,selected.name,"msg-avatar");if(avatar.textContent)avatar.classList.add("msg-fallback");row.append(avatar)}const bubble=document.createElement("div");bubble.className="bubble";bubble.textContent=item.text;row.append(bubble);feed.append(row);if(index===0)feed.append(makeIntake())}syncSimliControls();const ready=Boolean(birthProfiles[birthKey()]);$("question").disabled=!ready;$("send").disabled=!ready;$("question").placeholder=ready?"메시지 입력":"먼저 상담사 질문에 답해 주세요";requestAnimationFrame(()=>{feed.scrollTop=scrollToEnd?feed.scrollHeight:0})}
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
 function syncChatView(){const open=location.hash==="#chat";if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(open){renderMessages(false)}else{$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
@@ -1085,7 +1358,7 @@ form.addEventListener("submit",e=>{e.preventDefault();send()});
 sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
 sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimary)return;const r=sendBtn.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){form.requestSubmit(sendBtn);input.focus({preventScroll:true})}});
 input.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229))e.preventDefault()});
-$("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;delete birthProfiles[birthKey()];birthEditing.delete(birthKey());conversation=[greeting()];save();renderMessages(false)});
+$("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;delete birthProfiles[birthKey()];birthEditing.delete(birthKey());guidedManualMode.delete(birthKey());delete guidedDrafts[birthKey()];conversation=[greeting()];save();renderMessages(false)});
 // The selected appearance is independent of private birth and chat data.
 const sajuThemeKey="bokjakso.saju-theme.v1";
 function setSajuTheme(dark){
