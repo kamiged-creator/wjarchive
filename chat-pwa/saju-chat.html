@@ -554,6 +554,39 @@ html.dark .guided-intake .guided-manual:focus-visible{
   .intro-soft-line{animation:none!important}
 }
 
+
+/* Messenger-style birth interview: no framed form card.
+   Quick answers live directly above the composer, transcript stays in the chat feed. */
+.guided-chat-flow{display:flex;flex-direction:column;gap:14px;width:100%;min-width:0}
+.guided-transcript{display:flex;flex-direction:column;gap:14px}
+.guided-chat-flow .message{max-width:100%;min-width:0}
+.guided-chat-flow .message .bubble{max-width:min(85%,500px)}
+.guided-current .guided-prompt-text{min-width:0;padding:12px 14px}
+.guided-current .guided-question{font-size:17px;font-weight:750;line-height:1.6;color:#493328;margin:0}
+.guided-current .guided-hint{font-size:14px;line-height:1.45;color:#795b45;margin:6px 0 0}
+.guided-quickbar{flex:none;padding:10px max(12px,calc((100% - 720px)/2)) 8px;background:#fffdfa;border-top:1px solid #e7d8c6;max-height:min(43dvh,330px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.guided-quickbar[hidden]{display:none!important}
+.guided-quickbar .guided-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.guided-quickbar .guided-status{font-size:13px;font-weight:800;color:#785a41}
+.guided-quickbar .guided-manual{min-height:34px;font-size:13px;padding:5px 9px}
+.guided-quickbar .guided-controls{margin:0;gap:7px}
+.guided-quickbar .guided-choice{background:rgba(150,105,67,.86);border:1px solid #b79470;color:#fff7ef}
+.guided-quickbar .guided-choice.secondary{background:rgba(255,248,239,.10);border-color:#c4aa91;color:#75553d}
+.guided-quickbar .guided-choice:active{background:rgba(176,126,82,.9)}
+.guided-quickbar .guided-input,.guided-quickbar .saju-select-trigger{min-height:43px}
+.guided-quickbar .guided-back{margin:6px 0 0;padding:4px 6px;min-height:32px;font-size:13px}
+.guided-quickbar .guided-footer{font-size:11px;line-height:1.45;margin:6px 0 0}
+.guided-quickbar .guided-error:not(:empty){margin-top:6px}
+html.dark .guided-quickbar{background:#231e1b;border-top-color:#58473b;color:#f2e4d5}
+html.dark .guided-quickbar .guided-status{color:#d8b58f}
+html.dark .guided-quickbar .guided-manual{background:rgba(255,248,239,.06);color:#e6c5a5;border-color:#836b52}
+html.dark .guided-quickbar .guided-choice:not(.secondary){background:rgba(150,105,67,.72);border-color:rgba(196,154,112,.75);color:#fff6ed}
+html.dark .guided-quickbar .guided-choice.secondary{background:rgba(255,248,239,.06);border-color:rgba(207,173,141,.6);color:#f4dfc8}
+html.dark .guided-current .guided-question{color:#f6e4d1}
+html.dark .guided-current .guided-hint{color:#d2ac89}
+@media(max-width:355px){.guided-quickbar{padding:8px 9px}.guided-quickbar .guided-choice{font-size:14px;min-height:44px}}
+@media(prefers-reduced-motion:reduce){.guided-chat-flow .message{animation:none}}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-birthplaces.js"></script>
@@ -597,6 +630,7 @@ html.dark .guided-intake .guided-manual:focus-visible{
       </div>
     </section>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
+    <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
     <form class="composer" id="composer"><div class="composer-inner"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
     <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
   </section>
@@ -622,7 +656,7 @@ const araStudioPortrait="https://ik.imagekit.io/wonjuart/ara.png?updatedAt=17894
 const avatarUrl=id=>id==="ara"?araStudioPortrait:typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
 function msg(role,text){return{role,text:String(text).slice(0,1000)}}
-function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"두 분의 생일을 차례대로 여쭤볼게요.":"제가 하나씩 여쭤볼게요. 편하게 답해 주세요.")+"\n만세력 계산 결과는 참고용이에요.");}
+function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"두 분의 정보를 차례로 여쭤볼게요.":"제가 차근차근 여쭤볼게요."));}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");if(!Array.isArray(x))return[greeting()];const list=x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30);if(!list.length)return[greeting()];if(list[0].role==="bot"&&list[0].text.includes("먼저 아래에 생년월일을 입력해 주세요"))list[0]=greeting();return list;}catch(_){return[greeting()]}}
 let conversation=read();
 let introTypingRun=0,chatPreviouslyOpen=false;
@@ -758,44 +792,53 @@ function makeGuidedIntake(){
  if(!wizard){wizard={values:Array.from({length:count},newGuidedPerson),personIndex:0,step:"calendar",replies:[],back:[],error:"",busy:false};guidedDrafts[key]=wizard;}
  const current=wizard.values[wizard.personIndex];
  const titlePerson=isMatch?(wizard.personIndex===0?"본인":"상대방"):"본인";
- const card=makeEl("div","guided-intake");
- const head=makeEl("div","guided-header");
- const badge=makeEl("span","guided-label","🌸 "+selected.name+" 상담사");
+ const card=makeEl("div","guided-chat-flow");
+ const quickbar=$("guidedQuickbar");
+ quickbar.hidden=false;
+ const tools=makeEl("div","guided-tools");
+ const progressList=["calendar","year","month","day","leap","gender","time","province","city","review"];
+ const idx=Math.max(0,progressList.indexOf(wizard.step));
+ const stage=isMatch?(wizard.personIndex===0?"① 본인":"② 상대방"):"본인";
+ const stepsDone=wizard.personIndex*9+idx;
+ const totalSteps=count*9;
+ const status=makeEl("span","guided-status",stage+" · "+(wizard.step==="review"?"입력 확인":Math.min(stepsDone+1,totalSteps)+"/"+totalSteps));
  const change=makeEl("button","guided-manual","한눈에 입력하기");
  change.type="button";
  change.addEventListener("click",()=>{guidedManualMode.add(key);birthEditing.add(key);renderMessages(true);});
- head.append(badge,change);card.append(head);
- const progressList=["calendar","year","month","day","leap","gender","time","province","city","review"];
- const idx=Math.max(0,progressList.indexOf(wizard.step));
- const progress=makeEl("div","guided-progress");
- progress.append(makeEl("span","",isMatch?(wizard.personIndex===0?"① 본인 정보":"② 상대방 정보"):"출생 정보"));
- progress.append(makeEl("span","",wizard.step==="review"?"입력 확인":"차근차근 진행 중"));
- const bar=makeEl("div","guided-progress-bar");
- const filled=makeEl("div","guided-progress-fill");
- const completion=wizard.step==="review"?100:Math.max(8,Math.min(95,((wizard.personIndex*9+idx+1)/(count*9))*100));
- filled.style.width=completion+"%";bar.append(filled);
- card.append(progress,bar);
- const recent=wizard.replies.slice(-3);
- if(recent.length){
-   const transcript=makeEl("div","guided-recent");
-   for(const item of recent){
-     const q=makeEl("div","guided-recent-q",item.question);
-     const a=makeEl("div","guided-recent-a",item.answer);
-     transcript.append(q,a);
+ tools.append(status,change);
+ quickbar.append(tools);
+ const transcript=makeEl("div","guided-transcript");
+ for(const item of wizard.replies){
+   if(item.note){
+     const noteRow=makeEl("div","message bot");
+     noteRow.append(portrait(selected.id,selected.name,"msg-avatar"),makeEl("div","bubble",item.note));
+     transcript.append(noteRow);
+     continue;
    }
-   card.append(transcript);
+   if(item.question){
+     const questionRow=makeEl("div","message bot guided-history");
+     questionRow.append(portrait(selected.id,selected.name,"msg-avatar"),makeEl("div","bubble",item.question));
+     transcript.append(questionRow);
+   }
+   const answerRow=makeEl("div","message user");
+   answerRow.append(makeEl("div","bubble",item.answer));
+   transcript.append(answerRow);
  }
- const prompt=makeEl("div","guided-prompt");
- const icon=portrait(selected.id,selected.name,"guided-avatar");
- const words=makeEl("div","guided-prompt-text");
+ card.append(transcript);
+ const prompt=makeEl("div","message bot guided-current");
+ const icon=portrait(selected.id,selected.name,"msg-avatar");
+ const words=makeEl("div","bubble guided-prompt-text");
  const controls=makeEl("div","guided-controls");
  const notice=makeEl("div","guided-error",wizard.error||"");
  notice.setAttribute("role","alert");
+ let activeQuestion="";
  function ask(question,helper){
+   activeQuestion=question;
    words.append(makeEl("p","guided-question",question));
    if(helper)words.append(makeEl("p","guided-hint",helper));
  }
- prompt.append(icon,words);card.append(prompt,controls);
+ prompt.append(icon,words);card.append(prompt);
+ quickbar.append(controls);
  const nowYear=Number(new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric"}).format(new Date()));
  function capture(){
    wizard.back.push({values:wizard.values.map(d=>({...d})),personIndex:wizard.personIndex,
@@ -807,9 +850,9 @@ function makeGuidedIntake(){
    const oldStep=wizard.step;
    current[field]=value;
    if(extra)Object.assign(current,extra);
-   wizard.replies.push({question:({calendar:"양력인가요, 음력인가요?",year:"태어난 연도는?",month:"태어난 월은?",day:"태어난 날짜는?",leap:"음력 윤달인가요?",gender:"성별은?",time:"태어난 시간은?",province:"출생 지역은?",city:"태어난 시·군은?"})[oldStep],answer});
+   wizard.replies.push({question:activeQuestion,answer});
    if(next==="done"){
-     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.replies.push({question:"첫 번째 분의 정보",answer:"확인했어요. 이제 상대방 정보를 여쭤볼게요."});}
+     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요."});}
      else wizard.step="review";
    }else wizard.step=next;
    renderMessages(true);
@@ -841,7 +884,7 @@ function makeGuidedIntake(){
  function warn(text){wizard.error=text;notice.textContent=text;}
  switch(wizard.step){
  case "calendar":
-   ask(titlePerson+"의 생일은 양력인가요, 음력인가요?","선택하시면 다음 질문으로 넘어가요.");
+   ask(titlePerson+" 생일은 양력이세요, 음력이세요?","아래에서 선택하면 다음 질문으로 넘어가요.");
    btn("☀️ 양력",()=>submitAnswer("calendar","solar","양력","year"));
    btn("🌙 음력",()=>submitAnswer("calendar","lunar","음력","year"));
    btn("잘 모르겠어요",()=>warn("정확한 만세력 계산을 위해 양력인지 음력인지 먼저 확인해 주세요."),true);
@@ -962,9 +1005,9 @@ function makeGuidedIntake(){
      wizard.values=prev.values;wizard.personIndex=prev.personIndex;wizard.step=prev.step;
      wizard.replies=prev.replies;wizard.error="";renderMessages(true);
    });
-   card.append(back);
+   quickbar.append(back);
  }
- card.append(notice,makeEl("p","guided-footer","입력 정보는 기기 안에서만 계산하며, GPT API를 사용하지 않아요."));
+ quickbar.append(notice,makeEl("p","guided-footer","출생정보는 기기에서 계산하며 GPT API를 사용하지 않아."));
  return card;
 }
 
@@ -1277,6 +1320,8 @@ function renderMessages(scrollToEnd=true){
   const currentRun=introTypingRun;
   closeSajuPopup?.();
   const feed=$("messages");
+  const quickbar=$("guidedQuickbar");
+  quickbar.replaceChildren();quickbar.hidden=true;
   feed.replaceChildren();
   if(selected.id==="harin"){syncSimliControls();return;}
   const animateWelcome=scrollToEnd==="intro"&&conversation.length===1&&
@@ -1306,7 +1351,7 @@ function renderMessages(scrollToEnd=true){
   const ready=Boolean(birthProfiles[birthKey()]);
   $("question").disabled=!ready;
   $("send").disabled=!ready;
-  $("question").placeholder=ready?"메시지 입력":"먼저 상담사 질문에 답해 주세요";
+  $("question").placeholder=ready?"메시지 입력":"입력창 위에서 답을 선택해 주세요";
   requestAnimationFrame(()=>{
     if(currentRun!==introTypingRun)return;
     if(scrollToEnd==="result"){
