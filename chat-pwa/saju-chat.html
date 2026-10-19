@@ -7,6 +7,14 @@
 <link rel="dns-prefetch" href="//app.simli.com">
 <link rel="preconnect" href="https://app.simli.com" crossorigin>
 <title>복작소 AI 사주채팅 · 체험</title>
+<script>
+// Apply the saved preference before the first paint; new visitors start in dark mode.
+try {
+  const dark=localStorage.getItem("bokjakso.saju-theme.v1")!=="light";
+  document.documentElement.classList.toggle("dark",dark);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content",dark?"#171513":"#f5f0e8");
+}catch(_){document.documentElement.classList.add("dark");document.querySelector('meta[name="theme-color"]')?.setAttribute("content","#171513");}
+</script>
 <style>
 :root{font-family:Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;color:#35271e;background:#f6f1e9;font-synthesis:none}
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% 0%,#fffaf1 0,transparent 38%),#f6f1e9}
@@ -440,6 +448,24 @@ html.dark .ai-setup{background:#29211c;border-bottom-color:#5b493d;color:#f1d6b7
 html.dark .ai-pin-row input{background:#241c18;color:#f2e1d0;border-color:#785d47}
 html.dark .ai-privacy{color:#c4a993}
 #chatView.harin-chat .ai-setup{display:none}
+/* Compact native disclosure keeps setup available without pushing the chat below the fold. */
+.saju-ai-details{flex:none;min-width:0;background:#f8efe5;border-bottom:1px solid #e6d6c4;color:#664b37}
+.saju-ai-details>summary{display:flex;align-items:center;justify-content:space-between;gap:9px;min-height:45px;padding:7px 15px;cursor:pointer;list-style:none;-webkit-tap-highlight-color:transparent}
+.saju-ai-details>summary::-webkit-details-marker{display:none}
+.saju-ai-details>summary::marker{content:""}
+.saju-ai-details>summary:focus-visible{outline:2px solid #ae8969;outline-offset:-3px}
+.saju-ai-summary{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.saju-ai-summary strong{font-size:14px;font-weight:800}
+.saju-ai-summary small{font-size:12px;color:#856b56}
+.saju-ai-expand{font-size:23px;line-height:1;color:#856b56;transform:rotate(0);transition:transform .18s ease}
+.saju-ai-details[open] .saju-ai-expand{transform:rotate(180deg)}
+.saju-ai-details .disclaimer{margin:0!important;border-radius:0}
+.saju-ai-details .ai-setup{border-bottom:0}
+html.dark .saju-ai-details{background:#2b231e;border-bottom-color:#5d4939;color:#f3dac0}
+html.dark .saju-ai-summary small,html.dark .saju-ai-expand{color:#cbaa89}
+#chatView.harin-chat .saju-ai-details{display:none}
+@media(prefers-reduced-motion:reduce){.saju-ai-expand{transition:none}}
+
 
 /* Chat-first, API-free birth intake for older mobile users. */
 .guided-intake{align-self:center;width:min(calc(100% - 32px),460px);border:1px solid #dfccb7;border-radius:19px;background:#fffdf9;padding:16px;box-shadow:0 6px 20px #44312012;animation:guided-up .22s ease both}
@@ -509,13 +535,16 @@ html.dark .guided-back{color:#ddbb91}
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
-    <p class="disclaimer">개발 미리보기 · 만세력 기본 풀이 제공. 실제 AI 답변은 시험 기능을 켜고 동의한 경우에만 사용해.</p>
-    <div class="ai-setup" id="aiSetup">
-      <label class="ai-switch"><input type="checkbox" id="aiConsent" disabled> 계산된 사주로 AI에게 질문하기 (선택)</label>
-      <div class="ai-pin-row"><input type="password" id="aiPin" placeholder="AI 시험 비밀번호" aria-label="AI 시험 비밀번호" autocomplete="off" maxlength="64" disabled></div>
-      <p id="aiStatus" role="status">AI 연결 상태를 확인 중이야. 기본 사주 풀이는 계속 이용할 수 있어.</p>
-      <p class="ai-privacy">동의 시 질문·최근 대화·계산된 사주팔자와 오행을 외부 AI로 전송해. 생년월일·출생시간 입력값은 보내지 않아. 질문에 직접 쓴 개인정보는 전송될 수 있어. 대화 문구는 이 탭에 임시 저장돼.</p>
-    </div>
+    <details class="saju-ai-details" id="aiSettingsDetails">
+      <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
+      <p class="disclaimer">개발 미리보기 · 만세력 기본 풀이 제공. 실제 AI 답변은 시험 기능을 켜고 동의한 경우에만 사용해.</p>
+      <div class="ai-setup" id="aiSetup">
+        <label class="ai-switch"><input type="checkbox" id="aiConsent" disabled> 계산된 사주로 AI에게 질문하기 (선택)</label>
+        <div class="ai-pin-row"><input type="password" id="aiPin" placeholder="AI 시험 비밀번호" aria-label="AI 시험 비밀번호" autocomplete="off" maxlength="64" disabled></div>
+        <p id="aiStatus" role="status">AI 연결 상태를 확인 중이야. 기본 사주 풀이는 계속 이용할 수 있어.</p>
+        <p class="ai-privacy">동의 시 질문·최근 대화·계산된 사주팔자와 오행을 외부 AI로 전송해. 생년월일·출생시간 입력값은 보내지 않아. 질문에 직접 쓴 개인정보는 전송될 수 있어. 대화 문구는 이 탭에 임시 저장돼.</p>
+      </div>
+    </details>
     <section class="simli-panel" id="simliPanel" hidden>
       <div class="simli-head"><strong>🎙️ 하린 · 말하는 사주 상담</strong><span>2차 테스트</span></div>
       <p id="simliIntro">하린과 바로 음성 대화를 시작할 수 있어요. 생년월일은 상담 중 직접 말씀해 주세요.</p>
@@ -1379,8 +1408,8 @@ function setSajuTheme(dark){
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content",dark?"#171513":"#f5f0e8");
   try{localStorage.setItem(sajuThemeKey,dark?"dark":"light")}catch(_){}
 }
-let savedSajuTheme="light";
-try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="dark"?"dark":"light"}catch(_){}
+let savedSajuTheme="dark";
+try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="light"?"light":"dark"}catch(_){}
 setSajuTheme(savedSajuTheme==="dark");
 $("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
 renderAll();
