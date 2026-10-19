@@ -227,3 +227,53 @@ test("출생 지역을 모르면 보정하지 않고, 잘못된 지역 값은 �
   assert.equal(norm.correctionApplied,false);
   assert.throws(()=>engine.normalize({...profile,birthplace:"KR15/없는군"}));
 });
+
+
+// Guided birth interview regression tests: offline rule-based flow (no GPT/API).
+const guidedFs=require("node:fs");
+const guidedPath=require("node:path");
+const guidedHtml=guidedFs.readFileSync(guidedPath.join(__dirname,"../saju-chat.html"),"utf8");
+const guidedFirst=guidedHtml.indexOf("function newGuidedPerson()");
+const guidedLast=guidedHtml.indexOf("function makeGuidedIntake()",guidedFirst);
+const guidedFns=guidedFirst>=0&&guidedLast>guidedFirst
+  ?new Function(guidedHtml.slice(guidedFirst,guidedLast)+
+    ";return {newGuidedPerson,guidedProfile,guidedDateLabel};")()
+  :null;
+
+test("Guided birth interview regression: HTML inline script parses, conversation replaces full form",()=>{
+  const begin=guidedHtml.lastIndexOf("<script>");
+  const end=guidedHtml.lastIndexOf("</script>");
+  assert.ok(begin>=0&&end>begin);
+  assert.doesNotThrow(()=>new Function(guidedHtml.slice(begin+8,end)));
+  assert.ok(guidedFns);
+  assert.match(guidedHtml,/if\(!guidedManualMode\.has\(key\)&&!birthEditing\.has\(key\)\)return makeGuidedIntake\(\)/);
+  assert.match(guidedHtml,/case "calendar":/);
+  assert.match(guidedHtml,/case "city":/);
+  assert.match(guidedHtml,/case "review":/);
+});
+
+test("Guided birth interview regression: solar and lunar date values feed the existing saju engine",()=>{
+  const p=guidedFns.newGuidedPerson();
+  p.calendar="solar";p.year="1973";p.month="07";p.day="04";p.gender="남성";
+  p.unknown=false;p.time="18:20";p.birthplace="KR15/고령군";
+  const result=guidedFns.guidedProfile(p);
+  assert.deepEqual(result,{date:"1973-07-04",calendar:"solar",leap:false,
+    gender:"남성",unknown:false,time:"18:20",birthplace:"KR15/고령군",longitude:null});
+  assert.match(guidedFns.guidedDateLabel(p),/1973년 7월 4일/);
+  p.calendar="lunar";p.leap=true;
+  assert.equal(guidedFns.guidedProfile(p).leap,true);
+});
+
+test("Guided birth interview regression: unknown time never applies location correction",()=>{
+  const p=guidedFns.newGuidedPerson();
+  p.calendar="solar";p.year="1988";p.month="11";p.day="02";
+  p.unknown=true;p.time="12:30";p.birthplace="KR11/밀양시";
+  const result=guidedFns.guidedProfile(p);
+  assert.equal(result.time,"");
+  assert.equal(result.birthplace,"none");
+  assert.equal(result.unknown,true);
+  assert.equal(result.longitude,null);
+  assert.match(guidedHtml,/태어난 시간 모름/);
+  assert.match(guidedHtml,/지역을 잘 몰라요/);
+  assert.match(guidedHtml,/← 이전 질문/);
+});
