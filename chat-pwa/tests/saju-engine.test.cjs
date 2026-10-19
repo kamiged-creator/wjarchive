@@ -388,3 +388,43 @@ test("New saju question and controls reveal gently; re-render or reduced motion 
   assert.match(guidedHtml,/@keyframes guided-following-fade/);
   assert.match(guidedHtml,/\.guided-quickbar\.intro-choices-enter\{animation:guided-following-fade/);
 });
+
+
+test("Calculated saju results are individual chat bubbles rather than one large card",()=>{
+ const results=guidedHtml.slice(guidedHtml.indexOf("function sajuResultRow("),guidedHtml.indexOf("function makeIntake()"));
+ const intake=guidedHtml.slice(guidedHtml.indexOf("function makeIntake()"),guidedHtml.indexOf("function renderSoftWelcome("));
+ assert.match(results,/const root=makeEl\("div","saju-chat-results"\)/);
+ assert.match(results,/root\.append\(sajuResultRow\("user","제 사주를 봐주세요/);
+ assert.match(results,/makeEl\("div","message "\+role\+" saju-chat-msg"\)/);
+ assert.match(results,/messages\.push\("🔮 "\+label\+"의 사주팔자/);
+ assert.match(results,/messages\.push\("🌿 일간과 오행/);
+ assert.match(results,/engine\.advisorReading\(chart,topic\[0\],selected\.id\)/);
+ assert.match(results,/engine\.flowReading\(chart,flow,topic\[0\]\)/);
+ assert.match(results,/engine\.compatibility\(charts\[0\],charts\[1\]\)/);
+ assert.match(results,/setTimeout\(next,1000\)/);
+ assert.match(results,/root\.append\(actions\)/);
+ assert.match(intake,/if\(existing&&!birthEditing\.has\(key\)\)return makeSajuChatResults\(existing,key\)/);
+ assert.doesNotMatch(intake,/makeEl\("section","saju-result"\)/);
+ assert.match(guidedHtml,/\.saju-chat-results\{display:flex;flex-direction:column/);
+});
+
+test("Saju chat re-render shows cached bubbles and does not replay calculation or disclose data to an API",()=>{
+ const results=guidedHtml.slice(guidedHtml.indexOf("function sajuResultRow("),guidedHtml.indexOf("function makeIntake()"));
+ assert.match(results,/const sajuResultCache=Object\.create\(null\)/);
+ assert.match(results,/if\(cached\?\.source===profiles\)/);
+ assert.match(results,/for\(const message of cached\.messages\)root\.append\(sajuResultRow\("bot",message\)\)/);
+ assert.match(results,/sajuResultCache\[key\]=\{source:profiles,messages\}/);
+ assert.match(results,/birthProfiles\[key\]===profiles/);
+ assert.match(results,/delete sajuResultCache\[key\]/);
+ assert.doesNotMatch(results,/fetch\(|AI_ENDPOINT|localStorage|sessionStorage/);
+ assert.match(results,/edit\.addEventListener\("click",\(\)=>\{birthEditing\.add\(key\);renderMessages\(false\);\}\)/);
+});
+
+test("Saju result chat keeps the start-of-result scroll behavior and reduced-motion support",()=>{
+ const renderer=guidedHtml.slice(guidedHtml.indexOf("function renderMessages("),guidedHtml.indexOf("function renderAll()"));
+ assert.match(renderer,/feed\.querySelector\("\.saju-chat-results"\)\|\|feed\.querySelector\("\.intake-card"\)/);
+ assert.match(guidedHtml,/@keyframes saju-chat-reveal/);
+ assert.match(guidedHtml,/@media\(prefers-reduced-motion:reduce\)\{\.saju-chat-msg\{animation:none\}/);
+ assert.match(guidedHtml,/const reduce=window\.matchMedia\?\.\("\(prefers-reduced-motion: reduce\)"\)\?\.matches/);
+ assert.match(guidedHtml,/if\(!animate\|\|reduce\)\{revealAll\(\);return;\}/);
+});
