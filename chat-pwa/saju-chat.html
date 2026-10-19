@@ -803,7 +803,10 @@ function renderAdvisors(){
     else {
       const image=makeEl("span","advisor-card-art advisor-card-"+a.id);
       image.setAttribute("aria-hidden","true");
-      if(window.SAJU_CARD_SPRITE)image.style.backgroundImage="url("+window.SAJU_CARD_SPRITE+")";
+      if(window.SAJU_CARD_SPRITE){
+        image.style.backgroundImage="url("+window.SAJU_CARD_SPRITE+")";
+        if(window.SAJU_CARD_FALLBACK)image.style.backgroundImage+=",url("+window.SAJU_CARD_FALLBACK+")";
+      }
       else {image.classList.add("advisor-art-fallback");image.append(portrait(a.id,a.name));}
       wrap.append(image);
     }
