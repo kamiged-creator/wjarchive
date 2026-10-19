@@ -1082,7 +1082,8 @@ function makeSajuChatResults(profiles,key){
   const cached=sajuResultCache[key];
   if(cached?.source===profiles){
     startingBubble.textContent="이전에 계산한 만세력 풀이를 다시 보여줄게.";
-    showMessages(cached.messages,false);
+    for(const message of cached.messages)root.append(sajuResultRow("bot",message));
+    root.append(actions);
     return root;
   }
   const engine=window.BokjaksoSaju;
