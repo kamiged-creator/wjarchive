@@ -1086,6 +1086,18 @@ function makeSajuChatResults(profiles,key){
     root.append(actions);
     return root;
   }
+  // Ara is the warm conversation counsellor, not a technical astrologer.
+  // Birth details have already been validated; do not dump pillars and elements.
+  if(selected.id==="ara"){
+    const messages=[
+      "🌸 마음에 걸리는 일이 있다면 편하게 이야기해 줘. 먼저 네 이야기를 듣고 싶어.",
+      "사주 구조·궁합·재물운처럼 자세한 분석은 각 분야 상담사가 도와줄 수 있어. 나는 네 마음과 고민을 함께 이야기하는 역할이야."
+    ];
+    sajuResultCache[key]={source:profiles,messages};
+    startingBubble.textContent="출생 정보 확인했어. 이제 편하게 이야기해 줘. 🌸";
+    showMessages(messages,true);
+    return root;
+  }
   const engine=window.BokjaksoSaju;
   if(!engine){
     startingBubble.textContent="만세력 모듈을 불러오지 못했어. 새로고침하고 다시 시도해 줘.";
@@ -1477,7 +1489,32 @@ function aiChart(chart){
     dayMaster:{stem:chart.dayMaster.stem},
     elements:chart.elements};
 }
+/* Route explicit specialist questions without a paid AI call.
+   Emotional concerns stay with Ara even if they mention relationships or money. */
+function araSpecialistReferral(question){
+  if(typeof question!=="string")return null;
+  const q=question.replace(/\s+/g," ").trim();
+  if(!q)return null;
+  const feelings=/힘들|불안|속상|답답|걱정|외롭|우울|마음이|괴롭|두렵|스트레스|지쳐|막막/;
+  const request=/알려|분석|설명|봐줘|봐 줘|풀이|해석|어떻|뭐야|무엇|궁금|보고 싶|봐 주/;
+  if(feelings.test(q)&&!request.test(q))return null;
+  if(/궁합|연애운|결혼운|인연운|재회운|배우자운|애정운/.test(q)){
+    return "💕 그건 서윤 상담사가 더 자세히 이야기해 줄 수 있어. 상담사 선택에서 서윤을 찾아봐. 물론 관계 때문에 속상한 마음은 나한테 계속 이야기해도 돼.";
+  }
+  if(/재물운|금전운|사업운|직장운|취업운|이직운|투자운|돈복|창업운/.test(q)){
+    return "💰 재물·일·사업의 운세나 계획은 지안 상담사가 담당해. 상담사 선택에서 지안에게 물어봐. 돈이나 일 때문에 힘든 마음은 여기서 나눠도 좋아.";
+  }
+  if(/만세력|사주팔자|원국|일주|월주|연주|시주|일간|오행|십성|대운|세운|신살|용신|격국|합충|일진|사주\s*(분석|풀이|해석|구조)/.test(q)){
+    return "☯️ 자세한 사주팔자와 오행·대운 해석은 도윤 상담사가 전문이야. 상담사 선택에서 도윤에게 질문해 봐. 그 결과를 듣고 느낀 고민은 나와 함께 이야기해도 돼.";
+  }
+  return null;
+}
+
 async function response(question,previous){
+  if(selected.id==="ara"){
+    const specialist=araSpecialistReferral(question);
+    if(specialist)return specialist;
+  }
   const profiles=birthProfiles[birthKey()];
   if(!profiles||!profiles.length)return "먼저 위에서 출생 정보를 입력해 줘. 입력하면 만세력 사주팔자를 계산해 보여줄게.";
   const engine=window.BokjaksoSaju;
@@ -1504,6 +1541,9 @@ async function response(question,previous){
     if(!response.ok)throw new Error(body.error||"AI 연결에 실패했어.");
     if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
     return "✨ AI 상담 · 전통 사주 참고 풀이\n\n"+body.answer;
+  }
+  if(selected.id==="ara"){
+    return "🌸 아라 · 기본 안내 (실제 AI 상담 연결 전)\n\n편하게 마음을 이야기해 줘. 지금은 AI 연결 전이라 네 말에 맞춘 자유 상담 답변은 아직 어려워. 전문 사주나 운세 질문이라면 담당 상담사에게 안내해 줄게.";
   }
   const compare=partner?engine.compatibility(chart,partner):"";
   return "📜 기본 만세력 풀이 (질문별 AI 분석 아님)\n\n"+
