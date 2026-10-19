@@ -681,12 +681,12 @@ body:not(.chat-active) .selection-view .video-consult-shortcut:active{background
   body:not(.chat-active) .selection-view .video-consult-shortcut svg{width:18px;height:18px}
 }
 
-/* Single fine gold line. The overlaid frame does the drawing;
-   the underlying card border is transparent to avoid a double-width ring. */
+/* Keep one fine gold line. The old portrait asset script appends a
+   13px radius; lock the real card at 20px to match its 19px inset frame. */
 body:not(.chat-active) .selection-view .avatar:not(.avatar-featured){
   background:#050505;
   border:1px solid transparent;
-  border-radius:20px;
+  border-radius:20px!important;
   box-shadow:0 4px 18px #0008;
 }
 body:not(.chat-active) .selection-view .avatar:not(.avatar-featured):active,
@@ -906,7 +906,7 @@ function renderAdvisors(){
       b.style.position="relative";
       const frame=makeEl("span","advisor-gold-frame");
       frame.setAttribute("aria-hidden","true");
-      frame.style.cssText="position:absolute;inset:0;z-index:3;pointer-events:none;box-sizing:border-box;border:1.5px solid #c69a62;border-radius:19px;box-shadow:inset 0 0 0 .6px rgba(27,19,13,.65);";
+      frame.style.cssText="position:absolute;inset:0;z-index:3;pointer-events:none;box-sizing:border-box;border:1.5px solid #c69a62;border-radius:19px;box-shadow:inset 0 0 0 1px rgba(28,20,16,.87);";
       b.append(frame);
     }
     b.addEventListener("click",()=>selectAdvisorCard(a,b));
