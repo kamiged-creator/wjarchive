@@ -900,6 +900,15 @@ function renderAdvisors(){
       ara:"따뜻한 마음·인생 상담",doyun:"정통 사주·대운·세운",seoyun:"연애운·궁합",jian:"재물운·사업운",harin:"음성 아바타 상담 체험"
     }[a.id]||a.specialty));
     b.append(title,small);
+    // Explicit overlay sits above both the photo and black caption so the gold
+    // outline stays visible on Android regardless of border paint/clipping.
+    if(a.id!=="harin"){
+      b.style.position="relative";
+      const frame=makeEl("span","advisor-gold-frame");
+      frame.setAttribute("aria-hidden","true");
+      frame.style.cssText="position:absolute;inset:1px;z-index:3;pointer-events:none;box-sizing:border-box;border:3px solid #f4c77e;border-radius:18px;box-shadow:inset 0 0 0 1px rgba(255,235,194,.40),0 0 0 1px rgba(226,176,105,.25);";
+      b.append(frame);
+    }
     b.addEventListener("click",()=>selectAdvisorCard(a,b));
     root.append(b);
   }
