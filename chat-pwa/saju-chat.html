@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#f5f0e8">
 <link rel="dns-prefetch" href="//app.simli.com">
 <link rel="preconnect" href="https://app.simli.com" crossorigin>
-<title>복작소 AI 사주채팅 · 체험</title>
+<title>복작소 사주 · 상담사 선택</title>
 <script>
 // Apply the saved preference before the first paint; new visitors start in dark mode.
 try {
@@ -614,21 +614,70 @@ html.dark .saju-chat-edit{background:rgba(183,133,84,.12);color:#edcdaa;border-c
 @keyframes saju-chat-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.saju-chat-msg{animation:none}.saju-chat-results .message{scroll-behavior:auto}}
 
+
+/* Advisor selection redesign only: the existing chat screen retains its layout. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+body:not(.chat-active){background:#15120f}
+body:not(.chat-active) .page{max-width:760px;background:radial-gradient(ellipse 130% 60% at 80% -10%,#3b291a 0,#171310 43%,#100e0d 100%);color:#f9eddb}
+body:not(.chat-active) .top{min-height:78px;padding:14px 20px 13px;justify-content:center}
+body:not(.chat-active) .top .home{position:static;width:43px;height:43px;margin-right:auto;color:#eed3a6}
+body:not(.chat-active) .saju-main-brand{font-family:"Noto Serif KR",serif;font-size:24px;letter-spacing:.02em;color:#f3d4a1;white-space:nowrap}
+body:not(.chat-active) .saju-main-deco{margin-left:auto;width:43px;color:#b88e58;text-align:right;font-size:23px}
+body.chat-active .saju-main-brand,body.chat-active .saju-main-deco{display:none}
+body:not(.chat-active) .selection-view{padding:20px 14px 8px}
+body:not(.chat-active) .selection-view .hero{text-align:left;padding:0 2px 20px}
+body:not(.chat-active) .selection-view .hero h1{font-family:Pretendard,"Noto Sans KR",sans-serif;font-size:clamp(27px,7vw,37px);letter-spacing:-.045em;line-height:1.3;margin:0 0 12px;color:#f7e5cb;font-weight:900}
+body:not(.chat-active) .selection-view .hero .lead{font-size:clamp(13px,3.6vw,16px);line-height:1.6;color:#bfb2a5}
+body:not(.chat-active) .selection-view .advisor-main-panel{background:transparent;border:0;box-shadow:none;border-radius:0;margin:0!important;padding:0!important}
+body:not(.chat-active) .selection-view .avatars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+body:not(.chat-active) .selection-view .avatar{display:flex;flex-direction:column;align-items:stretch;min-width:0;gap:0;padding:0;background:linear-gradient(160deg,#30251e,#171310);border:1px solid rgba(223,182,126,.58);border-radius:20px;overflow:hidden;color:#f6e9d6;box-shadow:0 4px 18px #0004;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
+body:not(.chat-active) .selection-view .avatar:active,body:not(.chat-active) .selection-view .avatar.avatar-entering{transform:scale(.965);border-color:#ffd59c;box-shadow:0 0 0 2px #bd926575,0 0 26px #c69b6240}
+body:not(.chat-active) .selection-view .avatar-portrait-wrap{width:100%;height:auto;aspect-ratio:175/190;background:#352820;position:relative;overflow:hidden;display:block}
+body:not(.chat-active) .selection-view .advisor-card-art{display:block;width:100%;height:100%;background-size:200% 200%;background-repeat:no-repeat;transition:transform .3s ease}
+body:not(.chat-active) .selection-view .avatar.avatar-entering .advisor-card-art{transform:scale(1.055)}
+body:not(.chat-active) .selection-view .advisor-card-ara{background-position:0% 0%}
+body:not(.chat-active) .selection-view .advisor-card-doyun{background-position:100% 0%}
+body:not(.chat-active) .selection-view .advisor-card-seoyun{background-position:0% 100%}
+body:not(.chat-active) .selection-view .advisor-card-jian{background-position:100% 100%}
+body:not(.chat-active) .selection-view .advisor-art-fallback{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#69513e,#332a25)}
+body:not(.chat-active) .selection-view .advisor-art-fallback .portrait{width:90%;height:90%;max-width:none;max-height:none;border-radius:14px;object-fit:cover}
+body:not(.chat-active) .selection-view .avatar strong.advisor-card-name{margin:12px 7px 0;font-size:clamp(14px,3.5vw,20px);font-weight:850;color:#fbebd3;line-height:1.45;text-align:center;white-space:nowrap;letter-spacing:-.06em}
+body:not(.chat-active) .selection-view .avatar small.advisor-card-desc{margin:4px 6px 13px;color:#d4bca5;font-size:clamp(11px,2.7vw,13px);line-height:1.45;text-align:center;min-height:18px}
+body:not(.chat-active) .selection-view .avatar.avatar-featured{grid-column:1/-1;display:flex;flex-direction:row;align-items:center;gap:14px;min-height:70px;margin-top:2px;padding:9px 12px;border-color:#604e3d}
+body:not(.chat-active) .selection-view .avatar.avatar-featured .avatar-portrait-wrap{width:52px;height:52px;aspect-ratio:1}
+body:not(.chat-active) .selection-view .avatar.avatar-featured .portrait{width:52px;height:52px;border:1px solid #9d8067}
+body:not(.chat-active) .selection-view .avatar.avatar-featured .advisor-card-name{margin:0;text-align:left;font-size:16px}
+body:not(.chat-active) .selection-view .avatar.avatar-featured .advisor-card-desc{margin:0;text-align:left;font-size:12px}
+body:not(.chat-active) .advisor-topic-details{margin:16px 0 0;color:#d9bc9d;border:1px solid #59483a;border-radius:15px;background:#221b17;overflow:hidden}
+body:not(.chat-active) .advisor-topic-details summary{display:flex;justify-content:space-between;align-items:center;min-height:50px;padding:10px 15px;list-style:none;cursor:pointer;font-size:14px;font-weight:750}
+body:not(.chat-active) .advisor-topic-details summary::-webkit-details-marker{display:none}
+body:not(.chat-active) .advisor-topic-details[open] summary{border-bottom:1px solid #59483a}
+body:not(.chat-active) .advisor-topic-details section.panel{background:transparent;margin:0!important;border:0;box-shadow:none;padding:15px!important}
+body:not(.chat-active) .advisor-topic-details h2{color:#e9d4b7}
+body:not(.chat-active) .advisor-topic-details .topic:not([aria-pressed="true"]){background:#332a23;border-color:#755f48;color:#f0ddc9}
+body:not(.chat-active) .advisor-topic-details .start-chat{margin:0 15px 15px}
+body:not(.chat-active) .advisor-selection-tip{margin:13px 0 0;text-align:center;color:#bca591;font-size:12px;line-height:1.5}
+body:not(.chat-active) .selection-view footer{color:#967f6a;padding:15px 5px 22px}
+@media(min-width:600px){body:not(.chat-active) .selection-view{padding:22px 28px 12px}body:not(.chat-active) .selection-view .avatars{gap:22px}body:not(.chat-active) .top{min-height:85px}}
+@media(max-width:365px){body:not(.chat-active) .selection-view{padding:13px 10px 8px}body:not(.chat-active) .selection-view .avatars{gap:10px}body:not(.chat-active) .selection-view .avatar strong.advisor-card-name{font-size:13px}}
+@media(prefers-reduced-motion:reduce){body:not(.chat-active) .selection-view .avatar,body:not(.chat-active) .selection-view .advisor-card-art{transition:none!important}}
+
 </style>
 <script src="/saju-avatars.js"></script>
+<script src="/saju-advisor-cards.js"></script>
 <script src="/saju-birthplaces.js"></script>
 <script src="/saju-engine.js"></script>
 </head>
 <body>
 <div class="page">
-  <header class="top"><a class="home" href="/" aria-label="복작소 메인으로 돌아가기" title="복작소 메인으로 돌아가기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a></header>
+  <header class="top"><a class="home" href="/" aria-label="복작소 메인으로 돌아가기" title="복작소 메인으로 돌아가기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg></a><strong class="saju-main-brand">복작소 사주</strong><span class="saju-main-deco" aria-hidden="true">✦</span></header>
   <main class="selection-view" id="selectionView">
-  <div class="hero"><h1>AI 사주채팅</h1><p class="lead">상담사와 분야를 선택해 주세요.</p></div>
-  <section class="panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
-  <section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section>
-  <button id="startChat" type="button" class="start-chat">아라와 채팅 시작하기 →</button>
+  <div class="hero"><h1>상담사 선택</h1><p class="lead">원하는 상담사를 선택해 편하게 이야기를 시작해 보세요.</p></div>
+  <section class="panel advisor-main-panel" aria-labelledby="advisorsTitle"><h2 id="advisorsTitle" class="sr-only">상담사 선택</h2><div class="avatars" id="avatars"></div></section>
+  <details class="advisor-topic-details" id="advisorTopicDetails"><summary>다른 상담 분야 선택하기 <span aria-hidden="true">⌄</span></summary><section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section><button id="startChat" type="button" class="start-chat">선택한 분야로 상담 시작하기 →</button></details>
+  <p class="advisor-selection-tip">사진을 누르면 해당 상담방으로 바로 들어가요.</p>
   <p id="harinNewWindowHint" class="choose-tip" hidden>하린 음성 상담은 새 탭에서 크게 열려요. 마이크 사용을 허용해 주세요.</p>
-  <footer>복작소 사주채팅 미리보기 · 실제 상담 및 명식 해석 기능은 개발 중이야.</footer>
+  <footer>복작소 사주 · AI 상담은 준비 중이며 무료 만세력은 체험할 수 있어요.</footer>
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
@@ -689,7 +738,53 @@ let conversation=read();
 let introTypingRun=0,chatPreviouslyOpen=false;
 function save(){try{sessionStorage.setItem(storageKey(),JSON.stringify(conversation.slice(-30)))}catch(_){}}
 function portrait(id,name,cls="portrait"){const holder=document.createElement("span");holder.className=cls;const src=avatarUrl(id);if(src){const img=document.createElement("img");img.alt="";img.loading="eager";if(id==="ara"){img.onerror=()=>{const fallback=avatarSources.ara;if(typeof fallback==="string"&&fallback.startsWith("data:image/webp;base64,")){img.onerror=()=>{img.remove();holder.textContent=name.slice(0,1)};img.src=fallback;}else{img.remove();holder.textContent=name.slice(0,1)}}}img.src=src;holder.append(img)}else{holder.textContent=name.slice(0,1)}return holder;}
-function renderAdvisors(){const root=$("avatars");root.replaceChildren();for(const a of advisors){const b=document.createElement("button");b.type="button";b.className="avatar"+(a.id==="harin"?" avatar-featured":"");b.setAttribute("aria-pressed",String(a.id===selected.id));const wrap=document.createElement("span");wrap.className="avatar-portrait-wrap";wrap.append(portrait(a.id,a.name));const check=document.createElement("span");check.className="avatar-check";check.textContent="✓";check.setAttribute("aria-hidden","true");wrap.append(check);b.append(wrap);const title=document.createElement("strong");title.textContent=a.name;const small=document.createElement("small");small.textContent=a.specialty;b.append(title,small);b.addEventListener("click",()=>{if(a.id===selected.id)return;selected=a;topic=a.topics[0];conversation=read();renderAll()});root.append(b)}}
+// The portraits are still photos. Full character motion will be added later using Flow.
+let advisorCardTransition=false;
+function selectAdvisorCard(advisor,button){
+  if(advisorCardTransition)return;
+  advisorCardTransition=true;
+  selected=advisor;
+  topic=advisor.topics[0];
+  conversation=read();
+  button.classList.add("avatar-entering");
+  // Respect reduced motion and avoid trapping users inside the transition.
+  const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  setTimeout(()=>{
+    advisorCardTransition=false;
+    button.classList.remove("avatar-entering");
+    renderAll();
+    openChat();
+  },reduced?0:340);
+}
+function renderAdvisors(){
+  const root=$("avatars");root.replaceChildren();
+  for(const a of advisors){
+    const b=document.createElement("button");b.type="button";
+    b.className="avatar"+(a.id==="harin"?" avatar-featured":"");
+    b.setAttribute("aria-label",a.name+" "+a.specialty+" 상담방 입장");
+    const wrap=makeEl("span","avatar-portrait-wrap");
+    if(a.id==="harin"){wrap.append(portrait(a.id,a.name));}
+    else {
+      const image=makeEl("span","advisor-card-art advisor-card-"+a.id);
+      image.setAttribute("aria-hidden","true");
+      if(window.SAJU_CARD_SPRITE)image.style.backgroundImage="url("+window.SAJU_CARD_SPRITE+")";
+      else {image.classList.add("advisor-art-fallback");image.append(portrait(a.id,a.name));}
+      wrap.append(image);
+    }
+    b.append(wrap);
+    const title=makeEl("strong","advisor-card-name");
+    const icon={ara:"🌸",doyun:"☯️",seoyun:"💕",jian:"💰",harin:"🎙️"}[a.id];
+    title.textContent=icon+" "+a.name+" · "+({
+      ara:"마음 상담",doyun:"정통 사주",seoyun:"연애·궁합",jian:"재물·사업",harin:"음성 상담"
+    }[a.id]||a.specialty);
+    const small=makeEl("small","advisor-card-desc",({
+      ara:"편안하게 마음을 나누는 시간",doyun:"사주팔자·대운·세운",seoyun:"연애운·두 사람의 궁합",jian:"재물운·직장·사업운",harin:"음성 아바타 상담 체험"
+    }[a.id]||a.specialty));
+    b.append(title,small);
+    b.addEventListener("click",()=>selectAdvisorCard(a,b));
+    root.append(b);
+  }
+}
 function renderTopics(){const root=$("topics");root.replaceChildren();for(const t of selected.topics){const b=document.createElement("button");b.type="button";b.className="topic";b.setAttribute("aria-pressed",String(topic[0]===t[0]));const i=document.createElement("span");i.className="symbol";i.setAttribute("aria-hidden","true");i.textContent=t[1];const text=document.createElement("span");const strong=document.createElement("strong");strong.textContent=t[2];const small=document.createElement("small");small.textContent=t[3];text.append(strong,small);b.append(i,text);b.addEventListener("click",()=>{if(topic[0]!==t[0]){topic=t;conversation=read();renderAll()}});root.append(b)}}
 
 function makeEl(tag,cls,txt){const node=document.createElement(tag);if(cls)node.className=cls;if(txt!==undefined)node.textContent=txt;return node;}
