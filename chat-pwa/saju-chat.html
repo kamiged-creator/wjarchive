@@ -667,7 +667,7 @@ html.dark .saju-chat-edit{background:rgba(183,133,84,.12);color:#edcdaa;border-c
 (() => {
 "use strict";
 const advisors=[
- {id:"ara",name:"아라",specialty:"따뜻한 상담",topics:[["saju","🔮","사주","인생의 흐름"],["daily","☀️","오늘운세","하루의 방향"]],intro:"안녕하세요, 아라예요. 🌸 오늘은 어떤 이야기를 나누고 싶으세요?"},
+ {id:"ara",name:"아라",specialty:"마음·고민 상담",topics:[["talk","💬","마음 상담","편안한 대화와 고민 나누기"]],intro:"안녕하세요, 아라예요. 🌸 오늘은 어떤 이야기를 나누고 싶으세요?"},
  {id:"doyun",name:"도윤",specialty:"정통 사주",topics:[["saju","☯️","사주","타고난 성향"],["decade","📜","대운·세운","시기별 변화"]],intro:"반갑습니다. 도윤입니다. 정통 사주와 인생 흐름에 관한 질문을 남겨 주세요."},
  {id:"seoyun",name:"서윤",specialty:"궁합·연애운",topics:[["match","💕","궁합","두 사람의 관계"],["love","🌸","연애운","인연과 마음"]],intro:"안녕하세요, 서윤이에요. 💗 관계와 연애에 관해 무엇이 궁금하세요?"},
  {id:"jian",name:"지안",specialty:"재물·사업운",topics:[["wealth","💰","재물운","돈과 경제생활"],["career","💼","직장·사업운","일과 성장"]],intro:"반갑습니다. 지안입니다. 재물이나 일, 사업에 관해 궁금한 점을 이야기해 주세요."},
@@ -683,7 +683,7 @@ const araStudioPortrait="https://ik.imagekit.io/wonjuart/ara.png?updatedAt=17894
 const avatarUrl=id=>id==="ara"?araStudioPortrait:typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
 function msg(role,text){return{role,text:String(text).slice(0,1000)}}
-function greeting(){return msg("bot",selected.intro+"\n"+(topic[0]==="match"?"두 분의 정보를 차례로 여쭤볼게요.":"제가 차근차근 여쭤볼게요."));}
+function greeting(){return msg("bot",selected.intro+"\n"+(selected.id==="ara"?"편안하게 마음을 들려줘. 내가 들어줄게.":topic[0]==="match"?"두 분의 정보를 차례로 여쭤볼게요.":"제가 차근차근 여쭤볼게요."));}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");if(!Array.isArray(x))return[greeting()];const list=x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30);if(!list.length)return[greeting()];if(list[0].role==="bot"&&list[0].text.includes("먼저 아래에 생년월일을 입력해 주세요"))list[0]=greeting();return list;}catch(_){return[greeting()]}}
 let conversation=read();
 let introTypingRun=0,chatPreviouslyOpen=false;
@@ -1138,6 +1138,7 @@ function makeSajuChatResults(profiles,key){
   return root;
 }
 function makeIntake(){
+ if(selected.id==="ara")return document.createDocumentFragment();
  const key=birthKey(),existing=birthProfiles[key]||null;
  if(existing&&!birthEditing.has(key))return makeSajuChatResults(existing,key);
  const card=makeEl("div","intake-card");
@@ -1444,10 +1445,10 @@ function renderMessages(scrollToEnd=true){
     },greetingMs);
   }
   syncSimliControls();
-  const ready=Boolean(birthProfiles[birthKey()]);
+  const ready=selected.id==="ara"||Boolean(birthProfiles[birthKey()]);
   $("question").disabled=!ready;
   $("send").disabled=!ready;
-  $("question").placeholder=ready?"메시지 입력":"입력창 위에서 답을 선택해 주세요";
+  $("question").placeholder=selected.id==="ara"?"마음 편히 이야기해 줘":ready?"메시지 입력":"입력창 위에서 답을 선택해 주세요";
   requestAnimationFrame(()=>{
     if(currentRun!==introTypingRun)return;
     if(scrollToEnd==="result"){
@@ -1514,6 +1515,22 @@ async function response(question,previous){
   if(selected.id==="ara"){
     const specialist=araSpecialistReferral(question);
     if(specialist)return specialist;
+    if(aiReady&&aiConsent.checked){
+      const pin=aiPin.value;
+      if(pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
+      const payload={consent:true,question,advisor:"ara",topic:"talk",
+        chart:null,partner:null,flow:null,
+        history:previous.filter(x=>x&&["user","bot"].includes(x.role))
+          .slice(-4).map(x=>({role:x.role==="bot"?"assistant":"user",content:x.text.slice(0,350)}))};
+      const reply=await fetch(AI_ENDPOINT,{method:"POST",
+        headers:{"Content-Type":"application/json","x-saju-test-pin":pin},
+        body:JSON.stringify(payload),cache:"no-store"});
+      let body={};try{body=await reply.json()}catch(_){}
+      if(!reply.ok)throw new Error(body.error||"AI 연결에 실패했어.");
+      if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
+      return body.answer;
+    }
+    return "🌸 아라는 편안하게 이야기를 듣는 상담사야. 지금은 GPT API가 활성화되지 않아 네 고민에 맞춘 자유로운 답변은 아직 할 수 없어. 전문 운세·궁합·재물 질문은 담당 상담사를 안내해 줄게.";
   }
   const profiles=birthProfiles[birthKey()];
   if(!profiles||!profiles.length)return "먼저 위에서 출생 정보를 입력해 줘. 입력하면 만세력 사주팔자를 계산해 보여줄게.";
@@ -1541,9 +1558,6 @@ async function response(question,previous){
     if(!response.ok)throw new Error(body.error||"AI 연결에 실패했어.");
     if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
     return "✨ AI 상담 · 전통 사주 참고 풀이\n\n"+body.answer;
-  }
-  if(selected.id==="ara"){
-    return "🌸 아라 · 기본 안내 (실제 AI 상담 연결 전)\n\n편하게 마음을 이야기해 줘. 지금은 AI 연결 전이라 네 말에 맞춘 자유 상담 답변은 아직 어려워. 전문 사주나 운세 질문이라면 담당 상담사에게 안내해 줄게.";
   }
   const compare=partner?engine.compatibility(chart,partner):"";
   return "📜 기본 만세력 풀이 (질문별 AI 분석 아님)\n\n"+
