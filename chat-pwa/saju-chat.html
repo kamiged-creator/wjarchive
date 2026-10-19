@@ -543,11 +543,16 @@ html.dark .guided-intake .guided-manual:focus-visible{
 }
 
 
-/* Initial greeting appears at reading pace; users can reveal it immediately. */
-.intro-typed-copy{white-space:pre-wrap}
-.intro-skip{display:block;min-height:36px;margin-top:7px;padding:4px 9px;border:1px solid rgba(140,110,85,.48);border-radius:9px;background:rgba(122,93,68,.08);font:inherit;font-size:13px;font-weight:700;color:#765438;cursor:pointer}
-.intro-skip:focus-visible{outline:2px solid #bd9977;outline-offset:2px}
-html.dark .intro-skip{color:#e8c4a0;background:rgba(201,163,121,.12);border-color:rgba(201,163,121,.5)}
+/* Gentle phrase-by-phrase fade. Full text is rendered immediately, no typing cursor. */
+.intro-soft-line{display:block;white-space:pre-wrap;animation:welcome-soft-fade 700ms cubic-bezier(.22,.9,.34,1) both}
+.intro-soft-line+.intro-soft-line{margin-top:.36em}
+@keyframes welcome-soft-fade{
+  from{opacity:0;transform:translateY(7px);filter:blur(1.5px)}
+  to{opacity:1;transform:translateY(0);filter:blur(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .intro-soft-line{animation:none!important}
+}
 
 </style>
 <script src="/saju-avatars.js"></script>
@@ -1255,27 +1260,16 @@ function makeIntake(){
 
 /* Welcome type-on effect: entirely local UI. No TTS/API calls or data transmission.
    Only animate on entering an untouched chat; re-renders and accessibility skip it. */
-function typeIntroMessage(textNode,fullText,skipButton,feed,runId){
-  const characters=Array.from(fullText);
-  const totalMs=Math.min(3200,Math.max(1700,characters.length*27));
-  let started=null,shown=0;
-  function finish(){
-    if(introTypingRun!==runId||!textNode.isConnected)return;
-    textNode.textContent=fullText;
-    textNode.removeAttribute("aria-hidden");
-    textNode.parentElement.removeAttribute("aria-label");
-    skipButton.remove();
+function renderSoftWelcome(bubble,text){
+  // Show complete phrases with gentle staggered fades, never letter by letter.
+  // Text remains present in the DOM for screen readers and copying.
+  const lines=text.split("\n");
+  for(let index=0;index<lines.length;index++){
+    const line=makeEl("span","intro-soft-line",lines[index]);
+    line.style.animationDelay=Math.min(index*240,480)+"ms";
+    bubble.append(line);
   }
-  skipButton.addEventListener("click",finish,{once:true});
-  function tick(now){
-    if(introTypingRun!==runId||!textNode.isConnected)return;
-    if(started===null)started=now;
-    const count=Math.min(characters.length,Math.max(1,Math.floor((now-started)*characters.length/totalMs)));
-    if(count!==shown){shown=count;textNode.textContent=characters.slice(0,count).join("");}
-    if(count===characters.length)finish();
-    else requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+  bubble.classList.add("intro-soft-bubble");
 }
 
 function renderMessages(scrollToEnd=true){
@@ -1286,8 +1280,7 @@ function renderMessages(scrollToEnd=true){
   feed.replaceChildren();
   if(selected.id==="harin"){syncSimliControls();return;}
   const animateWelcome=scrollToEnd==="intro"&&conversation.length===1&&
-    conversation[0]?.role==="bot"&&!birthProfiles[birthKey()]&&
-    !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    conversation[0]?.role==="bot"&&!birthProfiles[birthKey()];
   for(const [index,item] of conversation.entries()){
     const row=document.createElement("div");
     row.className="message "+(item.role==="user"?"user":"bot");
@@ -1299,15 +1292,9 @@ function renderMessages(scrollToEnd=true){
     const bubble=document.createElement("div");
     bubble.className="bubble";
     if(index===0&&animateWelcome){
-      const typed=makeEl("span","intro-typed-copy","");
-      const skip=makeEl("button","intro-skip","전체 문장 보기");
-      skip.type="button";
-      bubble.setAttribute("aria-label",item.text);
-      typed.setAttribute("aria-hidden","true");
-      bubble.append(typed,skip);
+      renderSoftWelcome(bubble,item.text);
       row.append(bubble);
       feed.append(row);
-      typeIntroMessage(typed,item.text,skip,feed,currentRun);
     }else{
       bubble.textContent=item.text;
       row.append(bubble);
