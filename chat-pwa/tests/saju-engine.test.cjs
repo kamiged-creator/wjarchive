@@ -457,7 +457,7 @@ test("Ara refers technical topics to the correct adviser but listens to emotiona
 test("Preview-only Ara API does not require birth data while specialist readings still do",()=>{
  const apiSource=guidedFs.readFileSync(guidedPath.join(__dirname,"../api/saju-ai.js"),"utf8");
  assert.match(apiSource,/const TOPICS = new Set\(\["talk"/);
- assert.match(apiSource,/advisor==="ara"\?\(topic!=="talk"\|\|data\.chart!=null/);
+ assert.match(apiSource,/advisor==="ara"\?\(topic==="talk"\?\(data\.chart!=null/);
  assert.match(apiSource,/\(!chart\|\|topic==="talk"\)/);
  assert.match(apiSource,/마음·인생 고민 대화에 집중하는 상담사/);
  assert.match(apiSource,/감정과 상황을 듣고 공감/);
