@@ -303,7 +303,7 @@ test("Saju result scroll regression: guide and manual confirmations target resul
  assert.match(renderer,/scrollToEnd==="result"/);
  assert.match(renderer,/feed\.querySelector\("\.intake-card"\)/);
  assert.match(renderer,/feed\.scrollTop=Math\.max\(0,feed\.scrollTop\+offset-12\)/);
- assert.match(renderer,/else feed\.scrollTop=scrollToEnd\?feed\.scrollHeight:0/);
+ assert.match(renderer,/feed\.scrollTop=scrollToEnd===true\?feed\.scrollHeight:0/);
 });
 
 
