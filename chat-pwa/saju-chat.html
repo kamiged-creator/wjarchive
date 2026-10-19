@@ -709,6 +709,55 @@ body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advis
   body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advisor-card-desc{font-size:11px}
 }
 
+
+/* Responsive adviser landing: keep the four portraits and footer visible on
+   ordinary phones, while permitting gentle scrolling on compact screens. */
+@media(max-width:599px){
+  body:not(.chat-active) .top{min-height:65px;padding:9px 15px}
+  body:not(.chat-active) .selection-view{
+    padding:6px 12px 9px;
+    overflow-x:hidden;overflow-y:auto;touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+    scrollbar-width:none;
+  }
+  body:not(.chat-active) .selection-view::-webkit-scrollbar{display:none}
+  body:not(.chat-active) .selection-view > .hero,
+  body:not(.chat-active) .selection-view > .advisor-main-panel,
+  body:not(.chat-active) .selection-view > .advisor-topic-details,
+  body:not(.chat-active) .selection-view > .advisor-selection-tip,
+  body:not(.chat-active) .selection-view > footer{flex-shrink:0}
+  body:not(.chat-active) .selection-view .hero{padding:0 2px 11px}
+  body:not(.chat-active) .selection-view .hero h1{margin-bottom:0}
+  body:not(.chat-active) .selection-view .hero-heading{margin-bottom:3px}
+  body:not(.chat-active) .selection-view .avatars{gap:11px 9px}
+  body:not(.chat-active) .selection-view .avatar:not(.avatar-featured){
+    width:var(--advisor-mobile-card-width,90%);
+    justify-self:center;
+  }
+  /* Video consultation is now accessible beside the title. Don't repeat its
+     older, fifth voice-adviser card below the four main advisers. */
+  body:not(.chat-active) .selection-view .avatar.avatar-featured{display:none}
+  body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) strong.advisor-card-name{
+    margin-top:8px;
+  }
+  body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advisor-card-desc{
+    margin-top:2px;margin-bottom:10px;
+  }
+  body:not(.chat-active) .selection-view .advisor-topic-details{margin-top:10px}
+  body:not(.chat-active) .advisor-topic-details summary{min-height:44px;padding:7px 13px}
+  body:not(.chat-active) .selection-view .advisor-selection-tip{margin:8px 0 0}
+  body:not(.chat-active) .selection-view footer{
+    margin:6px auto 0;padding:5px 5px 12px;
+    line-height:1.5;
+  }
+}
+@media(max-width:599px) and (max-height:670px){
+  body:not(.chat-active) .top{min-height:58px;padding:6px 13px}
+  body:not(.chat-active) .selection-view{padding-top:3px}
+  body:not(.chat-active) .selection-view .hero{padding-bottom:8px}
+  body:not(.chat-active) .selection-view .avatars{gap:8px}
+}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
@@ -1856,8 +1905,27 @@ let savedSajuTheme="dark";
 try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="light"?"light":"dark"}catch(_){}
 setSajuTheme(savedSajuTheme==="dark");
 $("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
+/* Size main adviser portraits to the available phone height, without
+   shrinking text. Scroll only if even the smallest safe portraits won't fit. */
+function fitAdvisorSelection(){
+  if(window.innerWidth>=600)return;
+  const view=$("selectionView");
+  for(const percentage of [90,88,86,84,82,80]){
+    view.style.setProperty("--advisor-mobile-card-width",percentage+"%");
+    if(view.scrollHeight<=view.clientHeight+2)break;
+  }
+}
+let advisorFitQueued=false;
+function scheduleAdvisorFit(){
+  if(advisorFitQueued)return;
+  advisorFitQueued=true;
+  requestAnimationFrame(()=>{advisorFitQueued=false;fitAdvisorSelection();});
+}
+window.addEventListener("resize",scheduleAdvisorFit,{passive:true});
+document.fonts?.ready?.then(scheduleAdvisorFit);
 renderAll();
 syncChatView();
+scheduleAdvisorFit();
 refreshAiState();
 })();
 </script>
