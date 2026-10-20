@@ -1446,11 +1446,12 @@ function makeGuidedIntake(){
 
 /* Calculations still run locally. Only rendered chat bubbles are staged, not AI calls. */
 const sajuResultCache=Object.create(null);
-function sajuResultRow(role,message){
+function sajuResultRow(role,message,showAdvisor=false,at=null){
   const row=makeEl("div","message "+role+" saju-chat-msg");
-  if(role==="bot")row.append(portrait(selected.id,selected.name,"msg-avatar"));
+  if(role==="bot")appendAdvisorMark(row,showAdvisor);
   const bubble=makeEl("div","bubble",message);
   row.append(bubble);
+  appendChatTime(row,at,role);
   return row;
 }
 function sajuBirthSummary(profile,label){
@@ -1466,8 +1467,9 @@ function makeSajuChatResults(profiles,key){
   root.setAttribute("aria-label","만세력 사주 대화형 풀이");
   const match=profiles.length===2,names=match?["본인","상대방"]:["본인"];
   const sourceText=profiles.map((p,i)=>sajuBirthSummary(p,names[i])).join("\n");
-  root.append(sajuResultRow("user","제 사주를 봐주세요.\n"+sourceText));
-  const starting=sajuResultRow("bot","출생 정보를 확인했어. 🌸 만세력으로 차근차근 살펴볼게.");
+  const renderedAt=Date.now();
+  root.append(sajuResultRow("user","제 사주를 봐주세요.\n"+sourceText,false,renderedAt));
+  const starting=sajuResultRow("bot","출생 정보를 확인했어. 🌸 만세력으로 차근차근 살펴볼게.",true);
   root.append(starting);
   const startingBubble=starting.querySelector(".bubble");
   const actions=makeEl("div","saju-chat-actions");
@@ -1480,14 +1482,15 @@ function makeSajuChatResults(profiles,key){
     if(!isCurrent())return;
     const feed=$("messages");
     const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    const revealAll=()=>{if(!isCurrent())return;for(const step of messages)root.append(sajuResultRow("bot",step));root.append(actions);};
+    const revealAll=()=>{if(!isCurrent())return;messages.forEach((step,i)=>root.append(sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null)));root.append(actions);};
     if(!animate||reduce){revealAll();return;}
     let index=0;
     function next(){
       if(!isCurrent())return;
       if(index>=messages.length){root.append(actions);return;}
       const nearBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<95;
-      root.append(sajuResultRow("bot",messages[index++]));
+      root.append(sajuResultRow("bot",messages[index],false,index===messages.length-1?Date.now():null));
+      index++;
       if(nearBottom&&location.hash==="#chat"){
         requestAnimationFrame(()=>{if(isCurrent())feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});});
       }
@@ -1499,7 +1502,7 @@ function makeSajuChatResults(profiles,key){
   const cached=sajuResultCache[key];
   if(cached?.source===profiles){
     startingBubble.textContent="이전에 계산한 만세력 풀이를 다시 보여줄게.";
-    for(const message of cached.messages)root.append(sajuResultRow("bot",message));
+    cached.messages.forEach((message,i)=>root.append(sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null)));
     root.append(actions);
     return root;
   }
@@ -1510,7 +1513,7 @@ function makeSajuChatResults(profiles,key){
       "🌸 마음에 걸리는 일이 있다면 편하게 이야기해 줘. 먼저 네 이야기를 듣고 싶어.",
       "사주 구조·궁합·재물운처럼 자세한 분석은 각 분야 상담사가 도와줄 수 있어. 나는 네 마음과 고민을 함께 이야기하는 역할이야."
     ];
-    sajuResultCache[key]={source:profiles,messages};
+    sajuResultCache[key]={source:profiles,messages,generatedAt:Date.now()};
     startingBubble.textContent="출생 정보 확인했어. 이제 편하게 이야기해 줘. 🌸";
     showMessages(messages,true);
     return root;
@@ -1546,7 +1549,7 @@ function makeSajuChatResults(profiles,key){
     if(charts.length===2)messages.push("🤝 두 사람의 궁합 기초 비교\n"+engine.compatibility(charts[0],charts[1]));
     messages.push("📜 전통 명리 해석은 참고용이야. 실제 사건이나 미래를 보장하지 않아.\n더 궁금한 점은 아래 채팅으로 질문해 줘.");
     if(!isCurrent())return;
-    sajuResultCache[key]={source:profiles,messages};
+    sajuResultCache[key]={source:profiles,messages,generatedAt:Date.now()};
     startingBubble.textContent="계산을 마쳤어. 🌸 이제 하나씩 이야기해 줄게.";
     showMessages(messages,true);
   }).catch(error=>{
