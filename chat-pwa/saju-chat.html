@@ -577,6 +577,12 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-quickbar .guided-choice.birth-calendar-choice{display:flex;align-items:center;justify-content:center;gap:7px}
 /* Month-only: maintain the four-by-three grid with lighter, slightly shorter options. */
 .guided-quickbar .guided-controls.guided-month-options>.guided-choice{min-height:43px;padding:7px 4px;font-weight:600}
+/* Keep dates as compact as months, while leaving Back visible below their scrollable grid. */
+.guided-quickbar.guided-day-step{display:flex;flex-direction:column;overflow:hidden}
+.guided-quickbar.guided-day-step .guided-controls{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.guided-quickbar .guided-controls.guided-day-options>.guided-choice{min-height:43px;padding:7px 4px;font-weight:600}
+.guided-quickbar.guided-day-step .guided-back{flex:none;align-self:flex-start;margin-top:8px}
+.guided-quickbar.guided-day-step .guided-error{flex:none}
 /* The four-digit year field, Back and Next share one compact row. */
 .guided-quickbar.guided-year-step{padding-top:8px;padding-bottom:6px}
 .guided-quickbar.guided-year-step .guided-controls{
@@ -1118,6 +1124,7 @@ function makeGuidedIntake(){
  const quickbar=$("guidedQuickbar");
  quickbar.hidden=false;
  quickbar.classList.toggle("guided-year-step",wizard.step==="year");
+ quickbar.classList.toggle("guided-day-step",wizard.step==="day");
  const transcript=makeEl("div","guided-transcript");
  for(const item of wizard.replies){
    if(item.note){
@@ -1243,7 +1250,7 @@ function makeGuidedIntake(){
    break;
  case "day":{
    ask("며칠에 태어나셨나요?");
-   controls.classList.add("guided-date-options");
+   controls.classList.add("guided-date-options","guided-day-options");
    const y=Number(current.year),m=Number(current.month);
    const days=current.calendar==="lunar"?30:new Date(y,m,0).getDate();
    for(let i=1;i<=days;i++)btn(i+"일",()=>submitAnswer("day",String(i).padStart(2,"0"),i+"일",current.calendar==="lunar"?"leap":"gender"));
