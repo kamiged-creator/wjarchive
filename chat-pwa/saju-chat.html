@@ -601,6 +601,11 @@ html.dark .guided-intake .guided-manual:focus-visible{
   grid-column:span 3;min-height:44px;padding:7px 4px;
   font-size:14px;font-weight:500;white-space:nowrap;
 }
+/* Explicit order overrides other guided button rules, including :has() layouts. */
+.guided-quickbar .guided-controls.guided-time-options>.guided-choice.secondary{grid-column:1 / span 3;grid-row:2}
+.guided-quickbar .guided-controls.guided-time-options>.guided-choice:not(.secondary){grid-column:4 / span 3;grid-row:2}
+.guided-quickbar .guided-controls.guided-time-options.guided-time-approx>.guided-select-field{grid-row:1}
+
 html.dark .guided-quickbar .guided-controls.guided-time-options>.guided-time-part{color:#dfc5aa}
 /* A quiet switch optionally allows approximate one-hour birth-time ranges. */
 .guided-quickbar .guided-controls.guided-time-options.guided-time-approx>.guided-select-field{grid-column:span 3}
@@ -1362,9 +1367,9 @@ function makeGuidedIntake(){
      };
      btn("다음 →",go);
    }
-   // Keep the secondary "unsure" option left and the forward action right.
-   const unknownTimeButton=btn("잘 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true,approximateRange:""}),true);
-   unknownTimeButton.setAttribute("aria-label","태어난 시간 잘 모름");
+   // Place the unknown-time choice on the left, before the Next action.
+   const unknownTimeButton=btn("태어난 시간 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true,approximateRange:""}),true);
+   unknownTimeButton.setAttribute("aria-label","태어난 시간 모름");
    controls.insertBefore(unknownTimeButton,controls.querySelector(".guided-choice"));
    const toggle=makeEl("button","guided-time-toggle",approximate?"← 정확한 시간 입력하기":"대략적인 시간 알아요 (예: 5~6시)");
    toggle.type="button";
