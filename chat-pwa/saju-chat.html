@@ -1168,7 +1168,7 @@ function guidedDateLabel(data){
 function makeGuidedIntake(){
  const key=birthKey(),isMatch=topic[0]==="match",count=isMatch?2:1;
  let wizard=guidedDrafts[key];
- if(!wizard){wizard={values:Array.from({length:count},newGuidedPerson),personIndex:0,step:"calendar",replies:[],back:[],error:"",busy:false};guidedDrafts[key]=wizard;}
+ if(!wizard){wizard={values:Array.from({length:count},newGuidedPerson),personIndex:0,step:"calendar",replies:[],back:[],error:"",busy:false,stepAt:Date.now()};guidedDrafts[key]=wizard;}
  const current=wizard.values[wizard.personIndex];
  const titlePerson=isMatch?(wizard.personIndex===0?"본인":"상대방"):"본인";
  const card=makeEl("div","guided-chat-flow");
@@ -1177,25 +1177,34 @@ function makeGuidedIntake(){
  quickbar.classList.toggle("guided-year-step",wizard.step==="year");
  quickbar.classList.toggle("guided-day-step",wizard.step==="day");
  const transcript=makeEl("div","guided-transcript");
+ let previousGuidedRole="bot"; // The welcome greeting immediately precedes the interview.
  for(const item of wizard.replies){
    if(item.note){
      const noteRow=makeEl("div","message bot");
-     noteRow.append(portrait(selected.id,selected.name,"msg-avatar"),makeEl("div","bubble",item.note));
+     appendAdvisorMark(noteRow,previousGuidedRole!=="bot");
+     noteRow.append(makeEl("div","bubble",item.note));
+     appendChatTime(noteRow,item.at,"bot");
      transcript.append(noteRow);
+     previousGuidedRole="bot";
      continue;
    }
    if(item.question){
      const questionRow=makeEl("div","message bot guided-history");
-     questionRow.append(portrait(selected.id,selected.name,"msg-avatar"),makeEl("div","bubble",item.question));
+     appendAdvisorMark(questionRow,previousGuidedRole!=="bot");
+     questionRow.append(makeEl("div","bubble",item.question));
+     appendChatTime(questionRow,item.questionAt,"bot");
      transcript.append(questionRow);
+     previousGuidedRole="bot";
    }
    const answerRow=makeEl("div","message user");
    answerRow.append(makeEl("div","bubble",item.answer));
+   appendChatTime(answerRow,item.at,"user");
    transcript.append(answerRow);
+   previousGuidedRole="user";
  }
  card.append(transcript);
  const prompt=makeEl("div","message bot guided-current");
- const icon=portrait(selected.id,selected.name,"msg-avatar");
+ appendAdvisorMark(prompt,previousGuidedRole!=="bot");
  const words=makeEl("div","bubble guided-prompt-text");
  const controls=makeEl("div","guided-controls");
  const notice=makeEl("div","guided-error",wizard.error||"");
@@ -1206,12 +1215,12 @@ function makeGuidedIntake(){
    words.append(makeEl("p","guided-question",question));
    if(helper)words.append(makeEl("p","guided-hint",helper));
  }
- prompt.append(icon,words);card.append(prompt);
+ prompt.append(words);appendChatTime(prompt,wizard.stepAt,"bot");card.append(prompt);
  quickbar.append(controls);
  const nowYear=Number(new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric"}).format(new Date()));
  function capture(){
    wizard.back.push({values:wizard.values.map(d=>({...d})),personIndex:wizard.personIndex,
-     step:wizard.step,replies:wizard.replies.slice()});
+     step:wizard.step,replies:wizard.replies.slice(),stepAt:wizard.stepAt});
    wizard.error="";
  }
  function submitAnswer(field,value,answer,next,extra){
@@ -1219,9 +1228,11 @@ function makeGuidedIntake(){
    const oldStep=wizard.step;
    current[field]=value;
    if(extra)Object.assign(current,extra);
-   wizard.replies.push({question:activeQuestion,answer});
+   const answeredAt=Date.now();
+   wizard.replies.push({question:activeQuestion,answer,questionAt:wizard.stepAt,at:answeredAt});
+   wizard.stepAt=answeredAt;
    if(next==="done"){
-     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.approximateTimeMode=false;wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요."});}
+     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.approximateTimeMode=false;wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요.",at:Date.now()});}
      else wizard.step="review";
    }else wizard.step=next;
    renderMessages(true);
@@ -1420,7 +1431,7 @@ function makeGuidedIntake(){
      const prev=wizard.back.pop();
      if(!prev)return;
      wizard.values=prev.values;wizard.personIndex=prev.personIndex;wizard.step=prev.step;
-     wizard.replies=prev.replies;wizard.error="";renderMessages(true);
+     wizard.replies=prev.replies;wizard.stepAt=prev.stepAt;wizard.error="";renderMessages(true);
    });
    if(wizard.step==="year"){
      back.textContent="← 이전";
