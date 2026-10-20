@@ -574,6 +574,9 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-quickbar[hidden]{display:none!important}
 .guided-quickbar .guided-controls{margin:0;gap:7px}
 .guided-quickbar .guided-choice{background:rgba(150,105,67,.40);border:1px solid #b79470;color:#fff7ef}
+.guided-quickbar .guided-choice.birth-calendar-choice{display:flex;align-items:center;justify-content:center;gap:7px}
+.guided-quickbar .birth-calendar-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:18px;height:18px;color:#cfa56e}
+.guided-quickbar .birth-calendar-icon svg{display:block;width:18px;height:18px}
 .guided-quickbar .guided-choice.secondary{background:rgba(255,248,239,.10);border-color:#c4aa91;color:#75553d}
 .guided-quickbar .guided-choice:active{background:rgba(176,126,82,.9)}
 .guided-quickbar .guided-input,.guided-quickbar .saju-select-trigger{min-height:43px}
@@ -1137,8 +1140,31 @@ function makeGuidedIntake(){
    }else wizard.step=next;
    renderMessages(true);
  }
- function btn(label,run,secondary=false){
-   const b=makeEl("button","guided-choice"+(secondary?" secondary":""),label);
+ function calendarLineIcon(type){
+   const ns="http://www.w3.org/2000/svg";
+   const wrapper=makeEl("span","birth-calendar-icon");
+   wrapper.setAttribute("aria-hidden","true");
+   const svg=document.createElementNS(ns,"svg");
+   svg.setAttribute("viewBox","0 0 24 24");
+   svg.setAttribute("fill","none");
+   svg.setAttribute("stroke","currentColor");
+   svg.setAttribute("stroke-width","1.6");
+   svg.setAttribute("stroke-linecap","round");
+   svg.setAttribute("stroke-linejoin","round");
+   const shapes=type==="sun"
+     ?[["circle",{cx:"12",cy:"12",r:"4"}],["path",{d:"M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"}]]
+     :[["path",{d:"M20.985 12.486A9 9 0 0 1 11.514 3.015 9 9 0 1 0 20.985 12.486Z"}]];
+   for(const [tag,attributes] of shapes){
+     const child=document.createElementNS(ns,tag);
+     for(const [key,value] of Object.entries(attributes))child.setAttribute(key,value);
+     svg.append(child);
+   }
+   wrapper.append(svg);
+   return wrapper;
+ }
+ function btn(label,run,secondary=false,calendarIcon=null){
+   const b=makeEl("button","guided-choice"+(secondary?" secondary":"")+(calendarIcon?" birth-calendar-choice":""),label);
+   if(calendarIcon)b.prepend(calendarLineIcon(calendarIcon));
    b.type="button";b.addEventListener("click",run);controls.append(b);return b;
  }
  function textInput(label,hint,value,max,mode){
@@ -1165,8 +1191,8 @@ function makeGuidedIntake(){
  switch(wizard.step){
  case "calendar":
    ask(titlePerson+" 생일은 양력이세요, 음력이세요?","아래에서 선택하면 다음 질문으로 넘어가요.");
-   btn("☀️ 양력",()=>submitAnswer("calendar","solar","양력","year"));
-   btn("🌙 음력",()=>submitAnswer("calendar","lunar","음력","year"));
+   btn("양력",()=>submitAnswer("calendar","solar","양력","year"),false,"sun");
+   btn("음력",()=>submitAnswer("calendar","lunar","음력","year"),false,"moon");
    btn("잘 모르겠어요",()=>warn("정확한 만세력 계산을 위해 양력인지 음력인지 먼저 확인해 주세요."),true);
    break;
  case "year":{
