@@ -1232,7 +1232,7 @@ function makeGuidedIntake(){
    wizard.replies.push({question:activeQuestion,answer,questionAt:wizard.stepAt,at:answeredAt});
    wizard.stepAt=answeredAt;
    if(next==="done"){
-     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.approximateTimeMode=false;wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요.",at:Date.now()});}
+     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.approximateTimeMode=true;wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요.",at:Date.now()});}
      else wizard.step="review";
    }else wizard.step=next;
    renderMessages(true);
@@ -1330,7 +1330,7 @@ function makeGuidedIntake(){
    btn("선택 안 함",()=>submitAnswer("gender","unspecified","선택하지 않음","time"),true);
    break;
  case "time":{
-   const approximate=wizard.approximateTimeMode===true;
+   const approximate=wizard.approximateTimeMode!==false;
    ask("태어난 시간을 기억하시나요?",approximate
      ?"정확하지 않아도 괜찮아요. 기억나는 1시간대를 선택해 주세요."
      :"정확한 시·분을 입력하거나, 대략적인 시간대를 선택해 주세요.");
