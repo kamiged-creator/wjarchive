@@ -575,12 +575,28 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-quickbar .guided-controls{margin:0;gap:7px}
 .guided-quickbar .guided-choice{background:rgba(150,105,67,.40);border:1px solid #b79470;color:#fff7ef}
 .guided-quickbar .guided-choice.birth-calendar-choice{display:flex;align-items:center;justify-content:center;gap:7px}
-/* Compact four-digit year entry without shrinking the other birth questions. */
-.guided-quickbar.guided-year-step{padding-top:8px;padding-bottom:5px}
-.guided-quickbar.guided-year-step .guided-input-group{width:100%;max-width:220px}
+/* The four-digit year field, Back and Next share one compact row. */
+.guided-quickbar.guided-year-step{padding-top:8px;padding-bottom:6px}
+.guided-quickbar.guided-year-step .guided-controls{
+  display:grid;grid-template-columns:minmax(0,1fr) 72px 72px;
+  align-items:end;gap:7px;max-width:350px;margin:0;
+}
+.guided-quickbar.guided-year-step .guided-controls .guided-input-group{
+  grid-column:1;min-width:0;width:100%;max-width:none;gap:5px;
+}
 .guided-quickbar.guided-year-step .guided-input{height:44px;min-height:44px;padding:7px 10px;font-size:16px}
-.guided-quickbar.guided-year-step .guided-choice{min-height:44px;padding:6px 8px;font-size:14px;font-weight:600}
-.guided-quickbar.guided-year-step .guided-back{min-height:34px;margin:2px 0 0;padding:2px 5px;font-size:13px;font-weight:600}
+.guided-quickbar.guided-year-step .guided-controls .guided-back{
+  grid-column:2;min-height:44px;height:44px;margin:0;padding:5px 3px;
+  border:1px solid #a48669;border-radius:11px;background:transparent;
+  color:#d6b99d;font-size:14px;font-weight:600;white-space:nowrap;
+}
+.guided-quickbar.guided-year-step .guided-controls .guided-choice{
+  grid-column:3;min-height:44px;height:44px;padding:5px 3px;
+  font-size:14px;font-weight:600;white-space:nowrap;
+}
+html:not(.dark) .guided-quickbar.guided-year-step .guided-controls .guided-back{
+  color:#735238;border-color:#b69c81;
+}
 .guided-quickbar .birth-calendar-choices .guided-choice{font-weight:600}
 .guided-quickbar .birth-calendar-choices .guided-choice.secondary{font-weight:500}
 .guided-quickbar .birth-calendar-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:18px;height:18px;color:#cfa56e}
@@ -1322,7 +1338,12 @@ function makeGuidedIntake(){
      wizard.values=prev.values;wizard.personIndex=prev.personIndex;wizard.step=prev.step;
      wizard.replies=prev.replies;wizard.error="";renderMessages(true);
    });
-   quickbar.append(back);
+   if(wizard.step==="year"){
+     back.textContent="← 이전";
+     controls.insertBefore(back,controls.querySelector(".guided-choice"));
+   }else{
+     quickbar.append(back);
+   }
  }
  quickbar.append(notice);
  return card;
