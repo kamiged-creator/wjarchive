@@ -602,6 +602,15 @@ html.dark .guided-intake .guided-manual:focus-visible{
   font-size:14px;font-weight:500;white-space:nowrap;
 }
 html.dark .guided-quickbar .guided-controls.guided-time-options>.guided-time-part{color:#dfc5aa}
+/* A quiet switch optionally allows approximate one-hour birth-time ranges. */
+.guided-quickbar .guided-controls.guided-time-options.guided-time-approx>.guided-select-field{grid-column:span 3}
+.guided-quickbar .guided-controls.guided-time-options>.guided-time-toggle{
+  grid-column:1/-1;justify-self:start;min-height:32px;padding:5px 4px;
+  border:0;background:transparent;color:#78553b;text-align:left;
+  font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+}
+html.dark .guided-quickbar .guided-controls.guided-time-options>.guided-time-toggle{color:#d9b996}
+.guided-quickbar .guided-controls.guided-time-options>.guided-time-toggle:focus-visible{outline:2px solid #c6a27e;outline-offset:2px}
 /* The four-digit year field, Back and Next share one compact row. */
 .guided-quickbar.guided-year-step{padding-top:8px;padding-bottom:6px}
 .guided-quickbar.guided-year-step .guided-controls{
@@ -1123,12 +1132,12 @@ function upgradeSajuSelect(select){
 }
 
 /* The guided birth interview is local and rule-based. It never calls an AI API. */
-function newGuidedPerson(){return {calendar:"",year:"",month:"",day:"",leap:false,gender:"unspecified",unknown:false,time:"",province:"none",birthplace:"none"};}
+function newGuidedPerson(){return {calendar:"",year:"",month:"",day:"",leap:false,gender:"unspecified",unknown:false,time:"",approximateRange:"",province:"none",birthplace:"none"};}
 function guidedProfile(data){
  return {date:data.year+"-"+data.month+"-"+data.day,
    calendar:data.calendar,leap:data.calendar==="lunar"&&data.leap,
    gender:data.gender,unknown:data.unknown,time:data.unknown?"":data.time,
-   birthplace:data.unknown?"none":data.birthplace,longitude:null};
+   birthplace:data.unknown?"none":data.birthplace,longitude:null,approximateRange:data.approximateRange||""};
 }
 function guidedDateLabel(data){
  return (data.calendar==="lunar"?"음력":"양력")+(data.leap?" 윤달":"")+" "+data.year+"년 "+Number(data.month)+"월 "+Number(data.day)+"일";
@@ -1189,7 +1198,7 @@ function makeGuidedIntake(){
    if(extra)Object.assign(current,extra);
    wizard.replies.push({question:activeQuestion,answer});
    if(next==="done"){
-     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요."});}
+     if(wizard.personIndex+1<count){wizard.personIndex++;wizard.step="calendar";wizard.approximateTimeMode=false;wizard.replies.push({note:"첫 번째 분의 정보는 확인했어요. 이번에는 상대방 정보를 여쭤볼게요."});}
      else wizard.step="review";
    }else wizard.step=next;
    renderMessages(true);
@@ -1287,21 +1296,43 @@ function makeGuidedIntake(){
    btn("선택 안 함",()=>submitAnswer("gender","unspecified","선택하지 않음","time"),true);
    break;
  case "time":{
-   ask("태어난 시간을 기억하시나요?","기억나면 오전·오후와 시·분을 입력해 주세요. 모르면 건너뛸 수 있어요.");
+   const approximate=wizard.approximateTimeMode===true;
+   ask("태어난 시간을 기억하시나요?",approximate
+     ?"정확하지 않아도 괜찮아요. 기억나는 1시간대를 선택해 주세요."
+     :"정확한 시·분을 입력하거나, 대략적인 시간대를 선택해 주세요.");
    controls.classList.add("guided-time-options");
-   const part=selectInput("오전 / 오후",[["am","오전"],["pm","오후"]]);
-   const hour=textInput("시 (1~12)","예: 6","",2);
-   const minute=textInput("분 (0~59)","예: 20","",2);
-   hour.parentElement.classList.add("guided-time-part");
-   minute.parentElement.classList.add("guided-time-part");
-   const go=()=>{
-     const h=hour.value.trim(),m=minute.value.trim();
-     if(!/^[0-9]{1,2}$/.test(h)||Number(h)<1||Number(h)>12||!/^[0-9]{1,2}$/.test(m)||Number(m)>59)return warn("시간은 1~12시, 분은 0~59분으로 입력해 주세요.");
-     const h24=Number(h)%12+(part.value==="pm"?12:0);
-     submitAnswer("time",String(h24).padStart(2,"0")+":"+m.padStart(2,"0"),(part.value==="am"?"오전 ":"오후 ")+h+"시 "+m+"분","province",{unknown:false});
-   };
-   btn("시간 확인 →",go);
-   btn("태어난 시간 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true}),true);
+   if(approximate){
+     controls.classList.add("guided-time-approx");
+     const period=selectInput("오전 / 오후",[["am","오전"],["pm","오후"]]);
+     const options=[["","시간대 선택"]];
+     for(let h=1;h<=12;h++)options.push([String(h),h+"~"+(h===12?1:h+1)+"시"]);
+     const range=selectInput("대략적인 시간대",options);
+     btn("시간대 확인 →",()=>{
+       if(!range.value)return warn("기억나는 시간대를 선택해 주세요.");
+       const h=Number(range.value);
+       const hour24=(h%12+(period.value==="pm"?12:0))%24;
+       const label=(period.value==="am"?"오전 ":"오후 ")+h+"~"+(h===12?1:h+1)+"시 사이";
+       submitAnswer("time",String(hour24).padStart(2,"0")+":30",label+" (대략)","province",{unknown:false,approximateRange:label});
+     });
+   }else{
+     const period=selectInput("오전 / 오후",[["am","오전"],["pm","오후"]]);
+     const hour=textInput("시 (1~12)","예: 6","",2);
+     const minute=textInput("분 (0~59)","예: 20","",2);
+     hour.parentElement.classList.add("guided-time-part");
+     minute.parentElement.classList.add("guided-time-part");
+     const go=()=>{
+       const h=hour.value.trim(),m=minute.value.trim();
+       if(!/^[0-9]{1,2}$/.test(h)||Number(h)<1||Number(h)>12||!/^[0-9]{1,2}$/.test(m)||Number(m)>59)return warn("시간은 1~12시, 분은 0~59분으로 입력해 주세요.");
+       const h24=Number(h)%12+(period.value==="pm"?12:0);
+       submitAnswer("time",String(h24).padStart(2,"0")+":"+m.padStart(2,"0"),(period.value==="am"?"오전 ":"오후 ")+h+"시 "+m+"분","province",{unknown:false,approximateRange:""});
+     };
+     btn("시간 확인 →",go);
+   }
+   btn("태어난 시간 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true,approximateRange:""}),true);
+   const toggle=makeEl("button","guided-time-toggle",approximate?"← 정확한 시간 입력하기":"대략적인 시간 알아요 (예: 5~6시)");
+   toggle.type="button";
+   toggle.addEventListener("click",()=>{wizard.approximateTimeMode=!approximate;wizard.error="";renderMessages(true);});
+   controls.append(toggle);
    break;
  }
  case "province":{
@@ -1334,7 +1365,7 @@ function makeGuidedIntake(){
    for(let i=0;i<count;i++){
      const value=wizard.values[i],block=makeEl("p","guided-review",
        (isMatch?(i===0?"본인":"상대방"):"본인")+" · "+guidedDateLabel(value)+" · "+
-       (value.unknown?"태어난 시간 모름":value.time)+
+       (value.unknown?"태어난 시간 모름":value.approximateRange?value.approximateRange+" (추정)":value.time)+
        (value.gender==="unspecified"?"":" · "+value.gender)+
        (value.birthplace!=="none"?" · "+(window.BokjaksoBirthplaces?.locations[value.birthplace]?.label||value.birthplace):""));
      controls.append(block);
@@ -1392,7 +1423,7 @@ function sajuBirthSummary(profile,label){
   const place=window.BokjaksoSaju?.BIRTHPLACES?.[profile.birthplace]?.label||"";
   return label+" · "+(profile.calendar==="lunar"?"음력":"양력")+
     (profile.leap?" 윤달":"")+" "+profile.date.replaceAll("-",".")+
-    " · "+(profile.unknown?"시간 모름":profile.time)+
+    " · "+(profile.unknown?"시간 모름":profile.approximateRange?profile.approximateRange+" (추정·중간값 "+profile.time+")":profile.time)+
     (profile.gender==="unspecified"?"":" · "+profile.gender)+
     (place?" · "+place:"");
 }
@@ -1459,6 +1490,8 @@ function makeSajuChatResults(profiles,key){
   Promise.all(profiles.map(p=>engine.calculate(p))).then(async charts=>{
     if(!isCurrent())return;
     const messages=[];
+    const estimated=profiles.map((p,i)=>p.approximateRange?names[i]+": "+p.approximateRange+" (중간값 "+p.time+")":null).filter(Boolean);
+    if(estimated.length)messages.push("⏱ 출생 시간은 추정으로 입력됐어.\n"+estimated.join("\n")+"\n추정 중간값으로 계산했기 때문에 정확한 출생 시간에 따라 시주와 풀이가 달라질 수 있어.");
     for(let i=0;i<charts.length;i++){
       const chart=charts[i],label=names[i];
       const formatted=engine.format(chart).split("\n");
