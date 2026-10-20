@@ -1373,8 +1373,8 @@ function makeGuidedIntake(){
    ask("태어난 지역도 알려주시겠어요?","선택 사항이에요. 지역을 선택하면 시간 보정에 참고해요.");
    const areas=window.BokjaksoBirthplaces?.provinces||[];
    const p=selectInput("태어난 시·도",[["","시·도 선택"],...areas.map(a=>[a.id,a.label])]);
-   btn("이 지역 선택 →",()=>{
-     if(!p.value)return warn("시·도를 골라 주세요. 모르시면 아래 건너뛰기를 눌러 주세요.");
+   p.addEventListener("change",()=>{
+     if(!p.value)return;
      current.birthplace="none";
      submitAnswer("province",p.value,areas.find(x=>x.id===p.value)?.label||"선택한 지역","city");
    });
