@@ -771,13 +771,11 @@ body:not(.chat-active) .selection-view footer.saju-legal-footer{
   width:100%;margin:6px auto 0;padding:7px 6px 12px;
   transform:translateY(-14px);text-align:center;
 }
-.saju-legal-menu{display:flex;flex-direction:column;align-items:center;gap:5px;color:#bda68b}
-.saju-legal-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;font-size:12px;line-height:1.45;font-weight:550}
+.saju-legal-menu{display:flex;align-items:center;justify-content:center;color:#bda68b}
+.saju-legal-row{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:7px;font-size:11.5px;line-height:1.45;font-weight:550;white-space:nowrap}
 .saju-legal-separator{opacity:.5;font-weight:400}
-.saju-business-note,.saju-preview-note{margin:0;max-width:100%;word-break:keep-all}
-.saju-business-note{font-size:10px;line-height:1.45;color:#8f7d6c}
-.saju-preview-note{font-size:10px;line-height:1.55;color:#9c8772}
-@media(max-width:355px){.saju-legal-row{font-size:11px;gap:8px}.saju-business-note,.saju-preview-note{font-size:9.5px}}
+.saju-business-note{margin:0;max-width:100%;word-break:keep-all;font-size:10px;line-height:1.45;color:#8f7d6c}
+@media(max-width:355px){.saju-legal-row{font-size:10px;gap:5px}.saju-business-note{font-size:9.5px}}
 
 </style>
 <script src="/saju-avatars.js"></script>
@@ -805,11 +803,9 @@ body:not(.chat-active) .selection-view footer.saju-legal-footer{
   <p id="harinNewWindowHint" class="choose-tip" hidden>하린 음성 상담은 새 탭에서 크게 열려요. 마이크 사용을 허용해 주세요.</p>
   <footer class="saju-legal-footer" aria-label="서비스 및 정책 안내">
     <div class="saju-legal-menu" aria-label="정식 서비스 전 공개 예정인 정책">
-      <div class="saju-legal-row"><span>개인정보처리방침</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>이용약관</span></div>
-      <div class="saju-legal-row"><span>환불정책</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>고객문의</span></div>
+      <div class="saju-legal-row"><span>개인정보처리방침</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>이용약관</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>환불정책</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>고객문의</span></div>
     </div>
     <p class="saju-business-note">사업자정보 · 약관 상세는 정식 서비스 전 공개 예정</p>
-    <p class="saju-preview-note">복작소 사주 · AI 상담은 준비 중이며 무료 만세력은 체험할 수 있어요.</p>
   </footer>
   </main>
   <div id="chatView" class="chat-view" hidden>
