@@ -583,6 +583,10 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-quickbar .guided-controls.guided-day-options>.guided-choice{min-height:43px;padding:7px 4px;font-weight:600}
 .guided-quickbar.guided-day-step .guided-back{flex:none;align-self:flex-start;margin-top:8px}
 .guided-quickbar.guided-day-step .guided-error{flex:none}
+/* Birthplace: two selectors and two actions, each on one row. */
+.guided-quickbar .guided-controls.guided-birthplace-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.guided-quickbar .guided-controls.guided-birthplace-options>.guided-select-field{grid-column:span 1;min-width:0}
+.guided-quickbar .guided-controls.guided-birthplace-options>.guided-choice{grid-column:span 1;min-width:0;min-height:44px;font-size:14px;font-weight:600;white-space:nowrap;padding:8px 3px}
 /* Time intake: morning/afternoon, hour and minute on one row; action buttons below. */
 .guided-quickbar .guided-controls.guided-time-options{
   display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
@@ -1378,28 +1382,31 @@ function makeGuidedIntake(){
    break;
  }
  case "province":{
-   ask("태어난 지역도 알려주시겠어요?","선택 사항이에요. 지역을 선택하면 시간 보정에 참고해요.");
+   ask("태어난 지역도 알려주시겠어요?","시·도와 시·군·구를 선택해 주세요. 지역 보정은 선택 사항이에요.");
+   controls.classList.add("guided-birthplace-options");
    const areas=window.BokjaksoBirthplaces?.provinces||[];
-   const p=selectInput("태어난 시·도",[["","시·도 선택"],...areas.map(a=>[a.id,a.label])]);
-   p.addEventListener("change",()=>{
-     if(!p.value)return;
-     current.birthplace="none";
-     submitAnswer("province",p.value,areas.find(x=>x.id===p.value)?.label||"선택한 지역","city");
+   const p=selectInput("시·도", [["","시·도 선택"],...areas.map(a=>[a.id,a.label])]);
+   const loc=selectInput("시·군·구", [["","시·군·구 선택"]]);
+   const updatePlaces=()=>{
+     const area=areas.find(a=>a.id===p.value);
+     loc.replaceChildren();
+     const choices=[["","시·군·구 선택"],...(area?.places||[]).map(a=>[area.id+"/"+a[0],a[0]])];
+     for(const [value,name] of choices){const opt=makeEl("option","",name);opt.value=value;loc.append(opt);}
+     loc.disabled=!area;
+     loc.dispatchEvent(new Event("change",{bubbles:true}));
+   };
+   p.addEventListener("change",updatePlaces);
+   updatePlaces();
+   btn("잘 모름",()=>{current.birthplace="none";submitAnswer("province","none","지역 보정 안 함","done");},true);
+   btn("다음 →",()=>{
+     const area=areas.find(a=>a.id===p.value);
+     if(!area)return warn("시·도를 선택하거나 잘 모름을 눌러 주세요.");
+     if(!loc.value)return warn("시·군·구를 선택하거나 잘 모름을 눌러 주세요.");
+     const name=(area.places||[]).find(x=>area.id+"/"+x[0]===loc.value)?.[0]||"선택한 지역";
+     current.province=p.value;
+     current.birthplace=loc.value;
+     submitAnswer("province",p.value,(area.short||area.label)+" "+name,"done");
    });
-   btn("지역을 잘 몰라요 · 건너뛰기",()=>{current.birthplace="none";submitAnswer("province","none","보정하지 않음","done");},true);
-   break;
- }
- case "city":{
-   const areas=window.BokjaksoBirthplaces?.provinces||[];
-   const area=areas.find(x=>x.id===current.province);
-   ask("어느 시·군에서 태어나셨나요?","군·시 이름을 고르면 해당 지역의 중심 경도로 계산해요.");
-   const loc=selectInput("태어난 시·군",[["","시·군 선택"],...(area?.places||[]).map(a=>[area.id+"/"+a[0],a[0]])]);
-   btn("이 시·군으로 계속 →",()=>{
-     if(!loc.value)return warn("태어난 시·군을 선택해 주세요.");
-     const name=(area?.places||[]).find(x=>area.id+"/"+x[0]===loc.value)?.[0]||"선택한 지역";
-     submitAnswer("birthplace",loc.value,(area?.short||"")+" "+name,"done");
-   });
-   btn("잘 모르겠어요 · 보정하지 않기",()=>{current.birthplace="none";submitAnswer("birthplace","none","지역 보정 안 함","done");},true);
    break;
  }
  case "review":{
