@@ -777,6 +777,21 @@ body:not(.chat-active) .selection-view footer.saju-legal-footer{
 .saju-business-note{margin:0;max-width:100%;word-break:keep-all;font-size:10px;line-height:1.45;color:#8f7d6c}
 @media(max-width:355px){.saju-legal-row{font-size:10px;gap:5px}.saju-business-note{font-size:9.5px}}
 
+
+/* Keep the full-size advisor cards, but reclaim non-card vertical whitespace.
+   On mobile this allows the selection heading and video shortcut to stay visible
+   alongside the footer instead of requiring a bottom-aligned manual scroll. */
+@media(max-width:599px){
+  body:not(.chat-active) .top{min-height:57px;padding:6px 15px}
+  body:not(.chat-active) .selection-view{padding-top:3px;padding-bottom:5px}
+  body:not(.chat-active) .selection-view .hero{padding-bottom:7px}
+  body:not(.chat-active) .selection-view .hero-heading{margin-bottom:1px}
+  body:not(.chat-active) .selection-view .advisor-selection-tip{margin-top:4px}
+  body:not(.chat-active) .selection-view footer.saju-legal-footer{
+    margin-top:1px;padding:4px 6px 6px;gap:4px;
+  }
+}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
