@@ -672,7 +672,15 @@ html.dark .guided-current .guided-hint{color:#d2ac89}
 /* Manseryeok result in discreet chat bubbles, not a tall form card. */
 .saju-chat-results{display:flex;flex-direction:column;gap:14px;width:100%;min-width:0}
 .saju-chat-results .message{min-width:0;width:100%;align-items:flex-end}
-.saju-chat-results .message .bubble{max-width:min(85%,500px);white-space:pre-wrap;font-size:15px;line-height:1.75;overflow-wrap:anywhere}
+.saju-chat-results .message .bubble{max-width:min(85%,500px);white-space:pre-wrap;font-size:16px;line-height:1.65;overflow-wrap:anywhere}
+/* Kakao-style message grouping: keep text aligned even when repeating portrait is omitted. */
+.message .msg-avatar-spacer{width:32px;height:32px;flex:none;visibility:hidden}
+.message .chat-time{flex:none;align-self:flex-end;font-size:11px;font-weight:400;line-height:1.25;color:#978a7e;white-space:nowrap;margin-bottom:3px}
+.message.bot .chat-time{margin-left:1px}
+.message.user .chat-time{margin-right:1px}
+.message:has(.chat-time) .bubble{min-width:0;max-width:min(76%,500px)}
+.saju-chat-results .message:has(.chat-time) .bubble{max-width:min(76%,500px)}
+html.dark .message .chat-time{color:#ab9988}
 .saju-chat-results .message.bot .bubble{border:1px solid rgba(162,127,94,.26)}
 .saju-chat-msg{animation:saju-chat-reveal .65s cubic-bezier(.2,.8,.32,1) both}
 .saju-chat-actions{display:flex;justify-content:flex-start;padding:0 0 6px 39px}
@@ -948,7 +956,22 @@ if(harinShortcutPortrait&&typeof avatarSources.harin==="string"&&avatarSources.h
 const araStudioPortrait="https://ik.imagekit.io/wonjuart/ara.png?updatedAt=1789481607484";
 const avatarUrl=id=>id==="ara"?araStudioPortrait:typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
-function msg(role,text){return{role,text:String(text).slice(0,1000)}}
+const chatTimeFormatter=new Intl.DateTimeFormat("ko-KR",{hour:"numeric",minute:"2-digit",hour12:true});
+function appendChatTime(row,at,role){
+ if(!Number.isFinite(at)||at<=0)return;
+ const stamp=makeEl("time","chat-time",chatTimeFormatter.format(new Date(at)));
+ stamp.dateTime=new Date(at).toISOString();
+ if(role==="user")row.insertBefore(stamp,row.querySelector(".bubble"));
+ else row.append(stamp);
+}
+function appendAdvisorMark(row,show){
+ if(show){
+   const avatar=portrait(selected.id,selected.name,"msg-avatar");
+   if(avatar.textContent)avatar.classList.add("msg-fallback");
+   row.append(avatar);
+ }else row.append(makeEl("span","msg-avatar-spacer"));
+}
+function msg(role,text){return{role,text:String(text).slice(0,1000),at:Date.now()}}
 function greeting(){return msg("bot",selected.intro+"\n"+(selected.id==="ara"?"편안하게 마음을 들려줘. 내가 들어줄게.":topic[0]==="match"?"두 분의 정보를 차례로 여쭤볼게요.":"제가 차근차근 여쭤볼게요."));}
 function read(){try{const x=JSON.parse(sessionStorage.getItem(storageKey())||"null");if(!Array.isArray(x))return[greeting()];const list=x.filter(v=>v&&["user","bot"].includes(v.role)&&typeof v.text==="string").slice(-30);if(!list.length)return[greeting()];if(list[0].role==="bot"&&list[0].text.includes("먼저 아래에 생년월일을 입력해 주세요"))list[0]=greeting();return list;}catch(_){return[greeting()]}}
 let conversation=read();
