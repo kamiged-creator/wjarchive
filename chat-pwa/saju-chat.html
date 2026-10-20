@@ -1826,11 +1826,7 @@ function renderMessages(scrollToEnd=true){
   for(const [index,item] of conversation.entries()){
     const row=document.createElement("div");
     row.className="message "+(item.role==="user"?"user":"bot");
-    if(item.role==="bot"){
-      const avatar=portrait(selected.id,selected.name,"msg-avatar");
-      if(avatar.textContent)avatar.classList.add("msg-fallback");
-      row.append(avatar);
-    }
+    if(item.role==="bot")appendAdvisorMark(row,index===0||conversation[index-1]?.role!=="bot");
     const bubble=document.createElement("div");
     bubble.className="bubble";
     if(index===0&&animateWelcome){
@@ -1842,6 +1838,7 @@ function renderMessages(scrollToEnd=true){
       row.append(bubble);
       feed.append(row);
     }
+    if(index===conversation.length-1||conversation[index+1]?.role!==item.role)appendChatTime(row,item.at,item.role);
     if(index===0)feed.append(makeIntake());
   }
   // On first entry, let the whole greeting finish before revealing the next
