@@ -700,6 +700,10 @@ html.dark .guided-current .guided-hint{color:#d2ac89}
 html.dark .message .chat-time{color:#ab9988}
 .saju-chat-results .message.bot .bubble{border:1px solid rgba(162,127,94,.26)}
 .saju-chat-msg{animation:saju-chat-reveal .65s cubic-bezier(.2,.8,.32,1) both}
+/* Ease between guided questions without shifting the fixed composer. */
+.saju-chat-results .message:last-of-type .bubble{animation:guided-next-enter .32s ease-out both}
+.guided-quickbar:not([hidden]) .guided-controls{animation:guided-next-enter .3s ease-out both}
+@keyframes guided-next-enter{from{opacity:.45;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 .saju-chat-actions{display:flex;justify-content:flex-start;padding:0 0 6px 39px}
 .saju-chat-edit{min-height:42px;padding:7px 14px;border:1px solid #ad8969;border-radius:12px;background:rgba(147,109,73,.12);color:#735338;font:inherit;font-size:14px;font-weight:750}
 .saju-chat-edit:focus-visible{outline:2px solid #c5a079;outline-offset:2px}
@@ -707,7 +711,7 @@ html.dark .saju-chat-results .message.bot .bubble{background:#382b23;color:#f4e7
 html.dark .saju-chat-results .message.user .bubble{background:#654c3b;color:#f3e6d7}
 html.dark .saju-chat-edit{background:rgba(183,133,84,.12);color:#edcdaa;border-color:#846448}
 @keyframes saju-chat-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.saju-chat-msg{animation:none}.saju-chat-results .message{scroll-behavior:auto}}
+@media(prefers-reduced-motion:reduce){.saju-chat-msg,.saju-chat-results .message:last-of-type .bubble,.guided-quickbar:not([hidden]) .guided-controls{animation:none}.saju-chat-results .message{scroll-behavior:auto}}
 
 
 /* Advisor selection redesign only: the existing chat screen retains its layout. */
@@ -1903,7 +1907,7 @@ function renderMessages(scrollToEnd=true){
         feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
       }else feed.scrollTop=0;
     }else{
-      feed.scrollTop=scrollToEnd===true?feed.scrollHeight:0;
+      if(scrollToEnd===true&&conversation.length>1&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});}else{feed.scrollTop=scrollToEnd===true?feed.scrollHeight:0;}
     }
   });
 }
