@@ -672,7 +672,7 @@ body:not(.chat-active) .selection-view footer{color:#967f6a;padding:15px 5px 22p
 body:not(.chat-active) .selection-view .hero-heading{
   display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;min-height:44px;margin:0 0 5px;
 }
-body:not(.chat-active) .selection-view .hero-heading h1{min-width:0;margin:0;white-space:nowrap}
+body:not(.chat-active) .selection-view .hero-heading h1{min-width:0;margin:0;white-space:nowrap;font-size:clamp(22px,5.7vw,27px);font-weight:650;letter-spacing:-.025em}
 body:not(.chat-active) .selection-view .video-consult-shortcut{
   display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:none;min-height:44px;min-width:44px;
   padding:7px 9px;border:1px solid rgba(207,162,100,.50);border-radius:11px;
@@ -680,11 +680,11 @@ body:not(.chat-active) .selection-view .video-consult-shortcut{
   font-size:13px;font-weight:800;letter-spacing:-.035em;white-space:nowrap;
   -webkit-tap-highlight-color:transparent;
 }
-body:not(.chat-active) .selection-view .video-consult-shortcut svg{display:block;width:19px;height:19px;flex:none;stroke-width:1.9}
+body:not(.chat-active) .selection-view .video-consult-shortcut .harin-shortcut-photo{display:block;width:28px;height:28px;flex:none;object-fit:cover;object-position:center;border:1px solid rgba(219,178,117,.7);border-radius:50%;background:#4c392b}
 body:not(.chat-active) .selection-view .video-consult-shortcut:active{background:rgba(167,119,69,.3)}
 @media(max-width:355px){
   body:not(.chat-active) .selection-view .video-consult-shortcut{font-size:12px;padding-inline:7px;gap:4px}
-  body:not(.chat-active) .selection-view .video-consult-shortcut svg{width:18px;height:18px}
+  body:not(.chat-active) .selection-view .video-consult-shortcut .harin-shortcut-photo{width:24px;height:24px}
 }
 
 /* Keep one fine gold line. The old portrait asset script appends a
@@ -812,7 +812,7 @@ body:not(.chat-active) .selection-view footer.saju-legal-footer{
     <div class="hero-heading">
       <h1>상담사 선택</h1>
       <a class="video-consult-shortcut" href="/api/simli-session" target="_blank" rel="noopener noreferrer" aria-label="AI 영상상담 새 창으로 열기" title="AI 영상상담 새 창으로 열기">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/></svg>
+        <img id="harinShortcutPortrait" class="harin-shortcut-photo" alt="" aria-hidden="true" width="28" height="28" loading="eager">
         <span>영상상담</span>
       </a>
     </div>
@@ -877,6 +877,10 @@ const birthProfiles=Object.create(null),birthEditing=new Set();
 const guidedDrafts=Object.create(null),guidedManualMode=new Set();
 const birthKey=()=>selected.id+"."+topic[0];
 const avatarSources=window.SAJU_AVATARS||{};
+const harinShortcutPortrait=$("harinShortcutPortrait");
+if(harinShortcutPortrait&&typeof avatarSources.harin==="string"&&avatarSources.harin.startsWith("data:image/webp;base64,")){
+  harinShortcutPortrait.src=avatarSources.harin;
+}else if(harinShortcutPortrait){harinShortcutPortrait.hidden=true;}
 const araStudioPortrait="https://ik.imagekit.io/wonjuart/ara.png?updatedAt=1789481607484";
 const avatarUrl=id=>id==="ara"?araStudioPortrait:typeof avatarSources[id]==="string"&&avatarSources[id].startsWith("data:image/webp;base64,")?avatarSources[id]:"";
 const storageKey=()=>"bokjakso.saju-demo.v1."+selected.id+"."+topic[0];
