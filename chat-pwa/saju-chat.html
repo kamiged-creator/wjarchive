@@ -575,6 +575,8 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-quickbar .guided-controls{margin:0;gap:7px}
 .guided-quickbar .guided-choice{background:rgba(150,105,67,.40);border:1px solid #b79470;color:#fff7ef}
 .guided-quickbar .guided-choice.birth-calendar-choice{display:flex;align-items:center;justify-content:center;gap:7px}
+/* Month-only: maintain the four-by-three grid with lighter, slightly shorter options. */
+.guided-quickbar .guided-controls.guided-month-options>.guided-choice{min-height:43px;padding:7px 4px;font-weight:600}
 /* The four-digit year field, Back and Next share one compact row. */
 .guided-quickbar.guided-year-step{padding-top:8px;padding-bottom:6px}
 .guided-quickbar.guided-year-step .guided-controls{
@@ -1236,7 +1238,7 @@ function makeGuidedIntake(){
  }
  case "month":
    ask("태어난 달은 몇 월인가요?");
-   controls.classList.add("guided-date-options");
+   controls.classList.add("guided-date-options","guided-month-options");
    for(let i=1;i<=12;i++)btn(i+"월",()=>submitAnswer("month",String(i).padStart(2,"0"),i+"월","day"));
    break;
  case "day":{
