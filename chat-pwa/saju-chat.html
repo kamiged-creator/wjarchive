@@ -1362,7 +1362,10 @@ function makeGuidedIntake(){
      };
      btn("다음 →",go);
    }
-   btn("태어난 시간 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true,approximateRange:""}),true);
+   // Keep the secondary "unsure" option left and the forward action right.
+   const unknownTimeButton=btn("잘 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true,approximateRange:""}),true);
+   unknownTimeButton.setAttribute("aria-label","태어난 시간 잘 모름");
+   controls.insertBefore(unknownTimeButton,controls.querySelector(".guided-choice"));
    const toggle=makeEl("button","guided-time-toggle",approximate?"← 정확한 시간 입력하기":"대략적인 시간 알아요 (예: 5~6시)");
    toggle.type="button";
    toggle.addEventListener("click",()=>{wizard.approximateTimeMode=!approximate;wizard.error="";renderMessages(true);});
