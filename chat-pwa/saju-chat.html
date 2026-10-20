@@ -1341,7 +1341,7 @@ function makeGuidedIntake(){
      const options=[["","시간대 선택"]];
      for(let h=1;h<=12;h++)options.push([String(h),h+"~"+(h===12?1:h+1)+"시"]);
      const range=selectInput("대략적인 시간대",options);
-     btn("시간대 확인 →",()=>{
+     btn("다음 →",()=>{
        if(!range.value)return warn("기억나는 시간대를 선택해 주세요.");
        const h=Number(range.value);
        const hour24=(h%12+(period.value==="pm"?12:0))%24;
@@ -1360,7 +1360,7 @@ function makeGuidedIntake(){
        const h24=Number(h)%12+(period.value==="pm"?12:0);
        submitAnswer("time",String(h24).padStart(2,"0")+":"+m.padStart(2,"0"),(period.value==="am"?"오전 ":"오후 ")+h+"시 "+m+"분","province",{unknown:false,approximateRange:""});
      };
-     btn("시간 확인 →",go);
+     btn("다음 →",go);
    }
    btn("태어난 시간 모름",()=>submitAnswer("time","","태어난 시간 모름","done",{unknown:true,approximateRange:""}),true);
    const toggle=makeEl("button","guided-time-toggle",approximate?"← 정확한 시간 입력하기":"대략적인 시간 알아요 (예: 5~6시)");
