@@ -583,6 +583,25 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-quickbar .guided-controls.guided-day-options>.guided-choice{min-height:43px;padding:7px 4px;font-weight:600}
 .guided-quickbar.guided-day-step .guided-back{flex:none;align-self:flex-start;margin-top:8px}
 .guided-quickbar.guided-day-step .guided-error{flex:none}
+/* Time intake: morning/afternoon, hour and minute on one row; action buttons below. */
+.guided-quickbar .guided-controls.guided-time-options{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:8px 7px;align-items:end;
+}
+.guided-quickbar .guided-controls.guided-time-options>.guided-select-field,
+.guided-quickbar .guided-controls.guided-time-options>.guided-time-part{
+  grid-column:span 2;min-width:0;width:100%;gap:5px;
+  font-size:13px;font-weight:600;line-height:1.35;
+}
+.guided-quickbar .guided-controls.guided-time-options .guided-input,
+.guided-quickbar .guided-controls.guided-time-options .saju-select-trigger{
+  height:44px;min-height:44px;font-size:16px;padding:7px 9px;
+}
+.guided-quickbar .guided-controls.guided-time-options>.guided-choice{
+  grid-column:span 3;min-height:44px;padding:7px 4px;
+  font-size:14px;font-weight:600;white-space:nowrap;
+}
+html.dark .guided-quickbar .guided-controls.guided-time-options>.guided-time-part{color:#dfc5aa}
 /* The four-digit year field, Back and Next share one compact row. */
 .guided-quickbar.guided-year-step{padding-top:8px;padding-bottom:6px}
 .guided-quickbar.guided-year-step .guided-controls{
@@ -1269,6 +1288,7 @@ function makeGuidedIntake(){
    break;
  case "time":{
    ask("태어난 시간을 기억하시나요?","기억나면 오전·오후와 시·분을 입력해 주세요. 모르면 건너뛸 수 있어요.");
+   controls.classList.add("guided-time-options");
    const part=selectInput("오전 / 오후",[["am","오전"],["pm","오후"]]);
    const hour=textInput("시 (1~12)","예: 6","",2);
    const minute=textInput("분 (0~59)","예: 20","",2);
