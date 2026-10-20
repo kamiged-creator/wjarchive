@@ -499,6 +499,10 @@ html.dark .saju-ai-summary small,html.dark .saju-ai-expand{color:#cbaa89}
 .guided-input{width:100%;min-height:48px;border:1px solid #cbb49d;border-radius:10px;background:#fff;color:#38291f;font:inherit;font-size:17px;padding:9px 12px}
 .guided-select-field{grid-column:1/-1}
 .guided-error{grid-column:span 3;color:#a43730;font-size:14px;line-height:1.5;margin:9px 0 0;min-height:0}
+.guided-controls .guided-review-card{display:flex;flex-direction:column;gap:5px;padding:13px 14px}
+.guided-review-primary{font-size:16px;font-weight:600;line-height:1.5}
+.guided-review-detail{font-size:15px;font-weight:450;line-height:1.55}
+.guided-controls .guided-review-confirm{grid-column:1/-1;width:100%;min-height:52px;font-size:16px;font-weight:650;white-space:nowrap}
 .guided-review{grid-column:1/-1;background:#f6f0e7;padding:11px 12px;border-radius:10px;font-size:15px;line-height:1.6;color:#5a4031;margin:0}
 .guided-back{display:block;min-height:44px;padding:9px 6px;border:0;background:transparent;color:#7c5b42;font:inherit;font-size:15px;font-weight:800;margin-top:6px}
 .guided-footer{font-size:12px;line-height:1.55;color:#90725b;margin:11px 0 0}
@@ -1414,16 +1418,17 @@ function makeGuidedIntake(){
    break;
  }
  case "review":{
-   ask("정보를 확인했어요. 이대로 만세력을 계산해 볼까요?","바꾸고 싶은 내용이 있다면 '이전 질문'을 눌러 주세요.");
+   ask("입력하신 정보로 사주를 확인할까요?","바꾸고 싶은 내용이 있다면 '이전 질문'을 눌러 주세요.");
    for(let i=0;i<count;i++){
-     const value=wizard.values[i],block=makeEl("p","guided-review",
-       (isMatch?(i===0?"본인":"상대방"):"본인")+" · "+guidedDateLabel(value)+" · "+
-       (value.unknown?"태어난 시간 모름":value.approximateRange?value.approximateRange+" (추정)":value.time)+
-       (value.gender==="unspecified"?"":" · "+value.gender)+
-       (value.birthplace!=="none"?" · "+(window.BokjaksoBirthplaces?.locations[value.birthplace]?.label||value.birthplace):""));
+     const value=wizard.values[i],block=makeEl("div","guided-review guided-review-card");
+     const who=isMatch?(i===0?"본인":"상대방"):"본인";
+     block.append(makeEl("div","guided-review-primary",who+" · "+guidedDateLabel(value)));
+     block.append(makeEl("div","guided-review-detail",value.unknown?"태어난 시간 모름":value.approximateRange?value.approximateRange+" (추정)":value.time));
+     const details=[value.gender==="unspecified"?"":value.gender,value.birthplace!=="none"?(window.BokjaksoBirthplaces?.locations[value.birthplace]?.label||value.birthplace):""].filter(Boolean);
+     if(details.length)block.append(makeEl("div","guided-review-detail",details.join(" · ")));
      controls.append(block);
    }
-   const confirm=btn("✓ 이대로 사주 보기",async()=>{
+   const confirm=btn("✓ 이대로 사주 보기 →",async()=>{
      if(wizard.busy)return;
      wizard.error="";wizard.busy=true;confirm.disabled=true;confirm.textContent="만세력 확인 중…";
      try{
@@ -1438,8 +1443,9 @@ function makeGuidedIntake(){
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
        renderMessages("result");
      }catch(err){if(card.isConnected)warn(err?.message||"입력한 날짜를 확인해 주세요.");}
-     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent="✓ 이대로 사주 보기";}}
+     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent="✓ 이대로 사주 보기 →";}}
    });
+   confirm.classList.add("guided-review-confirm");
    break;
  }
  }
