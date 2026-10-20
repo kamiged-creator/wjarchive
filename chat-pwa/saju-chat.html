@@ -765,6 +765,20 @@ body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advis
   body:not(.chat-active) .selection-view .avatars{gap:8px}
 }
 
+/* Preview-only legal menu: text placeholders until the policy pages exist. */
+body:not(.chat-active) .selection-view footer.saju-legal-footer{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  width:100%;margin:6px auto 0;padding:7px 6px 12px;
+  transform:translateY(-14px);text-align:center;
+}
+.saju-legal-menu{display:flex;flex-direction:column;align-items:center;gap:5px;color:#bda68b}
+.saju-legal-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;font-size:12px;line-height:1.45;font-weight:550}
+.saju-legal-separator{opacity:.5;font-weight:400}
+.saju-business-note,.saju-preview-note{margin:0;max-width:100%;word-break:keep-all}
+.saju-business-note{font-size:10px;line-height:1.45;color:#8f7d6c}
+.saju-preview-note{font-size:10px;line-height:1.55;color:#9c8772}
+@media(max-width:355px){.saju-legal-row{font-size:11px;gap:8px}.saju-business-note,.saju-preview-note{font-size:9.5px}}
+
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
@@ -789,7 +803,14 @@ body:not(.chat-active) .selection-view .avatar:not(.avatar-featured) small.advis
   <details class="advisor-topic-details" id="advisorTopicDetails" hidden aria-hidden="true"><summary>다른 상담 분야 선택하기 <span aria-hidden="true">⌄</span></summary><section class="panel" aria-labelledby="topicsTitle"><h2 id="topicsTitle">상담 분야</h2><div class="topics" id="topics"></div></section><button id="startChat" type="button" class="start-chat">선택한 분야로 상담 시작하기 →</button></details>
   <p class="advisor-selection-tip">사진을 누르면 해당 상담방으로 바로 들어가요.</p>
   <p id="harinNewWindowHint" class="choose-tip" hidden>하린 음성 상담은 새 탭에서 크게 열려요. 마이크 사용을 허용해 주세요.</p>
-  <footer>복작소 사주 · AI 상담은 준비 중이며 무료 만세력은 체험할 수 있어요.</footer>
+  <footer class="saju-legal-footer" aria-label="서비스 및 정책 안내">
+    <div class="saju-legal-menu" aria-label="정식 서비스 전 공개 예정인 정책">
+      <div class="saju-legal-row"><span>개인정보처리방침</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>이용약관</span></div>
+      <div class="saju-legal-row"><span>환불정책</span><span class="saju-legal-separator" aria-hidden="true">|</span><span>고객문의</span></div>
+    </div>
+    <p class="saju-business-note">사업자정보 · 약관 상세는 정식 서비스 전 공개 예정</p>
+    <p class="saju-preview-note">복작소 사주 · AI 상담은 준비 중이며 무료 만세력은 체험할 수 있어요.</p>
+  </footer>
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
