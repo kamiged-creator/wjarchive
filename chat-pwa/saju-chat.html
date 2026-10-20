@@ -897,7 +897,7 @@ function renderAdvisors(){
     const title=makeEl("strong","advisor-card-name");
     title.textContent=a.id==="harin"?"🎙️ 하린 음성 상담":a.name+" 상담방";
     const small=makeEl("small","advisor-card-desc",({
-      ara:"따뜻한 마음·인생 상담",doyun:"정통 사주·대운·세운",seoyun:"연애운·궁합",jian:"재물운·사업운",harin:"음성 아바타 상담 체험"
+      ara:"고민 상담 · 마음 위로",doyun:"정통 사주·대운·세운",seoyun:"연애운·궁합",jian:"재물운·사업운",harin:"음성 아바타 상담 체험"
     }[a.id]||a.specialty));
     b.append(title,small);
     // Explicit overlay sits above both the photo and black caption so the gold
