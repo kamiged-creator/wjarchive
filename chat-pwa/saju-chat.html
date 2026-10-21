@@ -667,6 +667,10 @@ html:not(.dark) .guided-quickbar.guided-year-step .guided-controls .guided-back{
 .guided-quickbar .guided-choice:active{background:rgba(176,126,82,.9)}
 .guided-quickbar .guided-input,.guided-quickbar .saju-select-trigger{min-height:43px}
 .guided-quickbar .guided-back{margin:6px 0 0;padding:4px 6px;min-height:32px;font-size:13px}
+/* Birth-time step: keep the alternate input link and Back action together. */
+.guided-quickbar.guided-time-step .guided-controls.guided-time-options>.guided-time-toggle{min-height:26px;padding:2px 4px;margin:0;font-weight:500}
+.guided-quickbar.guided-time-step .guided-back{margin:2px 0 0;padding:3px 6px;min-height:28px;font-size:13px;font-weight:500}
+.guided-quickbar.guided-time-step{padding-bottom:5px}
 .guided-quickbar .guided-review-edit{margin:0 0 6px;padding:5px 10px;border:1px solid #a48b75;border-radius:9px;font-size:13px;font-weight:500}
 .guided-quickbar .guided-footer{font-size:11px;line-height:1.45;margin:6px 0 0}
 .guided-quickbar .guided-error:empty{display:none}
@@ -1209,6 +1213,7 @@ function makeGuidedIntake(){
  quickbar.hidden=false;
  quickbar.classList.toggle("guided-year-step",wizard.step==="year");
  quickbar.classList.toggle("guided-day-step",wizard.step==="day");
+ quickbar.classList.toggle("guided-time-step",wizard.step==="time");
  const transcript=makeEl("div","guided-transcript");
  let previousGuidedRole="bot"; // The welcome greeting immediately precedes the interview.
  for(const item of wizard.replies){
