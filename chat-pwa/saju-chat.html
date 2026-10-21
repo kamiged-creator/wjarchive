@@ -1327,6 +1327,8 @@ function makeGuidedIntake(){
  case "year":{
    ask("몇 년도에 태어나셨나요?","연도 4자리를 입력해 주세요. 예: 1977");
    const year=textInput("태어난 연도","출생연도 4자리 (예: 1977)",current.year,4);
+   year.setAttribute("aria-label","태어난 연도 4자리");
+   year.parentElement.querySelector("span")?.remove();
    const next=()=>{
      const n=Number(year.value.trim());
      if(!/^[0-9]{4}$/.test(year.value.trim())||n<1900||n>nowYear)return warn("출생 연도는 1900년부터 올해까지 4자리로 입력해 주세요.");
