@@ -643,6 +643,7 @@ html.dark .guided-quickbar.guided-year-step .guided-controls .guided-input-group
 .guided-quickbar.guided-year-step .guided-input{height:44px;min-height:44px;padding:7px 10px;font-size:16px}
 /* Preview: neutral gray year input to match counselor bubbles; keep existing border and actions. */
 html.dark .guided-quickbar.guided-year-step .guided-input{background:#34302c;color:#f5ede4}
+html.dark .guided-quickbar.guided-year-step .guided-input::placeholder{color:#cbbcaf;opacity:1}
 .guided-quickbar.guided-year-step .guided-controls .guided-back{
   grid-column:2;min-height:44px;height:44px;margin:0;padding:5px 3px;
   border:1px solid #a48669;border-radius:11px;background:transparent;
@@ -1322,8 +1323,8 @@ function makeGuidedIntake(){
    btn("잘 모르겠어요",()=>warn("정확한 만세력 계산을 위해 양력인지 음력인지 먼저 확인해 주세요."),true);
    break;
  case "year":{
-   ask("몇 년도에 태어나셨나요?","연도 4자리를 입력해 주세요. 예: 1973");
-   const year=textInput("태어난 연도","예: 1973",current.year,4);
+   ask("몇 년도에 태어나셨나요?","연도 4자리를 입력해 주세요. 예: 1977");
+   const year=textInput("태어난 연도","출생연도 4자리 (예: 1977)",current.year,4);
    const next=()=>{
      const n=Number(year.value.trim());
      if(!/^[0-9]{4}$/.test(year.value.trim())||n<1900||n>nowYear)return warn("출생 연도는 1900년부터 올해까지 4자리로 입력해 주세요.");
