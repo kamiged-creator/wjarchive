@@ -676,6 +676,7 @@ html:not(.dark) .guided-quickbar.guided-year-step .guided-controls .guided-back{
 .guided-quickbar.guided-time-step .guided-back{margin:-6px 0 0;padding:3px 6px;min-height:28px;font-size:13px;font-weight:500}
 .guided-quickbar.guided-time-step{padding-bottom:5px}
 .guided-quickbar .guided-review-edit{margin:0 0 6px;padding:5px 10px;border:1px solid #a48b75;border-radius:9px;font-size:13px;font-weight:500}
+.guided-quickbar .guided-forward{align-self:flex-end;margin-left:auto;color:#ddbb91;font-weight:600}
 .guided-quickbar .guided-footer{font-size:11px;line-height:1.45;margin:6px 0 0}
 .guided-quickbar .guided-error:empty{display:none}
 .guided-quickbar .guided-error:not(:empty){margin-top:6px}
@@ -1262,6 +1263,7 @@ function makeGuidedIntake(){
  quickbar.append(controls);
  const nowYear=Number(new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Seoul",year:"numeric"}).format(new Date()));
  function capture(){
+   wizard.forward=[];
    wizard.back.push({values:wizard.values.map(d=>({...d})),personIndex:wizard.personIndex,
      step:wizard.step,replies:wizard.replies.slice(),stepAt:wizard.stepAt});
    wizard.error="";
@@ -1483,6 +1485,7 @@ function makeGuidedIntake(){
    back.addEventListener("click",()=>{
      const prev=wizard.back.pop();
      if(!prev)return;
+     (wizard.forward||(wizard.forward=[])).push({values:wizard.values.map(d=>({...d})),personIndex:wizard.personIndex,step:wizard.step,replies:wizard.replies.slice(),stepAt:wizard.stepAt});
      wizard.values=prev.values;wizard.personIndex=prev.personIndex;wizard.step=prev.step;
      wizard.replies=prev.replies;wizard.stepAt=prev.stepAt;wizard.error="";renderMessages(true);
    });
@@ -1496,6 +1499,18 @@ function makeGuidedIntake(){
    }else{
      quickbar.append(back);
    }
+ }
+ if(wizard.forward?.length && wizard.step!=="review"){
+   const next=makeEl("button","guided-back guided-forward","다음 →");
+   next.type="button";
+   next.addEventListener("click",()=>{
+     const upcoming=wizard.forward.pop();
+     if(!upcoming)return;
+     wizard.back.push({values:wizard.values.map(d=>({...d})),personIndex:wizard.personIndex,step:wizard.step,replies:wizard.replies.slice(),stepAt:wizard.stepAt});
+     wizard.values=upcoming.values;wizard.personIndex=upcoming.personIndex;wizard.step=upcoming.step;
+     wizard.replies=upcoming.replies;wizard.stepAt=upcoming.stepAt;wizard.error="";renderMessages(true);
+   });
+   quickbar.append(next);
  }
  quickbar.append(notice);
  return card;
