@@ -667,6 +667,7 @@ html:not(.dark) .guided-quickbar.guided-year-step .guided-controls .guided-back{
 .guided-quickbar .guided-choice:active{background:rgba(176,126,82,.9)}
 .guided-quickbar .guided-input,.guided-quickbar .saju-select-trigger{min-height:43px}
 .guided-quickbar .guided-back{margin:6px 0 0;padding:4px 6px;min-height:32px;font-size:13px}
+.guided-quickbar .guided-review-edit{margin:0 0 6px;padding:5px 10px;border:1px solid #a48b75;border-radius:9px;font-size:13px;font-weight:500}
 .guided-quickbar .guided-footer{font-size:11px;line-height:1.45;margin:6px 0 0}
 .guided-quickbar .guided-error:empty{display:none}
 .guided-quickbar .guided-error:not(:empty){margin-top:6px}
@@ -1435,7 +1436,7 @@ function makeGuidedIntake(){
    break;
  }
  case "review":{
-   ask("입력하신 정보로 사주를 확인할까요?","바꾸고 싶은 내용이 있다면 '이전 질문'을 눌러 주세요.");
+   ask("입력하신 정보로 사주를 확인할까요?","바꾸고 싶은 내용이 있다면 '정보 수정'을 눌러 주세요.");
    for(let i=0;i<count;i++){
      const value=wizard.values[i],block=makeEl("div","guided-review guided-review-card");
      const who=isMatch?(i===0?"본인":"상대방"):"본인";
@@ -1475,7 +1476,11 @@ function makeGuidedIntake(){
      wizard.values=prev.values;wizard.personIndex=prev.personIndex;wizard.step=prev.step;
      wizard.replies=prev.replies;wizard.stepAt=prev.stepAt;wizard.error="";renderMessages(true);
    });
-   if(wizard.step==="year"){
+   if(wizard.step==="review"){
+     back.textContent="정보 수정";
+     back.classList.add("guided-review-edit");
+     quickbar.insertBefore(back,quickbar.firstChild);
+   }else if(wizard.step==="year"){
      back.textContent="← 이전";
      controls.insertBefore(back,controls.querySelector(".guided-choice"));
    }else{
