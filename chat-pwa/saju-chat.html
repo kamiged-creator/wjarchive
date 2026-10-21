@@ -677,6 +677,9 @@ html:not(.dark) .guided-quickbar.guided-year-step .guided-controls .guided-back{
 .guided-quickbar.guided-time-step{padding-bottom:5px}
 .guided-quickbar .guided-review-edit{margin:0 0 6px;padding:5px 10px;border:1px solid #a48b75;border-radius:9px;font-size:13px;font-weight:500}
 .guided-quickbar .guided-forward{align-self:flex-end;margin-left:auto;color:#ddbb91;font-weight:600}
+.guided-quickbar .guided-history-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;margin-top:4px}
+.guided-quickbar .guided-history-nav .guided-back{margin:0;min-height:36px}
+.guided-quickbar .guided-history-nav .guided-forward{margin-left:auto}
 .guided-quickbar .guided-footer{font-size:11px;line-height:1.45;margin:6px 0 0}
 .guided-quickbar .guided-error:empty{display:none}
 .guided-quickbar .guided-error:not(:empty){margin-top:6px}
@@ -1510,7 +1513,14 @@ function makeGuidedIntake(){
      wizard.values=upcoming.values;wizard.personIndex=upcoming.personIndex;wizard.step=upcoming.step;
      wizard.replies=upcoming.replies;wizard.stepAt=upcoming.stepAt;wizard.error="";renderMessages(true);
    });
-   quickbar.append(next);
+   const existingNext=Array.from(controls.querySelectorAll("button")).find(btn=>/^다음\s*→?$/.test(btn.textContent.trim()));
+   if(!existingNext){
+     const nav=makeEl("div","guided-history-nav");
+     const previous=Array.from(quickbar.children).find(el=>el.classList?.contains("guided-back")&&!el.classList.contains("guided-forward"));
+     if(previous)nav.append(previous);
+     nav.append(next);
+     quickbar.append(nav);
+   }
  }
  quickbar.append(notice);
  return card;
