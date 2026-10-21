@@ -1211,6 +1211,27 @@ function guidedProfile(data){
 function guidedDateLabel(data){
  return (data.calendar==="lunar"?"음력":"양력")+(data.leap?" 윤달":"")+" "+data.year+"년 "+Number(data.month)+"월 "+Number(data.day)+"일";
 }
+function reopenGuidedBirthEditor(key,profiles){
+ const values=profiles.map(p=>{
+   const [year,month,day]=(p.date||"").split("-");
+   return {...newGuidedPerson(),calendar:p.calendar||"solar",year,month,day,leap:!!p.leap,
+     gender:p.gender||"unspecified",unknown:!!p.unknown,time:p.time||"",
+     approximateRange:p.approximateRange||"",birthplace:p.birthplace||"none",
+     province:(p.birthplace||"").includes("/")?p.birthplace.split("/")[0]:"none"};
+ });
+ const back=[];
+ const steps=["calendar","year","month","day","gender","time","province"];
+ for(let personIndex=0;personIndex<values.length;personIndex++){
+   for(const step of steps){
+     if(step==="province"&&values[personIndex].unknown)continue;
+     back.push({values:values.map(v=>({...v})),personIndex,step,replies:[],stepAt:Date.now()});
+   }
+ }
+ guidedDrafts[key]={values,personIndex:values.length-1,step:"review",replies:[],back,
+   forward:[],error:"",busy:false,stepAt:Date.now(),approximateTimeMode:true};
+ guidedManualMode.delete(key);
+ birthEditing.add(key);
+}
 function makeGuidedIntake(){
  const key=birthKey(),isMatch=topic[0]==="match",count=isMatch?2:1;
  let wizard=guidedDrafts[key];
@@ -1557,7 +1578,7 @@ function makeSajuChatResults(profiles,key){
   const actions=makeEl("div","saju-chat-actions");
   const edit=makeEl("button","saju-chat-edit","정보 수정하기");
   edit.type="button";
-  edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(true);requestAnimationFrame(()=>{const form=document.querySelector("#messages .intake-card");if(form){form.scrollIntoView({block:"start",behavior:"instant"});form.querySelector("input,select")?.focus({preventScroll:true});}});});
+  edit.addEventListener("click",()=>{reopenGuidedBirthEditor(key,profiles);renderMessages(true);});
   actions.append(edit);
   function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
   function showMessages(messages,animate){
@@ -1647,7 +1668,7 @@ function makeIntake(){
  if(existing&&!birthEditing.has(key))return makeSajuChatResults(existing,key);
  const card=makeEl("div","intake-card");
  card.append(makeEl("p","intake-title","📅 사주 정보 입력"));
- if(!guidedManualMode.has(key)&&!birthEditing.has(key))return makeGuidedIntake();
+ if(!guidedManualMode.has(key))return makeGuidedIntake();
  card.append(makeEl("p","intake-intro","생년월일과 태어난 시간을 입력해 주세요."));
  const form=makeEl("form","intake-form");const sets=[];
  const count=topic[0]==="match"?2:1;
