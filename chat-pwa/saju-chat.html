@@ -1557,7 +1557,7 @@ function makeSajuChatResults(profiles,key){
   const actions=makeEl("div","saju-chat-actions");
   const edit=makeEl("button","saju-chat-edit","정보 수정하기");
   edit.type="button";
-  edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(false);});
+  edit.addEventListener("click",()=>{birthEditing.add(key);renderMessages(true);requestAnimationFrame(()=>{const form=document.querySelector("#messages .intake-card");if(form){form.scrollIntoView({block:"start",behavior:"instant"});form.querySelector("input,select")?.focus({preventScroll:true});}});});
   actions.append(edit);
   function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
   function showMessages(messages,animate){
