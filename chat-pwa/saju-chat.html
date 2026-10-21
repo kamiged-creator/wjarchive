@@ -580,6 +580,7 @@ html.dark .guided-intake .guided-manual:focus-visible{
 .guided-current .guided-hint{font-size:14px;line-height:1.45;color:#795b45;margin:6px 0 0}
 .guided-quickbar{flex:none;padding:10px max(12px,calc((100% - 720px)/2)) 8px;background:#fffdfa;border-top:1px solid #e7d8c6;max-height:min(43dvh,330px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .guided-quickbar[hidden]{display:none!important}
+.composer[hidden]{display:none!important}
 .guided-quickbar .guided-controls{margin:0;gap:7px}
 .guided-quickbar .guided-choice{background:rgba(150,105,67,.40);border:1px solid #b79470;color:#fff7ef}
 .guided-quickbar .guided-choice.birth-calendar-choice{display:flex;align-items:center;justify-content:center;gap:7px}
@@ -1906,6 +1907,8 @@ function renderMessages(scrollToEnd=true){
   }
   syncSimliControls();
   const ready=selected.id==="ara"||Boolean(birthProfiles[birthKey()]);
+  // Ara keeps free chat; the other three advisors start chat after birth intake.
+  $("composer").hidden=!ready;
   $("question").disabled=!ready;
   $("send").disabled=!ready;
   $("question").placeholder=selected.id==="ara"?"마음 편히 이야기해 줘":ready?"메시지 입력":"입력창 위에서 답을 선택해 주세요";
