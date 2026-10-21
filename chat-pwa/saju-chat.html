@@ -560,6 +560,10 @@ html.dark .guided-intake .guided-manual:focus-visible{
 /* Gentle phrase-by-phrase fade. Full text is rendered immediately, no typing cursor. */
 .intro-soft-line{display:block;white-space:pre-wrap;animation:welcome-soft-fade 1100ms cubic-bezier(.22,.9,.34,1) both}
 .intro-soft-line+.intro-soft-line{margin-top:.36em}
+.intro-soft-bubble .intro-soft-line{animation:none!important}
+.intro-soft-char{display:inline;opacity:0;animation:welcome-char-appear 180ms ease-out both}
+@keyframes welcome-char-appear{to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.intro-soft-char{animation:none!important;opacity:1}}
 @keyframes welcome-soft-fade{
   from{opacity:0;transform:translateY(7px);filter:blur(1.5px)}
   to{opacity:1;transform:translateY(0);filter:blur(0)}
@@ -1849,13 +1853,23 @@ function makeIntake(){
 /* Welcome type-on effect: entirely local UI. No TTS/API calls or data transmission.
    Only animate on entering an untouched chat; re-renders and accessibility skip it. */
 function renderSoftWelcome(bubble,text){
-  // Show complete phrases with gentle staggered fades, never letter by letter.
-  // Text remains present in the DOM for screen readers and copying.
-  const lines=text.split("\n");
-  for(let index=0;index<lines.length;index++){
-    const line=makeEl("span","intro-soft-line",lines[index]);
-    line.style.animationDelay=Math.min(index*850,1700)+"ms";
+  // Reveal the greeting from its first character, across all lines.
+  // Keep a full accessible label and respect reduced-motion preferences.
+  bubble.setAttribute("aria-label",text);
+  const chars=Array.from(text);
+  const duration=Math.min(1900,Math.max(950,chars.length*38));
+  let index=0;
+  for(const lineText of text.split("\n")){
+    const line=makeEl("span","intro-soft-line");
+    line.setAttribute("aria-hidden","true");
+    for(const char of Array.from(lineText)){
+      const letter=makeEl("span","intro-soft-char",char===" "?"\u00a0":char);
+      letter.style.animationDelay=Math.round(index*duration/Math.max(chars.length-1,1))+"ms";
+      line.append(letter);
+      index++;
+    }
     bubble.append(line);
+    index++;
   }
   bubble.classList.add("intro-soft-bubble");
 }
@@ -1904,7 +1918,7 @@ function renderMessages(scrollToEnd=true){
     quickbar.inert=true;
     quickbar.setAttribute("aria-hidden","true");
     const phraseCount=conversation[0].text.split("\n").length;
-    const greetingMs=Math.min((phraseCount-1)*850,1700)+1100+140;
+    const greetingMs=2250;
     setTimeout(()=>{
       if(currentRun!==introTypingRun||!feed.isConnected||location.hash!=="#chat")return;
       feed.classList.remove("intro-await-question");
