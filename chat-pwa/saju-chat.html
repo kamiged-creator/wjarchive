@@ -2262,6 +2262,22 @@ function syncChatKeyboardViewport(){
     }
   });
 }
+// Keep the test password input visible inside the disclosure when Android IME opens.
+function syncAiPasswordViewport(){
+  const viewport=window.visualViewport;
+  const height=viewport?Math.min(window.innerHeight,viewport.height):window.innerHeight;
+  if(height>0)document.body.style.setProperty("--saju-visible-height",Math.round(height)+"px");
+  if(document.activeElement===$("aiPin")){
+    const details=$("aiSettingsDetails"),pin=$("aiPin");
+    if(details?.open&&pin){
+      const target=Math.max(0,pin.offsetTop-details.offsetTop-65);
+      details.scrollTop=target;
+    }
+  }
+}
+window.visualViewport?.addEventListener("resize",syncAiPasswordViewport);
+window.visualViewport?.addEventListener("scroll",syncAiPasswordViewport);
+$("aiPin").addEventListener("focus",()=>{syncAiPasswordViewport();setTimeout(syncAiPasswordViewport,300)});
 window.visualViewport?.addEventListener("resize",syncChatKeyboardViewport);
 window.visualViewport?.addEventListener("scroll",syncChatKeyboardViewport);
 window.addEventListener("resize",syncChatKeyboardViewport);
