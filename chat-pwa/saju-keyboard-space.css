@@ -1,0 +1,6 @@
+/* Keep the AI test settings accessible, but reclaim chat space while typing on mobile. */
+@media (max-width: 599px) and (pointer: coarse) {
+  body.chat-active:has(#question:focus) #aiSettingsDetails {
+    display: none !important;
+  }
+}
