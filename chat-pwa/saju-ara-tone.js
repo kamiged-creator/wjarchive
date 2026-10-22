@@ -1,0 +1,20 @@
+/* Ara tone consent helper. Loaded by the preview chat page. */
+window.BokjaksoAraTone = (() => {
+  const question = "괜찮으시면 저도 편하게 반말로 이야기해도 될까요? 🌸";
+  const affirmative = /^(응|어|웅|그래|좋아|괜찮아|반말해|편하게 해|해도 돼|물론|네|예|오케이|ok|yes)[.!~\s]*$/i;
+  const informal = /(힘들어|외로워|속상해|고민\s*있어|들어줘|말해줘|어떡해|뭐해|했어|해줘|할까|있어|없어)[.!?\s]*$/;
+  function status(messages) {
+    const i = messages.findIndex(m => m.role === "bot" && m.text.includes(question));
+    if (i < 0) return "new";
+    const answer = messages.slice(i+1).find(m => m.role === "user");
+    if (!answer) return "pending";
+    return affirmative.test(answer.text.trim()) ? "casual" : "formal";
+  }
+  function handle(message, messages) {
+    const state = status(messages);
+    if (state === "new" && informal.test(message.trim())) return {reply: "말씀해 주셔서 고마워요. " + question, state:"pending"};
+    if (state === "casual" && affirmative.test(message.trim())) return {reply:"좋아, 그럼 우리 편하게 이야기하자. 🌸 무슨 일이 있었어?",state};
+    return {reply:null,state};
+  }
+  return {handle,status,question};
+})();
