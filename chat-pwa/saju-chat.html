@@ -2213,9 +2213,9 @@ $("startChat").addEventListener("click",openChat);
 $("backToSelect").addEventListener("click",closeChat);
 window.addEventListener("hashchange",syncChatView);
 form.addEventListener("submit",e=>{e.preventDefault();send()});
-// Keep focus when tapping Send with the on-screen IME, including Samsung browsers.
+// Avoid losing the Send tap while the mobile IME is visible; do not refocus after submission.
 sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
-sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimary)return;const r=sendBtn.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){form.requestSubmit(sendBtn);input.focus({preventScroll:true})}});
+sendBtn.addEventListener("pointerup",e=>{if(e.pointerType==="mouse"||!e.isPrimary)return;const r=sendBtn.getBoundingClientRect();if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){form.requestSubmit(sendBtn)}});
 input.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229))e.preventDefault()});
 $("clearChat").addEventListener("click",()=>{if(!confirm(selected.name+" · "+topic[2]+" 체험 대화를 지울까?"))return;delete birthProfiles[birthKey()];birthEditing.delete(birthKey());guidedManualMode.delete(birthKey());delete guidedDrafts[birthKey()];conversation=[greeting()];save();renderMessages(false)});
 // The selected appearance is independent of private birth and chat data.
