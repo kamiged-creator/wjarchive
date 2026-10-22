@@ -927,6 +927,11 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
 .typing-indicator .typing-dot:nth-child(3){animation-delay:.32s}
 @keyframes saju-typing{0%,65%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-4px);opacity:.9}}
 @media(prefers-reduced-motion:reduce){.typing-indicator .typing-dot{animation:none;opacity:.65}}
+
+/* Quiet, 200ms entrance for the full-screen counseling view. */
+.chat-view.chat-entering{animation:saju-chat-enter .2s ease-out both}
+@keyframes saju-chat-enter{from{opacity:.72;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.chat-view.chat-entering{animation:none}}
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
@@ -2009,7 +2014,7 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){renderMessages("intro")}else if(!open){introTypingRun++;$("question").blur();}}
+function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
