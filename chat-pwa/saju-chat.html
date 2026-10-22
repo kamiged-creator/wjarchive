@@ -559,7 +559,7 @@ html.dark .guided-intake .guided-manual:focus-visible{
 
 /* Gentle phrase-by-phrase fade. Full text is rendered immediately, no typing cursor. */
 .intro-soft-line{display:block;white-space:pre-wrap;animation:welcome-soft-fade 1100ms cubic-bezier(.22,.9,.34,1) both}
-.intro-soft-line+.intro-soft-line{margin-top:.36em}
+.intro-soft-line+.intro-soft-line{margin-top:0}
 .intro-soft-bubble .intro-soft-line{animation:none!important}
 .intro-soft-char{display:inline;opacity:0;animation:welcome-char-appear 180ms ease-out both}
 @keyframes welcome-char-appear{to{opacity:1}}
@@ -1000,7 +1000,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
 (() => {
 "use strict";
 const advisors=[
- {id:"ara",name:"아라",specialty:"마음·고민 상담",topics:[["talk","💬","마음 상담","편안한 대화와 고민 나누기"]],intro:"안녕하세요. 마음 상담사 아라예요. 🌸\n오늘은 어떤 이야기를 나누고 싶으세요?"},
+ {id:"ara",name:"아라",specialty:"마음·고민 상담",topics:[["talk","💬","마음 상담","편안한 대화와 고민 나누기"]],intro:"안녕하세요. 마음 상담사 아라예요. 🌸 오늘은 어떤 이야기를 나누고 싶으세요?"},
  {id:"doyun",name:"도윤",specialty:"정통 사주",topics:[["saju","☯️","사주","타고난 성향"],["decade","📜","대운·세운","시기별 변화"]],intro:"반갑습니다. 도윤입니다. 정통 사주와 인생 흐름에 관한 질문을 남겨 주세요."},
  {id:"seoyun",name:"서윤",specialty:"궁합·연애운",topics:[["match","💕","궁합","두 사람의 관계"],["love","🌸","연애운","인연과 마음"]],intro:"안녕하세요, 서윤이에요. 💗 관계와 연애에 관해 무엇이 궁금하세요?"},
  {id:"jian",name:"지안",specialty:"재물·사업운",topics:[["wealth","💰","재물운","돈과 경제생활"],["career","💼","직장·사업운","일과 성장"]],intro:"반갑습니다. 지안입니다. 재물이나 일, 사업에 관해 궁금한 점을 이야기해 주세요."},
