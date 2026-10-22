@@ -6,7 +6,7 @@ window.BokjaksoAraTone = (() => {
   const requested = /반말.{0,12}(해줘|하자|해도|하기로|해봐)|편하게.{0,8}(말해|얘기해)/;
   function status(messages) {
     const i = messages.findIndex(m => m.role === "bot" && m.text.includes(question));
-    if (i < 0) return "new";
+    if (i < 0) return messages.some(m => m.role === "user" && requested.test(m.text)) ? "casual" : "new";
     const answer = messages.slice(i+1).find(m => m.role === "user");
     if (!answer) return "pending";
     return affirmative.test(answer.text.trim()) || requested.test(answer.text.trim()) ? "casual" : "formal";
