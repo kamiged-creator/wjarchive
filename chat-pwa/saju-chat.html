@@ -2113,7 +2113,7 @@ async function response(question,previous){
     try{body=await response.json()}catch(_){}
     if(!response.ok)throw new Error(body.error||"AI 연결에 실패했어.");
     if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
-    return "✨ AI 상담 · 전통 사주 참고 풀이\n\n"+body.answer;
+    return body.answer.replace(/^(?:\\s*✨?\\s*AI 상담\\s*[·・-]\\s*전통 사주 참고 풀이\\s*)+/u,"").trim();
   }
   const compare=partner?engine.compatibility(chart,partner):"";
   return "📜 기본 만세력 풀이 (질문별 AI 분석 아님)\n\n"+
