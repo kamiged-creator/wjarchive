@@ -1,0 +1,26 @@
+{
+  "id": "/saju-chat.html",
+  "name": "복작소 사주 상담",
+  "short_name": "복작소 사주",
+  "description": "복작소 AI 사주·마음 상담",
+  "lang": "ko",
+  "start_url": "/saju-chat.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#171513",
+  "theme_color": "#171513",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
