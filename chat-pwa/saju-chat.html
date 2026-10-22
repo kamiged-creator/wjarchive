@@ -916,6 +916,9 @@ body:not(.chat-active) .selection-view footer.saju-legal-footer{
   }
 }
 
+/* Keep the conversation above the Android on-screen keyboard. */
+body.chat-active{height:var(--saju-chat-height,100dvh)}
+.chat-active .page{height:var(--saju-chat-height,100dvh)}
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
@@ -2256,9 +2259,6 @@ let savedSajuTheme="dark";
 try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="light"?"light":"dark"}catch(_){}
 setSajuTheme(savedSajuTheme==="dark");
 $("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
-/* Keep the conversation above the Android on-screen keyboard. */
-body.chat-active{height:var(--saju-chat-height,100dvh)}
-.chat-active .page{height:var(--saju-chat-height,100dvh)}
 /* Choice A: preserve full-width adviser portrait cards on mobile.
    Keep vertical scrolling available when the footer exceeds short screens. */
 function fitAdvisorSelection(){
