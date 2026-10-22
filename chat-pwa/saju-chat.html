@@ -2064,12 +2064,14 @@ function araSpecialistReferral(question){
 
 async function response(question,previous){
   if(selected.id==="ara"){
+    const tone=window.BokjaksoAraTone?.handle(question,previous);
+    if(tone?.reply)return tone.reply;
     const specialist=araSpecialistReferral(question);
     if(specialist)return specialist;
     if(aiReady&&aiConsent.checked){
       const pin=aiPin.value;
       if(pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
-      const payload={consent:true,question,advisor:"ara",topic:"talk",
+      const payload={consent:true,question,advisor:"ara",tone:tone?.state==="casual"?"casual":"formal",topic:"talk",
         chart:null,partner:null,flow:null,
         history:previous.filter(x=>x&&["user","bot"].includes(x.role))
           .slice(-4).map(x=>({role:x.role==="bot"?"assistant":"user",content:x.text.slice(0,350)}))};
