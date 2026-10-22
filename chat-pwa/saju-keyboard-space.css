@@ -17,3 +17,6 @@
     scroll-margin-bottom: 24px;
   }
 }
+
+/* Comfortable breathing room below the latest chat bubble, including after auto-scroll. */
+.chat-full .messages { padding-bottom: 36px; }
