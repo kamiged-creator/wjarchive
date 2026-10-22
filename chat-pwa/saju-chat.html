@@ -977,7 +977,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
     </section>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
-    <form class="composer" id="composer"><div class="composer-inner"><input id="question" type="text" autocomplete="off" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
+    <form class="composer" id="composer" autocomplete="off"><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
     <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
