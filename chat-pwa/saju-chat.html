@@ -2135,6 +2135,7 @@ async function send(){
   input.blur();
   save();renderMessages();
   const typingRow=showReplyTyping();
+  const typingStartedAt=performance.now();
   requestAnimationFrame(()=>requestAnimationFrame(()=>{const feed=$("messages");feed.scrollTop=feed.scrollHeight;}));
   try{
     const answer=await response(content,previous);
@@ -2142,6 +2143,11 @@ async function send(){
   }catch(e){
     if(storageKey()===oldKey)conversation.push(msg("bot",e.message||"연결 중 오류가 발생했어. 다시 시도해 줘."));
   }finally{
+    // Let the indicator paint even when local manse-ryeok replies resolve immediately.
+    // All text advisers share the same gentle minimum; real API waits remain unchanged.
+    const minimumTypingMs=800;
+    const remaining=minimumTypingMs-(performance.now()-typingStartedAt);
+    if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
     typingRow.remove();
     if(storageKey()===oldKey){save();renderMessages();}
     sentBusy=false;sendBtn.disabled=false;sendBtn.textContent="전송";
