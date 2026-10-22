@@ -1998,7 +1998,7 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){renderMessages("intro")}else if(!open){introTypingRun++;$("question").blur();}}
+function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open)stopSimliSession();document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){renderMessages("intro")}else if(!open){introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -2212,6 +2212,27 @@ const form=$("composer"),input=$("question"),sendBtn=$("send");
 $("startChat").addEventListener("click",openChat);
 $("backToSelect").addEventListener("click",closeChat);
 window.addEventListener("hashchange",syncChatView);
+// Android Chrome and in-app browsers may pan a 100dvh page behind the keyboard.
+// Match the chat shell to the actual visible viewport, without moving the composer separately.
+let chatViewportFrame=0;
+function syncChatKeyboardViewport(){
+  cancelAnimationFrame(chatViewportFrame);
+  chatViewportFrame=requestAnimationFrame(()=>{
+    if(!document.body.classList.contains("chat-active"))return;
+    const viewport=window.visualViewport;
+    const height=viewport?Math.min(window.innerHeight,viewport.height):window.innerHeight;
+    if(height>0)document.body.style.setProperty("--saju-chat-height",Math.round(height)+"px");
+    if(document.activeElement===$("question")){
+      const feed=$("messages");
+      feed.scrollTop=feed.scrollHeight;
+    }
+  });
+}
+window.visualViewport?.addEventListener("resize",syncChatKeyboardViewport);
+window.visualViewport?.addEventListener("scroll",syncChatKeyboardViewport);
+window.addEventListener("resize",syncChatKeyboardViewport);
+$("question").addEventListener("focus",()=>{syncChatKeyboardViewport();setTimeout(syncChatKeyboardViewport,250)});
+$("question").addEventListener("blur",()=>{syncChatKeyboardViewport();setTimeout(syncChatKeyboardViewport,250)});
 form.addEventListener("submit",e=>{e.preventDefault();send()});
 // Avoid losing the Send tap while the mobile IME is visible; do not refocus after submission.
 sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
@@ -2235,6 +2256,9 @@ let savedSajuTheme="dark";
 try{savedSajuTheme=localStorage.getItem(sajuThemeKey)==="light"?"light":"dark"}catch(_){}
 setSajuTheme(savedSajuTheme==="dark");
 $("themeToggle").addEventListener("click",()=>{closeSajuPopup?.();setSajuTheme(!document.documentElement.classList.contains("dark"))});
+/* Keep the conversation above the Android on-screen keyboard. */
+body.chat-active{height:var(--saju-chat-height,100dvh)}
+.chat-active .page{height:var(--saju-chat-height,100dvh)}
 /* Choice A: preserve full-width adviser portrait cards on mobile.
    Keep vertical scrolling available when the footer exceeds short screens. */
 function fitAdvisorSelection(){
