@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="/saju.webmanifest">
 <meta name="theme-color" content="#171513">
 <meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2339,6 +2340,7 @@ refreshAiState();
 })();
 </script>
 <style>body.saju-public-trial .ai-pin-row{display:none!important}body.saju-public-trial .saju-ai-summary small{display:none}</style>
+<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/bokjakso-push-sw.js",{scope:"/"}).catch(()=>{}));</script>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
 </body>
