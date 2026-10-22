@@ -2064,7 +2064,7 @@ function araSpecialistReferral(question){
 
 async function response(question,previous){
   if(selected.id==="ara"){
-    const tone=window.BokjaksoAraTone?.handle(question,previous);
+    const tone=window.BokjaksoAraTone?.handle(question,conversation.slice(0,-1));
     if(tone?.reply)return tone.reply;
     const specialist=araSpecialistReferral(question);
     if(specialist)return specialist;
