@@ -42,6 +42,29 @@ function isReady(){
     typeof process.env.OPENAI_API_KEY==="string" && process.env.OPENAI_API_KEY.length>20 &&
     typeof process.env.SAJU_AI_TEST_PIN==="string" && process.env.SAJU_AI_TEST_PIN.length>=8;
 }
+
+// Public trial stays disabled until a persistent Redis REST store is configured.
+// A single IP has at most five free requests across devices; the owner PIN remains separate.
+function trialReady(){
+  return process.env.SAJU_PUBLIC_TRIAL_ENABLED==="1" &&
+    process.env.SAJU_AI_ENABLED==="1" &&
+    typeof process.env.OPENAI_API_KEY==="string" &&
+    process.env.OPENAI_API_KEY.length>20 &&
+    Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+async function claimTrial(req){
+  const ip=String(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].trim();
+  const key="saju:trial:v1:"+crypto.createHmac("sha256",process.env.KV_REST_API_TOKEN).update(ip).digest("hex");
+  const url=process.env.KV_REST_API_URL.replace(/\/$/,"");
+  const response=await fetch(url+"/incr/"+encodeURIComponent(key),{
+    headers:{Authorization:"Bearer "+process.env.KV_REST_API_TOKEN},
+    signal:AbortSignal.timeout(4000)
+  });
+  if(!response.ok)throw new Error("trial storage unavailable");
+  const result=await response.json();
+  if(!Number.isInteger(result.result))throw new Error("invalid trial counter");
+  return result.result<=5;
+}
 function send(res,status,data){return res.status(status).json(data);}
 module.exports=async function handler(req,res){
   res.setHeader("Cache-Control","no-store, private, max-age=0");
@@ -49,7 +72,7 @@ module.exports=async function handler(req,res){
   res.setHeader("Referrer-Policy","no-referrer");
   res.setHeader("X-Robots-Tag","noindex, nofollow");
   if(req.method==="GET" && req.query?.status==="1"){
-    return send(res,200,{ready:isReady()});
+    return send(res,200,{ready:isReady()||trialReady(),trial:trialReady()});
   }
   if(req.method!=="POST"){
     res.setHeader("Allow","GET, POST");
@@ -64,10 +87,9 @@ module.exports=async function handler(req,res){
     }catch(_){}
     if(!same) return send(res,403,{error:"현재 사이트에서만 요청할 수 있어."});
   }
-  if(!isReady())return send(res,503,{error:"AI 상담은 아직 설정 중이야. 현재 기본 만세력 풀이를 이용해 줘."});
-  if(!verifyPin(req.headers?.["x-saju-test-pin"],process.env.SAJU_AI_TEST_PIN)){
-    return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
-  }
+  if(!isReady()&&!trialReady())return send(res,503,{error:"AI 상담은 아직 설정 중이야. 현재 기본 만세력 풀이를 이용해 줘."});
+  const owner=isReady()&&verifyPin(req.headers?.["x-saju-test-pin"],process.env.SAJU_AI_TEST_PIN);
+  if(!owner&&!trialReady())return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
   const size=Number(req.headers?.["content-length"]||0);
   if(size>12000)return send(res,413,{error:"질문이 너무 길어."});
   const data=typeof req.body==="string" ? (()=>{try{return JSON.parse(req.body)}catch(_){return null}})() : req.body;
@@ -89,6 +111,10 @@ module.exports=async function handler(req,res){
     .filter(x=>x && typeof x==="object" && ["user","assistant"].includes(x.role) && typeof x.content==="string")
     .map(x=>({role:x.role,content:cleanText(x.content,350)}))
     .filter(x=>x.content.length>0);
+  if(!owner){
+    try{if(!await claimTrial(req))return send(res,429,{error:"무료 AI 상담 5회를 모두 사용했어. 유료 상담은 준비 중이야."});}
+    catch(_){return send(res,503,{error:"무료 상담 이용 횟수를 확인할 수 없어. 잠시 뒤 다시 이용해 줘."});}
+  }
   const id=cleanText(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown",100).split(",")[0];
   const digest=crypto.createHash("sha256").update(id).digest("hex");
   const now=Date.now();
