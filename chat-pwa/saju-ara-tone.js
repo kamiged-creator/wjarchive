@@ -13,7 +13,7 @@ window.BokjaksoAraTone = (() => {
   function handle(message, messages) {
     const state = status(messages);
     if (state === "new" && informal.test(message.trim())) return {reply: "말씀해 주셔서 고마워요. " + question, state:"pending"};
-    if (state === "casual" && affirmative.test(message.trim())) return {reply:"좋아, 그럼 우리 편하게 이야기하자. 🌸 무슨 일이 있었어?",state};
+    if (state === "pending" && affirmative.test(message.trim())) return {reply:"좋아, 그럼 우리 편하게 이야기하자. 🌸 무슨 일이 있었어?",state};
     return {reply:null,state};
   }
   return {handle,status,question};
