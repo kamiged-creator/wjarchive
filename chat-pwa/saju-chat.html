@@ -919,6 +919,14 @@ body:not(.chat-active) .selection-view footer.saju-legal-footer{
 /* Keep the conversation above the Android on-screen keyboard. */
 body.chat-active{height:var(--saju-chat-height,100dvh)}
 .chat-active .page{height:var(--saju-chat-height,100dvh)}
+
+/* Subtle three-dot reply indicator; visible only while a reply is pending. */
+.typing-indicator .bubble{display:flex;align-items:center;gap:5px;min-width:66px;min-height:40px;justify-content:center}
+.typing-indicator .typing-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.35;animation:saju-typing 1.15s ease-in-out infinite}
+.typing-indicator .typing-dot:nth-child(2){animation-delay:.16s}
+.typing-indicator .typing-dot:nth-child(3){animation-delay:.32s}
+@keyframes saju-typing{0%,65%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-4px);opacity:.9}}
+@media(prefers-reduced-motion:reduce){.typing-indicator .typing-dot{animation:none;opacity:.65}}
 </style>
 <script src="/saju-avatars.js"></script>
 <script src="/saju-advisor-cards.js"></script>
@@ -2102,6 +2110,15 @@ async function response(question,previous){
     (flow?"\n\n"+engine.flowReading(chart,flow,topic[0]):"")+
     (compare?"\n\n"+compare:"");
 }
+function showReplyTyping(){
+  const feed=$("messages");
+  const row=document.createElement("div");row.className="message bot typing-indicator";row.setAttribute("role","status");row.setAttribute("aria-label","상담사가 답변을 작성하고 있어요");
+  appendAdvisorMark(row,true);
+  const bubble=document.createElement("div");bubble.className="bubble";bubble.setAttribute("aria-hidden","true");
+  for(let i=0;i<3;i++){const dot=document.createElement("span");dot.className="typing-dot";bubble.append(dot)}
+  row.append(bubble);feed.append(row);feed.scrollTop=feed.scrollHeight;
+  return row;
+}
 async function send(){
   if(sentBusy)return;
   const input=$("question"),content=input.value.trim();if(!content)return;
@@ -2111,6 +2128,7 @@ async function send(){
   // Sending a message dismisses the mobile keyboard so the composer returns to the bottom.
   input.blur();
   save();renderMessages();
+  const typingRow=showReplyTyping();
   requestAnimationFrame(()=>requestAnimationFrame(()=>{const feed=$("messages");feed.scrollTop=feed.scrollHeight;}));
   try{
     const answer=await response(content,previous);
@@ -2118,6 +2136,7 @@ async function send(){
   }catch(e){
     if(storageKey()===oldKey)conversation.push(msg("bot",e.message||"연결 중 오류가 발생했어. 다시 시도해 줘."));
   }finally{
+    typingRow.remove();
     if(storageKey()===oldKey){save();renderMessages();}
     sentBusy=false;sendBtn.disabled=false;sendBtn.textContent="전송";
   }
