@@ -2020,19 +2020,22 @@ function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,n
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
 const AI_ENDPOINT="/api/saju-ai";
-let aiReady=false;
+let aiReady=false,aiTrial=false;
 const aiConsent=$("aiConsent"),aiPin=$("aiPin"),aiStatus=$("aiStatus");
 async function refreshAiState(){
   try{
     const response=await fetch(AI_ENDPOINT+"?status=1",{cache:"no-store"});
     const result=await response.json();
     aiReady=Boolean(response.ok&&result.ready);
-  }catch(_){aiReady=false;}
+    aiTrial=Boolean(response.ok&&result.trial);
+  }catch(_){aiReady=false;aiTrial=false;}
+  document.body.classList.toggle("saju-public-trial",aiTrial);
   aiConsent.disabled=!aiReady;
-  aiPin.disabled=!aiReady;
+  aiPin.disabled=!aiReady||aiTrial;
+  if(aiTrial)aiConsent.checked=true;
   if(!aiReady){aiConsent.checked=false;aiPin.value="";}
   aiStatus.textContent=aiReady
-    ?"AI 시험 연결 준비 완료 · 동의하고 시험 비밀번호를 넣으면 실제 AI가 답해."
+    ?(aiTrial?"무료 AI 상담 5회 체험 · 질문과 최근 대화가 AI에 전송돼.":"AI 시험 연결 준비 완료 · 동의하고 시험 비밀번호를 넣으면 실제 AI가 답해.")
     :"AI 시험 연결 설정 대기 · 현재는 무료 기본 만세력 풀이만 제공해.";
 }
 function aiChart(chart){
@@ -2070,7 +2073,7 @@ async function response(question,previous){
     if(specialist)return specialist;
     if(aiReady&&aiConsent.checked){
       const pin=aiPin.value;
-      if(pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
+      if(!aiTrial&&pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
       const payload={consent:true,question,advisor:"ara",tone:tone?.state==="casual"?"casual":"formal",topic:"talk",
         chart:null,partner:null,flow:null,
         history:previous.filter(x=>x&&["user","bot"].includes(x.role))
@@ -2332,6 +2335,7 @@ scheduleAdvisorFit();
 refreshAiState();
 })();
 </script>
+<style>body.saju-public-trial .ai-pin-row{display:none!important}body.saju-public-trial .saju-ai-summary small{display:none}</style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
 </body>
