@@ -2104,7 +2104,11 @@ async function send(){
   const input=$("question"),content=input.value.trim();if(!content)return;
   const oldKey=storageKey(),previous=conversation.slice(-4);
   sentBusy=true;sendBtn.disabled=true;sendBtn.textContent="대기";
-  conversation.push(msg("user",content));input.value="";save();renderMessages();
+  conversation.push(msg("user",content));input.value="";
+  // Sending a message dismisses the mobile keyboard so the composer returns to the bottom.
+  input.blur();
+  save();renderMessages();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const feed=$("messages");feed.scrollTop=feed.scrollHeight;}));
   try{
     const answer=await response(content,previous);
     if(storageKey()===oldKey)conversation.push(msg("bot",answer));
