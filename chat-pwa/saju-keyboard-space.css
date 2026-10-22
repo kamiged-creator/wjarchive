@@ -4,3 +4,16 @@
     display: none !important;
   }
 }
+
+/* Password field must remain reachable when Android's autofill strip and IME open. */
+@media (max-width: 599px) and (pointer: coarse) {
+  body.chat-active:has(#aiPin:focus) #aiSettingsDetails[open] {
+    max-height: min(55vh, calc(var(--saju-visible-height, 100dvh) - 105px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 20px;
+  }
+  body.chat-active:has(#aiPin:focus) #aiSettingsDetails .ai-pin-row {
+    scroll-margin-bottom: 24px;
+  }
+}
