@@ -2366,10 +2366,10 @@ body.ara-cinematic-intro .chat-full .saju-scene{inset:0 0 62px!important;z-index
 body.ara-cinematic-intro .chat-full .saju-scene img,body.ara-cinematic-intro .chat-full .saju-scene video{object-position:center 24%!important}
 body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{border-color:rgba(214,178,118,.15)!important}
 
-/* Ara opening: remove the dark top letterbox by cropping the video upward. */
+/* Ara opening: crop only the ~58px mobile top letterbox, preserving full hair/headroom. */
 body.ara-cinematic-intro .chat-full .saju-scene{inset:0 0 62px!important;background:#e5d7ce!important}
-body.ara-cinematic-intro .chat-full .saju-scene video{top:0!important;height:100%!important;object-fit:cover!important;object-position:center top!important}
-body.ara-cinematic-intro .chat-full .saju-scene img{top:-110px!important;height:calc(100% + 110px)!important;object-fit:cover!important;object-position:center top!important}
+body.ara-cinematic-intro .chat-full .saju-scene video{top:-58px!important;height:calc(100% + 58px)!important;object-fit:cover!important;object-position:center top!important}
+body.ara-cinematic-intro .chat-full .saju-scene img{top:0!important;height:100%!important;object-fit:cover!important;object-position:center top!important}
 body.ara-cinematic-intro .chat-full .chat-heading{top:8px!important;z-index:20!important}
 body.ara-cinematic-intro .chat-full .back-to-select{background:rgba(23,21,19,.36)!important}
 /* Preview: counselor portrait behind readable Kakao-style chat bubbles. */
