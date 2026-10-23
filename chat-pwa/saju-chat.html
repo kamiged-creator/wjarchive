@@ -1981,6 +1981,8 @@ function renderMessages(scrollToEnd=true){
   closeSajuPopup?.();
   const feed=$("messages");
   document.body.classList.toggle("ara-cinematic-intro",selected.id==="ara"&&conversation.length===1&&conversation[0]?.role==="bot");
+  // Keep Ara's face visible once a conversation begins; older messages stay scrollable below.
+  document.body.classList.toggle("ara-portrait-chat",selected.id==="ara"&&conversation.length>1);
   const quickbar=$("guidedQuickbar");
   feed.classList.remove("intro-await-question","intro-question-enter");
   quickbar.classList.remove("intro-await-question","intro-choices-enter");
@@ -2052,8 +2054,8 @@ function renderMessages(scrollToEnd=true){
     }
   });
 }
-function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
+function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -2425,6 +2427,86 @@ body.ara-cinematic-intro .chat-full .saju-scene{inset:0 0 62px!important}
 html:not(.dark) .saju-scene{opacity:.17}
 html:not(.dark) .saju-scene.saju-video-scene{opacity:.45}
 .chat-panel.chat-full > :not(.saju-scene){position:relative;z-index:2}
+
+/* Ara conversation: reserve the upper portrait area for her face.
+   Only the lower caption-height message dock scrolls; the video remains full bleed. */
+body.ara-portrait-chat .chat-full .saju-scene{
+  inset:0 0 58px!important;
+  opacity:1!important;
+  background:#e5d7ce!important;
+}
+body.ara-portrait-chat .chat-full .saju-scene video{
+  top:-58px!important;
+  height:calc(100% + 58px)!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+}
+body.ara-portrait-chat .chat-full .saju-scene img{
+  top:0!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center top!important;
+}
+body.ara-portrait-chat .chat-full .saju-scene::after{
+  background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,0) 38%,rgba(23,21,19,.04) 52%,rgba(23,21,19,.6) 76%,#171513 100%)!important;
+}
+body.ara-portrait-chat .chat-full .chat-heading{
+  min-height:58px!important;
+  padding:6px 12px!important;
+  background:rgba(31,26,22,.94)!important;
+}
+body.ara-portrait-chat .chat-full #chatPortrait{display:none!important}
+body.ara-portrait-chat .chat-full .chat-info small{display:none!important}
+body.ara-portrait-chat .chat-full .clear{min-height:36px;padding:6px 10px;font-size:13px}
+body.ara-portrait-chat .chat-full .saju-ai-details>summary{min-height:36px;padding:5px 14px}
+body.ara-portrait-chat .chat-full .saju-ai-summary strong{font-size:13px}
+body.ara-portrait-chat .chat-full .saju-ai-summary small{font-size:11px}
+body.ara-portrait-chat .chat-full .messages{
+  position:absolute!important;
+  inset:auto 0 58px 0!important;
+  width:100%;
+  flex:none!important;
+  height:min(34dvh,365px)!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+  justify-content:flex-start!important;
+  gap:11px!important;
+  padding:42px 15px 15px!important;
+  background:linear-gradient(180deg,transparent,rgba(23,21,19,.20) 18%,rgba(23,21,19,.75) 78%,rgba(23,21,19,.91) 100%)!important;
+  z-index:6!important;
+  overscroll-behavior:contain;
+}
+body.ara-portrait-chat .chat-full .messages .msg-avatar{display:none!important}
+body.ara-portrait-chat .chat-full .messages .message{flex-shrink:0}
+body.ara-portrait-chat .chat-full .messages .message .bubble{
+  max-width:min(82%,480px)!important;
+  padding:10px 14px!important;
+  font-size:16px!important;
+  line-height:1.5!important;
+  border-radius:17px!important;
+}
+body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
+  background:rgba(42,37,33,.93)!important;
+  color:#faf0e5!important;
+  border:1px solid rgba(224,201,174,.12)!important;
+}
+body.ara-portrait-chat .chat-full .messages .message.user .bubble{
+  background:rgba(125,91,68,.94)!important;
+  color:#fff4e9!important;
+}
+body.ara-portrait-chat .chat-full .messages .chat-time{font-size:11px;color:#d2bdad}
+body.ara-portrait-chat .chat-full .composer{
+  margin-top:auto!important;
+  position:relative!important;
+  z-index:10!important;
+}
+@media(max-height:640px){
+  body.ara-portrait-chat .chat-full .messages{
+    height:min(39dvh,260px)!important;
+    padding-top:22px!important;
+  }
+}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
