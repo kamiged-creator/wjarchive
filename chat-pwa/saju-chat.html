@@ -969,7 +969,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
-    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" muted autoplay loop playsinline webkit-playsinline preload="auto" aria-hidden="true"></video></div>
+    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video></div>
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <details class="saju-ai-details" id="aiSettingsDetails">
       <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
@@ -1943,8 +1943,7 @@ function renderSoftWelcome(bubble,text){
   bubble.classList.add("intro-soft-bubble");
 }
 
-// Two muted video layers dissolve at the loop point, avoiding a hard cut to frame one.
-const araVideoLay// The pre-rendered MP4 plays forward then backward, so the end meets the start.
+// Ara background video loops as a silent, non-interactive chat backdrop.
 function syncSajuScene(){
   const scene=$("sajuScene"),image=$("sajuScenePortrait"),video=$("sajuSceneVideo");
   if(!scene||!image||!video)return;
@@ -1956,8 +1955,17 @@ function syncSajuScene(){
   scene.classList.toggle("saju-video-scene",isAra);
   if(isAra){
     if(!video.src)video.src="./arasaju-pingpong.mp4";
+    // Keep mobile browsers in inline/background mode with no native player controls.
+    video.controls=false;
+    video.removeAttribute("controls");
     video.muted=true;
+    video.defaultMuted=true;
     video.loop=true;
+    video.playsInline=true;
+    video.setAttribute("playsinline","");
+    video.setAttribute("webkit-playsinline","");
+    video.disablePictureInPicture=true;
+    video.disableRemotePlayback=true;
     video.onplaying=()=>scene.classList.add("saju-video-playing");
     video.onerror=()=>scene.classList.remove("saju-video-playing");
     if(video.paused)video.play().then(()=>scene.classList.add("saju-video-playing")).catch(()=>scene.classList.remove("saju-video-playing"));
@@ -1966,7 +1974,10 @@ function syncSajuScene(){
     scene.classList.remove("saju-video-playing");
   }
 }
-oTypingRun;
+function renderMessages(scrollToEnd=true){
+  syncSajuScene();
+  introTypingRun++;
+  const currentRun=introTypingRun;
   closeSajuPopup?.();
   const feed=$("messages");
   document.body.classList.toggle("ara-cinematic-intro",selected.id==="ara"&&conversation.length===1&&conversation[0]?.role==="bot");
@@ -2403,7 +2414,8 @@ body.ara-cinematic-intro .chat-full .saju-scene{inset:0 0 62px!important}
 .saju-scene img,.saju-scene video{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.82)}
 .saju-scene::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,#17151355 0%,#17151320 38%,#171513ee 100%)}
 .saju-scene.saju-video-playing img{opacity:0}
-.saju-scene video{display:block;object-position:center 18%;filter:saturate(.9)}
+.saju-scene video{display:block;object-position:center 18%;filter:saturate(.9);pointer-events:none!important}
+.saju-scene video::-webkit-media-controls,.saju-scene video::-webkit-media-controls-panel,.saju-scene video::-webkit-media-controls-start-playback-button,.saju-scene video::-webkit-media-controls-overlay-play-button{display:none!important;opacity:0!important;pointer-events:none!important}
 .saju-scene video[hidden]{display:none}
 .saju-scene.saju-video-scene{opacity:.9}
 .saju-scene.saju-speaking img{animation:saju-breathe 2.6s ease-in-out infinite alternate}
