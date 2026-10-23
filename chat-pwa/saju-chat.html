@@ -2050,7 +2050,18 @@ function renderMessages(scrollToEnd=true){
         feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
       }else feed.scrollTop=0;
     }else{
-      if(scrollToEnd===true&&conversation.length>1&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});}else{feed.scrollTop=scrollToEnd===true?feed.scrollHeight:0;}
+      const isAraDock=document.body.classList.contains("ara-portrait-chat");
+      if(isAraDock&&(scrollToEnd===true||scrollToEnd==="intro")){
+        // Snap to the latest reply and keep it visible after the dock layout settles.
+        feed.scrollTop=feed.scrollHeight;
+        requestAnimationFrame(()=>{
+          if(currentRun===introTypingRun&&document.body.classList.contains("ara-portrait-chat"))feed.scrollTop=feed.scrollHeight;
+        });
+      }else if(scrollToEnd===true&&conversation.length>1&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){
+        feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});
+      }else{
+        feed.scrollTop=scrollToEnd===true?feed.scrollHeight:0;
+      }
     }
   });
 }
@@ -2495,14 +2506,15 @@ body.ara-portrait-chat .chat-full .messages{
   inset:auto 0 58px 0!important;
   width:100%;
   flex:none!important;
-  height:min(34dvh,365px)!important;
+  height:min(35dvh,365px)!important;
   min-height:0!important;
   max-height:none!important;
   overflow-y:auto!important;
   justify-content:flex-start!important;
   gap:11px!important;
-  padding:42px 15px 15px!important;
-  background:linear-gradient(180deg,transparent,rgba(23,21,19,.20) 18%,rgba(23,21,19,.75) 78%,rgba(23,21,19,.91) 100%)!important;
+  padding:32px 15px 25px!important;
+  scroll-padding-bottom:25px;
+  background:linear-gradient(180deg,transparent,rgba(23,21,19,.12) 18%,rgba(23,21,19,.38) 70%,rgba(23,21,19,.70) 100%)!important;
   z-index:6!important;
   overscroll-behavior:contain;
 }
@@ -2516,15 +2528,19 @@ body.ara-portrait-chat .chat-full .messages .message .bubble{
   border-radius:17px!important;
 }
 body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
-  background:rgba(42,37,33,.93)!important;
+  background:rgba(39,34,31,.76)!important;
+  -webkit-backdrop-filter:blur(7px);
+  backdrop-filter:blur(7px);
   color:#faf0e5!important;
   border:1px solid rgba(224,201,174,.12)!important;
 }
 body.ara-portrait-chat .chat-full .messages .message.user .bubble{
-  background:rgba(125,91,68,.94)!important;
+  background:rgba(125,91,68,.82)!important;
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
   color:#fff4e9!important;
 }
-body.ara-portrait-chat .chat-full .messages .chat-time{font-size:11px;color:#d2bdad}
+body.ara-portrait-chat .chat-full .messages .chat-time{font-size:11px;color:#efe0d3;text-shadow:0 1px 3px rgba(0,0,0,.60)}
 body.ara-portrait-chat .chat-full .composer{
   margin-top:auto!important;
   position:relative!important;
