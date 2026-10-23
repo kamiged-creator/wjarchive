@@ -2349,14 +2349,15 @@ refreshAiState();
 <style>
 /* Preview: counselor portrait behind readable Kakao-style chat bubbles. */
 .chat-panel.chat-full{position:relative;isolation:isolate}
-.saju-scene{position:absolute;inset:65px 0 70px;z-index:-1;overflow:hidden;pointer-events:none;opacity:.25}
-.saju-scene img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.75)}
+.saju-scene{position:absolute;inset:65px 0 70px;z-index:0;overflow:hidden;pointer-events:none;opacity:.38}
+.saju-scene img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.82)}
 .saju-scene::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#171513a8 0%,#17151340 40%,#171513c9 100%)}
 .saju-scene.saju-speaking img{animation:saju-breathe 2.6s ease-in-out infinite alternate}
 .saju-scene.saju-speaking::after{background:linear-gradient(180deg,#1715138c,#17151322 45%,#171513c9)}
 @keyframes saju-breathe{from{transform:scale(1.02) translateY(0)}to{transform:scale(1.075) translateY(-1.2%)}}
 @media(prefers-reduced-motion:reduce){.saju-scene.saju-speaking img{animation:none}}
-html:not(.dark) .saju-scene{opacity:.13}
+html:not(.dark) .saju-scene{opacity:.17}
+.chat-panel.chat-full > :not(.saju-scene){position:relative;z-index:1}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
