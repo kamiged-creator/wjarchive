@@ -2573,7 +2573,7 @@ body.ara-portrait-chat .chat-full .saju-scene img{
   object-position:center top!important;
 }
 body.ara-portrait-chat .chat-full .saju-scene::after{
-  background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,0) 38%,rgba(23,21,19,.04) 52%,rgba(23,21,19,.6) 76%,#171513 100%)!important;
+  background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,0) 38%,rgba(23,21,19,.04) 52%,rgba(23,21,19,.67) 76%,#171513 100%)!important;
 }
 /* Ara's conversation room ONLY: hide the top bars; float the back arrow over the video.
    Other advisors retain their original header and AI settings. */
@@ -2630,7 +2630,7 @@ body.ara-portrait-chat .chat-full .messages{
   /* Give the last reply and timestamp breathing room above the composer. */
   padding:71px 22px 52px!important;
   scroll-padding-bottom:52px;
-  background:linear-gradient(180deg,rgba(23,21,19,0) 0%,rgba(23,21,19,.13) 23%,rgba(23,21,19,.42) 61%,rgba(23,21,19,.70) 100%)!important;
+  background:linear-gradient(180deg,rgba(23,21,19,0) 0%,rgba(23,21,19,.13) 23%,rgba(23,21,19,.48) 61%,rgba(23,21,19,.77) 100%)!important;
   z-index:6!important;
   overscroll-behavior:contain;
 }
@@ -2710,12 +2710,13 @@ body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{
   }
 }
 body.ara-cinematic-intro .chat-full .saju-scene::after{
+  /* Preserve Ara's face; deepen only the lower caption/button area. */
   background:linear-gradient(180deg,
     rgba(23,21,19,0) 0%,
     rgba(23,21,19,0) 42%,
     rgba(23,21,19,.11) 56%,
-    rgba(23,21,19,.43) 77%,
-    rgba(23,21,19,.84) 95%,
+    rgba(23,21,19,.52) 77%,
+    rgba(23,21,19,.91) 95%,
     #171513 100%)!important;
 }
 body.ara-portrait-chat .chat-full .composer{
