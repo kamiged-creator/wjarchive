@@ -1,0 +1,44 @@
+name: Build Ara smooth ping-pong video
+on:
+  push:
+    branches:
+      - feature/saju-video-header-shortcut-20261019
+    paths:
+      - '.github/workflows/ara-pingpong-video.yml'
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout preview branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: feature/saju-video-header-shortcut-20261019
+          persist-credentials: true
+      - name: Render forward + reverse continuous loop
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v ffmpeg
+          curl --fail --location --retry 3 --silent --show-error --max-time 45 \
+            'https://pherh2oisbugqyou.public.blob.vercel-storage.com/arasaju.mp4' \
+            -o /tmp/arasaju-original.mp4
+          ffmpeg -hide_banner -loglevel error -i /tmp/arasaju-original.mp4 \
+            -filter_complex '[0:v]split=2[fwd][revsrc];[fwd]trim=end_frame=192,setpts=PTS-STARTPTS[f];[revsrc]reverse,trim=start_frame=1:end_frame=191,setpts=PTS-STARTPTS[r];[f][r]concat=n=2:v=1:a=0,format=yuv420p[v]' \
+            -map '[v]' -an -c:v libx264 -preset veryfast -crf 27 \
+            -movflags +faststart -y chat-pwa/arasaju-pingpong.mp4
+          test "$(stat -c%s chat-pwa/arasaju-pingpong.mp4)" -gt 100000
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 chat-pwa/arasaju-pingpong.mp4
+      - name: Commit media only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add chat-pwa/arasaju-pingpong.mp4
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add forward-reverse Ara loop video for preview'
+            git push origin HEAD:feature/saju-video-header-shortcut-20261019
+          fi
