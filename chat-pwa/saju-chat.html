@@ -1013,7 +1013,7 @@ const advisors=[
  {id:"harin",name:"하린",specialty:"외국인 AI · 음성 상담",topics:[["voice","🎙️","말하는 사주","Simli 한국어 아바타 체험"]],intro:"안녕하세요. 저는 하린이에요. 음성 상담은 아바타 연결 화면에서 시작해 주세요."}
 ];
 const $=id=>document.getElementById(id);
-const ARA_WELCOME_TEXT="🌸 안녕하세요. 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
+const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
 let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
 const birthProfiles=Object.create(null),birthEditing=new Set();
 const guidedDrafts=Object.create(null),guidedManualMode=new Set();
@@ -2775,22 +2775,22 @@ body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle{
   z-index:21!important;
   align-items:center;
   justify-content:center;
-  gap:5px;
-  min-height:41px;
-  padding:6px 11px;
-  border:1px solid rgba(255,231,198,.22);
+  gap:4px;
+  min-height:39px;
+  padding:5px 9px;
+  border:1px solid rgba(255,231,198,.16);
   border-radius:999px;
-  background:rgba(22,19,18,.38);
+  background:rgba(22,19,18,.27);
   color:#f7e4c9;
-  font-size:12px;
+  font-size:11px;
   font-weight:550;
   backdrop-filter:blur(5px);
   -webkit-backdrop-filter:blur(5px);
 }
 .ara-music-toggle{display:none;}
-.ara-music-toggle .ara-music-symbol{font-size:19px;line-height:1;}
+.ara-music-toggle .ara-music-symbol{font-size:17px;line-height:1;}
 body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle[aria-pressed="true"]{background:rgba(91,67,48,.7);border-color:rgba(238,211,170,.5)}
-.ara-starters{display:flex;flex-wrap:wrap;align-self:center;justify-content:center;gap:7px;width:min(100%,480px);margin:10px auto 0;z-index:7;}
+.ara-starters{display:flex;flex-wrap:wrap;align-self:center;justify-content:center;gap:7px;width:min(100%,480px);margin:17px auto 0;z-index:7;}
 .ara-starters .ara-starter{min-height:37px;padding:8px 11px;border:1px solid rgba(238,216,190,.46);border-radius:999px;background:rgba(26,22,20,.52);color:#ffecd9;font-size:13px;line-height:1.35;font-weight:500;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .ara-starters .ara-starter:active{background:rgba(102,76,56,.8)}
 /* Starter row gets its own space; keep the opening greeting off Ara's face. */
