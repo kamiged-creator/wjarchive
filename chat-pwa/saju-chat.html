@@ -969,6 +969,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
+    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""></div>
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <details class="saju-ai-details" id="aiSettingsDetails">
       <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
@@ -1942,7 +1943,9 @@ function renderSoftWelcome(bubble,text){
   bubble.classList.add("intro-soft-bubble");
 }
 
+function syncSajuScene(){const scene=$("sajuScene"),image=$("sajuScenePortrait");if(!scene||!image)return;const src=avatarUrl(selected.id);scene.hidden=!src||selected.id==="harin";if(src&&image.src!==src)image.src=src;}
 function renderMessages(scrollToEnd=true){
+  syncSajuScene();
   introTypingRun++;
   const currentRun=introTypingRun;
   closeSajuPopup?.();
@@ -2126,6 +2129,7 @@ async function response(question,previous){
     (compare?"\n\n"+compare:"");
 }
 function showReplyTyping(){
+  $("sajuScene")?.classList.add("saju-speaking");
   const feed=$("messages");
   const row=document.createElement("div");row.className="message bot typing-indicator";row.setAttribute("role","status");row.setAttribute("aria-label","상담사가 답변을 작성하고 있어요");
   appendAdvisorMark(row,true);
@@ -2158,6 +2162,7 @@ async function send(){
     const remaining=minimumTypingMs-(performance.now()-typingStartedAt);
     if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
     typingRow.remove();
+    $("sajuScene")?.classList.remove("saju-speaking");
     if(storageKey()===oldKey){save();renderMessages();}
     sentBusy=false;sendBtn.disabled=false;sendBtn.textContent="전송";
   }
@@ -2341,6 +2346,18 @@ refreshAiState();
 </script>
 <style>body.saju-public-trial .ai-pin-row{display:none!important}body.saju-public-trial .saju-ai-summary small{display:none}</style>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/bokjakso-push-sw.js",{scope:"/"}).catch(()=>{}));</script>
+<style>
+/* Preview: counselor portrait behind readable Kakao-style chat bubbles. */
+.chat-panel.chat-full{position:relative;isolation:isolate}
+.saju-scene{position:absolute;inset:65px 0 70px;z-index:-1;overflow:hidden;pointer-events:none;opacity:.25}
+.saju-scene img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.75)}
+.saju-scene::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#171513a8 0%,#17151340 40%,#171513c9 100%)}
+.saju-scene.saju-speaking img{animation:saju-breathe 2.6s ease-in-out infinite alternate}
+.saju-scene.saju-speaking::after{background:linear-gradient(180deg,#1715138c,#17151322 45%,#171513c9)}
+@keyframes saju-breathe{from{transform:scale(1.02) translateY(0)}to{transform:scale(1.075) translateY(-1.2%)}}
+@media(prefers-reduced-motion:reduce){.saju-scene.saju-speaking img{animation:none}}
+html:not(.dark) .saju-scene{opacity:.13}
+</style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
 </body>
