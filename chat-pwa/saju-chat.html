@@ -2506,41 +2506,91 @@ body.ara-portrait-chat .chat-full .messages{
   inset:auto 0 58px 0!important;
   width:100%;
   flex:none!important;
-  height:min(35dvh,365px)!important;
+  height:min(40dvh,440px)!important;
   min-height:0!important;
   max-height:none!important;
   overflow-y:auto!important;
   justify-content:flex-start!important;
-  gap:11px!important;
-  padding:32px 15px 25px!important;
+  gap:14px!important;
+  padding:36px 22px 26px!important;
   scroll-padding-bottom:25px;
-  background:linear-gradient(180deg,transparent,rgba(23,21,19,.12) 18%,rgba(23,21,19,.38) 70%,rgba(23,21,19,.70) 100%)!important;
+  background:linear-gradient(180deg,rgba(23,21,19,0) 0%,rgba(23,21,19,.13) 23%,rgba(23,21,19,.42) 61%,rgba(23,21,19,.70) 100%)!important;
   z-index:6!important;
   overscroll-behavior:contain;
 }
 body.ara-portrait-chat .chat-full .messages .msg-avatar{display:none!important}
 body.ara-portrait-chat .chat-full .messages .message{flex-shrink:0}
+/* Ara-only cinematic dialogue: counselor speech is readable text on the
+   video fade, while the visitor keeps a compact right-side message chip. */
+body.ara-portrait-chat .chat-full .messages .message{
+  flex-shrink:0;
+}
+body.ara-portrait-chat .chat-full .messages .msg-avatar,
+body.ara-portrait-chat .chat-full .messages .message.bot .msg-avatar{
+  display:none!important;
+}
 body.ara-portrait-chat .chat-full .messages .message .bubble{
-  max-width:min(82%,480px)!important;
-  padding:10px 14px!important;
-  font-size:16px!important;
-  line-height:1.5!important;
-  border-radius:17px!important;
+  font-size:17px!important;
+  line-height:1.58!important;
+  overflow-wrap:anywhere;
 }
 body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
-  background:rgba(39,34,31,.76)!important;
-  -webkit-backdrop-filter:blur(7px);
-  backdrop-filter:blur(7px);
-  color:#faf0e5!important;
-  border:1px solid rgba(224,201,174,.12)!important;
+  max-width:min(88%,520px)!important;
+  padding:3px 2px!important;
+  background:transparent!important;
+  color:#fff4e7!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  text-shadow:0 2px 8px rgba(0,0,0,.73);
 }
 body.ara-portrait-chat .chat-full .messages .message.user .bubble{
-  background:rgba(125,91,68,.82)!important;
-  -webkit-backdrop-filter:blur(6px);
-  backdrop-filter:blur(6px);
-  color:#fff4e9!important;
+  max-width:min(72%,420px)!important;
+  padding:9px 14px!important;
+  background:rgba(126,87,62,.82)!important;
+  color:#fff5e7!important;
+  border:1px solid rgba(236,205,170,.11)!important;
+  border-radius:17px!important;
+  -webkit-backdrop-filter:blur(5px);
+  backdrop-filter:blur(5px);
+  text-shadow:none!important;
 }
-body.ara-portrait-chat .chat-full .messages .chat-time{font-size:11px;color:#efe0d3;text-shadow:0 1px 3px rgba(0,0,0,.60)}
+body.ara-portrait-chat .chat-full .messages .chat-time{
+  font-size:10px;
+  color:#e6d1c0;
+  text-shadow:0 1px 4px rgba(0,0,0,.72);
+}
+/* The greeting uses the same unboxed caption style as later replies. */
+body.ara-cinematic-intro .chat-full .messages{
+  padding:65px 22px 36px!important;
+  background:transparent!important;
+}
+body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{
+  width:100%;
+  max-width:100%!important;
+  padding:3px 0!important;
+  background:transparent!important;
+  color:#fff2df!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  text-shadow:0 2px 8px rgba(0,0,0,.75);
+  font-size:18px!important;
+  line-height:1.58!important;
+}
+body.ara-cinematic-intro .chat-full .saju-scene::after{
+  background:linear-gradient(180deg,
+    rgba(23,21,19,0) 0%,
+    rgba(23,21,19,0) 42%,
+    rgba(23,21,19,.11) 56%,
+    rgba(23,21,19,.43) 77%,
+    rgba(23,21,19,.84) 95%,
+    #171513 100%)!important;
+}
 body.ara-portrait-chat .chat-full .composer{
   margin-top:auto!important;
   position:relative!important;
