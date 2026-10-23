@@ -2450,17 +2450,46 @@ body.ara-portrait-chat .chat-full .saju-scene img{
 body.ara-portrait-chat .chat-full .saju-scene::after{
   background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,0) 38%,rgba(23,21,19,.04) 52%,rgba(23,21,19,.6) 76%,#171513 100%)!important;
 }
-body.ara-portrait-chat .chat-full .chat-heading{
-  min-height:58px!important;
-  padding:6px 12px!important;
-  background:rgba(31,26,22,.94)!important;
+/* Ara's conversation room ONLY: hide the top bars; float the back arrow over the video.
+   Other advisors retain their original header and AI settings. */
+body.ara-portrait-chat .chat-panel.chat-full > .chat-heading{
+  position:absolute!important;
+  top:8px!important;
+  left:12px!important;
+  right:auto!important;
+  width:44px!important;
+  height:44px!important;
+  min-height:44px!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:20!important;
+  pointer-events:none!important;
 }
-body.ara-portrait-chat .chat-full #chatPortrait{display:none!important}
-body.ara-portrait-chat .chat-full .chat-info small{display:none!important}
-body.ara-portrait-chat .chat-full .clear{min-height:36px;padding:6px 10px;font-size:13px}
-body.ara-portrait-chat .chat-full .saju-ai-details>summary{min-height:36px;padding:5px 14px}
-body.ara-portrait-chat .chat-full .saju-ai-summary strong{font-size:13px}
-body.ara-portrait-chat .chat-full .saju-ai-summary small{font-size:11px}
+body.ara-portrait-chat .chat-full #chatPortrait,
+body.ara-portrait-chat .chat-full .chat-info,
+body.ara-portrait-chat .chat-full #themeToggle,
+body.ara-portrait-chat .chat-full #clearChat,
+body.ara-portrait-chat .chat-full .saju-ai-details{display:none!important}
+body.ara-portrait-chat .chat-full .back-to-select{
+  pointer-events:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:44px!important;
+  min-width:44px!important;
+  height:44px!important;
+  min-height:44px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:50%!important;
+  background:rgba(23,21,19,.36)!important;
+  color:#f2d6a4!important;
+  font-size:30px!important;
+  line-height:1!important;
+  box-shadow:none!important;
+}
 body.ara-portrait-chat .chat-full .messages{
   position:absolute!important;
   inset:auto 0 58px 0!important;
