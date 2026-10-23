@@ -1950,6 +1950,7 @@ function renderMessages(scrollToEnd=true){
   const currentRun=introTypingRun;
   closeSajuPopup?.();
   const feed=$("messages");
+  document.body.classList.toggle("ara-cinematic-intro",selected.id==="ara"&&conversation.length===1&&conversation[0]?.role==="bot");
   const quickbar=$("guidedQuickbar");
   feed.classList.remove("intro-await-question","intro-question-enter");
   quickbar.classList.remove("intro-await-question","intro-choices-enter");
@@ -1963,19 +1964,19 @@ function renderMessages(scrollToEnd=true){
   for(const [index,item] of conversation.entries()){
     const row=document.createElement("div");
     row.className="message "+(item.role==="user"?"user":"bot");
-    if(item.role==="bot")appendAdvisorMark(row,index===0||conversation[index-1]?.role!=="bot");
+    if(item.role==="bot"&&!(document.body.classList.contains("ara-cinematic-intro")&&index===0))appendAdvisorMark(row,index===0||conversation[index-1]?.role!=="bot");
     const bubble=document.createElement("div");
     bubble.className="bubble";
     if(index===0&&animateWelcome){
-      renderSoftWelcome(bubble,item.text);
+      renderSoftWelcome(bubble,selected.id==="ara"?"🌸 안녕하세요. 아라예요.\n오늘은 어떤 이야기를 나누고 싶으세요?":item.text);
       row.append(bubble);
       feed.append(row);
     }else{
-      bubble.textContent=item.text;
+      bubble.textContent=index===0&&document.body.classList.contains("ara-cinematic-intro")?"🌸 안녕하세요. 아라예요.\n오늘은 어떤 이야기를 나누고 싶으세요?":item.text;
       row.append(bubble);
       feed.append(row);
     }
-    if(index===conversation.length-1||conversation[index+1]?.role!==item.role)appendChatTime(row,item.at,item.role);
+    if(!document.body.classList.contains("ara-cinematic-intro")&&(index===conversation.length-1||conversation[index+1]?.role!==item.role))appendChatTime(row,item.at,item.role);
     if(index===0)feed.append(makeIntake());
   }
   // On first entry, let the whole greeting finish before revealing the next
@@ -2022,7 +2023,7 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+" · 체험판";$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else document.body.style.removeProperty("--saju-chat-height");$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -2347,6 +2348,18 @@ refreshAiState();
 <style>body.saju-public-trial .ai-pin-row{display:none!important}body.saju-public-trial .saju-ai-summary small{display:none}</style>
 <script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/bokjakso-push-sw.js",{scope:"/"}).catch(()=>{}));</script>
 <style>
+/* Ara-only cinematic first greeting; subsequent messages keep normal chat layout. */
+body.ara-cinematic-intro .chat-full .chat-heading{position:absolute!important;top:0;left:0;right:0;height:58px;min-height:58px;padding:4px 12px;background:transparent!important;border:0!important;z-index:8!important;pointer-events:none}
+body.ara-cinematic-intro .chat-full .back-to-select{pointer-events:auto;background:rgba(20,16,14,.45);border-radius:50%;color:#f2d6a4}
+body.ara-cinematic-intro .chat-full #chatPortrait,body.ara-cinematic-intro .chat-full .chat-info,body.ara-cinematic-intro .chat-full #themeToggle,body.ara-cinematic-intro .chat-full #clearChat,body.ara-cinematic-intro .chat-full .saju-ai-details{display:none!important}
+body.ara-cinematic-intro .chat-full .saju-scene{inset:0 0 62px!important;opacity:1!important}
+body.ara-cinematic-intro .chat-full .saju-scene img,body.ara-cinematic-intro .chat-full .saju-scene video{object-position:center 18%}
+body.ara-cinematic-intro .chat-full .saju-scene::after{background:linear-gradient(180deg,rgba(23,21,19,.15) 0%,rgba(23,21,19,.02) 43%,rgba(23,21,19,.68) 74%,#171513 100%)}
+body.ara-cinematic-intro .chat-full .messages{justify-content:flex-end;min-height:0;padding:65px 16px 30px!important;overflow-y:auto}
+body.ara-cinematic-intro .chat-full .messages .message.bot{width:100%;justify-content:flex-start;align-items:flex-end}
+body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{max-width:95%;background:rgba(22,17,14,.74)!important;color:#fff2de!important;border:1px solid rgba(214,178,118,.32);font-size:17px;line-height:1.65;backdrop-filter:blur(5px);border-radius:18px;padding:15px 18px}
+body.ara-cinematic-intro .chat-full .composer{z-index:9!important}
+@media(max-height:620px){body.ara-cinematic-intro .chat-full .messages{padding-bottom:10px!important}body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{font-size:15px}}
 /* Preview: counselor portrait behind readable Kakao-style chat bubbles. */
 .chat-panel.chat-full{position:relative;isolation:isolate}
 /* Keep the scene inside the chat scroll region, above opaque panel backgrounds. */
