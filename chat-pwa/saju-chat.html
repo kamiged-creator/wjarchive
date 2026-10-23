@@ -2521,14 +2521,15 @@ body.ara-portrait-chat .chat-full .messages{
   inset:auto 0 58px 0!important;
   width:100%;
   flex:none!important;
-  height:min(40dvh,440px)!important;
+  /* Extend Ara's caption fade 35px upward without moving the dialogue. */
+  height:calc(min(40dvh,440px) + 35px)!important;
   min-height:0!important;
   max-height:none!important;
   overflow-y:auto!important;
   justify-content:flex-start!important;
   gap:14px!important;
   /* Give the last reply and timestamp breathing room above the composer. */
-  padding:36px 22px 52px!important;
+  padding:71px 22px 52px!important;
   scroll-padding-bottom:52px;
   background:linear-gradient(180deg,rgba(23,21,19,0) 0%,rgba(23,21,19,.13) 23%,rgba(23,21,19,.42) 61%,rgba(23,21,19,.70) 100%)!important;
   z-index:6!important;
@@ -2625,8 +2626,8 @@ body.ara-portrait-chat .chat-full .composer{
 }
 @media(max-height:640px){
   body.ara-portrait-chat .chat-full .messages{
-    height:min(39dvh,260px)!important;
-    padding-top:22px!important;
+    height:calc(min(39dvh,260px) + 35px)!important;
+    padding-top:57px!important;
   }
 }
 /* Android/Samsung IME: fixed visual-viewport shell keeps the entry field
