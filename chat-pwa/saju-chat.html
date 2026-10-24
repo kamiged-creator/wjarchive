@@ -2794,10 +2794,21 @@ body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle[
 .ara-starters{display:flex;flex-wrap:wrap;align-self:center;justify-content:center;gap:7px;width:min(100%,480px);margin:17px auto 0;z-index:7;}
 .ara-starters .ara-starter{min-height:37px;padding:8px 11px;border:1px solid rgba(238,216,190,.46);border-radius:999px;background:rgba(26,22,20,.52);color:#ffecd9;font-size:13px;line-height:1.35;font-weight:500;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .ara-starters .ara-starter:active{background:rgba(102,76,56,.8)}
-/* Starter row gets its own space; keep the opening greeting off Ara's face. */
+/* Ara intro only: keep the quick-reply buttons near the composer and lift
+   just the first greeting toward the portrait's forearms. */
 body.ara-cinematic-intro .chat-full .messages{padding-bottom:clamp(70px,13dvh,145px)!important}
+body.ara-cinematic-intro .chat-full .messages .message.bot{
+  margin-bottom:clamp(85px,13dvh,135px)!important;
+}
 @media(max-height:650px){
   body.ara-cinematic-intro .chat-full .messages{padding-bottom:clamp(37px,7dvh,65px)!important}
+  body.ara-cinematic-intro .chat-full .messages .message.bot{
+    margin-bottom:clamp(55px,10dvh,80px)!important;
+  }
+}
+/* While the mobile keyboard is open, return to a compact, scrollable greeting. */
+body.ara-cinematic-intro.ara-keyboard-open .chat-full .messages .message.bot{
+  margin-bottom:12px!important;
 }
 @media(max-width:355px){
   .ara-starters{gap:5px}
