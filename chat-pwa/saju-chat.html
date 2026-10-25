@@ -2087,22 +2087,34 @@ function renderMessages(scrollToEnd=true){
     }
   });
 }
-function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
+function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
 function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
 const AI_ENDPOINT="/api/saju-ai";
-let aiReady=false,aiTrial=false;
+let aiReady=false,aiTrial=false,aiAraDirect=false;
 const aiConsent=$("aiConsent"),aiPin=$("aiPin"),aiStatus=$("aiStatus");
+// Direct Ara AI chat uses no PIN. Other advisers' testing controls remain unchanged.
+function syncAraAiUi(){
+  const ara=selected.id==="ara";
+  $("aiSettingsDetails").hidden=ara;
+  const chatInput=$("question");
+  chatInput.placeholder=ara&&aiAraDirect?"아라 AI 상담 · 메시지 입력":"메시지 입력";
+  chatInput.setAttribute("aria-label",ara&&aiAraDirect
+    ?"아라 AI 상담. 메시지를 전송하면 질문과 최근 대화가 AI 서비스로 전송됩니다."
+    :"상담 질문 입력");
+}
 async function refreshAiState(){
   try{
     const response=await fetch(AI_ENDPOINT+"?status=1",{cache:"no-store"});
     const result=await response.json();
     aiReady=Boolean(response.ok&&result.ready);
     aiTrial=Boolean(response.ok&&result.trial);
-  }catch(_){aiReady=false;aiTrial=false;}
+    aiAraDirect=Boolean(response.ok&&result.araDirect);
+  }catch(_){aiReady=false;aiTrial=false;aiAraDirect=false;}
   document.body.classList.toggle("saju-public-trial",aiTrial);
+  syncAraAiUi();
   aiConsent.disabled=!aiReady;
   aiPin.disabled=!aiReady||aiTrial;
   if(aiTrial)aiConsent.checked=true;
@@ -2141,25 +2153,23 @@ function araSpecialistReferral(question){
 async function response(question,previous){
   if(selected.id==="ara"){
     const tone=window.BokjaksoAraTone?.handle(question,conversation.slice(0,-1));
-    if(tone?.reply)return tone.reply;
+    if(tone?.reply&&!aiAraDirect)return tone.reply;
     const specialist=araSpecialistReferral(question);
-    if(specialist)return specialist;
-    if(aiReady&&aiConsent.checked){
-      const pin=aiPin.value;
-      if(!aiTrial&&pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
+    if(specialist&&!aiAraDirect)return specialist;
+    if(aiAraDirect){
       const payload={consent:true,question,advisor:"ara",tone:tone?.state==="casual"?"casual":"formal",topic:"talk",
         chart:null,partner:null,flow:null,
         history:previous.filter(x=>x&&["user","bot"].includes(x.role))
           .slice(-4).map(x=>({role:x.role==="bot"?"assistant":"user",content:x.text.slice(0,350)}))};
       const reply=await fetch(AI_ENDPOINT,{method:"POST",
-        headers:{"Content-Type":"application/json","x-saju-test-pin":pin},
+        headers:{"Content-Type":"application/json"},
         body:JSON.stringify(payload),cache:"no-store"});
       let body={};try{body=await reply.json()}catch(_){}
       if(!reply.ok)throw new Error(body.error||"AI 연결에 실패했어.");
       if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
       return body.answer;
     }
-    return "🌸 아라는 편안하게 이야기를 듣는 상담사야. 지금은 GPT API가 활성화되지 않아 네 고민에 맞춘 자유로운 답변은 아직 할 수 없어. 전문 운세·궁합·재물 질문은 담당 상담사를 안내해 줄게.";
+    return "🌸 지금은 아라 AI 연결을 준비 중이야. 설정을 확인한 뒤 다시 이용해 줘.";
   }
   const profiles=birthProfiles[birthKey()];
   if(!profiles||!profiles.length)return "먼저 위에서 출생 정보를 입력해 줘. 입력하면 만세력 사주팔자를 계산해 보여줄게.";
