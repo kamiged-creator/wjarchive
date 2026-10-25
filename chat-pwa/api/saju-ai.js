@@ -43,6 +43,35 @@ function isReady(){
     typeof process.env.SAJU_AI_TEST_PIN==="string" && process.env.SAJU_AI_TEST_PIN.length>=8;
 }
 
+// Ara's password-free preview stays disabled unless a shared Redis REST store is configured.
+// This does not alter the PIN requirement for the other advisers.
+function araDirectReady(){
+  return process.env.VERCEL_ENV==="preview" &&
+    process.env.SAJU_AI_ENABLED==="1" &&
+    typeof process.env.OPENAI_API_KEY==="string" &&
+    process.env.OPENAI_API_KEY.length>20 &&
+    Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+}
+async function claimAraDirect(req){
+  const ip=String(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].trim();
+  const day=new Date().toISOString().slice(0,10);
+  const hash=crypto.createHmac("sha256",process.env.KV_REST_API_TOKEN).update(ip).digest("hex");
+  const base=process.env.KV_REST_API_URL.replace(/\/$/,"");
+  async function increment(key){
+    const response=await fetch(base+"/incr/"+encodeURIComponent(key),{
+      headers:{Authorization:"Bearer "+process.env.KV_REST_API_TOKEN},
+      signal:AbortSignal.timeout(4000)
+    });
+    if(!response.ok)throw new Error("counter unavailable");
+    const data=await response.json();
+    if(!Number.isInteger(data.result))throw new Error("invalid counter");
+    return data.result;
+  }
+  // Fail closed on storage errors. UTC date-scoped counters reset automatically each day.
+  if(await increment("saju:ara:ip:v1:"+day+":"+hash)>25)return false;
+  return await increment("saju:ara:global:v1:"+day)<=150;
+}
+
 // Public trial stays disabled until a persistent Redis REST store is configured.
 // A single IP has at most five free requests across devices; the owner PIN remains separate.
 function trialReady(){
@@ -72,7 +101,7 @@ module.exports=async function handler(req,res){
   res.setHeader("Referrer-Policy","no-referrer");
   res.setHeader("X-Robots-Tag","noindex, nofollow");
   if(req.method==="GET" && req.query?.status==="1"){
-    return send(res,200,{ready:isReady()||trialReady(),trial:trialReady()});
+    return send(res,200,{ready:isReady()||trialReady()||araDirectReady(),trial:trialReady(),araDirect:araDirectReady()});
   }
   if(req.method!=="POST"){
     res.setHeader("Allow","GET, POST");
@@ -87,9 +116,10 @@ module.exports=async function handler(req,res){
     }catch(_){}
     if(!same) return send(res,403,{error:"현재 사이트에서만 요청할 수 있어."});
   }
-  if(!isReady()&&!trialReady())return send(res,503,{error:"AI 상담은 아직 설정 중이야. 현재 기본 만세력 풀이를 이용해 줘."});
-  const owner=isReady()&&verifyPin(req.headers?.["x-saju-test-pin"],process.env.SAJU_AI_TEST_PIN);
-  if(!owner&&!trialReady())return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
+  const direct=araDirectReady(),trial=trialReady(),pinReady=isReady();
+  if(!pinReady&&!trial&&!direct)return send(res,503,{error:"AI 상담은 아직 설정 중이야. 현재 기본 만세력 풀이를 이용해 줘."});
+  const owner=pinReady&&verifyPin(req.headers?.["x-saju-test-pin"],process.env.SAJU_AI_TEST_PIN);
+  if(!owner&&!trial&&!direct)return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
   const size=Number(req.headers?.["content-length"]||0);
   if(size>12000)return send(res,413,{error:"질문이 너무 길어."});
   const data=typeof req.body==="string" ? (()=>{try{return JSON.parse(req.body)}catch(_){return null}})() : req.body;
@@ -104,6 +134,10 @@ module.exports=async function handler(req,res){
     return send(res,400,{error:"질문이나 만세력 데이터 형식을 확인해 줘."});
   }
   if(topic==="match"&&!partner)return send(res,400,{error:"궁합 상담에는 두 사람의 계산된 사주가 필요해."});
+  // Anonymous direct access is only for Ara's everyday talk, never for other advisers.
+  if(!owner&&!trial&&!(direct&&advisor==="ara"&&topic==="talk")){
+    return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
+  }
   if(data.history!==undefined && !Array.isArray(data.history)){
     return send(res,400,{error:"대화 기록 형식이 올바르지 않아."});
   }
@@ -112,8 +146,13 @@ module.exports=async function handler(req,res){
     .map(x=>({role:x.role,content:cleanText(x.content,350)}))
     .filter(x=>x.content.length>0);
   if(!owner){
-    try{if(!await claimTrial(req))return send(res,429,{error:"무료 AI 상담 5회를 모두 사용했어. 유료 상담은 준비 중이야."});}
-    catch(_){return send(res,503,{error:"무료 상담 이용 횟수를 확인할 수 없어. 잠시 뒤 다시 이용해 줘."});}
+    try{
+      if(direct&&advisor==="ara"&&topic==="talk"){
+        if(!await claimAraDirect(req))return send(res,429,{error:"오늘 아라 AI 상담 이용 한도에 도달했어. 내일 다시 이용해 줘."});
+      }else if(trial){
+        if(!await claimTrial(req))return send(res,429,{error:"무료 AI 상담 5회를 모두 사용했어. 유료 상담은 준비 중이야."});
+      }else return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
+    }catch(_){return send(res,503,{error:"무료 상담 이용 횟수를 확인할 수 없어. 잠시 뒤 다시 이용해 줘."});}
   }
   const id=cleanText(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown",100).split(",")[0];
   const digest=crypto.createHash("sha256").update(id).digest("hex");
