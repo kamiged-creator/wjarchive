@@ -2153,7 +2153,9 @@ function araSpecialistReferral(question){
 async function response(question,previous){
   if(selected.id==="ara"){
     const tone=window.BokjaksoAraTone?.handle(question,conversation.slice(0,-1));
-    if(tone?.reply&&!aiAraDirect)return tone.reply;
+    // Respect the local tone-consent exchange before every server AI request.
+    // API-direct mode must not bypass the permission question or acknowledgement.
+    if(tone?.reply)return tone.reply;
     const specialist=araSpecialistReferral(question);
     if(specialist&&!aiAraDirect)return specialist;
     if(aiAraDirect){
