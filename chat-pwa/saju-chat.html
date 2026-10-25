@@ -2335,9 +2335,19 @@ $("simliStop").addEventListener("click",()=>{
   syncSimliControls();
 });
 
-// Ara-only background music: locally synthesized, no streamed audio or autoplay.
-// A visitor must tap the music control before any sound begins.
-let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0;
+// Ara-only gentle soundtrack. No autoplay: sound begins ONLY on Music On.
+// Web Audio's clock schedules notes early so the 32-beat phrase loops
+// continuously, with note tails overlapping across the final/first beat.
+let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0,araMusicNextAt=0;
+const ARA_MUSIC_BEAT_SECONDS=1.5;
+const ARA_MUSIC_STEPS=32;
+const ARA_MUSIC_CHORDS=[
+  [174.61,220,261.63,329.63],
+  [196,246.94,293.66,392],
+  [164.81,196,246.94,293.66],
+  [174.61,220,261.63,349.23]
+];
+const ARA_MUSIC_ORDER=[0,2,1,3,2,1,0,2];
 function refreshAraMusicToggle(){
   const button=$("araMusicToggle"),playing=Boolean(araMusicContext);
   const label=playing?"음악 끄기":"음악 켜기";
@@ -2346,43 +2356,50 @@ function refreshAraMusicToggle(){
   button.title="잔잔한 배경"+label;
   button.querySelector(".ara-music-label").textContent=label;
 }
-function araMusicNote(ctx,freq,duration,level){
-  const now=ctx.currentTime;
+function araMusicNote(ctx,freq,when,duration,level){
+  const start=Math.max(ctx.currentTime,when);
   for(const [multiple,volume] of [[1,level],[2,level*.1]]){
     const tone=ctx.createOscillator(),envelope=ctx.createGain();
     tone.type="sine";
     tone.frequency.value=freq*multiple;
-    envelope.gain.setValueAtTime(.0001,now);
-    envelope.gain.exponentialRampToValueAtTime(Math.max(.0002,volume),now+.11);
-    envelope.gain.exponentialRampToValueAtTime(.0001,now+duration);
+    envelope.gain.setValueAtTime(.0001,start);
+    envelope.gain.exponentialRampToValueAtTime(Math.max(.0002,volume),start+.18);
+    envelope.gain.exponentialRampToValueAtTime(.0001,start+duration);
     tone.connect(envelope);
     envelope.connect(araMusicMaster);
-    tone.start(now);
-    tone.stop(now+duration+.05);
+    tone.start(start);
+    tone.stop(start+duration+.06);
     tone.onended=()=>{tone.disconnect();envelope.disconnect();};
   }
 }
-function araMusicPulse(){
+function araMusicSchedule(){
   const ctx=araMusicContext;
   if(!ctx||ctx.state!=="running")return;
-  const chords=[
-    [174.61,220,261.63,329.63],
-    [196,246.94,293.66,392],
-    [164.81,196,246.94,293.66],
-    [174.61,220,261.63,349.23]
-  ];
-  const notes=chords[Math.floor(araMusicStep/8)%chords.length];
-  const order=[0,2,1,3,2,1,0,2];
-  araMusicNote(ctx,notes[order[araMusicStep%8]],2.8,.15);
-  if(araMusicStep%8===0)araMusicNote(ctx,notes[0]/2,6,.075);
-  araMusicStep++;
+  // Future notes are handled by the audio clock, rather than setInterval timing.
+  // A short look-ahead avoids gaps when mobile JavaScript is briefly delayed.
+  if(araMusicNextAt<ctx.currentTime-.2)araMusicNextAt=ctx.currentTime+.08;
+  const horizon=ctx.currentTime+3.2;
+  while(araMusicNextAt<horizon){
+    const beat=araMusicStep%ARA_MUSIC_STEPS;
+    const notes=ARA_MUSIC_CHORDS[Math.floor(beat/8)];
+    const at=araMusicNextAt;
+    // The main voice overlaps the next beat, including beat 31 -> beat 0.
+    araMusicNote(ctx,notes[ARA_MUSIC_ORDER[beat%8]],at,3.1,.15);
+    // Long, quiet bass release crosses chord/loop boundaries without a hard cut.
+    if(beat%8===0)araMusicNote(ctx,notes[0]/2,at,13.2,.065);
+    araMusicStep=(beat+1)%ARA_MUSIC_STEPS;
+    araMusicNextAt+=ARA_MUSIC_BEAT_SECONDS;
+  }
 }
 function stopAraMusic(){
   if(araMusicTimer!==null){clearInterval(araMusicTimer);araMusicTimer=null;}
   const ctx=araMusicContext,master=araMusicMaster;
-  araMusicContext=null;araMusicMaster=null;
+  araMusicContext=null;araMusicMaster=null;araMusicStep=0;araMusicNextAt=0;
   if(ctx){
-    if(master){master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(0,ctx.currentTime,.09);}
+    if(master){
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setTargetAtTime(0,ctx.currentTime,.09);
+    }
     setTimeout(()=>ctx.close().catch(()=>{}),360);
   }
   refreshAraMusicToggle();
@@ -2399,11 +2416,12 @@ function startAraMusic(){
     master.connect(ctx.destination);
     araMusicContext=ctx;araMusicMaster=master;araMusicStep=0;
     refreshAraMusicToggle();
-    // AudioContext is created/resumed only inside this explicit click gesture.
+    // AudioContext is created/resumed only in response to this explicit click.
     ctx.resume().then(()=>{
       if(araMusicContext!==ctx)return;
-      araMusicPulse();
-      araMusicTimer=setInterval(araMusicPulse,1500);
+      araMusicNextAt=ctx.currentTime+.08;
+      araMusicSchedule();
+      araMusicTimer=setInterval(araMusicSchedule,100);
     }).catch(()=>{if(araMusicContext===ctx)stopAraMusic();});
   }catch(_){stopAraMusic();}
 }
