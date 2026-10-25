@@ -995,6 +995,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
       </div>
     </section>
     <button type="button" id="araMusicToggle" class="ara-music-toggle" aria-label="잔잔한 배경음악 켜기" aria-pressed="false" title="잔잔한 배경음악 켜기"><span class="ara-music-symbol" aria-hidden="true">♫</span><span class="ara-music-label">음악 켜기</span></button>
+    <a class="ara-voice-shortcut" id="araVoiceShortcut" href="https://bokjakso-chat-pwa.vercel.app/api/simli-session" target="_blank" rel="noopener noreferrer" aria-label="하린 음성상담 새 창에서 열기" title="하린 음성상담으로 이동"><span aria-hidden="true">🎙️</span><span>음성상담</span></a>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
     <form class="composer" id="composer" autocomplete="off"><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
@@ -2914,6 +2915,43 @@ body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
   white-space:pre-wrap;
   text-wrap:pretty;
   line-height:1.68!important;
+}
+
+/* Ara-only shortcut to the existing Harin voice session on the public chat app.
+   The preview's own Simli endpoint is not configured; do not route to it. */
+.ara-voice-shortcut{display:none}
+body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-voice-shortcut{
+  display:inline-flex!important;
+  position:absolute!important;
+  top:14px!important;
+  right:113px!important;
+  z-index:21!important;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:39px;
+  padding:6px 11px;
+  border:1px solid rgba(255,231,198,.16);
+  border-radius:999px;
+  background:rgba(22,19,18,.39);
+  color:#f7e4c9;
+  font-size:12px;
+  font-weight:600;
+  text-decoration:none;
+  white-space:nowrap;
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-voice-shortcut:focus-visible{
+  outline:2px solid #f7d3a4;
+  outline-offset:3px;
+}
+@media(max-width:355px){
+  body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-voice-shortcut{
+    right:105px!important;
+    padding-inline:8px;
+    font-size:11px;
+  }
 }
 </style>
 <script defer src="./saju-ara-tone.js"></script>
