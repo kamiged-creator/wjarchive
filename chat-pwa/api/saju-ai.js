@@ -43,6 +43,17 @@ function isReady(){
     typeof process.env.SAJU_AI_TEST_PIN==="string" && process.env.SAJU_AI_TEST_PIN.length>=8;
 }
 
+// Accept legacy Vercel KV names or the standard Upstash Marketplace variable names.
+function redisCredentials(){
+  const candidates=[
+    [process.env.KV_REST_API_URL,process.env.KV_REST_API_TOKEN],
+    [process.env.UPSTASH_REDIS_REST_URL,process.env.UPSTASH_REDIS_REST_TOKEN]
+  ];
+  const pair=candidates.find(([url,token])=>
+    typeof url==="string" && /^https:\/\//.test(url) &&
+    typeof token==="string" && token.length>0);
+  return pair?{url:pair[0].replace(/\/$/,""),token:pair[1]}:null;
+}
 // Ara's password-free preview stays disabled unless a shared Redis REST store is configured.
 // This does not alter the PIN requirement for the other advisers.
 function araDirectReady(){
@@ -50,16 +61,18 @@ function araDirectReady(){
     process.env.SAJU_AI_ENABLED==="1" &&
     typeof process.env.OPENAI_API_KEY==="string" &&
     process.env.OPENAI_API_KEY.length>20 &&
-    Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+    Boolean(redisCredentials());
 }
 async function claimAraDirect(req){
+  const redis=redisCredentials();
+  if(!redis)throw new Error("Redis not configured");
   const ip=String(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].trim();
   const day=new Date().toISOString().slice(0,10);
-  const hash=crypto.createHmac("sha256",process.env.KV_REST_API_TOKEN).update(ip).digest("hex");
-  const base=process.env.KV_REST_API_URL.replace(/\/$/,"");
+  const hash=crypto.createHmac("sha256",redis.token).update(ip).digest("hex");
+  const base=redis.url;
   async function increment(key){
     const response=await fetch(base+"/incr/"+encodeURIComponent(key),{
-      headers:{Authorization:"Bearer "+process.env.KV_REST_API_TOKEN},
+      headers:{Authorization:"Bearer "+redis.token},
       signal:AbortSignal.timeout(4000)
     });
     if(!response.ok)throw new Error("counter unavailable");
@@ -79,14 +92,16 @@ function trialReady(){
     process.env.SAJU_AI_ENABLED==="1" &&
     typeof process.env.OPENAI_API_KEY==="string" &&
     process.env.OPENAI_API_KEY.length>20 &&
-    Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+    Boolean(redisCredentials());
 }
 async function claimTrial(req){
+  const redis=redisCredentials();
+  if(!redis)throw new Error("Redis not configured");
   const ip=String(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].trim();
-  const key="saju:trial:v1:"+crypto.createHmac("sha256",process.env.KV_REST_API_TOKEN).update(ip).digest("hex");
-  const url=process.env.KV_REST_API_URL.replace(/\/$/,"");
+  const key="saju:trial:v1:"+crypto.createHmac("sha256",redis.token).update(ip).digest("hex");
+  const url=redis.url;
   const response=await fetch(url+"/incr/"+encodeURIComponent(key),{
-    headers:{Authorization:"Bearer "+process.env.KV_REST_API_TOKEN},
+    headers:{Authorization:"Bearer "+redis.token},
     signal:AbortSignal.timeout(4000)
   });
   if(!response.ok)throw new Error("trial storage unavailable");
