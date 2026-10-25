@@ -2834,6 +2834,59 @@ body.ara-cinematic-intro.ara-keyboard-open .chat-full .messages .message.bot{
 @media(prefers-reduced-motion:reduce){
   body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle{transition:none}
 }
+
+/* Ara conversation polish — preview only. Keep the portrait bright and the
+   scrolled dialogue soft at its top edge, without changing the intro or
+   the other three advisers. */
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full{
+  --ara-dock-bottom:70px;
+  --ara-dock-height:calc(min(43dvh,465px) + 35px);
+  --ara-dock-fade:62px;
+}
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
+  bottom:var(--ara-dock-bottom)!important;
+  height:var(--ara-dock-height)!important;
+  padding-top:78px!important;
+  padding-bottom:58px!important;
+  scroll-padding-top:var(--ara-dock-fade);
+  scroll-padding-bottom:58px;
+  background:linear-gradient(180deg,
+    rgba(23,21,19,0) 0%,
+    rgba(23,21,19,.16) 20%,
+    rgba(23,21,19,.53) 57%,
+    rgba(23,21,19,.86) 100%)!important;
+  -webkit-mask-image:linear-gradient(to bottom,
+    transparent 0px,rgba(0,0,0,.24) 18px,#000 64px);
+  mask-image:linear-gradient(to bottom,
+    transparent 0px,rgba(0,0,0,.24) 18px,#000 64px);
+}
+/* Blurred first 62px of the clipped dialogue, blending smoothly into
+   the crisp text below; never intercept scrolling or taps. */
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:calc(var(--ara-dock-bottom) + var(--ara-dock-height) - var(--ara-dock-fade));
+  height:var(--ara-dock-fade);
+  z-index:8;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(23,21,19,.08),transparent);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.7) 38%,transparent 100%);
+  mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.7) 38%,transparent 100%);
+}
+/* Raise the typing field inside its own dock instead of using a transform;
+   this preserves the Android keyboard-viewport behavior. */
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .composer{
+  padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;
+}
+@media(max-height:640px){
+  body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full{
+    --ara-dock-height:calc(min(40dvh,280px) + 35px);
+  }
+}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
