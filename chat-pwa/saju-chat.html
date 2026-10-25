@@ -2884,6 +2884,19 @@ body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .composer{
     --ara-dock-height:calc(min(40dvh,280px) + 35px);
   }
 }
+
+/* Ara's counseling text: ragged-right, natural Korean word boundaries and
+   slightly looser leading. No newspaper-style full justification. */
+body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
+  text-align:left!important;
+  text-align-last:left!important;
+  word-break:keep-all!important;
+  overflow-wrap:break-word!important;
+  line-break:strict;
+  white-space:pre-wrap;
+  text-wrap:pretty;
+  line-height:1.68!important;
+}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
