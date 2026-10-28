@@ -2269,12 +2269,15 @@ function renderMessages(scrollToEnd=true){
         feed.scrollTop=Math.max(0,feed.scrollTop+offset-12);
       }else feed.scrollTop=0;
     }else{
-      const isAraDock=document.body.classList.contains("ara-portrait-chat");
-      if(isAraDock&&(scrollToEnd===true||scrollToEnd==="intro")){
-        // Snap to the latest reply and keep it visible after the dock layout settles.
+      const isBottomDock=document.body.classList.contains("ara-portrait-chat")||
+        document.body.classList.contains("jiyun-video-chat");
+      if(isBottomDock&&(scrollToEnd===true||scrollToEnd==="intro")){
+        // Keep the latest question visible as the bottom-mounted message dock settles.
         feed.scrollTop=feed.scrollHeight;
         requestAnimationFrame(()=>{
-          if(currentRun===introTypingRun&&document.body.classList.contains("ara-portrait-chat"))feed.scrollTop=feed.scrollHeight;
+          if(currentRun===introTypingRun&&
+             (document.body.classList.contains("ara-portrait-chat")||
+              document.body.classList.contains("jiyun-video-chat")))feed.scrollTop=feed.scrollHeight;
         });
       }else if(scrollToEnd===true&&conversation.length>1&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){
         feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});
@@ -3330,6 +3333,104 @@ body.jiyun-video-chat .chat-full .back-to-select{
   font-size:30px!important;
   line-height:1!important;
   box-shadow:none!important;
+}
+
+/* Jiyun cinematic chat: preserve her unobstructed face by placing a compact,
+   scrollable conversation dock directly above the unchanged birth-choice bar.
+   Scope everything to Jiyun; other counselors retain their own layouts. */
+body.jiyun-video-chat .chat-full .messages{
+  position:relative!important;
+  flex:0 1 auto!important;
+  margin-top:auto!important;
+  width:100%!important;
+  height:min(34dvh,340px)!important;
+  max-height:calc(100% - 95px)!important;
+  min-height:0!important;
+  justify-content:flex-start!important;
+  padding:49px 18px 15px!important;
+  gap:10px!important;
+  overflow-y:auto!important;
+  background:linear-gradient(to bottom,
+    rgba(23,21,19,0) 0%,
+    rgba(23,21,19,.12) 22%,
+    rgba(23,21,19,.37) 48%,
+    rgba(23,21,19,.72) 100%)!important;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0px,rgba(0,0,0,.55) 33px,#000 57px);
+  mask-image:linear-gradient(to bottom,transparent 0px,rgba(0,0,0,.55) 33px,#000 57px);
+  scroll-padding-bottom:15px;
+  z-index:6!important;
+  overscroll-behavior:contain;
+}
+body.jiyun-video-chat .chat-full .messages .msg-avatar,
+body.jiyun-video-chat .chat-full .messages .msg-avatar-spacer,
+body.jiyun-video-chat .chat-full .messages .guided-avatar,
+body.jiyun-video-chat .chat-full .messages .chat-time{display:none!important}
+body.jiyun-video-chat .chat-full .messages .message,
+body.jiyun-video-chat .chat-full .messages .guided-chat-flow,
+body.jiyun-video-chat .chat-full .messages .guided-transcript{
+  flex-shrink:0!important;
+  min-width:0!important;
+}
+body.jiyun-video-chat .chat-full .messages .message{
+  width:100%;
+  gap:0!important;
+}
+body.jiyun-video-chat .chat-full .messages .guided-chat-flow{gap:10px!important}
+body.jiyun-video-chat .chat-full .messages .guided-transcript{gap:10px!important}
+body.jiyun-video-chat .chat-full .messages .message .bubble{
+  font-size:16px!important;
+  line-height:1.54!important;
+  word-break:keep-all;
+  overflow-wrap:break-word;
+}
+body.jiyun-video-chat .chat-full .messages .message.bot .bubble:not(.guided-prompt-text){
+  max-width:min(90%,520px)!important;
+  padding:4px 2px!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  color:#fff1df!important;
+  text-shadow:0 2px 7px rgba(0,0,0,.84);
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+body.jiyun-video-chat .chat-full .messages .message.user .bubble{
+  max-width:min(75%,420px)!important;
+  padding:8px 13px!important;
+  background:rgba(114,79,56,.64)!important;
+  color:#fff1e4!important;
+  border:1px solid rgba(244,208,174,.13)!important;
+  border-radius:15px!important;
+  box-shadow:none!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.34);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+body.jiyun-video-chat .chat-full .messages .guided-current .guided-prompt-text{
+  width:100%;
+  max-width:min(100%,520px)!important;
+  padding:10px 13px!important;
+  background:rgba(25,21,18,.64)!important;
+  border:1px solid rgba(255,228,195,.13)!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+body.jiyun-video-chat .chat-full .guided-quickbar,
+body.jiyun-video-chat .chat-full .composer{
+  position:relative;
+  z-index:9!important;
+}
+@media(max-height:650px){
+  body.jiyun-video-chat .chat-full .messages{
+    height:min(28dvh,215px)!important;
+    padding:36px 14px 9px!important;
+  }
+}
+@media(max-width:360px){
+  body.jiyun-video-chat .chat-full .messages{padding-left:12px!important;padding-right:12px!important}
 }
 </style>
 <script defer src="./saju-ara-tone.js"></script>
