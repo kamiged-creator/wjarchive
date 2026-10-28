@@ -32,6 +32,10 @@ try {
 <style>
 html.saju-direct-entry .selection-view,
 html.saju-direct-entry .top{display:none!important}
+/* Hold all uninitialized markup out of view until the actual Ara video is ready.
+   The head stylesheet is applied before the first paint on mobile. */
+html.saju-direct-entry:not(.saju-video-ready) .page{visibility:hidden!important}
+.chat-view[hidden],.selection-view[hidden]{display:none!important}
 :root{color-scheme:light;background:#f6f1e9}html.dark{color-scheme:dark;background:#171513}
 :root{font-family:Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;color:#35271e;background:#f6f1e9;font-synthesis:none}
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% 0%,#fffaf1 0,transparent 38%),#f6f1e9}
@@ -2600,6 +2604,28 @@ document.fonts?.ready?.then(scheduleAdvisorFit);
 if(location.hash!=="#chat"&&!new URLSearchParams(location.search).has("advisor-list"))history.replaceState(null,"",location.pathname+location.search+"#chat");
 renderAll();
 syncChatView();
+// Reveal the composed room only after the final stylesheet has been parsed
+// and the CURRENT video has a frame, avoiding the old layout/photo flash.
+function revealAraRoomWhenReady(){
+  if(!document.documentElement.classList.contains("saju-direct-entry"))return;
+  const video=$("sajuSceneVideo");
+  let shown=false;
+  const show=()=>{
+    if(shown)return;
+    shown=true;
+    document.documentElement.classList.add("saju-video-ready");
+  };
+  if(video?.readyState>=2)show();
+  else{
+    video?.addEventListener("loadeddata",show,{once:true});
+    video?.addEventListener("playing",show,{once:true});
+    video?.addEventListener("error",show,{once:true});
+    // Never trap visitors on a blank page if a mobile browser blocks video.
+    setTimeout(show,1800);
+  }
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",revealAraRoomWhenReady,{once:true});
+else revealAraRoomWhenReady();
 scheduleAdvisorFit();
 refreshAiState();
 })();
