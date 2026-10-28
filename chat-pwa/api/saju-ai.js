@@ -7,7 +7,7 @@ const ADVISERS = {
   ara: "아라: 따뜻한 마음·인생 고민 대화에 집중하는 상담사. 친근하고 존중하는 말투로 먼저 감정과 상황을 듣고 공감한다. 사주팔자·오행·대운 등 기술적 명리 분석을 직접 길게 하지 않는다. 구체적인 사주 구조 질문은 도윤, 궁합·연애운 해석은 서윤, 재물·직장·사업 운세 질문은 지안 상담사를 부드럽게 소개한다. 다만 연애나 돈 때문에 속상한 감정을 털어놓을 때는 떠넘기지 말고 먼저 충분히 들어준다. 미래나 마음을 단정하지 않고 질문을 한두 개씩 자연스럽게 이어 간다.",
   doyun: "도윤: 명리 구조를 차근차근 설명하는 정중한 존댓말.",
   seoyun: "서윤: 관계와 연애에 공감하며 조심스럽게 정중한 존댓말.",
-  jian: "지안: 경제·일·사업을 현실적으로 살피는 존댓말."
+  jian: "지윤: 재물·직장·사업에 관해 차분하고 따뜻하게 존댓말로 상담한다. 만세력의 상징은 쉬운 일상 언어로 풀고, 실제 수입·취업·사업 결과를 예언하지 않는다. 구체적인 재무·직장 상황을 먼저 확인하고 지출 관리, 위험 관리, 실행 가능한 다음 단계처럼 현실적인 도움을 간결하게 제공한다. 투자 수익이나 계약 성사를 장담하지 않는다."
 };
 const TOPICS = new Set(["talk","saju","daily","decade","match","love","wealth","career"]);
 const PILLAR = /^[갑을병정무기경신임계][자축인묘진사오미신유술해]$/;
@@ -85,6 +85,35 @@ async function claimAraDirect(req){
   return await increment("saju:ara:global:v1:"+day)<=150;
 }
 
+// Jiyun shares the existing preview-only key and Redis but has her own
+// strict daily limits. No anonymous AI endpoints are enabled in production.
+function jiyunDirectReady(){
+  return process.env.VERCEL_ENV==="preview" &&
+    process.env.SAJU_AI_ENABLED==="1" &&
+    typeof process.env.OPENAI_API_KEY==="string" &&
+    process.env.OPENAI_API_KEY.length>20 &&
+    Boolean(redisCredentials());
+}
+async function claimJiyunDirect(req){
+  const redis=redisCredentials();
+  if(!redis)throw new Error("Redis not configured");
+  const ip=String(req.headers?.["x-forwarded-for"]||req.socket?.remoteAddress||"unknown").split(",")[0].trim();
+  const day=new Date().toISOString().slice(0,10);
+  const hash=crypto.createHmac("sha256",redis.token).update(ip).digest("hex");
+  async function increment(key){
+    const response=await fetch(redis.url+"/incr/"+encodeURIComponent(key),{
+      headers:{Authorization:"Bearer "+redis.token},
+      signal:AbortSignal.timeout(4000)
+    });
+    if(!response.ok)throw new Error("counter unavailable");
+    const data=await response.json();
+    if(!Number.isInteger(data.result))throw new Error("invalid counter");
+    return data.result;
+  }
+  // IP and project quotas both apply; Redis failure always denies access.
+  if(await increment("saju:jiyun:ip:v1:"+day+":"+hash)>8)return false;
+  return await increment("saju:jiyun:global:v1:"+day)<=60;
+}
 // Public trial stays disabled until a persistent Redis REST store is configured.
 // A single IP has at most five free requests across devices; the owner PIN remains separate.
 function trialReady(){
@@ -116,7 +145,7 @@ module.exports=async function handler(req,res){
   res.setHeader("Referrer-Policy","no-referrer");
   res.setHeader("X-Robots-Tag","noindex, nofollow");
   if(req.method==="GET" && req.query?.status==="1"){
-    return send(res,200,{ready:isReady()||trialReady()||araDirectReady(),trial:trialReady(),araDirect:araDirectReady()});
+    return send(res,200,{ready:isReady()||trialReady()||araDirectReady()||jiyunDirectReady(),trial:trialReady(),araDirect:araDirectReady(),jiyunDirect:jiyunDirectReady()});
   }
   if(req.method!=="POST"){
     res.setHeader("Allow","GET, POST");
@@ -131,10 +160,10 @@ module.exports=async function handler(req,res){
     }catch(_){}
     if(!same) return send(res,403,{error:"현재 사이트에서만 요청할 수 있어."});
   }
-  const direct=araDirectReady(),trial=trialReady(),pinReady=isReady();
-  if(!pinReady&&!trial&&!direct)return send(res,503,{error:"AI 상담은 아직 설정 중이야. 현재 기본 만세력 풀이를 이용해 줘."});
+  const direct=araDirectReady(),jiyunDirect=jiyunDirectReady(),trial=trialReady(),pinReady=isReady();
+  if(!pinReady&&!trial&&!direct&&!jiyunDirect)return send(res,503,{error:"AI 상담은 아직 설정 중이야. 현재 기본 만세력 풀이를 이용해 줘."});
   const owner=pinReady&&verifyPin(req.headers?.["x-saju-test-pin"],process.env.SAJU_AI_TEST_PIN);
-  if(!owner&&!trial&&!direct)return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
+  if(!owner&&!trial&&!direct&&!jiyunDirect)return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
   const size=Number(req.headers?.["content-length"]||0);
   if(size>12000)return send(res,413,{error:"질문이 너무 길어."});
   const data=typeof req.body==="string" ? (()=>{try{return JSON.parse(req.body)}catch(_){return null}})() : req.body;
@@ -149,9 +178,11 @@ module.exports=async function handler(req,res){
     return send(res,400,{error:"질문이나 만세력 데이터 형식을 확인해 줘."});
   }
   if(topic==="match"&&!partner)return send(res,400,{error:"궁합 상담에는 두 사람의 계산된 사주가 필요해."});
-  // Anonymous direct access is only for Ara's everyday talk, never for other advisers.
-  if(!owner&&!trial&&!(direct&&advisor==="ara"&&topic==="talk")){
-    return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
+  // Preview-only anonymous direct access is restricted by advisor and topic.
+  const araFree=direct&&advisor==="ara"&&topic==="talk";
+  const jiyunFree=jiyunDirect&&advisor==="jian"&&["wealth","career"].includes(topic);
+  if(!owner&&!trial&&!araFree&&!jiyunFree){
+    return send(res,403,{error:"AI 상담 사용 권한을 확인해 줘."});
   }
   if(data.history!==undefined && !Array.isArray(data.history)){
     return send(res,400,{error:"대화 기록 형식이 올바르지 않아."});
@@ -162,8 +193,10 @@ module.exports=async function handler(req,res){
     .filter(x=>x.content.length>0);
   if(!owner){
     try{
-      if(direct&&advisor==="ara"&&topic==="talk"){
+      if(araFree){
         if(!await claimAraDirect(req))return send(res,429,{error:"오늘 아라 AI 상담 이용 한도에 도달했어. 내일 다시 이용해 줘."});
+      }else if(jiyunFree){
+        if(!await claimJiyunDirect(req))return send(res,429,{error:"오늘 지윤 AI 상담 이용 한도에 도달했어요. 다음 날 다시 이용해 주세요."});
       }else if(trial){
         if(!await claimTrial(req))return send(res,429,{error:"무료 AI 상담 5회를 모두 사용했어. 유료 상담은 준비 중이야."});
       }else return send(res,403,{error:"시험 비밀번호를 확인해 줘."});
