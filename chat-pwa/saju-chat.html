@@ -18,7 +18,20 @@ try {
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content",dark?"#171513":"#f5f0e8");
 }catch(_){document.documentElement.classList.add("dark");document.querySelector('meta[name="theme-color"]')?.setAttribute("content","#171513");}
 </script>
+<script>
+// Direct visitors to the Ara video room before the first paint, preventing
+// the legacy advisor-selection screen from flashing while the app initializes.
+(function(){
+  const direct=!new URLSearchParams(location.search).has("advisor-list");
+  document.documentElement.classList.toggle("saju-direct-entry",direct);
+  if(direct && location.hash!=="#chat" && history.replaceState){
+    history.replaceState(null,"",location.pathname+location.search+"#chat");
+  }
+})();
+</script>
 <style>
+html.saju-direct-entry .selection-view,
+html.saju-direct-entry .top{display:none!important}
 :root{color-scheme:light;background:#f6f1e9}html.dark{color-scheme:dark;background:#171513}
 :root{font-family:Pretendard,"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;color:#35271e;background:#f6f1e9;font-synthesis:none}
 *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:radial-gradient(circle at 100% 0%,#fffaf1 0,transparent 38%),#f6f1e9}
@@ -969,7 +982,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
-    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video></div>
+    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" src="./arasaju-pingpong.mp4" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video></div>
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <details class="saju-ai-details" id="aiSettingsDetails">
       <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
@@ -2020,10 +2033,16 @@ function renderAraMenu(starters){
 function syncSajuScene(){
   const scene=$("sajuScene"),image=$("sajuScenePortrait"),video=$("sajuSceneVideo");
   if(!scene||!image||!video)return;
-  const src=avatarUrl(selected.id);
-  scene.hidden=!src||selected.id==="harin";
-  if(src&&image.src!==src)image.src=src;
-  const isAra=selected.id==="ara"&&!scene.hidden;
+  const isAra=selected.id==="ara";
+  const src=isAra?"":avatarUrl(selected.id);
+  scene.hidden=(!isAra&&!src)||selected.id==="harin";
+  // Ara's old still portrait must never flash before the current video starts.
+  image.hidden=isAra;
+  if(isAra){
+    if(image.hasAttribute("src"))image.removeAttribute("src");
+  }else if(src&&image.src!==src){
+    image.src=src;
+  }
   video.hidden=!isAra;
   scene.classList.toggle("saju-video-scene",isAra);
   if(isAra){
@@ -2634,6 +2653,7 @@ body.ara-cinematic-intro .chat-full .saju-scene{inset:0 0 62px!important}
 .saju-scene img,.saju-scene video{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center 22%;filter:saturate(.82)}
 .saju-scene::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,#17151355 0%,#17151320 38%,#171513ee 100%)}
 .saju-scene.saju-video-playing img{opacity:0}
+.saju-scene.saju-video-scene img{display:none!important}
 .saju-scene video{display:block;object-position:center 18%;filter:saturate(.9);pointer-events:none!important}
 .saju-scene video::-webkit-media-controls,.saju-scene video::-webkit-media-controls-panel,.saju-scene video::-webkit-media-controls-start-playback-button,.saju-scene video::-webkit-media-controls-overlay-play-button{display:none!important;opacity:0!important;pointer-events:none!important}
 .saju-scene video[hidden]{display:none}
