@@ -1694,7 +1694,8 @@ function sajuResultRow(role,message,showAdvisor=false,at=null){
 // Only a user's finger scrolls the result from there; never chase new text.
 function scrollSajuReadingStart(feed){
   if(!feed||!document.body.classList.contains("jiyun-video-chat"))return false;
-  const first=feed.querySelector(".saju-chat-results .saju-reading-first");
+  const first=feed.querySelector(".saju-chat-results .saju-jiyun-ai-offer")||
+    feed.querySelector(".saju-chat-results .saju-reading-first");
   if(!first)return false;
   const offset=first.getBoundingClientRect().top-feed.getBoundingClientRect().top;
   feed.scrollTop=Math.max(0,feed.scrollTop+offset-76);
@@ -2560,11 +2561,16 @@ async function response(question,previous){
   if(directJiyun || (aiReady && aiConsent.checked)){
     const pin=directJiyun?"":aiPin.value;
     if(!directJiyun&&pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
+    const history=previous.filter(x=>x&&["user","bot"].includes(x.role))
+      .slice(-4).map(x=>({role:x.role==="bot"?"assistant":"user",content:x.text.slice(0,350)}));
+    if(selected.id==="jian"&&jiyunIntroConsent[birthKey()]===true){
+      const firstReading=sajuResultCache[birthKey()]?.messages?.[0];
+      if(typeof firstReading==="string"&&firstReading.length>0)
+        history.unshift({role:"assistant",content:firstReading.slice(0,350)});
+    }
     const payload={consent:true,question,advisor:selected.id,topic:topic[0],
       chart:aiChart(chart),partner:partner?aiChart(partner):null,
-      flow:flow?{year:flow.year,day:flow.day}:null,
-      history:previous.filter(x=>x&&["user","bot"].includes(x.role))
-        .slice(-4).map(x=>({role:x.role==="bot"?"assistant":"user",content:x.text.slice(0,350)}))};
+      flow:flow?{year:flow.year,day:flow.day}:null,history:history.slice(-4)};
     const response=await fetch(AI_ENDPOINT,{
       method:"POST",
       headers:directJiyun?{"Content-Type":"application/json"}:{"Content-Type":"application/json","x-saju-test-pin":pin},
