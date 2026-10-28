@@ -2136,6 +2136,12 @@ function syncSajuScene(){
       frameRequested=true;
       if(typeof jiyunVideo.requestVideoFrameCallback==="function"){
         jiyunVideo.requestVideoFrameCallback(showFirstFrame);
+        // Some mobile WebViews suppress frame callbacks for opacity:0 videos.
+        // A decoded, playing frame is a safe fallback; Ara stays visible until then.
+        setTimeout(()=>{
+          if(frameRequested&&generation===jiyunFrameGeneration&&selected.id==="jian"&&
+             jiyunVideo.readyState>=2&&!jiyunVideo.paused)showFirstFrame();
+        },650);
       }else{
         requestAnimationFrame(()=>requestAnimationFrame(showFirstFrame));
       }
