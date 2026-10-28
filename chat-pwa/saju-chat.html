@@ -1035,6 +1035,7 @@ const ARA_SAJU_WELCOME_TEXT="🔮 어떤 사주가 궁금하세요?\n원하시�
 // Jiyun's uploaded Vercel Blob MP4 (same silent video player as Ara).
 // A valid ?jiyunVideo= preview override remains available for testing.
 const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4";
+const JIYUN_WELCOME_TEXT="🌿 안녕하세요, 지윤이에요.\n재물과 사업의 흐름을 차근차근 살펴볼게요.";
 const JIYUN_VIDEO_URL=(()=>{
   const raw=new URLSearchParams(location.search).get("jiyunVideo")||JIYUN_BLOB_VIDEO_URL;
   try{
@@ -2147,11 +2148,11 @@ function renderMessages(scrollToEnd=true){
     const bubble=document.createElement("div");
     bubble.className="bubble";
     if(index===0&&animateWelcome){
-      renderSoftWelcome(bubble,selected.id==="ara"&&araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:selected.id==="ara"?ARA_WELCOME_TEXT:item.text);
+      renderSoftWelcome(bubble,selected.id==="ara"&&araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:selected.id==="ara"?ARA_WELCOME_TEXT:selected.id==="jian"?JIYUN_WELCOME_TEXT:item.text);
       row.append(bubble);
       feed.append(row);
     }else{
-      bubble.textContent=index===0&&selected.id==="ara"?(araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT):item.text;
+      bubble.textContent=index===0&&selected.id==="ara"?(araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT):index===0&&selected.id==="jian"?JIYUN_WELCOME_TEXT:item.text;
       row.append(bubble);
       feed.append(row);
     }
@@ -3132,7 +3133,55 @@ body.jiyun-video-chat .chat-full .saju-scene{inset:0 0 62px!important;opacity:1!
 body.jiyun-video-chat .chat-full .saju-scene video{object-fit:cover!important;object-position:center 24%!important;filter:saturate(.96)}
 body.jiyun-video-chat .chat-full .saju-scene::after{background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,.02) 40%,rgba(23,21,19,.64) 77%,#171513 100%)}
 body.jiyun-video-chat .chat-full .saju-scene.saju-video-scene:not(.saju-video-playing) img{display:block!important}
-body.jiyun-video-chat .chat-full .messages{background:transparent!important}
+/* Jiyun: anchor the initial transcript low over the sleeves/desk, leaving
+   her face and the top controls unobstructed. Keep the birth-answer dock fixed. */
+body.jiyun-video-chat .chat-full .messages{
+  background:transparent!important;
+  min-height:0!important;
+  padding:66px 16px 18px!important;
+  gap:9px!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+}
+body.jiyun-video-chat .chat-full .messages > .message:first-child{
+  margin-top:auto!important;
+  flex-shrink:0;
+}
+body.jiyun-video-chat .chat-full .messages .guided-chat-flow{
+  flex-shrink:0;
+  gap:8px;
+}
+body.jiyun-video-chat .chat-full .messages .message.bot .bubble{
+  background:rgba(27,23,20,.62)!important;
+  border:1px solid rgba(255,232,201,.09)!important;
+  color:#fff0dc!important;
+  border-radius:14px!important;
+  max-width:min(87%,470px)!important;
+  font-size:16px!important;
+  line-height:1.5!important;
+  padding:10px 13px!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.35);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+body.jiyun-video-chat .chat-full .messages .guided-current .guided-question{
+  font-size:16px!important;
+  line-height:1.45!important;
+  color:#fff0dc!important;
+}
+body.jiyun-video-chat .chat-full .messages .guided-current .guided-hint{
+  font-size:13px!important;
+  line-height:1.45!important;
+  color:#e8c9a7!important;
+}
+body.jiyun-video-chat .chat-full .messages > .message:first-child .msg-avatar,
+body.jiyun-video-chat .chat-full .messages > .message:first-child .chat-time,
+body.jiyun-video-chat .chat-full .messages .guided-current .msg-avatar,
+body.jiyun-video-chat .chat-full .messages .guided-current .chat-time{display:none!important}
+@media(max-height:650px){
+  body.jiyun-video-chat .chat-full .messages{padding-top:58px!important;padding-bottom:10px!important}
+  body.jiyun-video-chat .chat-full .messages .message.bot .bubble{font-size:15px!important;padding:8px 11px!important}
+}
 /* Jiyun: match Ara's minimal floating video controls.
    The existing guided solar/lunar birth choices remain in the bottom dock. */
 body.jiyun-video-chat .chat-panel.chat-full > .chat-heading{
