@@ -1,0 +1,71 @@
+name: Generate Jiyun 16-second pingpong video
+on:
+  push:
+    branches:
+      - feature/saju-video-header-shortcut-20261019
+    paths:
+      - .github/workflows/jiyun-pingpong-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-jiyun-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout preview source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9ad
+        with:
+          ref: feature/saju-video-header-shortcut-20261019
+          persist-credentials: true
+      - name: Generate 16s muted pingpong from the published 8s MP4
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg >/dev/null
+          curl --fail --show-error --location --retry 3 --max-time 90 \
+            'https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4' -o /tmp/jiyun-original.mp4
+          ffmpeg -hide_banner -loglevel error -y -i /tmp/jiyun-original.mp4 \
+            -filter_complex '[0:v]fps=24,split=2[f][r];[r]reverse[rev];[f][rev]concat=n=2:v=1:a=0,format=yuv420p[v]' \
+            -map '[v]' -an -c:v libx264 -preset fast -crf 23 -movflags +faststart chat-pwa/jiyun-pingpong.mp4
+          ffprobe -v error -show_entries format=duration,size \
+            -of default=noprint_wrappers=1 chat-pwa/jiyun-pingpong.mp4
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('chat-pwa/saju-chat.html')
+          text=p.read_text(encoding='utf-8')
+          old='const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4";'
+          new='const JIYUN_BLOB_VIDEO_URL="./jiyun-pingpong.mp4";'
+          assert text.count(old)==1, 'unexpected source constant'
+          text=text.replace(old,new)
+          old='''  const raw=new URLSearchParams(location.search).get("jiyunVideo")||JIYUN_BLOB_VIDEO_URL;
+            try{
+              const u=new URL(raw);
+              return u.protocol==="https:"&&/^[a-z0-9-]+\\.public\\.blob\\.vercel-storage\\.com$/i.test(u.hostname)&&/\\.mp4$/i.test(u.pathname)?u.href:"";
+            }catch(_){return "";}'''
+          new='''  const preview=new URLSearchParams(location.search).get("jiyunVideo");
+            if(!preview)return JIYUN_BLOB_VIDEO_URL;
+            try{
+              const u=new URL(preview);
+              return u.protocol==="https:"&&/^[a-z0-9-]+\\.public\\.blob\\.vercel-storage\\.com$/i.test(u.hostname)&&/\\.mp4$/i.test(u.pathname)?u.href:"";
+            }catch(_){return "";}'''
+          assert text.count(old)==1, 'unexpected source validator'
+          p.write_text(text.replace(old,new),encoding='utf-8')
+          PY
+          test -s chat-pwa/jiyun-pingpong.mp4
+          test "$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 chat-pwa/jiyun-pingpong.mp4 | wc -l)" -eq 0
+          python3 - <<'PY'
+          import json,subprocess
+          meta=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','json','chat-pwa/jiyun-pingpong.mp4']))
+          assert 15.9<float(meta['format']['duration'])<16.1
+          PY
+      - name: Save preview video and update its local source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add chat-pwa/jiyun-pingpong.mp4 chat-pwa/saju-chat.html
+          git commit -m 'Add Jiyun 16s silent pingpong video to preview'
+          git push origin HEAD:feature/saju-video-header-shortcut-20261019
