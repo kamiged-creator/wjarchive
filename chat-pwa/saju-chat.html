@@ -3071,6 +3071,17 @@ body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
   line-height:1.68!important;
 }
 
+/* Ara initial screen: keep the welcome bubble in the same place while
+   reducing its text/padding. Shift only the two primary choice buttons down. */
+body.ara-cinematic-intro:not(.ara-saju-menu) .chat-full .messages .message.bot .bubble{
+  font-size:16px!important;
+  line-height:1.52!important;
+  padding:8px 14px!important;
+}
+body.ara-cinematic-intro .ara-starters.ara-main-choices{
+  position:relative;
+  top:20px;
+}
 /* Saju chooser only: quieter caption lets Ara remain the visual focus.
    Do not change the heart-story welcome or the three specialist controls. */
 body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble{
