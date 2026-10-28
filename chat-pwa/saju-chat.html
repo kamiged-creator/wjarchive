@@ -1946,7 +1946,7 @@ function renderSoftWelcome(bubble,text){
 }
 
 // First-contact flow: two clear entry points, then the existing specialist choices.
-let araStartMode="home";
+let araStartMode="home",araMenuEnabled=true;
 function openAdvisorFromAra(id){
   if(sentBusy || selected.id!=="ara" || location.hash!=="#chat")return;
   const advisor=advisors.find(item=>item.id===id);
@@ -1963,6 +1963,7 @@ function returnToAraChoices(){
   topic=selected.topics[0];
   conversation=read();
   araStartMode="saju";
+  araMenuEnabled=true;
   renderAll();
 }
 function renderAraMenu(starters){
@@ -2070,7 +2071,7 @@ function renderMessages(scrollToEnd=true){
     if(!document.body.classList.contains("ara-cinematic-intro")&&(index===conversation.length-1||conversation[index+1]?.role!==item.role))appendChatTime(row,item.at,item.role);
     if(index===0)feed.append(makeIntake());
   }
-  if(selected.id==="ara"&&(conversation.length===1||araStartMode==="saju")){
+  if(selected.id==="ara"&&araMenuEnabled){
     const starters=makeEl("div","ara-starters");
     renderAraMenu(starters);
     feed.append(starters);
@@ -2263,6 +2264,7 @@ async function send(){
   const input=$("question"),content=input.value.trim();if(!content)return;
   const oldKey=storageKey(),previous=conversation.slice(-4);
   sentBusy=true;sendBtn.disabled=true;sendBtn.textContent="대기";
+  if(selected.id==="ara")araMenuEnabled=false;
   conversation.push(msg("user",content));input.value="";
   // Sending a message dismisses the mobile keyboard so the composer returns to the bottom.
   input.blur();
