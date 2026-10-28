@@ -1671,6 +1671,16 @@ function sajuResultRow(role,message,showAdvisor=false,at=null){
   appendChatTime(row,at,role);
   return row;
 }
+// Keep Jiyun's initial interpretation at a readable fixed starting point.
+// Only a user's finger scrolls the result from there; never chase new text.
+function scrollSajuReadingStart(feed){
+  if(!feed||!document.body.classList.contains("jiyun-video-chat"))return false;
+  const first=feed.querySelector(".saju-chat-results .saju-reading-first");
+  if(!first)return false;
+  const offset=first.getBoundingClientRect().top-feed.getBoundingClientRect().top;
+  feed.scrollTop=Math.max(0,feed.scrollTop+offset-76);
+  return true;
+}
 function sajuBirthSummary(profile,label){
   const place=window.BokjaksoSaju?.BIRTHPLACES?.[profile.birthplace]?.label||"";
   return label+" · "+(profile.calendar==="lunar"?"음력":"양력")+
@@ -1707,9 +1717,22 @@ function makeSajuChatResults(profiles,key){
     };
     const revealAll=()=>{
       if(!isCurrent())return;
-      messages.forEach((step,i)=>root.append(sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null)));
+      messages.forEach((step,i)=>{
+        const row=sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null);
+        if(i===0)row.classList.add("saju-reading-first");
+        root.append(row);
+      });
       finish();
     };
+    // Jiyun: show the complete reading without automatic upward scrolling.
+    // The opening paragraph stays at the top until the visitor swipes to read more.
+    if(selected.id==="jian"){
+      revealAll();
+      requestAnimationFrame(()=>{
+        if(isCurrent()&&conversation.length===1)scrollSajuReadingStart(feed);
+      });
+      return;
+    }
     if(!animate||reduce){revealAll();return;}
     let index=0;
     function next(){
@@ -1729,7 +1752,11 @@ function makeSajuChatResults(profiles,key){
   const cached=sajuResultCache[key];
   if(cached?.source===profiles){
     startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
-    cached.messages.forEach((message,i)=>root.append(sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null)));
+    cached.messages.forEach((message,i)=>{
+      const row=sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null);
+      if(i===0)row.classList.add("saju-reading-first");
+      root.append(row);
+    });
     const drawer=sajuTechnicalDrawer(cached.technical);
     if(drawer)root.append(drawer);
     root.append(actions);
@@ -2334,7 +2361,10 @@ function renderMessages(scrollToEnd=true){
   $("question").placeholder=selected.id==="ara"?"편하게 한마디 남겨 주세요":ready?"메시지 입력":"입력창 위에서 답을 선택해 주세요";
   requestAnimationFrame(()=>{
     if(currentRun!==introTypingRun)return;
-    if(scrollToEnd==="result"){
+    if(selected.id==="jian"&&conversation.length===1&&
+       feed.querySelector(".saju-chat-results")&&scrollSajuReadingStart(feed)){
+      // Restored Jiyun readings reopen at the first paragraph, not the last.
+    }else if(scrollToEnd==="result"){
       // Show the title at the top of the result card, not its last paragraph.
       const card=feed.querySelector(".saju-chat-results")||feed.querySelector(".intake-card");
       if(card){
@@ -3521,6 +3551,17 @@ body.jiyun-video-chat .chat-full .messages:has(> .saju-chat-results){
     padding-bottom:52px!important;
     scroll-padding-bottom:52px;
   }
+}
+
+/* Jiyun completed birth reading: user-controlled scroll from the first line.
+   Prevent browser scroll anchoring and avoid the automatic bottom chase. */
+body.jiyun-video-chat .chat-full .messages:has(.saju-chat-results){
+  scroll-behavior:auto!important;
+  overflow-anchor:none!important;
+  touch-action:pan-y!important;
+}
+body.jiyun-video-chat .chat-full .saju-chat-results{
+  overflow-anchor:none;
 }
 
 /* Easy reading first; raw manseryeok chart available on demand. */
