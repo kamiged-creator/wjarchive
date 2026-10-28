@@ -1014,6 +1014,7 @@ const advisors=[
 ];
 const $=id=>document.getElementById(id);
 const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
+const ARA_SAJU_WELCOME_TEXT="🔮 사주 상담을 도와드릴게요.\n아래에서 원하는 상담사를 선택해 주세요.";
 let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
 const birthProfiles=Object.create(null),birthEditing=new Set();
 const guidedDrafts=Object.create(null),guidedManualMode=new Set();
@@ -1966,6 +1967,18 @@ function returnToAraChoices(){
   araMenuEnabled=true;
   renderAll();
 }
+function switchAraStartMode(mode,starters){
+  araStartMode=mode;
+  const greetingBubble=$("messages")?.querySelector(".message.bot .bubble");
+  if(greetingBubble){
+    const greetingText=mode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT;
+    greetingBubble.classList.remove("intro-soft-bubble");
+    greetingBubble.replaceChildren();
+    greetingBubble.textContent=greetingText;
+    greetingBubble.setAttribute("aria-label",greetingText);
+  }
+  renderAraMenu(starters);
+}
 function renderAraMenu(starters){
   starters.replaceChildren();
   starters.classList.toggle("ara-main-choices",araStartMode==="home");
@@ -1980,8 +1993,8 @@ function renderAraMenu(starters){
     starters.append(button);
   };
   if(araStartMode==="home"){
-    add("♡ 마음 이야기",()=>{araStartMode="heart";renderAraMenu(starters);});
-    add("✧ 사주보기",()=>{araStartMode="saju";renderAraMenu(starters);},"saju-choice");
+    add("♡ 마음 이야기",()=>switchAraStartMode("heart",starters));
+    add("✧ 사주보기",()=>switchAraStartMode("saju",starters),"saju-choice");
   }else if(araStartMode==="heart"){
     for(const [label,phrase] of [
       ["그냥 이야기","그냥 편하게 이야기하고 싶어요."],
@@ -1994,13 +2007,13 @@ function renderAraMenu(starters){
         send();
       });
     }
-    add("‹ 처음으로",()=>{araStartMode="home";renderAraMenu(starters);},"ara-menu-back");
+    add("‹ 처음으로",()=>switchAraStartMode("home",starters),"ara-menu-back");
   }else{
-    starters.append(makeEl("span","ara-choose-caption","원하는 사주 상담사를 선택해 주세요."));
+    // The main welcome caption already asks visitors to choose a counselor.
     add("도윤",()=>openAdvisorFromAra("doyun"),"saju-choice","정통 사주");
     add("서윤",()=>openAdvisorFromAra("seoyun"),"saju-choice","연애·궁합");
     add("지윤",()=>openAdvisorFromAra("jian"),"saju-choice","재물·사업");
-    add("‹ 처음으로",()=>{araStartMode="home";renderAraMenu(starters);},"ara-menu-back");
+    add("‹ 처음으로",()=>switchAraStartMode("home",starters),"ara-menu-back");
   }
 }
 // Ara background video loops as a silent, non-interactive chat backdrop.
@@ -2060,11 +2073,11 @@ function renderMessages(scrollToEnd=true){
     const bubble=document.createElement("div");
     bubble.className="bubble";
     if(index===0&&animateWelcome){
-      renderSoftWelcome(bubble,selected.id==="ara"?ARA_WELCOME_TEXT:item.text);
+      renderSoftWelcome(bubble,selected.id==="ara"&&araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:selected.id==="ara"?ARA_WELCOME_TEXT:item.text);
       row.append(bubble);
       feed.append(row);
     }else{
-      bubble.textContent=index===0&&selected.id==="ara"?ARA_WELCOME_TEXT:item.text;
+      bubble.textContent=index===0&&selected.id==="ara"?(araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT):item.text;
       row.append(bubble);
       feed.append(row);
     }
