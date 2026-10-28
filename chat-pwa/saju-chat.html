@@ -1601,6 +1601,66 @@ function makeGuidedIntake(){
  return card;
 }
 
+/* Explain the same locally calculated chart in everyday Korean.
+   This is an interpretive summary, not a prediction or a change to the engine. */
+const EASY_SAJU_STEMS={
+  갑:["큰 나무","방향을 정하고 성장하는 모습"],
+  을:["풀과 꽃","상황에 맞춰 유연하게 자라는 모습"],
+  병:["태양","주변을 밝게 비추는 모습"],
+  정:["작은 등불","차분히 주변을 살피는 모습"],
+  무:["큰 산","중심을 지키며 버티는 모습"],
+  기:["밭","꾸준히 돌보고 가꾸는 모습"],
+  경:["단단한 쇠","기준을 세우고 정리하는 모습"],
+  신:["보석","작은 차이를 세밀하게 다듬는 모습"],
+  임:["큰 강","넓게 흐르며 여러 길을 잇는 모습"],
+  계:["비와 이슬","작은 변화를 섬세하게 알아차리는 모습"]
+};
+const EASY_SAJU_ELEMENTS={목:"성장과 시작",화:"활력과 표현",토:"안정과 꾸준함",금:"원칙과 정리",수:"유연함과 소통"};
+const EASY_SAJU_ACTIONS={
+  saju:"내가 편안하게 잘하는 일과 어려워하는 일을 하나씩 떠올려 보세요.",
+  daily:"오늘 꼭 해야 할 일 하나부터 시작해 보세요.",
+  decade:"지금까지의 변화와 앞으로 바라는 방향을 나눠 생각해 보세요.",
+  match:"서로의 기대와 중요한 기준을 직접 이야기해 보세요.",
+  love:"관계에서 원하는 것과 지키고 싶은 선을 생각해 보세요.",
+  wealth:"고정 지출, 비상금과 감당할 수 있는 위험을 먼저 살펴보세요.",
+  career:"현재 잘하는 일과 앞으로 키우고 싶은 능력을 정리해 보세요."
+};
+function easySajuSummary(chart,subject,label){
+  const stem=chart.dayMaster?.stem||"";
+  const metaphor=EASY_SAJU_STEMS[stem]||["자연의 모습","자신을 돌아보는 모습"];
+  const sorted=Object.entries(chart.elements||{}).filter(([,count])=>Number(count)>0).sort((a,b)=>b[1]-a[1]);
+  const strongest=sorted.length?sorted.filter(([,count])=>count===sorted[0][1]).map(([el])=>el):[];
+  const elementText=strongest.map(el=>el+"("+ (EASY_SAJU_ELEMENTS[el]||"자연의 상징") +")").join("·");
+  return "🌿 "+label+"의 사주, 쉽게 볼게요.\n\n"+
+    "① 나를 나타내는 상징\n"+stem+"은 '"+metaphor[0]+"'에 비유해요. 전통적으로 "+metaphor[1]+"을 떠올리는 글자예요.\n\n"+
+    "② 눈에 띄는 기운\n"+(elementText||"계산된 기운을 확인하기 어려워요.")+
+    "\n사주의 겉글자에서 비교적 자주 나온 상징이에요. 이것만으로 성격이나 운의 좋고 나쁨을 판단할 수는 없어요."+
+    (chart.input?.unknown?"\n태어난 시간을 몰라 일부 글자는 제외했어요.":"")+"\n\n"+
+    "③ 지금 참고하면 좋을 점\n"+(EASY_SAJU_ACTIONS[subject]||EASY_SAJU_ACTIONS.saju);
+}
+function easySajuToday(flow,subject){
+  return "📅 오늘과 올해는 어떤 흐름일까요?\n"+
+    "오늘("+flow.date+")은 전통 달력에서 '"+flow.day+"'라는 이름의 날이에요.\n"+
+    "올해는 '"+flow.year+"'라는 이름의 해예요.\n"+
+    "이 글자들이 실제 좋은 일이나 나쁜 일을 예고하는 것은 아니에요.\n"+
+    "오늘 실천할 한 가지: "+(EASY_SAJU_ACTIONS[subject]||EASY_SAJU_ACTIONS.saju);
+}
+function easySajuCompatibility(a,b){
+  const p=EASY_SAJU_STEMS[a.dayMaster?.stem]?.[0]||"자연의 한 모습";
+  const q=EASY_SAJU_STEMS[b.dayMaster?.stem]?.[0]||"자연의 한 모습";
+  return "💕 두 사람의 관계도 쉽게 볼게요.\n"+
+    "본인은 '"+p+"', 상대방은 '"+q+"'라는 상징으로 설명할 수 있어요.\n"+
+    "궁합의 좋고 나쁨이나 상대방의 마음을 계산으로 확정할 수는 없어요. 실제 대화와 서로에 대한 배려가 더 중요해요.";
+}
+function sajuTechnicalDrawer(entries){
+  if(!Array.isArray(entries)||!entries.length)return null;
+  const panel=makeEl("details","saju-technical-details");
+  panel.append(makeEl("summary","saju-technical-summary","📜 전문 만세력 계산표 보기"));
+  panel.append(makeEl("p","saju-technical-note","정확한 글자와 오행·일진·세운 등 전통 계산값이 궁금할 때만 펼쳐보세요."));
+  entries.forEach(entry=>panel.append(makeEl("p","saju-technical-entry",entry)));
+  return panel;
+}
+
 /* Calculations still run locally. Only rendered chat bubbles are staged, not AI calls. */
 const sajuResultCache=Object.create(null);
 function sajuResultRow(role,message,showAdvisor=false,at=null){
@@ -1635,16 +1695,26 @@ function makeSajuChatResults(profiles,key){
   edit.addEventListener("click",()=>{reopenGuidedBirthEditor(key,profiles);renderMessages(true);});
   actions.append(edit);
   function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
-  function showMessages(messages,animate){
+  function showMessages(messages,animate,technical=[]){
     if(!isCurrent())return;
     const feed=$("messages");
     const reduce=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    const revealAll=()=>{if(!isCurrent())return;messages.forEach((step,i)=>root.append(sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null)));root.append(actions);};
+    const finish=()=>{
+      if(!isCurrent())return;
+      const details=sajuTechnicalDrawer(technical);
+      if(details)root.append(details);
+      root.append(actions);
+    };
+    const revealAll=()=>{
+      if(!isCurrent())return;
+      messages.forEach((step,i)=>root.append(sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null)));
+      finish();
+    };
     if(!animate||reduce){revealAll();return;}
     let index=0;
     function next(){
       if(!isCurrent())return;
-      if(index>=messages.length){root.append(actions);return;}
+      if(index>=messages.length){finish();return;}
       const nearBottom=feed.scrollHeight-feed.scrollTop-feed.clientHeight<95;
       root.append(sajuResultRow("bot",messages[index],false,index===messages.length-1?Date.now():null));
       index++;
@@ -1652,14 +1722,16 @@ function makeSajuChatResults(profiles,key){
         requestAnimationFrame(()=>{if(isCurrent())feed.scrollTo({top:feed.scrollHeight,behavior:"smooth"});});
       }
       if(index<messages.length)setTimeout(next,1000);
-      else root.append(actions);
+      else finish();
     }
     setTimeout(next,550);
   }
   const cached=sajuResultCache[key];
   if(cached?.source===profiles){
-    startingBubble.textContent="이전에 계산한 만세력 풀이를 다시 보여줄게.";
+    startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
     cached.messages.forEach((message,i)=>root.append(sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null)));
+    const drawer=sajuTechnicalDrawer(cached.technical);
+    if(drawer)root.append(drawer);
     root.append(actions);
     return root;
   }
@@ -1683,32 +1755,33 @@ function makeSajuChatResults(profiles,key){
   startingBubble.textContent="만세력 사주팔자를 계산하고 있어…";
   Promise.all(profiles.map(p=>engine.calculate(p))).then(async charts=>{
     if(!isCurrent())return;
-    const messages=[];
+    const messages=[],technical=[];
     const estimated=profiles.map((p,i)=>p.approximateRange?names[i]+": "+p.approximateRange+" (중간값 "+p.time+")":null).filter(Boolean);
-    if(estimated.length)messages.push("⏱ 출생 시간은 추정으로 입력됐어.\n"+estimated.join("\n")+"\n추정 중간값으로 계산했기 때문에 정확한 출생 시간에 따라 시주와 풀이가 달라질 수 있어.");
+    if(estimated.length)messages.push("⏱ 태어난 시간을 대략 입력했어요. 정확한 시간에 따라 일부 결과가 달라질 수 있어요.");
     for(let i=0;i<charts.length;i++){
       const chart=charts[i],label=names[i];
-      const formatted=engine.format(chart).split("\n");
-      messages.push("🔮 "+label+"의 사주팔자\n"+(formatted[1]||engine.format(chart)));
-      messages.push("🌿 일간과 오행\n"+formatted.slice(2).join("\n"));
-      const text=engine.advisorReading(chart,topic[0],selected.id).replace(/^[^\n]*\n/,"");
-      const parts=text.split(/\n\s*\n/).filter(Boolean);
-      parts.forEach((part,j)=>messages.push((j===0?"🌸 "+selected.name+"의 풀이\n":"")+part));
+      messages.push(easySajuSummary(chart,topic[0],label));
+      technical.push("🔮 "+label+"의 정확한 계산표\n"+engine.format(chart));
+      technical.push("🌸 "+selected.name+"의 전통 풀이\n"+engine.advisorReading(chart,topic[0],selected.id));
       try{
         const flow=await engine.calculateFlows(chart);
         if(!isCurrent())return;
-        messages.push("📅 오늘 일진과 올해 세운\n"+engine.flowReading(chart,flow,topic[0])+
+        messages.push(easySajuToday(flow,topic[0]));
+        technical.push("📅 날짜별 자세한 계산\n"+engine.flowReading(chart,flow,topic[0])+
           "\n계산 날짜: "+flow.date+" (한국 표준시)");
       }catch(_){
-        messages.push("오늘 일진·올해 세운 계산은 확인하지 못했어. 사주 원국 결과만 참고해 줘.");
+        messages.push("오늘과 올해의 날짜별 계산은 확인하지 못했어요. 위의 기본 풀이만 참고해 주세요.");
       }
     }
-    if(charts.length===2)messages.push("🤝 두 사람의 궁합 기초 비교\n"+engine.compatibility(charts[0],charts[1]));
-    messages.push("📜 전통 명리 해석은 참고용이야. 실제 사건이나 미래를 보장하지 않아.\n더 궁금한 점은 아래 채팅으로 질문해 줘.");
+    if(charts.length===2){
+      messages.push(easySajuCompatibility(charts[0],charts[1]));
+      technical.push("🤝 두 사람의 전통 궁합 비교\n"+engine.compatibility(charts[0],charts[1]));
+    }
+    messages.push("🌸 이 설명은 전통적인 상징을 풀어쓴 참고 자료예요. 미래, 돈, 건강을 단정하지 않아요.\n정확한 숫자와 용어가 궁금하다면 아래 계산표를 펼쳐보세요.");
     if(!isCurrent())return;
-    sajuResultCache[key]={source:profiles,messages,generatedAt:Date.now()};
-    startingBubble.textContent="계산을 마쳤어. 🌸 이제 하나씩 이야기해 줄게.";
-    showMessages(messages,true);
+    sajuResultCache[key]={source:profiles,messages,technical,generatedAt:Date.now()};
+    startingBubble.textContent="계산을 마쳤어요. 🌿 어려운 말 대신 쉽게 설명해 드릴게요.";
+    showMessages(messages,true,technical);
   }).catch(error=>{
     if(!isCurrent())return;
     startingBubble.textContent=error?.message||"만세력 계산에 실패했어. 입력 정보를 확인해 줘.";
@@ -2400,11 +2473,10 @@ async function response(question,previous){
     if(typeof body.answer!=="string"||!body.answer.trim())throw new Error("AI 답변이 비어 있어.");
     return body.answer.replace(/^(?:\\s*✨?\\s*AI 상담\\s*[·・-]\\s*전통 사주 참고 풀이\\s*)+/u,"").trim();
   }
-  const compare=partner?engine.compatibility(chart,partner):"";
-  return "📜 기본 만세력 풀이 (질문별 AI 분석 아님)\n\n"+
-    engine.advisorReading(chart,topic[0],selected.id)+
-    (flow?"\n\n"+engine.flowReading(chart,flow,topic[0]):"")+
-    (compare?"\n\n"+compare:"");
+  return "🌿 쉬운 기본 사주 풀이 (질문별 AI 분석은 아니에요)\n\n"+
+    easySajuSummary(chart,topic[0],"본인")+
+    (flow?"\n\n"+easySajuToday(flow,topic[0]):"")+
+    (partner?"\n\n"+easySajuCompatibility(chart,partner):"");
 }
 function showReplyTyping(){
   $("sajuScene")?.classList.add("saju-speaking");
@@ -3432,6 +3504,26 @@ body.jiyun-video-chat .chat-full .composer{
 @media(max-width:360px){
   body.jiyun-video-chat .chat-full .messages{padding-left:12px!important;padding-right:12px!important}
 }
+
+/* Easy reading first; raw manseryeok chart available on demand. */
+.saju-chat-results .saju-technical-details{
+  width:100%;min-width:0;border:1px solid rgba(186,147,112,.34);
+  border-radius:13px;overflow:hidden;background:rgba(35,29,25,.80);color:#f2dfc7;
+}
+.saju-chat-results .saju-technical-summary{
+  display:list-item;cursor:pointer;padding:13px 16px;
+  font-size:15px;font-weight:650;line-height:1.5;
+}
+.saju-chat-results .saju-technical-summary:focus-visible{outline:2px solid #cbad87;outline-offset:-3px}
+.saju-chat-results .saju-technical-note{
+  margin:8px 13px 12px;color:#dec3a5;font-size:13px;line-height:1.5;
+}
+.saju-chat-results .saju-technical-entry{
+  margin:10px 12px 14px;padding:10px 11px;border-radius:9px;
+  background:rgba(18,15,13,.32);font-size:13px;line-height:1.6;
+  white-space:pre-wrap;overflow-wrap:anywhere;word-break:keep-all;
+}
+
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
