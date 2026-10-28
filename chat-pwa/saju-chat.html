@@ -1032,6 +1032,14 @@ const advisors=[
 const $=id=>document.getElementById(id);
 const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
 const ARA_SAJU_WELCOME_TEXT="🔮 어떤 사주가 궁금하세요?\n원하시는 상담사를 선택해 주세요.";
+// Preview accepts a verified Vercel Blob MP4 link via ?jiyunVideo=.
+const JIYUN_VIDEO_URL=(()=>{
+  const raw=new URLSearchParams(location.search).get("jiyunVideo")||"";
+  try{
+    const u=new URL(raw);
+    return u.protocol==="https:"&&/^[a-z0-9-]+\.public\.blob\.vercel-storage\.com$/i.test(u.hostname)&&/\.mp4$/i.test(u.pathname)?u.href:"";
+  }catch(_){return "";}
+})();
 let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
 const birthProfiles=Object.create(null),birthEditing=new Set();
 const guidedDrafts=Object.create(null),guidedManualMode=new Set();
@@ -2069,20 +2077,27 @@ function syncSajuScene(){
   const scene=$("sajuScene"),image=$("sajuScenePortrait"),video=$("sajuSceneVideo");
   if(!scene||!image||!video)return;
   const isAra=selected.id==="ara";
+  const isJiyunVideo=selected.id==="jian"&&Boolean(JIYUN_VIDEO_URL);
+  const videoSource=isAra?"./arasaju-pingpong.mp4":isJiyunVideo?JIYUN_VIDEO_URL:"";
   const src=isAra?"":avatarUrl(selected.id);
-  scene.hidden=(!isAra&&!src)||selected.id==="harin";
-  // Ara's old still portrait must never flash before the current video starts.
+  scene.hidden=(!videoSource&&!src)||selected.id==="harin";
+  // Ara has no photo fallback; Jiyun keeps her own portrait until video loads.
   image.hidden=isAra;
   if(isAra){
     if(image.hasAttribute("src"))image.removeAttribute("src");
   }else if(src&&image.src!==src){
     image.src=src;
   }
-  video.hidden=!isAra;
-  scene.classList.toggle("saju-video-scene",isAra);
-  if(isAra){
-    if(!video.src)video.src="./arasaju-pingpong.mp4";
-    // Keep mobile browsers in inline/background mode with no native player controls.
+  const hasVideo=Boolean(videoSource);
+  video.hidden=!hasVideo;
+  scene.classList.toggle("saju-video-scene",hasVideo);
+  if(hasVideo){
+    if(video.getAttribute("src")!==videoSource){
+      video.pause();
+      scene.classList.remove("saju-video-playing");
+      video.setAttribute("src",videoSource);
+      video.load();
+    }
     video.controls=false;
     video.removeAttribute("controls");
     video.muted=true;
@@ -2108,6 +2123,7 @@ function renderMessages(scrollToEnd=true){
   closeSajuPopup?.();
   const feed=$("messages");
   document.body.classList.toggle("ara-cinematic-intro",selected.id==="ara"&&conversation.length===1&&conversation[0]?.role==="bot");
+  document.body.classList.toggle("jiyun-video-chat",selected.id==="jian"&&Boolean(JIYUN_VIDEO_URL));
   document.body.classList.toggle("ara-saju-menu",selected.id==="ara"&&araStartMode==="saju"&&araMenuEnabled);
   // Keep Ara's face visible once a conversation begins; older messages stay scrollable below.
   document.body.classList.toggle("ara-portrait-chat",selected.id==="ara"&&conversation.length>1);
@@ -2199,7 +2215,7 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","jiyun-video-chat");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -3107,6 +3123,13 @@ body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble
   body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble{top:18px}
 }
 
+/* Jiyun video scene: reuse Ara's muted vertical-video player while retaining
+   the existing solar/lunar birth interview, calculation, and chat controls. */
+body.jiyun-video-chat .chat-full .saju-scene{inset:0 0 62px!important;opacity:1!important;background:#2c2825!important}
+body.jiyun-video-chat .chat-full .saju-scene video{object-fit:cover!important;object-position:center 24%!important;filter:saturate(.96)}
+body.jiyun-video-chat .chat-full .saju-scene::after{background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,.02) 40%,rgba(23,21,19,.64) 77%,#171513 100%)}
+body.jiyun-video-chat .chat-full .saju-scene.saju-video-scene:not(.saju-video-playing) img{display:block!important}
+body.jiyun-video-chat .chat-full .messages{background:transparent!important}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
