@@ -1031,7 +1031,7 @@ const advisors=[
 ];
 const $=id=>document.getElementById(id);
 const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
-const ARA_SAJU_WELCOME_TEXT="🔮 사주 상담을 도와드릴게요.\n아래에서 원하는 상담사를 선택해 주세요.";
+const ARA_SAJU_WELCOME_TEXT="🔮 어떤 사주가 궁금하세요?\n원하시는 상담사를 선택해 주세요.";
 let selected=advisors[0],topic=selected.topics[0],sentBusy=false;
 const birthProfiles=Object.create(null),birthEditing=new Set();
 const guidedDrafts=Object.create(null),guidedManualMode=new Set();
@@ -1990,6 +1990,7 @@ function switchAraStartMode(mode,starters){
   const greetingBubble=$("messages")?.querySelector(".message.bot .bubble");
   const update=()=>{
     araStartMode=mode;
+    document.body.classList.toggle("ara-saju-menu",mode==="saju");
     if(greetingBubble){
       const greetingText=mode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT;
       greetingBubble.classList.remove("intro-soft-bubble");
@@ -2106,6 +2107,7 @@ function renderMessages(scrollToEnd=true){
   closeSajuPopup?.();
   const feed=$("messages");
   document.body.classList.toggle("ara-cinematic-intro",selected.id==="ara"&&conversation.length===1&&conversation[0]?.role==="bot");
+  document.body.classList.toggle("ara-saju-menu",selected.id==="ara"&&araStartMode==="saju"&&araMenuEnabled);
   // Keep Ara's face visible once a conversation begins; older messages stay scrollable below.
   document.body.classList.toggle("ara-portrait-chat",selected.id==="ara"&&conversation.length>1);
   const quickbar=$("guidedQuickbar");
@@ -3067,6 +3069,20 @@ body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
   white-space:pre-wrap;
   text-wrap:pretty;
   line-height:1.68!important;
+}
+
+/* Saju chooser only: quieter caption lets Ara remain the visual focus.
+   Do not change the heart-story welcome or the three specialist controls. */
+body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble{
+  position:relative;
+  top:30px;
+  max-width:min(92%,490px)!important;
+  padding:7px 12px!important;
+  font-size:16px!important;
+  line-height:1.48!important;
+}
+@media(max-height:650px){
+  body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble{top:18px}
 }
 
 </style>
