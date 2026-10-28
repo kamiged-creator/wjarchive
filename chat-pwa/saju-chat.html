@@ -2085,9 +2085,10 @@ function syncSajuScene(){
   const videoSource=isAra?"./arasaju-pingpong.mp4":isJiyunVideo?JIYUN_VIDEO_URL:"";
   const src=isAra?"":avatarUrl(selected.id);
   scene.hidden=(!videoSource&&!src)||selected.id==="harin";
-  // Ara has no photo fallback; Jiyun keeps her own portrait until video loads.
-  image.hidden=isAra;
-  if(isAra){
+  // Neither Ara nor Jiyun may flash a still portrait before video frames.
+  // Keep still photos only for the other non-video counselors.
+  image.hidden=isAra||isJiyunVideo;
+  if(isAra||isJiyunVideo){
     if(image.hasAttribute("src"))image.removeAttribute("src");
   }else if(src&&image.src!==src){
     image.src=src;
@@ -2099,8 +2100,11 @@ function syncSajuScene(){
     if(video.getAttribute("src")!==videoSource){
       video.pause();
       scene.classList.remove("saju-video-playing");
+      scene.classList.toggle("saju-video-pending",isJiyunVideo);
       video.setAttribute("src",videoSource);
       video.load();
+    }else if(isJiyunVideo&&video.readyState>=2){
+      scene.classList.remove("saju-video-pending");
     }
     video.controls=false;
     video.removeAttribute("controls");
@@ -2112,12 +2116,18 @@ function syncSajuScene(){
     video.setAttribute("webkit-playsinline","");
     video.disablePictureInPicture=true;
     video.disableRemotePlayback=true;
-    video.onplaying=()=>scene.classList.add("saju-video-playing");
-    video.onerror=()=>scene.classList.remove("saju-video-playing");
-    if(video.paused)video.play().then(()=>scene.classList.add("saju-video-playing")).catch(()=>scene.classList.remove("saju-video-playing"));
+    const revealJiyunFrame=()=>{
+      if(selected.id==="jian"&&video.getAttribute("src")===videoSource&&video.readyState>=2){
+        scene.classList.remove("saju-video-pending");
+      }
+    };
+    video.onloadeddata=revealJiyunFrame;
+    video.onplaying=()=>{scene.classList.add("saju-video-playing");revealJiyunFrame();};
+    video.onerror=()=>{scene.classList.remove("saju-video-playing","saju-video-pending");};
+    if(video.paused)video.play().then(()=>{scene.classList.add("saju-video-playing");revealJiyunFrame();}).catch(()=>{scene.classList.remove("saju-video-pending");});
   }else{
     video.pause();
-    scene.classList.remove("saju-video-playing");
+    scene.classList.remove("saju-video-playing","saju-video-pending");
   }
 }
 function renderMessages(scrollToEnd=true){
@@ -3132,7 +3142,9 @@ body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble
 body.jiyun-video-chat .chat-full .saju-scene{inset:0 0 62px!important;opacity:1!important;background:#2c2825!important}
 body.jiyun-video-chat .chat-full .saju-scene video{object-fit:cover!important;object-position:center 24%!important;filter:saturate(.96)}
 body.jiyun-video-chat .chat-full .saju-scene::after{background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,.02) 40%,rgba(23,21,19,.64) 77%,#171513 100%)}
-body.jiyun-video-chat .chat-full .saju-scene.saju-video-scene:not(.saju-video-playing) img{display:block!important}
+/* Never show the large still portrait while the Jiyun MP4 is loading. */
+body.jiyun-video-chat .chat-full .saju-scene img{display:none!important}
+body.jiyun-video-chat .chat-full .saju-scene.saju-video-pending video{visibility:hidden!important}
 /* Jiyun: anchor the initial transcript low over the sleeves/desk, leaving
    her face and the top controls unobstructed. Keep the birth-answer dock fixed. */
 body.jiyun-video-chat .chat-full .messages{
