@@ -1032,9 +1032,11 @@ const advisors=[
 const $=id=>document.getElementById(id);
 const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
 const ARA_SAJU_WELCOME_TEXT="🔮 어떤 사주가 궁금하세요?\n원하시는 상담사를 선택해 주세요.";
-// Preview accepts a verified Vercel Blob MP4 link via ?jiyunVideo=.
+// Jiyun's uploaded Vercel Blob MP4 (same silent video player as Ara).
+// A valid ?jiyunVideo= preview override remains available for testing.
+const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4";
 const JIYUN_VIDEO_URL=(()=>{
-  const raw=new URLSearchParams(location.search).get("jiyunVideo")||"";
+  const raw=new URLSearchParams(location.search).get("jiyunVideo")||JIYUN_BLOB_VIDEO_URL;
   try{
     const u=new URL(raw);
     return u.protocol==="https:"&&/^[a-z0-9-]+\.public\.blob\.vercel-storage\.com$/i.test(u.hostname)&&/\.mp4$/i.test(u.pathname)?u.href:"";
