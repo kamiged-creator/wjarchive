@@ -2022,8 +2022,8 @@ function switchAraStartMode(mode,starters){
       greetingBubble?.classList.remove("ara-caption-entering");
       starters.inert=false;
       araMenuSwitching=false;
-    },260);
-  },130);
+    },400);
+  },200);
 }
 function renderAraMenu(starters){
   starters.replaceChildren();
@@ -2961,13 +2961,13 @@ body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle{
 body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle[aria-pressed="true"]{background:rgba(91,67,48,.7);border-color:rgba(238,211,170,.5)}
 /* Smooth two-step counselor chooser: keep the video fixed and gently exchange
    captions and buttons. A small shared minimum height avoids a sudden vertical jump. */
-.ara-starters{display:flex;flex-wrap:wrap;align-self:center;justify-content:center;align-content:center;gap:7px;width:min(100%,480px);min-height:94px;margin:17px auto 0;z-index:7;transition:opacity 130ms ease,transform 130ms ease}
-.ara-starters.ara-choice-leaving{opacity:0;transform:translateY(-5px);pointer-events:none}
-.ara-starters.ara-choice-entering{animation:ara-choice-soft-enter 260ms cubic-bezier(.2,.8,.2,1) both}
-body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{transition:opacity 130ms ease,transform 130ms ease}
-body.ara-cinematic-intro .chat-full .messages .message.bot .bubble.ara-caption-leaving{opacity:0;transform:translateY(-5px)}
-body.ara-cinematic-intro .chat-full .messages .message.bot .bubble.ara-caption-entering{animation:ara-choice-soft-enter 260ms cubic-bezier(.2,.8,.2,1) both}
-@keyframes ara-choice-soft-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.ara-starters{display:flex;flex-wrap:wrap;align-self:center;justify-content:center;align-content:center;gap:7px;width:min(100%,480px);min-height:94px;margin:17px auto 0;z-index:7;transition:opacity 200ms cubic-bezier(.4,0,.2,1),transform 200ms cubic-bezier(.4,0,.2,1)}
+.ara-starters.ara-choice-leaving{opacity:0;transform:translateY(-3px);pointer-events:none}
+.ara-starters.ara-choice-entering{animation:ara-choice-soft-enter 400ms cubic-bezier(.22,1,.36,1) both}
+body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{transition:opacity 200ms cubic-bezier(.4,0,.2,1),transform 200ms cubic-bezier(.4,0,.2,1)}
+body.ara-cinematic-intro .chat-full .messages .message.bot .bubble.ara-caption-leaving{opacity:0;transform:translateY(-3px)}
+body.ara-cinematic-intro .chat-full .messages .message.bot .bubble.ara-caption-entering{animation:ara-choice-soft-enter 400ms cubic-bezier(.22,1,.36,1) both}
+@keyframes ara-choice-soft-enter{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){
   .ara-starters,.ara-starters.ara-choice-entering,body.ara-cinematic-intro .chat-full .messages .message.bot .bubble{animation:none!important;transition:none!important;transform:none!important}
 }
