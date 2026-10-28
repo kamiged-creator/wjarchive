@@ -1976,15 +1976,42 @@ function renderSoftWelcome(bubble,text){
 
 // First-contact flow: two clear entry points, then the existing specialist choices.
 let araStartMode="home",araMenuEnabled=true;
+let araToJiyunSwitching=false;
 function openAdvisorFromAra(id){
-  if(sentBusy || selected.id!=="ara" || location.hash!=="#chat")return;
+  if(sentBusy||araToJiyunSwitching||selected.id!=="ara"||location.hash!=="#chat")return;
   const advisor=advisors.find(item=>item.id===id);
   if(!advisor)return;
-  stopAraMusic();
-  selected=advisor;
-  topic=advisor.topics[0];
-  conversation=read();
-  renderAll();
+  const change=()=>{
+    stopAraMusic();
+    selected=advisor;
+    topic=advisor.topics[0];
+    conversation=read();
+    renderAll();
+  };
+  if(id==="jian"&&JIYUN_VIDEO_URL&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){
+    araToJiyunSwitching=true;
+    // Start buffering inside the tap gesture; Ara stays visible meanwhile.
+    const jiyun=$("jiyunSceneVideo");
+    if(jiyun){
+      jiyun.preload="auto";
+      jiyun.muted=true;
+      jiyun.playsInline=true;
+      if(jiyun.readyState===0)jiyun.load();
+      if(jiyun.paused)jiyun.play().catch(()=>{});
+    }
+    document.body.classList.add("ara-to-jiyun-leaving");
+    setTimeout(()=>{
+      document.body.classList.remove("ara-to-jiyun-leaving");
+      if(selected.id==="ara"&&location.hash==="#chat"){
+        document.body.classList.add("jiyun-handoff-entering");
+        change();
+        setTimeout(()=>document.body.classList.remove("jiyun-handoff-entering"),1100);
+      }
+      araToJiyunSwitching=false;
+    },220);
+    return;
+  }
+  change();
 }
 function returnToAraChoices(){
   if(sentBusy)return;
@@ -2129,7 +2156,7 @@ function syncSajuScene(){
       // Let the short crossfade finish before stopping Ara behind it.
       setTimeout(()=>{
         if(generation===jiyunFrameGeneration&&selected.id==="jian"&&scene.classList.contains("jiyun-frame-ready"))araVideo.pause();
-      },380);
+      },1050);
     };
     const waitForFrame=()=>{
       if(frameRequested||generation!==jiyunFrameGeneration||selected.id!=="jian"||jiyunVideo.paused||jiyunVideo.readyState<2)return;
@@ -2257,7 +2284,7 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages();save();}
-function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","jiyun-video-chat");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -3180,9 +3207,39 @@ body.jiyun-video-chat .chat-full .saju-scene img{display:none!important}
   z-index:1;
   opacity:0;
   pointer-events:none!important;
-  transition:opacity 280ms ease;
+  transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
 }
 body.jiyun-video-chat .chat-full .saju-scene.jiyun-frame-ready #jiyunSceneVideo{opacity:1}
+
+/* Gentle Ara-to-Jiyun two-stage handoff, respecting reduced motion. */
+@keyframes ara-jiyun-choice-out{
+  from{opacity:1;transform:translateY(0)}
+  to{opacity:0;transform:translateY(-5px)}
+}
+@keyframes ara-jiyun-choice-in{
+  from{opacity:0;transform:translateY(9px)}
+  to{opacity:1;transform:translateY(0)}
+}
+body.ara-to-jiyun-leaving .chat-full .messages > .message,
+body.ara-to-jiyun-leaving .chat-full .ara-starters,
+body.ara-to-jiyun-leaving .chat-full > .ara-music-toggle{
+  animation:ara-jiyun-choice-out 220ms ease-in both!important;
+  pointer-events:none!important;
+}
+body.jiyun-handoff-entering.jiyun-video-chat .chat-full .messages > .message,
+body.jiyun-handoff-entering.jiyun-video-chat .chat-full .messages > .guided-chat-flow,
+body.jiyun-handoff-entering.jiyun-video-chat .chat-full .guided-quickbar:not([hidden]),
+body.jiyun-handoff-entering.jiyun-video-chat .chat-full > .ara-music-toggle{
+  animation:ara-jiyun-choice-in 650ms cubic-bezier(.22,.8,.28,1) 100ms both!important;
+}
+@media(prefers-reduced-motion:reduce){
+  body.ara-to-jiyun-leaving .chat-full .messages > .message,
+  body.ara-to-jiyun-leaving .chat-full .ara-starters,
+  body.jiyun-handoff-entering.jiyun-video-chat .chat-full .messages > .message,
+  body.jiyun-handoff-entering.jiyun-video-chat .chat-full .messages > .guided-chat-flow,
+  body.jiyun-handoff-entering.jiyun-video-chat .chat-full .guided-quickbar:not([hidden]){animation:none!important}
+}
+
 @media(prefers-reduced-motion:reduce){.saju-scene #jiyunSceneVideo{transition:none}}
 /* Jiyun: anchor the initial transcript low over the sleeves/desk, leaving
    her face and the top controls unobstructed. Keep the birth-answer dock fixed. */
