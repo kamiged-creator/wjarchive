@@ -1536,7 +1536,13 @@ function makeGuidedIntake(){
      if(details.length)block.append(makeEl("div","guided-review-detail",details.join(" · ")));
      controls.append(block);
    }
-   const confirm=btn("✓ 이대로 사주 보기 →",async()=>{
+   const jiyunReview=selected.id==="jian";
+   let useJiyunAi=jiyunReview;
+   if(jiyunReview){
+     controls.append(makeEl("p","guided-jiyun-ai-disclosure",
+       "AI 풀이를 선택하면 계산된 사주 글자와 오행 정보가 OpenAI로 전송돼요. 입력하신 생년월일·태어난 시간 원본은 보내지 않아요. 전통적인 참고 풀이로 미래를 보장하지 않아요."));
+   }
+   const confirm=btn(jiyunReview?"🌸 동의하고 지윤 AI 풀이 듣기 →":"✓ 이대로 사주 보기 →",async()=>{
      if(wizard.busy)return;
      wizard.error="";wizard.busy=true;confirm.disabled=true;confirm.textContent="만세력 확인 중…";
      try{
@@ -1547,13 +1553,24 @@ function makeGuidedIntake(){
        await engine.validateProfiles(profiles,undefined,today);
        if(guidedDrafts[key]!==wizard||birthKey()!==key||!card.isConnected)return;
        delete sajuResultCache[key];
+       if(jiyunReview){
+         jiyunIntroConsent[key]=useJiyunAi;
+         jiyunAiConsent.checked=useJiyunAi;
+       }
        birthProfiles[key]=profiles;
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
        renderMessages("result");
      }catch(err){if(card.isConnected)warn(err?.message||"입력한 날짜를 확인해 주세요.");}
-     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent="✓ 이대로 사주 보기 →";}}
+     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent=jiyunReview?"🌸 동의하고 지윤 AI 풀이 듣기 →":"✓ 이대로 사주 보기 →";}}
    });
    confirm.classList.add("guided-review-confirm");
+   if(jiyunReview){
+     const basic=btn("AI 없이 기본 만세력만 보기",()=>{
+       useJiyunAi=false;
+       confirm.click();
+     },true);
+     basic.classList.add("guided-basic-confirm");
+   }
    break;
  }
  }
@@ -1663,6 +1680,8 @@ function sajuTechnicalDrawer(entries){
 
 /* Calculations still run locally. Only rendered chat bubbles are staged, not AI calls. */
 const sajuResultCache=Object.create(null);
+// Volatile opt-in for an individual Jiyun first reading; never stored remotely.
+const jiyunIntroConsent=Object.create(null);
 function sajuResultRow(role,message,showAdvisor=false,at=null){
   const row=makeEl("div","message "+role+" saju-chat-msg");
   if(role==="bot")appendAdvisorMark(row,showAdvisor);
@@ -1704,6 +1723,23 @@ function makeSajuChatResults(profiles,key){
   edit.type="button";
   edit.addEventListener("click",()=>{reopenGuidedBirthEditor(key,profiles);renderMessages(true);});
   actions.append(edit);
+  function makeFirstReadingOffer(){
+    if(selected.id!=="jian"||jiyunIntroConsent[key]===true)return;
+    const offer=makeEl("div","saju-jiyun-ai-offer");
+    offer.append(makeEl("p","saju-jiyun-ai-offer-info",
+      "계산된 사주와 오행을 OpenAI에 전송해 지윤이 따뜻하게 풀어드려요. 생년월일·태어난 시간 원본은 전송하지 않아요."));
+    const start=makeEl("button","saju-jiyun-ai-offer-button","🌸 동의하고 지윤 AI 풀이 듣기");
+    start.type="button";
+    start.addEventListener("click",()=>{
+      if(!root.isConnected||birthProfiles[key]!==profiles||birthKey()!==key)return;
+      jiyunIntroConsent[key]=true;
+      jiyunAiConsent.checked=true;
+      delete sajuResultCache[key];
+      renderMessages("result");
+    });
+    offer.append(start);
+    root.insertBefore(offer,starting.nextSibling);
+  }
   function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
   function showMessages(messages,animate,technical=[]){
     if(!isCurrent())return;
@@ -1714,6 +1750,7 @@ function makeSajuChatResults(profiles,key){
       const details=sajuTechnicalDrawer(technical);
       if(details)root.append(details);
       root.append(actions);
+      makeFirstReadingOffer();
     };
     const revealAll=()=>{
       if(!isCurrent())return;
@@ -1760,6 +1797,7 @@ function makeSajuChatResults(profiles,key){
     const drawer=sajuTechnicalDrawer(cached.technical);
     if(drawer)root.append(drawer);
     root.append(actions);
+    makeFirstReadingOffer();
     return root;
   }
   // Ara is the warm conversation counsellor, not a technical astrologer.
@@ -1803,6 +1841,33 @@ function makeSajuChatResults(profiles,key){
     if(charts.length===2){
       messages.push(easySajuCompatibility(charts[0],charts[1]));
       technical.push("🤝 두 사람의 전통 궁합 비교\n"+engine.compatibility(charts[0],charts[1]));
+    }
+    if(selected.id==="jian"&&jiyunIntroConsent[key]===true){
+      startingBubble.textContent="지윤이 사주를 천천히 살펴보고 있어요. 🌸";
+      try{
+        const flow=await engine.calculateFlows(charts[0]).catch(()=>null);
+        if(!isCurrent())return;
+        const reply=await fetch("/api/saju-ai",{
+          method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            consent:true,purpose:"firstReading",advisor:"jian",topic:topic[0],
+            question:"제 사주를 처음 보는 사람도 이해하도록 지윤의 따뜻한 말투로 구체적으로 풀어주세요. 제 사주의 성향과 재물·일에 참고할 점을 알려주고 마지막에 질문 하나만 해주세요.",
+            chart:aiChart(charts[0]),partner:null,
+            flow:flow?{year:flow.year,day:flow.day}:null,history:[]
+          }),cache:"no-store"
+        });
+        const body=await reply.json().catch(()=>({}));
+        if(!reply.ok||typeof body.answer!=="string"||!body.answer.trim())
+          throw new Error(body.error||"AI 풀이를 불러오지 못했어요.");
+        if(!isCurrent())return;
+        messages.splice(0,messages.length,body.answer.trim(),
+          "📜 계산된 사주의 자세한 글자는 아래 '전문 만세력 계산표'에서 확인할 수 있어요.");
+      }catch(error){
+        if(!isCurrent())return;
+        jiyunIntroConsent[key]=false;
+        jiyunAiConsent.checked=false;
+        messages.unshift("AI 연결이 원활하지 않아 먼저 기본 풀이를 보여드릴게요. 아래 버튼에서 다시 요청하실 수 있어요.\n"+(error?.message||""));
+      }
     }
     messages.push("🌸 이 설명은 전통적인 상징을 풀어쓴 참고 자료예요. 미래, 돈, 건강을 단정하지 않아요.\n정확한 숫자와 용어가 궁금하다면 아래 계산표를 펼쳐보세요.");
     if(!isCurrent())return;
@@ -3604,6 +3669,30 @@ body.jiyun-video-chat .chat-full .jiyun-ai-consent-label input{
 }
 body.jiyun-video-chat .chat-full #jiyunAiNotice{
   padding-left:24px;color:#ffd2b8;font-size:12px;
+}
+
+/* Jiyun opt-in at final birth review and at existing basic results. */
+body.jiyun-video-chat .guided-jiyun-ai-disclosure{
+  grid-column:1/-1;margin:3px 5px;padding:9px 11px;
+  color:#f0dac3;font-size:12px;line-height:1.5;word-break:keep-all;
+  background:rgba(34,26,20,.72);border:1px solid rgba(224,189,145,.25);border-radius:10px;
+}
+body.jiyun-video-chat .guided-basic-confirm{
+  grid-column:1/-1;width:100%;min-height:40px;
+  background:rgba(33,26,22,.65)!important;border:1px solid rgba(217,185,146,.37)!important;
+  font-size:14px!important;font-weight:550!important;
+}
+body.jiyun-video-chat .saju-jiyun-ai-offer{
+  display:flex;flex-direction:column;gap:8px;padding:10px 12px;
+  background:rgba(23,19,17,.7);color:#f1dbc2;
+  border:1px solid rgba(224,190,152,.3);border-radius:12px;
+}
+body.jiyun-video-chat .saju-jiyun-ai-offer-info{
+  font-size:13px;line-height:1.55;margin:0;word-break:keep-all;
+}
+body.jiyun-video-chat .saju-jiyun-ai-offer-button{
+  min-height:44px;width:100%;border:1px solid #be9b75;border-radius:10px;
+  background:rgba(109,76,54,.84);color:#fff3df;font-size:15px;font-weight:700;
 }
 
 /* Easy reading first; raw manseryeok chart available on demand. */
