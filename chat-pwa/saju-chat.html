@@ -1009,7 +1009,7 @@ const advisors=[
  {id:"ara",name:"아라",specialty:"마음·고민 상담",topics:[["talk","💬","마음 상담","편안한 대화와 고민 나누기"]],intro:"안녕하세요. 마음 상담사 아라예요. 🌸 오늘은 어떤 이야기를 나누고 싶으세요?"},
  {id:"doyun",name:"도윤",specialty:"정통 사주",topics:[["saju","☯️","사주","타고난 성향"],["decade","📜","대운·세운","시기별 변화"]],intro:"반갑습니다. 도윤입니다. 정통 사주와 인생 흐름에 관한 질문을 남겨 주세요."},
  {id:"seoyun",name:"서윤",specialty:"궁합·연애운",topics:[["match","💕","궁합","두 사람의 관계"],["love","🌸","연애운","인연과 마음"]],intro:"안녕하세요, 서윤이에요. 💗 관계와 연애에 관해 무엇이 궁금하세요?"},
- {id:"jian",name:"지안",specialty:"재물·사업운",topics:[["wealth","💰","재물운","돈과 경제생활"],["career","💼","직장·사업운","일과 성장"]],intro:"반갑습니다. 지안입니다. 재물이나 일, 사업에 관해 궁금한 점을 이야기해 주세요."},
+ {id:"jian",name:"지윤",specialty:"재물·사업운",topics:[["wealth","💰","재물운","돈과 경제생활"],["career","💼","직장·사업운","일과 성장"]],intro:"안녕하세요. 재물·사업 상담사 지윤이에요. 재물이나 사업의 흐름을 차분하게 살펴볼게요."},
  {id:"harin",name:"하린",specialty:"외국인 AI · 음성 상담",topics:[["voice","🎙️","말하는 사주","Simli 한국어 아바타 체험"]],intro:"안녕하세요. 저는 하린이에요. 음성 상담은 아바타 연결 화면에서 시작해 주세요."}
 ];
 const $=id=>document.getElementById(id);
@@ -1945,6 +1945,63 @@ function renderSoftWelcome(bubble,text){
   bubble.classList.add("intro-soft-bubble");
 }
 
+// First-contact flow: two clear entry points, then the existing specialist choices.
+let araStartMode="home";
+function openAdvisorFromAra(id){
+  if(sentBusy || selected.id!=="ara" || location.hash!=="#chat")return;
+  const advisor=advisors.find(item=>item.id===id);
+  if(!advisor)return;
+  stopAraMusic();
+  selected=advisor;
+  topic=advisor.topics[0];
+  conversation=read();
+  renderAll();
+}
+function returnToAraChoices(){
+  if(sentBusy)return;
+  selected=advisors[0];
+  topic=selected.topics[0];
+  conversation=read();
+  araStartMode="saju";
+  renderAll();
+}
+function renderAraMenu(starters){
+  starters.replaceChildren();
+  starters.classList.toggle("ara-main-choices",araStartMode==="home");
+  starters.classList.toggle("ara-saju-choices",araStartMode==="saju");
+  starters.setAttribute("aria-label",araStartMode==="saju"?"사주 상담사 선택":"마음 이야기 또는 사주보기");
+  const add=(label,handler,kind="",hint="")=>{
+    const button=makeEl("button","ara-starter"+(kind?" "+kind:""));
+    button.type="button";
+    button.textContent=label;
+    if(hint)button.append(makeEl("small","ara-choice-hint",hint));
+    button.addEventListener("click",handler);
+    starters.append(button);
+  };
+  if(araStartMode==="home"){
+    add("♡ 마음 이야기",()=>{araStartMode="heart";renderAraMenu(starters);});
+    add("✧ 사주보기",()=>{araStartMode="saju";renderAraMenu(starters);},"saju-choice");
+  }else if(araStartMode==="heart"){
+    for(const [label,phrase] of [
+      ["그냥 이야기","그냥 편하게 이야기하고 싶어요."],
+      ["오늘 있었던 일","오늘 있었던 일을 이야기하고 싶어요."],
+      ["마음이 복잡해요","마음이 좀 복잡해서 이야기하고 싶어요."]
+    ]){
+      add(label,()=>{
+        if(sentBusy || location.hash!=="#chat" || selected.id!=="ara")return;
+        $("question").value=phrase;
+        send();
+      });
+    }
+    add("‹ 처음으로",()=>{araStartMode="home";renderAraMenu(starters);},"ara-menu-back");
+  }else{
+    starters.append(makeEl("span","ara-choose-caption","원하는 사주 상담사를 선택해 주세요."));
+    add("도윤",()=>openAdvisorFromAra("doyun"),"saju-choice","정통 사주");
+    add("서윤",()=>openAdvisorFromAra("seoyun"),"saju-choice","연애·궁합");
+    add("지윤",()=>openAdvisorFromAra("jian"),"saju-choice","재물·사업");
+    add("‹ 처음으로",()=>{araStartMode="home";renderAraMenu(starters);},"ara-menu-back");
+  }
+}
 // Ara background video loops as a silent, non-interactive chat backdrop.
 function syncSajuScene(){
   const scene=$("sajuScene"),image=$("sajuScenePortrait"),video=$("sajuSceneVideo");
@@ -2013,24 +2070,9 @@ function renderMessages(scrollToEnd=true){
     if(!document.body.classList.contains("ara-cinematic-intro")&&(index===conversation.length-1||conversation[index+1]?.role!==item.role))appendChatTime(row,item.at,item.role);
     if(index===0)feed.append(makeIntake());
   }
-  if(selected.id==="ara"&&conversation.length===1){
+  if(selected.id==="ara"&&(conversation.length===1||araStartMode==="saju")){
     const starters=makeEl("div","ara-starters");
-    starters.setAttribute("aria-label","편하게 시작하는 대화");
-    const choices=[
-      ["그냥 이야기","그냥 편하게 이야기하고 싶어요."],
-      ["오늘 있었던 일","오늘 있었던 일을 이야기하고 싶어요."],
-      ["마음이 복잡해요","마음이 좀 복잡해서 이야기하고 싶어요."]
-    ];
-    for(const [label,phrase] of choices){
-      const button=makeEl("button","ara-starter",label);
-      button.type="button";
-      button.addEventListener("click",()=>{
-        if(sentBusy||location.hash!=="#chat"||selected.id!=="ara")return;
-        $("question").value=phrase;
-        send();
-      });
-      starters.append(button);
-    }
+    renderAraMenu(starters);
     feed.append(starters);
   }
   // On first entry, let the whole greeting finish before revealing the next
@@ -2142,7 +2184,7 @@ function araSpecialistReferral(question){
     return "💕 그건 서윤 상담사가 더 자세히 이야기해 줄 수 있어. 상담사 선택에서 서윤을 찾아봐. 물론 관계 때문에 속상한 마음은 나한테 계속 이야기해도 돼.";
   }
   if(/재물운|금전운|사업운|직장운|취업운|이직운|투자운|돈복|창업운/.test(q)){
-    return "💰 재물·일·사업의 운세나 계획은 지안 상담사가 담당해. 상담사 선택에서 지안에게 물어봐. 돈이나 일 때문에 힘든 마음은 여기서 나눠도 좋아.";
+    return "💰 재물·일·사업의 운세나 계획은 지윤 상담사가 담당해. 사주보기에서 지윤을 선택해 봐. 돈이나 일 때문에 힘든 마음은 여기서 나눠도 좋아.";
   }
   if(/만세력|사주팔자|원국|일주|월주|연주|시주|일간|오행|십성|대운|세운|신살|용신|격국|합충|일진|사주\s*(분석|풀이|해석|구조)/.test(q)){
     return "☯️ 자세한 사주팔자와 오행·대운 해석은 도윤 상담사가 전문이야. 상담사 선택에서 도윤에게 질문해 봐. 그 결과를 듣고 느낀 고민은 나와 함께 이야기해도 돼.";
@@ -2431,7 +2473,7 @@ $("araMusicToggle").addEventListener("click",()=>{if(araMusicContext)stopAraMusi
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAraMusic();});
 window.addEventListener("pagehide",stopAraMusic);
 $("startChat").addEventListener("click",openChat);
-$("backToSelect").addEventListener("click",closeChat);
+$("backToSelect").addEventListener("click",()=>{if(selected.id!=="ara")returnToAraChoices();else if(araStartMode!=="home"){araStartMode="home";renderMessages(false);}else location.assign("/");});
 window.addEventListener("hashchange",syncChatView);
 // Anchor the mobile chat to the VISUAL viewport when Android's IME opens.
 // height alone leaves an empty band if the in-app browser also pans the layout.
@@ -2521,6 +2563,7 @@ function scheduleAdvisorFit(){
 }
 window.addEventListener("resize",scheduleAdvisorFit,{passive:true});
 document.fonts?.ready?.then(scheduleAdvisorFit);
+if(location.hash!=="#chat"&&!new URLSearchParams(location.search).has("advisor-list"))history.replaceState(null,"",location.pathname+location.search+"#chat");
 renderAll();
 syncChatView();
 scheduleAdvisorFit();
@@ -2827,6 +2870,15 @@ body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle{
 .ara-music-toggle .ara-music-symbol{font-size:17px;line-height:1;}
 body:is(.ara-cinematic-intro,.ara-portrait-chat) .chat-full > .ara-music-toggle[aria-pressed="true"]{background:rgba(91,67,48,.7);border-color:rgba(238,211,170,.5)}
 .ara-starters{display:flex;flex-wrap:wrap;align-self:center;justify-content:center;gap:7px;width:min(100%,480px);margin:17px auto 0;z-index:7;}
+.ara-starters.ara-main-choices{width:min(100%,370px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ara-starters.ara-main-choices .ara-starter{min-height:49px;padding:10px 5px;font-size:14px;font-weight:700}
+.ara-starters.ara-saju-choices{width:min(100%,430px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.ara-starters.ara-saju-choices .ara-starter{min-height:52px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:700;gap:4px}
+.ara-starters .ara-starter.saju-choice{border-color:rgba(236,198,135,.77);background:rgba(100,68,40,.72)}
+.ara-starters .ara-choice-hint{display:block;font-size:11px;font-weight:500;color:#f1dbbf}
+.ara-starters .ara-choose-caption{grid-column:1/-1;text-align:center;font-size:13px;color:#ffe6c6;text-shadow:0 1px 5px #18120f}
+.ara-starters .ara-starter.ara-menu-back{grid-column:1/-1;min-height:32px;width:max-content;justify-self:center;align-self:center;padding:5px 12px;font-size:12px;background:rgba(28,23,20,.34);border-color:rgba(238,216,190,.28)}
+@media(max-width:355px){.ara-starters.ara-main-choices .ara-starter{font-size:13px}.ara-starters.ara-saju-choices .ara-starter{font-size:13px}.ara-starters .ara-choice-hint{font-size:10px}}
 .ara-starters .ara-starter{min-height:37px;padding:8px 11px;border:1px solid rgba(238,216,190,.46);border-radius:999px;background:rgba(26,22,20,.52);color:#ffecd9;font-size:13px;line-height:1.35;font-weight:500;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .ara-starters .ara-starter:active{background:rgba(102,76,56,.8)}
 /* Ara intro only: keep the quick-reply buttons near the composer and lift
