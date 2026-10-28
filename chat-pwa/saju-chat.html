@@ -2030,6 +2030,7 @@ function renderAraMenu(starters){
   starters.replaceChildren();
   starters.classList.toggle("ara-main-choices",araStartMode==="home");
   starters.classList.toggle("ara-saju-choices",araStartMode==="saju");
+  starters.classList.toggle("ara-heart-choices",araStartMode==="heart");
   starters.setAttribute("aria-label",araStartMode==="saju"?"사주 상담사 선택":"마음 이야기 또는 사주보기");
   const add=(label,handler,kind="",hint="")=>{
     const button=makeEl("button","ara-starter"+(kind?" "+kind:""));
@@ -2984,6 +2985,16 @@ body.ara-cinematic-intro .chat-full .messages .message.bot .bubble.ara-caption-e
 @media(max-width:355px){.ara-starters.ara-main-choices .ara-starter{font-size:13px}.ara-starters.ara-saju-choices .ara-starter{font-size:13px}.ara-starters .ara-choice-hint{font-size:10px}}
 .ara-starters .ara-starter{min-height:37px;padding:8px 11px;border:1px solid rgba(238,216,190,.46);border-radius:999px;background:rgba(26,22,20,.52);color:#ffecd9;font-size:13px;line-height:1.35;font-weight:500;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .ara-starters .ara-starter:active{background:rgba(102,76,56,.8)}
+/* Match the heart-story quick choices to the warm brown/gold Saju counselor
+   palette. Keep the back button dark and preserve existing size and behavior. */
+.ara-starters.ara-heart-choices .ara-starter:not(.ara-menu-back){
+  border-color:rgba(236,198,135,.77);
+  background:rgba(100,68,40,.72);
+  color:#ffecd9;
+}
+.ara-starters.ara-heart-choices .ara-starter:not(.ara-menu-back):active{
+  background:rgba(124,85,55,.88);
+}
 /* Ara intro only: keep the quick-reply buttons near the composer and lift
    just the first greeting toward the portrait's forearms. */
 body.ara-cinematic-intro .chat-full .messages{padding-bottom:clamp(70px,13dvh,145px)!important}
