@@ -2363,7 +2363,7 @@ function syncSajuScene(){
             if(generation!==jiyunLoopGeneration||selected.id!=="jian")return;
             loopVideo.pause();
             scene.classList.add("jiyun-loop-ready");
-            // The introduction holds its final frame underneath the one-second crossfade.
+            // The introduction holds its final frame while both videos slide horizontally.
             setTimeout(()=>{
               if(generation===jiyunLoopGeneration&&selected.id==="jian"&&scene.classList.contains("jiyun-loop-ready"))jiyunVideo.pause();
             },JIYUN_LOOP_FADE_MS+100);
@@ -3490,9 +3490,18 @@ body.jiyun-video-chat .chat-full .saju-scene img{display:none!important}
   transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
 }
 body.jiyun-video-chat .chat-full .saju-scene.jiyun-frame-ready #jiyunSceneVideo{opacity:1}
-/* Layer two stays hidden until its first decoded frame, then fades over the held intro. */
-.saju-scene #jiyunLoopVideo{z-index:2;opacity:0;pointer-events:none!important;transition:opacity 900ms cubic-bezier(.4,0,.2,1)}
-body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunLoopVideo{opacity:1}
+/* Slide from the one-time page turn into the looping gaze, on the loop's held first frame.
+   Both layers move together so the handoff stays covered, with no visible blank background. */
+body.jiyun-video-chat .chat-full .saju-scene #jiyunSceneVideo{
+  top:0;left:0;transform:translate3d(0,0,0);
+  transition:opacity 800ms cubic-bezier(.22,.8,.25,1),transform 900ms cubic-bezier(.4,0,.2,1);
+}
+body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunSceneVideo{transform:translate3d(-100%,0,0)}
+.saju-scene #jiyunLoopVideo{
+  z-index:2;top:0;left:0;opacity:1;transform:translate3d(100%,0,0);
+  pointer-events:none!important;transition:transform 900ms cubic-bezier(.4,0,.2,1);
+}
+body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunLoopVideo{transform:translate3d(0,0,0)}
 /* Opt-in preview: overlay only the incense plume from the same MP4 at 55% speed.
    The woman, book, hands and surrounding room remain at original speed.
    Existing Blob file is untouched. Soft edges avoid a rectangular patch. */
