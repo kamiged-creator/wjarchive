@@ -2421,6 +2421,8 @@ function renderMessages(scrollToEnd=true){
       const floatingGreeting=selected.id==="jian"&&conversation.length===1&&
         !birthProfiles[birthKey()]&&!guidedManualMode.has(birthKey());
       if(floatingGreeting&&greetingOverlay){
+        // A floating caption should have no duplicate mini-avatar or timestamp.
+        row.querySelectorAll(".msg-avatar,.msg-avatar-spacer,.chat-time").forEach(el=>el.remove());
         greetingOverlay.append(row);
         greetingOverlay.hidden=false;
       }else if(selected.id==="jian"&&conversation.length===1&&birthProfiles[birthKey()]){
@@ -3680,20 +3682,24 @@ body.jiyun-video-chat .chat-full .composer{
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay{
   position:absolute;z-index:7;
   left:18px;right:18px;
-  bottom:calc(min(34dvh,340px) + 140px);
+  bottom:calc(min(34dvh,340px) + 24px);
   pointer-events:none;
   color:#fff1df;font-size:16px;line-height:1.54;
   text-shadow:0 2px 7px rgba(0,0,0,.84);
 }
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .message{
-  display:block!important;width:100%;margin:0!important;
+  display:block!important;width:100%;margin:0!important;gap:0!important;
 }
-body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .bubble{
-  display:block;width:max-content;max-width:min(92%,520px);
-  padding:6px 9px;
-  background:linear-gradient(90deg,rgba(18,14,12,.32),rgba(18,14,12,.12) 78%,transparent);
-  border:0;border-radius:9px;box-shadow:none;
-  color:#fff1df;font:inherit;text-shadow:inherit;white-space:pre-line;
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .msg-avatar,
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .msg-avatar-spacer,
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .chat-time{display:none!important}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .message.bot .bubble{
+  display:block!important;width:max-content;max-width:min(100%,520px)!important;
+  padding:5px 8px!important;
+  background:linear-gradient(90deg,rgba(18,14,12,.32),rgba(18,14,12,.10) 78%,transparent)!important;
+  border:0!important;border-radius:9px!important;box-shadow:none!important;
+  color:#fff1df!important;font-size:16px!important;line-height:1.54!important;
+  text-shadow:0 2px 7px rgba(0,0,0,.84)!important;white-space:pre-line;
 }
 body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage{
   justify-content:flex-end!important;
@@ -3703,7 +3709,7 @@ body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage > .intake-card{
 }
 @media(max-height:650px){
   body.jiyun-video-chat .chat-full .jiyun-welcome-overlay{
-    bottom:calc(min(28dvh,215px) + 106px);
+    bottom:calc(min(28dvh,215px) + 16px);
     left:14px;right:14px;font-size:15px;
   }
 }
