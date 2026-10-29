@@ -1813,6 +1813,13 @@ function makeSajuChatResults(profiles,key){
     // The opening paragraph stays at the top until the visitor swipes to read more.
     if(selected.id==="jian"){
       revealAll();
+      // Jiyun's typing field appears after the first reading is actually rendered,
+      // not merely because birth details were saved while AI was loading.
+      const composer=$("composer"),question=$("question"),sendButton=$("send");
+      if(sajuResultCache[key]?.source===profiles){
+        composer.hidden=false;question.disabled=false;sendButton.disabled=false;
+        question.placeholder="메시지 입력";
+      }
       requestAnimationFrame(()=>{
         if(isCurrent()&&conversation.length===1)scrollSajuReadingStart(feed);
       });
@@ -2523,7 +2530,10 @@ function renderMessages(scrollToEnd=true){
     },greetingMs);
   }
   syncSimliControls();
-  const ready=selected.id==="ara"||Boolean(birthProfiles[birthKey()]);
+  const hasBirth=Boolean(birthProfiles[birthKey()]);
+  const hasJiyunReading=Boolean(sajuResultCache[birthKey()]?.messages?.length);
+  const ready=selected.id==="ara"||(hasBirth&&(selected.id!=="jian"||hasJiyunReading));
+  // Jiyun's typing dock waits for the first finished reading, not just birth intake.
   // Ara keeps free chat; the other three advisors start chat after birth intake.
   $("composer").hidden=!ready;
   $("question").disabled=!ready;
