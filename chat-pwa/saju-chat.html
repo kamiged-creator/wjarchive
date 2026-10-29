@@ -2014,10 +2014,26 @@ function makeSajuChatResults(profiles,key){
   });
   return root;
 }
+function makeJiyunChatInvitation(){
+  const row=makeEl("div","message bot jiyun-chat-invitation");
+  const bubble=makeEl("div","bubble");
+  bubble.append(
+    makeEl("strong","jiyun-chat-invitation-title","🌸 지윤과 채팅 상담"),
+    makeEl("span","jiyun-chat-invitation-text","사주 풀이를 잘 살펴보셨나요?\n재물·사업에 관해 더 궁금한 점이 있다면 아래 채팅창에 편하게 질문해 주세요.")
+  );
+  row.append(bubble);
+  return row;
+}
 function makeIntake(){
  if(selected.id==="ara")return document.createDocumentFragment();
  const key=birthKey(),existing=birthProfiles[key]||null;
- if(existing&&!birthEditing.has(key))return makeSajuChatResults(existing,key);
+ if(existing&&!birthEditing.has(key)){
+   // The full illustration-rich interpretation belongs only in report mode.
+   // Once calculated, the counselor video room contains only chat messages.
+   if(selected.id==="jian"&&!jiyunReportVisible&&sajuResultCache[key]?.source===existing&&
+      sajuResultCache[key]?.messages?.length) return makeJiyunChatInvitation();
+   return makeSajuChatResults(existing,key);
+ }
  const card=makeEl("div","intake-card");
  card.append(makeEl("p","intake-title","📅 사주 정보 입력"));
  if(!guidedManualMode.has(key))return makeGuidedIntake();
@@ -2572,7 +2588,9 @@ function renderMessages(scrollToEnd=true){
     }
     if(!document.body.classList.contains("ara-cinematic-intro")&&(index===conversation.length-1||conversation[index+1]?.role!==item.role))appendChatTime(row,item.at,item.role);
     if(index===0){
-      if(selected.id==="jian"&&conversation.length===1&&birthProfiles[birthKey()])row.remove();
+      // A completed Jiyun reading gets its own report screen, so never keep
+      // the older welcome bubble above the new chat-only invitation.
+      if(selected.id==="jian"&&birthProfiles[birthKey()]&&!birthEditing.has(birthKey()))row.remove();
       feed.append(makeIntake());
     }
   }
@@ -4404,6 +4422,29 @@ body.jiyun-video-chat.jiyun-report-open .chat-panel.chat-full > .messages:has(> 
   body.jiyun-video-chat.jiyun-report-open .chat-panel.chat-full > .messages:has(> .saju-chat-results){
     padding-left:15px!important;padding-right:15px!important;
   }
+}
+
+/* Jiyun video room after result: invite conversation without replaying report. */
+body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-invitation{
+  width:100%;justify-content:flex-start;flex-shrink:0;margin-top:auto;
+}
+body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-invitation .bubble{
+  display:flex;flex-direction:column;gap:7px;
+  width:min(100%,520px);max-width:100%!important;
+  padding:14px 15px!important;
+  border:1px solid rgba(231,190,141,.33)!important;
+  border-radius:13px!important;
+  background:rgba(24,20,18,.69)!important;
+  color:#fff1df!important;
+  -webkit-backdrop-filter:blur(4px)!important;backdrop-filter:blur(4px)!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.42)!important;
+}
+body.jiyun-video-chat .jiyun-chat-invitation-title{
+  display:block;font-size:15px;font-weight:750;color:#f1cda0;line-height:1.4;
+}
+body.jiyun-video-chat .jiyun-chat-invitation-text{
+  display:block;font-size:15px;font-weight:450;line-height:1.62;white-space:pre-line;
+  word-break:keep-all;overflow-wrap:break-word;
 }
 
 </style>
