@@ -4100,7 +4100,9 @@ body.jiyun-video-chat .chat-full .messages .saju-chat-results .jiyun-reading-las
   text-shadow:0 2px 5px rgba(0,0,0,.98)!important;
   line-height:1.62!important;
 }
-body.jiyun-video-chat .chat-full .composer{
+/* Only show the Jiyun typing dock after birth intake is complete.
+   The narrower result composer must not override the hidden attribute. */
+body.jiyun-video-chat .chat-full .composer:not([hidden]){
   display:flex!important;flex-direction:column!important;
   align-items:stretch!important;gap:0!important;
 }
