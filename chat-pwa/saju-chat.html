@@ -2279,8 +2279,8 @@ let jiyunFrameGeneration=0;
 let jiyunLoopGeneration=0;
 let jiyunLoopStarted=false;
 let jiyunLoopFirstFrameHold=false;
-const JIYUN_LOOP_FADE_MS=900;
-const JIYUN_LOOP_HOLD_MS=1200;
+const JIYUN_LOOP_FADE_MS=1400;
+const JIYUN_LOOP_HOLD_MS=2000;
 function resetJiyunPlayback(){
   ++jiyunFrameGeneration;
   ++jiyunLoopGeneration;
@@ -2363,7 +2363,7 @@ function syncSajuScene(){
             if(generation!==jiyunLoopGeneration||selected.id!=="jian")return;
             loopVideo.pause();
             scene.classList.add("jiyun-loop-ready");
-            // The introduction holds its final frame while both videos slide horizontally.
+            // The introduction holds its final frame beneath a long, subtle dissolve.
             setTimeout(()=>{
               if(generation===jiyunLoopGeneration&&selected.id==="jian"&&scene.classList.contains("jiyun-loop-ready"))jiyunVideo.pause();
             },JIYUN_LOOP_FADE_MS+100);
@@ -3490,18 +3490,17 @@ body.jiyun-video-chat .chat-full .saju-scene img{display:none!important}
   transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
 }
 body.jiyun-video-chat .chat-full .saju-scene.jiyun-frame-ready #jiyunSceneVideo{opacity:1}
-/* Slide from the one-time page turn into the looping gaze, on the loop's held first frame.
-   Both layers move together so the handoff stays covered, with no visible blank background. */
-body.jiyun-video-chat .chat-full .saju-scene #jiyunSceneVideo{
-  top:0;left:0;transform:translate3d(0,0,0);
-  transition:opacity 800ms cubic-bezier(.22,.8,.25,1),transform 900ms cubic-bezier(.4,0,.2,1);
-}
-body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunSceneVideo{transform:translate3d(-100%,0,0)}
+/* No sideways slide: dissolve over the held first frame of the looping clip.
+   The page-turn introduction remains completely still until the new opening frame
+   has decoded; the slower blend conceals small Flow frame-to-frame differences. */
 .saju-scene #jiyunLoopVideo{
-  z-index:2;top:0;left:0;opacity:1;transform:translate3d(100%,0,0);
-  pointer-events:none!important;transition:transform 900ms cubic-bezier(.4,0,.2,1);
+  z-index:2;opacity:0;pointer-events:none!important;
+  transform:none!important;transition:opacity 1400ms ease-in-out;
 }
-body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunLoopVideo{transform:translate3d(0,0,0)}
+body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunLoopVideo{opacity:1}
+body.jiyun-video-chat .chat-full .saju-scene #jiyunSceneVideo{
+  transform:none!important;transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
+}
 /* Opt-in preview: overlay only the incense plume from the same MP4 at 55% speed.
    The woman, book, hands and surrounding room remain at original speed.
    Existing Blob file is untouched. Soft edges avoid a rectangular patch. */
