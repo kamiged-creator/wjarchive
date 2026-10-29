@@ -2426,10 +2426,15 @@ function renderMessages(scrollToEnd=true){
       if(firstQuestion){
         const heading=makeEl("h2","jiyun-welcome-title","재물·사업운");
         const label=makeEl("p","jiyun-welcome-subtitle","복작소 · 지윤 상담사");
-        const lead=makeEl("p","jiyun-welcome-copy",
-          "안녕하세요. 복작소 지윤 상담사입니다.\n재물과 사업의 흐름을 차분히 살펴드리겠습니다.");
+        const lead=makeEl("p","jiyun-welcome-copy");
+        lead.append(
+          makeEl("span","jiyun-intro-line jiyun-intro-first","안녕하세요. 복작소 지윤 상담사입니다."),
+          makeEl("span","jiyun-intro-line jiyun-intro-second","재물과 사업의 흐름을 차분히 살펴드리겠습니다.")
+        );
         const disclosure=makeEl("small","jiyun-welcome-ai-note","AI 기술을 활용한 사주 해석 서비스");
         greetingOverlay.append(heading,label,lead,disclosure);
+        greetingOverlay.classList.toggle("jiyun-opening-sequence",
+          animateWelcome&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
         greetingOverlay.hidden=false;
       }
       feed.append(makeIntake());
@@ -2461,8 +2466,8 @@ function renderMessages(scrollToEnd=true){
     renderAraMenu(starters);
     feed.append(starters);
   }
-  // Jiyun's title and spoken greeting appear immediately. On the first
-  // question only, reveal the question and choices together after 2 seconds.
+  // Jiyun's title is immediate. Stagger the two greeting lines, then reveal
+  // the first question and choices together; later questions never wait.
   // Never restart the delay on later guided steps or repeat visits.
   const jiyunFirstWelcome=selected.id==="jian"&&Boolean(greetingOverlay&&!greetingOverlay.hidden);
   const sequenceWelcome=animateWelcome&&(selected.id!=="jian"||jiyunFirstWelcome)&&
@@ -2473,7 +2478,7 @@ function renderMessages(scrollToEnd=true){
     quickbar.classList.add("intro-await-question");
     quickbar.inert=true;
     quickbar.setAttribute("aria-hidden","true");
-    const greetingMs=selected.id==="jian"?2000:2250;
+    const greetingMs=selected.id==="jian"?2300:2250;
     setTimeout(()=>{
       if(currentRun!==introTypingRun||!feed.isConnected||location.hash!=="#chat")return;
       feed.classList.remove("intro-await-question");
@@ -3731,6 +3736,30 @@ body.jiyun-video-chat .chat-full .composer{
 }
 @media(max-width:360px){
   body.jiyun-video-chat .chat-full .messages{padding-left:12px!important;padding-right:12px!important}
+}
+
+/* Jiyun opening rhythm: the large service title stays visible from frame one.
+   Both introduction lines reserve their final space before fading in;
+   later question transitions never animate the greeting again. */
+body.jiyun-video-chat .jiyun-welcome-copy .jiyun-intro-line{display:block;}
+body.jiyun-video-chat .jiyun-welcome-overlay.jiyun-opening-sequence .jiyun-intro-first{
+  animation:jiyun-greeting-appear .38s ease-out .4s both;
+}
+body.jiyun-video-chat .jiyun-welcome-overlay.jiyun-opening-sequence .jiyun-intro-second{
+  animation:jiyun-greeting-appear .38s ease-out 1.05s both;
+}
+body.jiyun-video-chat .jiyun-welcome-overlay.jiyun-opening-sequence .jiyun-welcome-ai-note{
+  animation:jiyun-greeting-appear .3s ease-out 1.5s both;
+}
+@keyframes jiyun-greeting-appear{
+  from{opacity:0;transform:translateY(3px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  body.jiyun-video-chat .jiyun-welcome-overlay.jiyun-opening-sequence .jiyun-intro-line,
+  body.jiyun-video-chat .jiyun-welcome-overlay.jiyun-opening-sequence .jiyun-welcome-ai-note{
+    animation:none!important;
+  }
 }
 
 /* Jiyun first-contact branding: large service title, restrained counselor label.
