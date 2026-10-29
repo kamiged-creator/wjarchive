@@ -731,6 +731,18 @@ html.dark .guided-current .guided-hint{color:#d2ac89}
 }
 
 
+/* Jiyun first visit: show title and greeting immediately, while the birth
+   question and all three answer buttons fade in together after the greeting.
+   Visibility hidden reserves the layout so the video and title do not jump. */
+body.jiyun-video-chat .messages.intro-question-enter .guided-current,
+body.jiyun-video-chat .guided-quickbar.intro-choices-enter{
+  animation:guided-following-fade .3s ease-out both!important;
+}
+@media(prefers-reduced-motion:reduce){
+  body.jiyun-video-chat .messages.intro-question-enter .guided-current,
+  body.jiyun-video-chat .guided-quickbar.intro-choices-enter{animation:none!important}
+}
+
 /* Manseryeok result in discreet chat bubbles, not a tall form card. */
 .saju-chat-results{display:flex;flex-direction:column;gap:14px;width:100%;min-width:0}
 .saju-chat-results .message{min-width:0;width:100%;align-items:flex-end}
@@ -2449,9 +2461,11 @@ function renderMessages(scrollToEnd=true){
     renderAraMenu(starters);
     feed.append(starters);
   }
-  // Jiyun's opening video caption and the first question/choice buttons
-  // appear together. Other advisers retain their existing greeting sequence.
-  const sequenceWelcome=animateWelcome&&selected.id!=="jian"&&
+  // Jiyun's title and spoken greeting appear immediately. On the first
+  // question only, reveal the question and choices together after 2 seconds.
+  // Never restart the delay on later guided steps or repeat visits.
+  const jiyunFirstWelcome=selected.id==="jian"&&Boolean(greetingOverlay&&!greetingOverlay.hidden);
+  const sequenceWelcome=animateWelcome&&(selected.id!=="jian"||jiyunFirstWelcome)&&
     !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches&&
     Boolean(feed.querySelector(".guided-current"));
   if(sequenceWelcome){
@@ -2459,8 +2473,7 @@ function renderMessages(scrollToEnd=true){
     quickbar.classList.add("intro-await-question");
     quickbar.inert=true;
     quickbar.setAttribute("aria-hidden","true");
-    const phraseCount=conversation[0].text.split("\n").length;
-    const greetingMs=selected.id==="jian"?3250:2250;
+    const greetingMs=selected.id==="jian"?2000:2250;
     setTimeout(()=>{
       if(currentRun!==introTypingRun||!feed.isConnected||location.hash!=="#chat")return;
       feed.classList.remove("intro-await-question");
