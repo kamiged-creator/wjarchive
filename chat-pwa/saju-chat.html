@@ -2405,13 +2405,19 @@ function renderMessages(scrollToEnd=true){
     // generic chat bubble first: that caused the earlier "flash below" bug.
     if(index===0&&selected.id==="jian"&&conversation.length===1&&
        !birthProfiles[birthKey()]&&!guidedManualMode.has(birthKey())&&greetingOverlay){
-      const heading=makeEl("h2","jiyun-welcome-title","재물·사업운");
-      const label=makeEl("p","jiyun-welcome-subtitle","복작소 · 지윤 상담사");
-      const lead=makeEl("p","jiyun-welcome-copy",
-        "안녕하세요. 복작소 지윤 상담사입니다.\n재물과 사업의 흐름을 차분히 살펴드리겠습니다.");
-      const disclosure=makeEl("small","jiyun-welcome-ai-note","AI 기술을 활용한 사주 해석 서비스");
-      greetingOverlay.append(heading,label,lead,disclosure);
-      greetingOverlay.hidden=false;
+      // The large title and greeting belong to the first question only.
+      // Once an answer advances the guided interview, the scrolling transcript
+      // must never sit on top of a persistent welcome caption.
+      const firstQuestion=!guidedDrafts[birthKey()]?.replies?.length;
+      if(firstQuestion){
+        const heading=makeEl("h2","jiyun-welcome-title","재물·사업운");
+        const label=makeEl("p","jiyun-welcome-subtitle","복작소 · 지윤 상담사");
+        const lead=makeEl("p","jiyun-welcome-copy",
+          "안녕하세요. 복작소 지윤 상담사입니다.\n재물과 사업의 흐름을 차분히 살펴드리겠습니다.");
+        const disclosure=makeEl("small","jiyun-welcome-ai-note","AI 기술을 활용한 사주 해석 서비스");
+        greetingOverlay.append(heading,label,lead,disclosure);
+        greetingOverlay.hidden=false;
+      }
       feed.append(makeIntake());
       continue;
     }
