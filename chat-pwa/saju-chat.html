@@ -1605,10 +1605,13 @@ function makeGuidedIntake(){
      },true);
      basic.classList.add("guided-basic-confirm");
      const footnote=makeEl("div","guided-jiyun-ai-footnote");
-     footnote.append(makeEl("p","guided-jiyun-ai-brief",
-       "AI 분석을 위해 사주 정보와 질문이 외부 AI 서비스에 전달됩니다."));
      const disclosure=makeEl("details","guided-jiyun-ai-disclosure");
-     disclosure.append(makeEl("summary","guided-jiyun-ai-summary","자세히 보기"));
+     const summary=makeEl("summary","guided-jiyun-ai-summary");
+     summary.append(
+       makeEl("span","guided-jiyun-ai-brief","AI 상담 시 사주·질문을 OpenAI에 전송"),
+       makeEl("span","guided-jiyun-ai-link","· 자세히 보기")
+     );
+     disclosure.append(summary);
      disclosure.append(makeEl("p","guided-jiyun-ai-more",
        "동의하고 상담을 시작하면 계산된 사주 글자·오행 정보, 질문과 최근 대화가 OpenAI에 전송됩니다. 생년월일·출생시간 입력값 자체는 보내지 않지만 질문에 직접 적은 개인정보는 전송될 수 있습니다. 기본 사주 보기는 외부 AI에 전송하지 않습니다."));
      footnote.append(disclosure);
@@ -4019,24 +4022,24 @@ body.jiyun-video-chat .guided-quickbar .guided-basic-confirm.jiyun-choice-select
   color:#ffe2a8!important;text-decoration-color:#ffe2a8;
 }
 body.jiyun-video-chat .guided-jiyun-ai-footnote{
-  grid-column:1/-1;min-width:0;display:flex;
-  flex-direction:column;align-items:center;gap:0;
-  margin:0 0 1px;
-}
-body.jiyun-video-chat .guided-jiyun-ai-brief{
-  margin:0 3px;
-  color:#cdb8a4;text-align:center;
-  font-size:10.5px;line-height:1.4;word-break:keep-all;
+  grid-column:1/-1;min-width:0;display:block;
+  margin:0 0 1px;text-align:center;
 }
 body.jiyun-video-chat .guided-jiyun-ai-disclosure{
-  min-width:0;margin:0;padding:0;
+  width:100%;min-width:0;margin:0;padding:0;
   background:transparent;border:0;
-  color:#c9b19a;text-align:center;font-size:10.5px;
+  color:#c9b19a;text-align:center;
 }
 body.jiyun-video-chat .guided-jiyun-ai-summary{
-  display:inline-block;cursor:pointer;list-style:none;
-  font-size:10.5px;line-height:1.5;padding:2px 6px;
-  text-decoration:underline;text-underline-offset:3px;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  min-height:24px;cursor:pointer;list-style:none;white-space:nowrap;
+  font-size:clamp(10px,2.65vw,11px);line-height:1.5;padding:2px 1px;
+  letter-spacing:-.025em;
+}
+body.jiyun-video-chat .guided-jiyun-ai-summary::marker{content:""}
+body.jiyun-video-chat .guided-jiyun-ai-brief{color:#cdb8a4}
+body.jiyun-video-chat .guided-jiyun-ai-link{
+  color:#e5c9a6;text-decoration:underline;text-underline-offset:3px;
 }
 body.jiyun-video-chat .guided-jiyun-ai-summary::-webkit-details-marker{display:none}
 body.jiyun-video-chat .guided-jiyun-ai-summary:focus-visible{
