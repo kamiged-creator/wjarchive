@@ -1027,7 +1027,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
     <div class="jiyun-welcome-overlay" id="jiyunWelcomeOverlay" hidden aria-live="polite"></div>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
-    <form class="composer" id="composer" autocomplete="off"><div class="jiyun-consent-gate" id="jiyunConsentGate" hidden role="group" aria-label="지윤 AI 정보 전송 동의"><p>AI 상담을 선택하면 질문·최근 대화·계산된 사주 정보가 OpenAI에 전송됩니다. 동의하지 않으면 전송되지 않아요.</p><div class="jiyun-consent-actions"><button type="button" id="jiyunConsentApprove">동의하고 전송</button><button type="button" id="jiyunConsentCancel">취소</button></div></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div><details class="jiyun-privacy-details" id="jiyunPrivacyDetails" hidden><summary>개인정보 처리 안내</summary><p>AI 상담 동의 시 계산된 사주 글자와 오행, 질문, 최근 대화가 OpenAI에 전송됩니다. 생년월일·출생시간 입력값 자체는 보내지 않지만, 질문에 직접 적은 개인정보는 전송될 수 있습니다. 동의하지 않아도 기본 만세력 풀이를 이용할 수 있습니다.</p></details></form>
+    <form class="composer" id="composer" autocomplete="off"><div class="jiyun-consent-gate" id="jiyunConsentGate" hidden role="group" aria-label="지윤 AI 정보 전송 동의"><p>AI 상담을 선택하면 질문·최근 대화·계산된 사주 정보가 OpenAI에 전송됩니다. 동의하지 않으면 전송되지 않아요.</p><div class="jiyun-consent-actions"><button type="button" id="jiyunConsentApprove">동의하고 전송</button><button type="button" id="jiyunConsentCancel">취소</button></div></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
     <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
@@ -1606,7 +1606,7 @@ function makeGuidedIntake(){
      basic.classList.add("guided-basic-confirm");
      const footnote=makeEl("div","guided-jiyun-ai-footnote");
      footnote.append(makeEl("p","guided-jiyun-ai-brief",
-       "AI 상담 시 사주·질문·최근 대화가 OpenAI에 전송됩니다."));
+       "AI 분석을 위해 사주 정보와 질문이 외부 AI 서비스에 전달됩니다."));
      const disclosure=makeEl("details","guided-jiyun-ai-disclosure");
      disclosure.append(makeEl("summary","guided-jiyun-ai-summary","자세히 보기"));
      disclosure.append(makeEl("p","guided-jiyun-ai-more",
@@ -2580,7 +2580,7 @@ const AI_ENDPOINT="/api/saju-ai";
 let aiReady=false,aiTrial=false,aiAraDirect=false,aiJiyunDirect=false;
 const aiConsent=$("aiConsent"),aiPin=$("aiPin"),aiStatus=$("aiStatus");
 const jiyunConsentGate=$("jiyunConsentGate"),jiyunConsentApprove=$("jiyunConsentApprove");
-const jiyunConsentCancel=$("jiyunConsentCancel"),jiyunPrivacyDetails=$("jiyunPrivacyDetails");
+const jiyunConsentCancel=$("jiyunConsentCancel");
 jiyunConsentApprove.addEventListener("click",()=>{
   if(selected.id!=="jian"||!birthProfiles[birthKey()])return;
   jiyunIntroConsent[birthKey()]=true;
@@ -2595,11 +2595,7 @@ function syncAraAiUi(){
   const jiyun=selected.id==="jian"&&aiJiyunDirect;
   $("aiSettingsDetails").hidden=ara||jiyun;
   const jiyunHasBirth=selected.id==="jian"&&Boolean(birthProfiles[birthKey()]);
-  jiyunPrivacyDetails.hidden=!jiyunHasBirth;
-  if(!jiyunHasBirth){
-    jiyunPrivacyDetails.open=false;
-    jiyunConsentGate.hidden=true;
-  }
+  if(!jiyunHasBirth)jiyunConsentGate.hidden=true;
   if(jiyunIntroConsent[birthKey()]===true)jiyunConsentGate.hidden=true;
   const chatInput=$("question");
   chatInput.placeholder=ara&&aiAraDirect?"아라 AI 상담 · 메시지 입력":jiyun?"지윤 AI에게 재물·사업 질문":"메시지 입력";
@@ -3916,7 +3912,7 @@ body.jiyun-video-chat .chat-full .saju-chat-results{
 
 /* Jiyun: one-time opt-in at the birth-review action. Use a compact
    optional disclosure instead of repeating a checkbox in the chat dock. */
-.jiyun-consent-gate[hidden],.jiyun-privacy-details[hidden]{display:none!important}
+.jiyun-consent-gate[hidden]{display:none!important}
 body.jiyun-video-chat .chat-full .composer:has(.jiyun-consent-gate:not([hidden])){
   display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;
 }
@@ -3932,21 +3928,6 @@ body.jiyun-video-chat .chat-full .jiyun-consent-actions button{
   border-radius:9px;background:rgba(126,88,58,.82);color:#fff1e0;font:inherit;font-weight:650;
 }
 body.jiyun-video-chat .chat-full #jiyunConsentCancel{background:transparent}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details{
-  width:min(calc(100% - 44px),450px);margin:5px auto 0;
-  color:#d7b99b;font-size:11px;line-height:1.45;text-align:right;
-}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details summary{
-  display:inline-block;list-style:none;cursor:pointer;
-  text-decoration:underline;text-underline-offset:3px;padding:3px 0 2px;
-}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details summary::-webkit-details-marker{display:none}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details p{
-  margin:6px 0 4px;padding:9px 11px;text-align:left;
-  color:#f0dac7;background:rgba(29,23,20,.94);
-  border:1px solid rgba(219,184,149,.4);border-radius:10px;font-size:11px;
-}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details summary:focus-visible,
 body.jiyun-video-chat .chat-full .jiyun-consent-actions button:focus-visible{
   outline:2px solid #e5b889;outline-offset:2px;
 }
@@ -4122,15 +4103,6 @@ body.jiyun-video-chat .chat-full .composer-inner{
 }
 body.jiyun-video-chat .chat-full .composer .composer-inner input{
   flex:1 1 auto!important;min-width:0!important;font-size:16px!important;
-}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details{
-  flex:none;box-sizing:border-box;
-  width:min(100%,450px)!important;max-width:100%;
-  margin:3px auto 0!important;
-  font-size:10px!important;text-align:right;
-}
-body.jiyun-video-chat .chat-full .jiyun-privacy-details summary{
-  font-size:10px;line-height:1.4;padding:1px 2px;
 }
 @media(max-width:360px){
   body.jiyun-video-chat .chat-full .composer{padding-left:10px!important;padding-right:10px!important}
