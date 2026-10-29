@@ -2278,10 +2278,14 @@ function renderAraMenu(starters){
 let jiyunFrameGeneration=0;
 let jiyunLoopGeneration=0;
 let jiyunLoopStarted=false;
+let jiyunLoopFirstFrameHold=false;
+const JIYUN_LOOP_FADE_MS=900;
+const JIYUN_LOOP_HOLD_MS=1200;
 function resetJiyunPlayback(){
   ++jiyunFrameGeneration;
   ++jiyunLoopGeneration;
   jiyunLoopStarted=false;
+  jiyunLoopFirstFrameHold=false;
   const scene=$("sajuScene"),intro=$("jiyunSceneVideo"),loop=$("jiyunLoopVideo");
   if(scene)scene.classList.remove("jiyun-frame-ready","jiyun-loop-ready","jiyun-smoke-ready","saju-video-pending");
   if(intro){intro.pause();intro.onended=null;try{intro.currentTime=0;}catch(_){}}
@@ -2345,17 +2349,31 @@ function syncSajuScene(){
       jiyunVideo.onended=()=>{
         if(selected.id!=="jian"||jiyunLoopStarted||!loopVideo)return;
         jiyunLoopStarted=true;
+        jiyunLoopFirstFrameHold=true;
         const generation=++jiyunLoopGeneration;
-        let requested=false;
+        let requested=false,revealed=false;
         if(smokeVideo){smokeVideo.pause();scene.classList.remove("jiyun-smoke-ready");}
         const revealLoopFrame=()=>{
-          requested=false;
-          if(generation!==jiyunLoopGeneration||selected.id!=="jian"||loopVideo.readyState<2)return;
-          scene.classList.add("jiyun-loop-ready");
-          // Hold the introduction's final frame until the loop has decoded a frame.
-          setTimeout(()=>{
-            if(generation===jiyunLoopGeneration&&selected.id==="jian"&&scene.classList.contains("jiyun-loop-ready"))jiyunVideo.pause();
-          },350);
+          if(revealed||generation!==jiyunLoopGeneration||selected.id!=="jian"||loopVideo.readyState<2)return;
+          revealed=true;requested=false;
+          loopVideo.onloadeddata=null;loopVideo.onplaying=null;
+          // Pause on the newly decoded opening frame: soften the visual jump without
+          // slowing or reversing the incense plume and book movements.
+          requestAnimationFrame(()=>{
+            if(generation!==jiyunLoopGeneration||selected.id!=="jian")return;
+            loopVideo.pause();
+            scene.classList.add("jiyun-loop-ready");
+            // The introduction holds its final frame underneath the one-second crossfade.
+            setTimeout(()=>{
+              if(generation===jiyunLoopGeneration&&selected.id==="jian"&&scene.classList.contains("jiyun-loop-ready"))jiyunVideo.pause();
+            },JIYUN_LOOP_FADE_MS+100);
+            // Keep the new opening still briefly, then play the rest at normal speed.
+            setTimeout(()=>{
+              if(generation!==jiyunLoopGeneration||selected.id!=="jian")return;
+              jiyunLoopFirstFrameHold=false;
+              loopVideo.play().catch(()=>{});
+            },JIYUN_LOOP_HOLD_MS);
+          });
         };
         const waitForLoopFrame=()=>{
           if(requested||generation!==jiyunLoopGeneration||selected.id!=="jian"||loopVideo.paused||loopVideo.readyState<2)return;
@@ -2373,7 +2391,7 @@ function syncSajuScene(){
       };
     }
     if(jiyunLoopStarted){
-      if(loopVideo&&loopVideo.paused)loopVideo.play().catch(()=>{});
+      if(loopVideo&&loopVideo.paused&&!jiyunLoopFirstFrameHold)loopVideo.play().catch(()=>{});
       return;
     }
     if(jiyunVideo.getAttribute("src")!==JIYUN_VIDEO_URL){
@@ -3473,7 +3491,7 @@ body.jiyun-video-chat .chat-full .saju-scene img{display:none!important}
 }
 body.jiyun-video-chat .chat-full .saju-scene.jiyun-frame-ready #jiyunSceneVideo{opacity:1}
 /* Layer two stays hidden until its first decoded frame, then fades over the held intro. */
-.saju-scene #jiyunLoopVideo{z-index:2;opacity:0;pointer-events:none!important;transition:opacity 220ms ease-out}
+.saju-scene #jiyunLoopVideo{z-index:2;opacity:0;pointer-events:none!important;transition:opacity 900ms cubic-bezier(.4,0,.2,1)}
 body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunLoopVideo{opacity:1}
 /* Opt-in preview: overlay only the incense plume from the same MP4 at 55% speed.
    The woman, book, hands and surrounding room remain at original speed.
