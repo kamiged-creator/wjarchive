@@ -4382,6 +4382,30 @@ body.jiyun-report-open .jiyun-report-inline-title p{
   margin:0;color:#ddc5a8;font-size:14px;line-height:1.7;
 }
 
+/* HOTFIX: the old Jiyun bottom-dock :has() selector had greater specificity
+   than full-screen report styles, leaving the report at ~42dvh and clipping
+   the opening sentence. Override it only while the report is open. */
+body.jiyun-video-chat.jiyun-report-open .chat-panel.chat-full > .messages:has(> .saju-chat-results){
+  position:absolute!important;inset:0!important;top:0!important;bottom:0!important;
+  flex:none!important;margin:0!important;
+  width:100%!important;height:100%!important;min-height:0!important;
+  max-height:none!important;max-width:none!important;
+  padding:72px max(18px,calc((100% - 700px)/2)) calc(112px + env(safe-area-inset-bottom))!important;
+  box-sizing:border-box!important;display:block!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;touch-action:pan-y!important;
+  scroll-padding:72px 0 110px!important;
+  -webkit-mask-image:none!important;mask-image:none!important;
+  background:radial-gradient(ellipse at 85% 3%,#483526 0%,transparent 38%),#1d1916!important;
+  z-index:16!important;
+}
+@media(max-width:360px){
+  body.jiyun-video-chat.jiyun-report-open .chat-panel.chat-full > .messages:has(> .saju-chat-results){
+    padding-left:15px!important;padding-right:15px!important;
+  }
+}
+
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
