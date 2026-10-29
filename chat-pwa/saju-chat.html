@@ -1012,6 +1012,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
       </div>
     </section>
     <button type="button" id="araMusicToggle" class="ara-music-toggle" aria-label="잔잔한 배경음악 켜기" aria-pressed="false" title="잔잔한 배경음악 켜기"><span class="ara-music-symbol" aria-hidden="true">♫</span><span class="ara-music-label">음악 켜기</span></button>
+    <div class="jiyun-welcome-overlay" id="jiyunWelcomeOverlay" hidden aria-live="polite"></div>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
     <form class="composer" id="composer" autocomplete="off"><div class="jiyun-ai-consent-row" id="jiyunAiRow" hidden><label class="jiyun-ai-consent-label"><input type="checkbox" id="jiyunAiConsent"><span>지윤 AI 상담 동의 · 질문·최근 대화·계산된 사주를 OpenAI에 전송</span></label><small id="jiyunAiNotice" role="status" hidden>AI 상담을 이용하려면 먼저 전송에 동의해 주세요.</small></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
@@ -2394,6 +2395,8 @@ function renderMessages(scrollToEnd=true){
   quickbar.removeAttribute("aria-hidden");
   quickbar.replaceChildren();quickbar.hidden=true;
   feed.replaceChildren();
+  const greetingOverlay=$("jiyunWelcomeOverlay");
+  if(greetingOverlay){greetingOverlay.hidden=true;greetingOverlay.replaceChildren();}
   if(selected.id==="harin"){syncSimliControls();return;}
   const animateWelcome=scrollToEnd==="intro"&&conversation.length===1&&
     conversation[0]?.role==="bot"&&!birthProfiles[birthKey()];
@@ -2413,13 +2416,20 @@ function renderMessages(scrollToEnd=true){
       feed.append(row);
     }
     if(!document.body.classList.contains("ara-cinematic-intro")&&(index===conversation.length-1||conversation[index+1]?.role!==item.role))appendChatTime(row,item.at,item.role);
-    if(index===0)feed.append(makeIntake());
+    if(index===0){
+      const intake=makeIntake();
+      const floatingGreeting=selected.id==="jian"&&conversation.length===1&&
+        !birthProfiles[birthKey()]&&!guidedManualMode.has(birthKey());
+      if(floatingGreeting&&greetingOverlay){
+        greetingOverlay.append(row);
+        greetingOverlay.hidden=false;
+      }else if(selected.id==="jian"&&conversation.length===1&&birthProfiles[birthKey()]){
+        row.remove();
+      }
+      feed.append(intake);
+    }
   }
-  // Only the initial Jiyun greeting is lifted into the lower hanbok-knot area.
-  // Keep the birth-calendar question and controls fixed in their usual dock.
-  feed.classList.toggle("jiyun-welcome-stage",selected.id==="jian"&&
-    conversation.length===1&&!birthProfiles[birthKey()]&&
-    guidedDrafts[birthKey()]?.step==="calendar"&&!guidedManualMode.has(birthKey()));
+  feed.classList.toggle("jiyun-welcome-stage",Boolean(greetingOverlay&&!greetingOverlay.hidden));
   if(selected.id==="ara"&&araMenuEnabled){
     const starters=makeEl("div","ara-starters");
     renderAraMenu(starters);
@@ -3664,31 +3674,40 @@ body.jiyun-video-chat .chat-full .composer{
   body.jiyun-video-chat .chat-full .messages{padding-left:12px!important;padding-right:12px!important}
 }
 
-/* Jiyun's opening greeting alone: float near the lower hanbok knot (~80 CSS px
-   above its former position). Expand only the first-stage scroll dock so the
-   moved line is not clipped by overflow/masking. Birth question stays put. */
+/* Jiyun greeting is one fixed layer, separate from the scrolling question dock.
+   No repositioned copy is ever painted at the old location. */
+.jiyun-welcome-overlay[hidden]{display:none!important}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay{
+  position:absolute;z-index:7;
+  left:18px;right:18px;
+  bottom:calc(min(34dvh,340px) + 140px);
+  pointer-events:none;
+  color:#fff1df;font-size:16px;line-height:1.54;
+  text-shadow:0 2px 7px rgba(0,0,0,.84);
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .message{
+  display:block!important;width:100%;margin:0!important;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .bubble{
+  display:block;width:max-content;max-width:min(92%,520px);
+  padding:6px 9px;
+  background:linear-gradient(90deg,rgba(18,14,12,.32),rgba(18,14,12,.12) 78%,transparent);
+  border:0;border-radius:9px;box-shadow:none;
+  color:#fff1df;font:inherit;text-shadow:inherit;white-space:pre-line;
+}
 body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage{
-  height:min(calc(34dvh + 90px),430px)!important;
+  justify-content:flex-end!important;
 }
-body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage > .message:first-child{
-  transform:translateY(-80px);
-}
-body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage > .message:first-child .bubble{
-  width:max-content;
-  max-width:min(92%,520px)!important;
-  padding:6px 9px!important;
-  border-radius:9px!important;
-  background:linear-gradient(90deg,rgba(18,14,12,.32),rgba(18,14,12,.12) 78%,transparent)!important;
-  color:#fff1df!important;
+body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage > .intake-card{
+  margin-top:auto!important;
 }
 @media(max-height:650px){
-  body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage{
-    height:min(calc(28dvh + 65px),290px)!important;
-  }
-  body.jiyun-video-chat .chat-full .messages.jiyun-welcome-stage > .message:first-child{
-    transform:translateY(-50px);
+  body.jiyun-video-chat .chat-full .jiyun-welcome-overlay{
+    bottom:calc(min(28dvh,215px) + 106px);
+    left:14px;right:14px;font-size:15px;
   }
 }
+body.ara-keyboard-open.jiyun-video-chat .chat-full .jiyun-welcome-overlay{display:none!important}
 /* Jiyun result only: raise the readable interpretation and controls off
    the bottom edge, without moving the Android input dock or intake choices.
    Keep the extra height transparent over the portrait and fully scrollable. */
