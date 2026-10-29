@@ -2447,9 +2447,9 @@ function renderMessages(scrollToEnd=true){
     renderAraMenu(starters);
     feed.append(starters);
   }
-  // On first entry, let the whole greeting finish before revealing the next
-  // question and quick choices. Re-renders and reduced-motion remain instant.
-  const sequenceWelcome=animateWelcome&&
+  // Jiyun's opening video caption and the first question/choice buttons
+  // appear together. Other advisers retain their existing greeting sequence.
+  const sequenceWelcome=animateWelcome&&selected.id!=="jian"&&
     !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches&&
     Boolean(feed.querySelector(".guided-current"));
   if(sequenceWelcome){
