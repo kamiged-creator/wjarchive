@@ -1026,6 +1026,12 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
     <button type="button" id="araMusicToggle" class="ara-music-toggle" aria-label="잔잔한 배경음악 켜기" aria-pressed="false" title="잔잔한 배경음악 켜기"><span class="ara-music-symbol" aria-hidden="true">♫</span><span class="ara-music-label">음악 켜기</span></button>
     <div class="jiyun-welcome-overlay" id="jiyunWelcomeOverlay" hidden aria-live="polite"></div>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
+    <div class="jiyun-report-heading" id="jiyunReportHeading" hidden>
+      <span>✦ BOKJAKSO · JIYUN READING ✦</span><h1>나의 재물·사업운</h1><p>지윤 상담사가 전하는 나만의 사주 이야기</p>
+    </div>
+    <header class="jiyun-report-top" id="jiyunReportTop" hidden><button type="button" id="jiyunReportClose">‹ <span>지윤 상담으로</span></button><strong>복작소 · 사주 결과</strong><span aria-hidden="true">✦</span></header>
+    <div class="jiyun-report-bottom" id="jiyunReportBottom" hidden><button type="button" id="jiyunReportChat">🌸 지윤과 채팅 상담 이어가기 →</button></div>
+    <button type="button" class="jiyun-report-reopen" id="jiyunReportReopen" hidden>📜 사주 결과 다시 보기</button>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
     <form class="composer" id="composer" autocomplete="off"><div class="jiyun-consent-gate" id="jiyunConsentGate" hidden role="group" aria-label="지윤 AI 정보 전송 동의"><p>AI 상담을 선택하면 질문·최근 대화·계산된 사주 정보가 OpenAI에 전송됩니다. 동의하지 않으면 전송되지 않아요.</p><div class="jiyun-consent-actions"><button type="button" id="jiyunConsentApprove">동의하고 전송</button><button type="button" id="jiyunConsentCancel">취소</button></div></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
     <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
@@ -1587,6 +1593,7 @@ function makeGuidedIntake(){
          jiyunIntroConsent[key]=useJiyunAi;
        }
        birthProfiles[key]=profiles;
+       if(jiyunReview)jiyunReportVisible=true;
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
        renderMessages("result");
      }catch(err){if(card.isConnected)warn(err?.message||"입력한 날짜를 확인해 주세요.");}
@@ -1730,6 +1737,54 @@ const JIYUN_SAJU_NOTE="사주 풀이는 전통 해석을 바탕으로 한 참고
 const sajuResultCache=Object.create(null);
 // Volatile opt-in for an individual Jiyun first reading; never stored remotely.
 const jiyunIntroConsent=Object.create(null);
+let jiyunReportVisible=false;
+// Illustrations are local, decorative Korean landscape artwork. No external image service.
+function jiyunReportFigure(variant){
+ const figure=makeEl("figure","jiyun-report-figure");
+ const sky=variant===2?"#604733":"#2e353a";
+ const sunX=variant===2?320:730;
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 450"><defs><linearGradient id="s" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="#c3a47b"/></linearGradient><radialGradient id="g"><stop stop-color="#ffe1aa" stop-opacity=".8"/><stop offset="1" stop-color="#f1c88b" stop-opacity="0"/></radialGradient></defs><rect width="960" height="450" fill="url(#s)"/><circle cx="${sunX}" cy="133" r="145" fill="url(#g)"/><circle cx="${sunX}" cy="133" r="47" fill="#ecd6ac"/><path d="M0 280 128 205 250 280 390 139 500 267 625 184 760 295 885 228 960 286V450H0Z" fill="#6f6858" opacity=".55"/><path d="M0 350 175 283 308 330 480 234 635 326 798 260 960 325V450H0Z" fill="#45504a" opacity=".86"/><path d="M0 397Q300 344 535 393T960 368V450H0Z" fill="#283737"/><g fill="none" stroke="#ead1a2" opacity=".4"><path d="M110 414Q470 387 840 406"/><path d="M240 434Q565 415 935 425"/></g><g stroke="#242b26" stroke-linecap="round" fill="none"><path d="M128 423Q143 279 166 184M160 215Q112 165 57 161M160 213Q206 165 271 173M148 293Q100 242 39 254" stroke-width="11"/><path d="M58 162Q30 132 3 132M273 173Q309 147 349 155M40 254Q5 234 0 217" stroke-width="7"/></g><g fill="#334438" opacity=".91"><ellipse cx="55" cy="154" rx="65" ry="17" transform="rotate(10 55 154)"/><ellipse cx="267" cy="169" rx="91" ry="20" transform="rotate(-10 267 169)"/><ellipse cx="42" cy="250" rx="65" ry="17"/></g><rect x="12" y="12" width="936" height="426" fill="none" stroke="#e8c89c" stroke-opacity=".4"/></svg>`;
+ const img=document.createElement("img");img.alt="산과 소나무, 햇빛이 어우러진 동양화 풍경";img.loading="lazy";img.src="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+ figure.append(img,makeEl("figcaption","",variant===2?"삶의 뿌리와 성장의 기운":"한 걸음씩 열리는 새로운 흐름"));return figure;
+}
+function decorateJiyunReading(row,text){
+ if(selected.id!=="jian"||!text||text.length<280)return;
+ const bubble=row.querySelector(".bubble");if(!bubble)return;
+ let parts=text.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+ if(parts.length<3){
+   const sentences=text.split(/(?<=[.!?。])\s+/).map(x=>x.trim()).filter(Boolean);
+   if(sentences.length>=4){
+     parts=[];let buffer="";
+     for(const sentence of sentences){
+       if(buffer.length>220){parts.push(buffer.trim());buffer="";}
+       buffer+=(buffer?" ":"")+sentence;
+     }
+     if(buffer)parts.push(buffer.trim());
+   }
+ }
+ if(parts.length<2)return;
+ bubble.replaceChildren();
+ const first=Math.max(1,Math.floor(parts.length*.4));
+ const second=Math.max(first+1,Math.floor(parts.length*.78));
+ parts.forEach((part,i)=>{
+   const paragraph=makeEl("p","jiyun-report-paragraph",part);
+   if(/^(?:\d+[.)]|[①②③④⑤]|【)/.test(part))paragraph.classList.add("jiyun-report-heading-text");
+   bubble.append(paragraph);
+   if(i+1===first)bubble.append(jiyunReportFigure(1));
+   if(parts.length>=5&&i+1===second&&second<parts.length)bubble.append(jiyunReportFigure(2));
+ });
+}
+function syncJiyunReportUi(){
+ const show=selected.id==="jian"&&jiyunReportVisible&&Boolean(birthProfiles[birthKey()])&&!birthEditing.has(birthKey());
+ document.body.classList.toggle("jiyun-report-open",show);
+ $("jiyunReportHeading").hidden=!show;
+ $("jiyunReportTop").hidden=!show;
+ $("jiyunReportBottom").hidden=!show||!sajuResultCache[birthKey()]?.messages?.length;
+ $("jiyunReportReopen").hidden=selected.id!=="jian"||show||!sajuResultCache[birthKey()]?.messages?.length;
+}
+function closeJiyunReport(){
+ jiyunReportVisible=false;renderMessages(true);
+}
 function sajuResultRow(role,message,showAdvisor=false,at=null){
   const row=makeEl("div","message "+role+" saju-chat-msg");
   if(role==="bot"&&message===JIYUN_SAJU_NOTE)row.classList.add("jiyun-saju-note");
@@ -1771,7 +1826,7 @@ function makeSajuChatResults(profiles,key){
   const actions=makeEl("div","saju-chat-actions");
   const edit=makeEl("button","saju-chat-edit",selected.id==="jian"?"정보 수정":"정보 수정하기");
   edit.type="button";
-  edit.addEventListener("click",()=>{reopenGuidedBirthEditor(key,profiles);renderMessages(true);});
+  edit.addEventListener("click",()=>{jiyunReportVisible=false;reopenGuidedBirthEditor(key,profiles);renderMessages(true);});
   actions.append(edit);
   function makeFirstReadingOffer(){
     if(selected.id!=="jian"||jiyunIntroConsent[key]===true)return;
@@ -1798,7 +1853,7 @@ function makeSajuChatResults(profiles,key){
     followup.setAttribute("role","note");
     followup.append(makeEl("p","jiyun-followup-label","🌸 지윤과 상담 이어가기"));
     followup.append(makeEl("p","jiyun-followup-question","더 궁금한 점이나 재물·사업에 관한 고민이 있으신가요?"));
-    followup.append(makeEl("p","jiyun-followup-hint","아래 채팅창에 편하게 남겨주세요. 제가 이어서 상담해 드릴게요."));
+    followup.append(makeEl("p","jiyun-followup-hint","아래 버튼을 누르면 지윤과 채팅 상담을 이어갈 수 있어요."));
     root.append(followup);
   }
   function showMessages(messages,animate,technical=[]){
@@ -1817,7 +1872,7 @@ function makeSajuChatResults(profiles,key){
       if(!isCurrent())return;
       messages.forEach((step,i)=>{
         const row=sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null);
-        if(i===0)row.classList.add("saju-reading-first");
+        if(i===0){row.classList.add("saju-reading-first");decorateJiyunReading(row,step);}
         if(selected.id==="jian"&&i===messages.length-2&&messages[messages.length-1]===JIYUN_SAJU_NOTE)
           row.classList.add("jiyun-reading-last");
         root.append(row);
@@ -1862,7 +1917,7 @@ function makeSajuChatResults(profiles,key){
     else startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
     cached.messages.forEach((message,i)=>{
       const row=sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null);
-      if(i===0)row.classList.add("saju-reading-first");
+      if(i===0){row.classList.add("saju-reading-first");decorateJiyunReading(row,message);}
       if(selected.id==="jian"&&i===cached.messages.length-2&&cached.messages[cached.messages.length-1]===JIYUN_SAJU_NOTE)
         row.classList.add("jiyun-reading-last");
       root.append(row);
@@ -2556,6 +2611,7 @@ function renderMessages(scrollToEnd=true){
   $("send").disabled=!ready;
   $("question").placeholder=selected.id==="ara"?"편하게 한마디 남겨 주세요":ready?"메시지 입력":"입력창 위에서 답을 선택해 주세요";
   syncAraAiUi();
+  syncJiyunReportUi();
   requestAnimationFrame(()=>{
     if(currentRun!==introTypingRun)return;
     if(selected.id==="jian"&&conversation.length===1&&
@@ -2956,6 +3012,9 @@ function startAraMusic(){
 }
 
 const form=$("composer"),input=$("question"),sendBtn=$("send");
+$("jiyunReportClose").addEventListener("click",closeJiyunReport);
+$("jiyunReportChat").addEventListener("click",closeJiyunReport);
+$("jiyunReportReopen").addEventListener("click",()=>{jiyunReportVisible=true;renderMessages(false);});
 $("araMusicToggle").addEventListener("click",()=>{if(araMusicContext)stopAraMusic();else startAraMusic();});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAraMusic();});
 window.addEventListener("pagehide",stopAraMusic);
@@ -4174,6 +4233,126 @@ body.jiyun-video-chat .chat-full .composer .composer-inner input{
   margin:10px 12px 14px;padding:10px 11px;border-radius:9px;
   background:rgba(18,15,13,.32);font-size:13px;line-height:1.6;
   white-space:pre-wrap;overflow-wrap:anywhere;word-break:keep-all;
+}
+
+/* Full-screen editorial report. The Jiyun video and fixed chat dock remain
+   unchanged until a completed birth review opens this separate reading mode. */
+body.jiyun-report-open .chat-full .saju-scene,
+body.jiyun-report-open .chat-full > .ara-music-toggle,
+body.jiyun-report-open .chat-full .chat-heading,
+body.jiyun-report-open .chat-full .composer,
+body.jiyun-report-open .chat-full .guided-quickbar,
+body.jiyun-report-open .chat-full .jiyun-welcome-overlay{display:none!important}
+body.jiyun-report-open .chat-full .messages{
+ position:absolute!important;inset:0!important;z-index:16!important;
+ margin:0!important;width:100%!important;height:100%!important;max-height:none!important;
+ padding:70px 21px 110px!important;overflow-y:auto!important;display:block!important;
+ background:radial-gradient(ellipse at 85% 3%,#483526 0%,transparent 38%),#1d1916!important;
+ color:#f3e5d5!important;box-sizing:border-box;scroll-behavior:auto!important;
+ -webkit-mask-image:none!important;mask-image:none!important;
+}
+body.jiyun-report-open .chat-full .messages>.message,
+body.jiyun-report-open .chat-full .messages>.guided-chat-flow,
+body.jiyun-report-open .chat-full .messages>.intake-card{display:none!important}
+body.jiyun-report-open .chat-full .messages>.saju-chat-results{
+ display:flex!important;width:min(100%,660px);margin:0 auto!important;gap:24px!important;
+ padding-bottom:40px;max-width:660px;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results>.message.user{display:none!important}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .message.bot{
+ width:100%!important;display:block!important;max-width:none!important;margin:0!important;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .message.bot .bubble{
+ width:100%!important;max-width:100%!important;display:block!important;
+ margin:0!important;padding:0!important;
+ background:transparent!important;color:#f2e7d8!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important;
+ font-size:17px!important;line-height:1.9!important;font-weight:420!important;
+ white-space:pre-wrap!important;word-break:keep-all!important;overflow-wrap:break-word!important;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results :is(.msg-avatar,.msg-avatar-spacer,.chat-time){display:none!important}
+body.jiyun-report-open .jiyun-report-paragraph{
+ margin:0 0 20px;white-space:pre-wrap;line-height:1.92;color:#f3e7d9;font-size:17px;
+}
+body.jiyun-report-open .jiyun-report-heading-text{color:#efc995;font-weight:700;font-size:18px}
+body.jiyun-report-open .jiyun-report-figure{
+ margin:25px 0 28px;border:1px solid rgba(217,178,121,.46);
+ border-radius:12px;overflow:hidden;background:#36322b;
+ box-shadow:0 8px 21px rgba(0,0,0,.23);
+}
+body.jiyun-report-open .jiyun-report-figure img{
+ display:block;width:100%;height:auto;aspect-ratio:960/450;object-fit:cover;
+}
+body.jiyun-report-open .jiyun-report-figure figcaption{
+ padding:8px 10px;text-align:center;color:#ddbd96;font-size:12px;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .jiyun-saju-note .bubble{
+ color:#c4b09c!important;font-size:12px!important;line-height:1.55!important;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .saju-technical-details{
+ width:100%!important;max-width:none!important;background:rgba(53,42,33,.74);
+ border:1px solid rgba(202,164,114,.4);border-radius:11px;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .saju-technical-summary{
+ padding:12px 14px!important;font-size:13px!important;
+}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .saju-chat-actions{padding:0!important}
+body.jiyun-report-open .chat-full .messages .saju-chat-results .jiyun-followup{
+ width:100%!important;max-width:none!important;background:rgba(61,43,30,.7);
+}
+body.jiyun-video-chat .chat-full > .jiyun-report-top{
+ position:absolute!important;inset:0 0 auto 0!important;z-index:26!important;
+ min-height:57px;padding:7px 16px;box-sizing:border-box;
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ background:#251d17;border-bottom:1px solid rgba(220,181,124,.37);color:#f5dfbf;
+}
+body.jiyun-video-chat .jiyun-report-top[hidden],body.jiyun-video-chat .jiyun-report-bottom[hidden],
+body.jiyun-video-chat .jiyun-report-heading[hidden],body.jiyun-video-chat .jiyun-report-reopen[hidden]{display:none!important}
+body.jiyun-video-chat .jiyun-report-top button{
+ min-height:40px;background:transparent;border:0;color:#edd0a8;
+ display:flex;align-items:center;gap:5px;font:inherit;font-size:29px;
+}
+body.jiyun-video-chat .jiyun-report-top button span{font-size:12px;font-weight:650}
+body.jiyun-video-chat .jiyun-report-top strong{font-size:13px;font-weight:650}
+body.jiyun-video-chat .jiyun-report-top>span{color:#c69a5d}
+body.jiyun-report-open .chat-full .jiyun-report-heading{
+ display:block;max-width:660px;margin:0 auto 25px;padding:28px 0 31px;
+ text-align:center;border-bottom:1px solid rgba(221,185,137,.3);
+ color:#d7af77!important;
+}
+body.jiyun-report-open .jiyun-report-heading>span{
+ display:block;font-size:10px;letter-spacing:.14em;color:#cdaa7f;
+}
+body.jiyun-report-open .jiyun-report-heading h1{
+ margin:15px 0 5px;font-size:clamp(28px,7vw,38px);line-height:1.25;
+ color:#f8d9a4;letter-spacing:-.05em;font-weight:800;
+}
+body.jiyun-report-open .jiyun-report-heading p{
+ font-size:14px;color:#ddc5a8;margin:0;
+}
+body.jiyun-video-chat .chat-full > .jiyun-report-heading{
+ position:absolute!important;z-index:17!important;top:70px!important;left:0;right:0;
+ pointer-events:none;
+}
+body.jiyun-report-open .chat-full .messages{padding-top:220px!important}
+body.jiyun-video-chat .chat-full > .jiyun-report-bottom{
+ position:absolute!important;inset:auto 0 0 0!important;z-index:26!important;
+ display:flex;justify-content:center;padding:10px 16px calc(12px + env(safe-area-inset-bottom));
+ background:#251e19;border-top:1px solid rgba(221,185,137,.39);
+}
+body.jiyun-video-chat .jiyun-report-bottom button{
+ width:min(100%,620px);min-height:50px;border-radius:12px;border:1px solid #cdaa7d;
+ background:#76553b;color:#fff0db;font:inherit;font-size:16px;font-weight:700;
+}
+body.jiyun-video-chat .chat-full > .jiyun-report-reopen{
+ position:absolute!important;z-index:21!important;right:14px;top:70px;
+ border-radius:999px;border:1px solid #b68f69;background:rgba(40,29,21,.88);
+ color:#ffe4c0;padding:8px 12px;font:inherit;font-size:12px;font-weight:650;
+}
+@media(max-width:360px){
+ body.jiyun-report-open .chat-full .messages{padding-left:15px!important;padding-right:15px!important}
+ body.jiyun-report-open .jiyun-report-paragraph{font-size:16px}
 }
 
 </style>
