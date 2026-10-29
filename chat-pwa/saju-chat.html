@@ -1787,6 +1787,17 @@ function makeSajuChatResults(profiles,key){
     root.insertBefore(offer,root.querySelector(".saju-reading-first")||starting.nextSibling);
   }
   function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
+  // A distinct invitation after the reading makes the next step obvious.
+  // Keep it separate from the AI-generated text so the presentation is consistent.
+  function appendJiyunFollowup(){
+    if(selected.id!=="jian"||jiyunIntroConsent[key]!==true||root.querySelector(".jiyun-followup"))return;
+    const followup=makeEl("div","jiyun-followup");
+    followup.setAttribute("role","note");
+    followup.append(makeEl("p","jiyun-followup-label","🌸 지윤과 상담 이어가기"));
+    followup.append(makeEl("p","jiyun-followup-question","더 궁금한 점이나 재물·사업에 관한 고민이 있으신가요?"));
+    followup.append(makeEl("p","jiyun-followup-hint","아래 채팅창에 편하게 남겨주세요. 제가 이어서 상담해 드릴게요."));
+    root.append(followup);
+  }
   function showMessages(messages,animate,technical=[]){
     if(!isCurrent())return;
     const feed=$("messages");
@@ -1797,6 +1808,7 @@ function makeSajuChatResults(profiles,key){
       if(details)root.append(details);
       root.append(actions);
       makeFirstReadingOffer();
+      appendJiyunFollowup();
     };
     const revealAll=()=>{
       if(!isCurrent())return;
@@ -1856,6 +1868,7 @@ function makeSajuChatResults(profiles,key){
     if(drawer)root.append(drawer);
     root.append(actions);
     makeFirstReadingOffer();
+    appendJiyunFollowup();
     return root;
   }
   // Ara is the warm conversation counsellor, not a technical astrologer.
@@ -1909,7 +1922,7 @@ function makeSajuChatResults(profiles,key){
           method:"POST",headers:{"Content-Type":"application/json"},
           body:JSON.stringify({
             consent:true,purpose:"firstReading",advisor:"jian",topic:topic[0],
-            question:"제 사주를 처음 보는 사람도 이해하도록 지윤의 따뜻한 말투로 구체적으로 풀어주세요. 제 사주의 성향과 재물·일에 참고할 점을 알려주고 마지막에 질문 하나만 해주세요.",
+            question:"제 사주를 처음 보는 사람도 이해하도록 지윤의 따뜻한 말투로 구체적으로 풀어주세요. 제 사주의 성향과 재물·일에 참고할 점을 알려주세요. 마지막에는 별도의 질문이나 채팅 안내를 덧붙이지 말고 풀이만 자연스럽게 마무리해주세요.",
             chart:aiChart(charts[0]),partner:null,
             flow:flow?{year:flow.year,day:flow.day}:null,history:[]
           }),cache:"no-store"
@@ -4090,6 +4103,39 @@ body.jiyun-video-chat .chat-full .messages .saju-chat-results .jiyun-reading-las
   color:#fff5e8!important;
   text-shadow:0 2px 5px rgba(0,0,0,.98)!important;
   line-height:1.62!important;
+}
+/* The finished-reading invitation uses readable ivory and a warm gold accent.
+   It appears after the optional chart/edit controls and above the input dock. */
+body.jiyun-video-chat .saju-chat-results .jiyun-followup{
+  width:100%;max-width:520px;box-sizing:border-box;
+  margin:6px 0 8px;padding:14px 16px 15px;
+  background:rgba(27,22,18,.9);
+  border:1px solid rgba(221,181,127,.76);
+  border-left:3px solid #e7ba7f;
+  border-radius:13px;
+  box-shadow:0 5px 18px rgba(0,0,0,.22);
+  color:#fff5e8;
+  animation:jiyun-followup-enter .38s ease-out both;
+}
+body.jiyun-video-chat .saju-chat-results .jiyun-followup-label{
+  margin:0 0 8px;color:#eec999;font-size:13px;font-weight:750;
+  line-height:1.35;letter-spacing:.01em;
+}
+body.jiyun-video-chat .saju-chat-results .jiyun-followup-question{
+  margin:0 0 8px;color:#fff8ed;
+  font-size:clamp(17px,4.4vw,19px);font-weight:750;line-height:1.48;
+  word-break:keep-all;text-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+body.jiyun-video-chat .saju-chat-results .jiyun-followup-hint{
+  margin:0;color:#f0ddc5;font-size:14px;font-weight:500;
+  line-height:1.5;word-break:keep-all;
+}
+@keyframes jiyun-followup-enter{
+  from{opacity:.3;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+  body.jiyun-video-chat .saju-chat-results .jiyun-followup{animation:none}
 }
 /* Only show the Jiyun typing dock after birth intake is complete.
    The narrower result composer must not override the hidden attribute. */
