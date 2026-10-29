@@ -986,7 +986,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
-    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" src="./arasaju-pingpong.mp4" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSceneVideo" src="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4" muted loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSmokeVideo" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true" tabindex="-1"></video></div>
+    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" src="./arasaju-pingpong.mp4" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSceneVideo" src="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4?v=20261029-e892d045" muted loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSmokeVideo" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true" tabindex="-1"></video></div>
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <details class="saju-ai-details" id="aiSettingsDetails">
       <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
@@ -1034,7 +1034,7 @@ const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어
 const ARA_SAJU_WELCOME_TEXT="🔮 어떤 사주가 궁금하세요?\n원하시는 상담사를 선택해 주세요.";
 // Jiyun's uploaded Vercel Blob MP4 (same silent video player as Ara).
 // A valid ?jiyunVideo= preview override remains available for testing.
-const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4";
+const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4?v=20261029-e892d045";
 const JIYUN_WELCOME_TEXT="안녕하세요, 지윤이에요.\n재물과 사업의 흐름을 차근차근 살펴볼게요.";
 const JIYUN_SMOKE_PREVIEW=new URLSearchParams(location.search).get("jiyunSlowSmoke")==="1";
 const JIYUN_VIDEO_URL=(()=>{
