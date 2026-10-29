@@ -1681,11 +1681,13 @@ function sajuTechnicalDrawer(entries){
 }
 
 /* Calculations still run locally. Only rendered chat bubbles are staged, not AI calls. */
+const JIYUN_SAJU_NOTE="사주 풀이는 전통 해석을 바탕으로 한 참고 자료입니다.";
 const sajuResultCache=Object.create(null);
 // Volatile opt-in for an individual Jiyun first reading; never stored remotely.
 const jiyunIntroConsent=Object.create(null);
 function sajuResultRow(role,message,showAdvisor=false,at=null){
   const row=makeEl("div","message "+role+" saju-chat-msg");
+  if(role==="bot"&&message===JIYUN_SAJU_NOTE)row.classList.add("jiyun-saju-note");
   if(role==="bot")appendAdvisorMark(row,showAdvisor);
   const bubble=makeEl("div","bubble",message);
   row.append(bubble);
@@ -1718,7 +1720,7 @@ function makeSajuChatResults(profiles,key){
   const sourceText=profiles.map((p,i)=>sajuBirthSummary(p,names[i])).join("\n");
   const renderedAt=Date.now();
   root.append(sajuResultRow("user","제 사주를 봐주세요.\n"+sourceText,false,renderedAt));
-  const starting=sajuResultRow("bot","출생 정보를 확인했어. 🌸 만세력으로 차근차근 살펴볼게.",true);
+  const starting=sajuResultRow("bot",selected.id==="jian"?"지윤이 사주를 살펴보고 있어요…":"출생 정보를 확인했어. 🌸 만세력으로 차근차근 살펴볼게.",true);
   root.append(starting);
   const startingBubble=starting.querySelector(".bubble");
   const actions=makeEl("div","saju-chat-actions");
@@ -1741,7 +1743,7 @@ function makeSajuChatResults(profiles,key){
       renderMessages("result");
     });
     offer.append(start);
-    root.insertBefore(offer,starting.nextSibling);
+    root.insertBefore(offer,root.querySelector(".saju-reading-first")||starting.nextSibling);
   }
   function isCurrent(){return root.isConnected&&birthProfiles[key]===profiles&&birthKey()===key;}
   function showMessages(messages,animate,technical=[]){
@@ -1791,7 +1793,8 @@ function makeSajuChatResults(profiles,key){
   }
   const cached=sajuResultCache[key];
   if(cached?.source===profiles){
-    startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
+    if(selected.id==="jian")starting.remove();
+    else startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
     cached.messages.forEach((message,i)=>{
       const row=sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null);
       if(i===0)row.classList.add("saju-reading-first");
@@ -1820,7 +1823,7 @@ function makeSajuChatResults(profiles,key){
     startingBubble.textContent="만세력 모듈을 불러오지 못했어. 새로고침하고 다시 시도해 줘.";
     root.append(actions);return root;
   }
-  startingBubble.textContent="만세력 사주팔자를 계산하고 있어…";
+  startingBubble.textContent=selected.id==="jian"?"지윤이 사주를 살펴보고 있어요…":"만세력 사주팔자를 계산하고 있어…";
   Promise.all(profiles.map(p=>engine.calculate(p))).then(async charts=>{
     if(!isCurrent())return;
     const messages=[],technical=[];
@@ -1846,7 +1849,7 @@ function makeSajuChatResults(profiles,key){
       technical.push("🤝 두 사람의 전통 궁합 비교\n"+engine.compatibility(charts[0],charts[1]));
     }
     if(selected.id==="jian"&&jiyunIntroConsent[key]===true){
-      startingBubble.textContent="지윤이 사주를 천천히 살펴보고 있어요. 🌸";
+      startingBubble.textContent="지윤이 사주를 살펴보고 있어요…";
       try{
         const flow=await engine.calculateFlows(charts[0]).catch(()=>null);
         if(!isCurrent())return;
@@ -1863,8 +1866,7 @@ function makeSajuChatResults(profiles,key){
         if(!reply.ok||typeof body.answer!=="string"||!body.answer.trim())
           throw new Error(body.error||"AI 풀이를 불러오지 못했어요.");
         if(!isCurrent())return;
-        messages.splice(0,messages.length,body.answer.trim(),
-          "📜 계산된 사주의 자세한 글자는 아래 '전문 만세력 계산표'에서 확인할 수 있어요.");
+        messages.splice(0,messages.length,body.answer.trim());
       }catch(error){
         if(!isCurrent())return;
         jiyunIntroConsent[key]=false;
@@ -1872,10 +1874,11 @@ function makeSajuChatResults(profiles,key){
         messages.unshift("AI 연결이 원활하지 않아 먼저 기본 풀이를 보여드릴게요. 아래 버튼에서 다시 요청하실 수 있어요.\n"+(error?.message||""));
       }
     }
-    messages.push("🌸 이 설명은 전통적인 상징을 풀어쓴 참고 자료예요. 미래, 돈, 건강을 단정하지 않아요.\n정확한 숫자와 용어가 궁금하다면 아래 계산표를 펼쳐보세요.");
+    messages.push(selected.id==="jian"?JIYUN_SAJU_NOTE:"🌸 이 설명은 전통적인 상징을 풀어쓴 참고 자료예요. 미래, 돈, 건강을 단정하지 않아요.\n정확한 숫자와 용어가 궁금하다면 아래 계산표를 펼쳐보세요.");
     if(!isCurrent())return;
     sajuResultCache[key]={source:profiles,messages,technical,generatedAt:Date.now()};
-    startingBubble.textContent="계산을 마쳤어요. 🌿 어려운 말 대신 쉽게 설명해 드릴게요.";
+    if(selected.id==="jian")starting.remove();
+    else startingBubble.textContent="계산을 마쳤어요. 🌿 어려운 말 대신 쉽게 설명해 드릴게요.";
     showMessages(messages,true,technical);
   }).catch(error=>{
     if(!isCurrent())return;
@@ -3887,6 +3890,14 @@ body.jiyun-video-chat .saju-jiyun-ai-offer-button{
   background:rgba(109,76,54,.84);color:#fff3df;font-size:15px;font-weight:700;
 }
 
+/* Small, unobtrusive note after Jiyun's interpretation; keep technical drawer accessible. */
+body.jiyun-video-chat .chat-full .messages .saju-chat-results .jiyun-saju-note .bubble{
+  font-size:12px!important;
+  line-height:1.5!important;
+  font-weight:400!important;
+  color:rgba(255,231,207,.8)!important;
+  text-shadow:0 1px 3px rgba(0,0,0,.7)!important;
+}
 /* Easy reading first; raw manseryeok chart available on demand. */
 .saju-chat-results .saju-technical-details{
   width:100%;min-width:0;border:1px solid rgba(186,147,112,.34);
