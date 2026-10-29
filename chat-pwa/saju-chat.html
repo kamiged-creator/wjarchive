@@ -2523,6 +2523,30 @@ function syncSajuScene(){
   araVideo.pause();
   araVideo.hidden=true;
 }
+/* Only Jiyun's conversational replies are spaced into readable paragraphs.
+   Keep the exact answer text and history intact; report and birth steps are untouched. */
+function renderJiyunChatParagraphs(bubble,text){
+  const normalized=String(text||"").trim();
+  if(normalized.length<90){bubble.textContent=text;return;}
+  const existing=normalized.split(/\n\s*\n/).map(v=>v.trim()).filter(Boolean);
+  let blocks=[];
+  for(const section of existing){
+    const sentences=section.split(/(?<=[.!?。！？])\s+(?=\S)/u).map(v=>v.trim()).filter(Boolean);
+    if(sentences.length<3){
+      if(sentences.length===2&&section.length>130)blocks.push(...sentences);
+      else blocks.push(section);
+      continue;
+    }
+    // Up to two sentences per paragraph. Avoid an orphan one-line ending.
+    for(let i=0;i<sentences.length;i+=2){
+      blocks.push(sentences.slice(i,i+2).join(" "));
+    }
+  }
+  if(blocks.length<2){bubble.textContent=text;return;}
+  bubble.classList.add("jiyun-chat-text");
+  bubble.replaceChildren();
+  blocks.forEach(block=>bubble.append(makeEl("p","jiyun-chat-paragraph",block)));
+}
 function renderMessages(scrollToEnd=true){
   syncSajuScene();
   introTypingRun++;
@@ -2582,7 +2606,12 @@ function renderMessages(scrollToEnd=true){
       row.append(bubble);
       feed.append(row);
     }else{
-      bubble.textContent=index===0&&selected.id==="ara"?(araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT):index===0&&selected.id==="jian"?JIYUN_WELCOME_TEXT:item.text;
+      const displayedText=index===0&&selected.id==="ara"?(araStartMode==="saju"?ARA_SAJU_WELCOME_TEXT:ARA_WELCOME_TEXT):index===0&&selected.id==="jian"?JIYUN_WELCOME_TEXT:item.text;
+      if(selected.id==="jian"&&index>0&&item.role==="bot"&&
+         birthProfiles[birthKey()]&&!birthEditing.has(birthKey())){
+        row.classList.add("jiyun-chat-reply");
+        renderJiyunChatParagraphs(bubble,displayedText);
+      }else bubble.textContent=displayedText;
       row.append(bubble);
       feed.append(row);
     }
@@ -4469,6 +4498,28 @@ body.jiyun-video-chat .chat-full .composer .composer-inner .send:disabled{
 }
 @media(prefers-reduced-motion:reduce){
   body.jiyun-video-chat .chat-full .composer .composer-inner{transition:none}
+}
+
+/* Jiyun replies: airy, readable Korean paragraphs over the video.
+   Only regular chat replies, not guided questions or the full-screen report. */
+body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-reply .bubble{
+  font-size:16px!important;
+  line-height:1.77!important;
+  letter-spacing:.005em;
+  word-break:keep-all!important;
+  overflow-wrap:break-word!important;
+  color:#fff5e9!important;
+  text-shadow:0 2px 7px rgba(0,0,0,.92)!important;
+}
+body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-reply .jiyun-chat-paragraph{
+  margin:0;
+  font:inherit;
+  line-height:inherit;
+  letter-spacing:inherit;
+  white-space:pre-wrap;
+}
+body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-reply .jiyun-chat-paragraph+.jiyun-chat-paragraph{
+  margin-top:13px;
 }
 
 </style>
