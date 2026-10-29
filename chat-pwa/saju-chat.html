@@ -4522,6 +4522,37 @@ body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-r
   margin-top:13px;
 }
 
+/* Jiyun opening only: seamless localized vignette for legible greetings.
+   The face and upper video remain unshaded; no visible rectangular card. */
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay{
+  isolation:isolate;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay::before{
+  content:"";
+  position:absolute;
+  inset:-24px -18px -22px -18px;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(
+    90deg,
+    rgba(13,10,9,.68) 0%,
+    rgba(13,10,9,.54) 42%,
+    rgba(13,10,9,.24) 71%,
+    rgba(13,10,9,0) 100%
+  );
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 17%,#000 83%,transparent 100%);
+  mask-image:linear-gradient(to bottom,transparent 0%,#000 17%,#000 83%,transparent 100%);
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
+  color:#fff5e8!important;
+  font-weight:530!important;
+  text-shadow:0 2px 5px rgba(0,0,0,.98),0 0 14px rgba(0,0,0,.55)!important;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-ai-note{
+  color:rgba(255,236,213,.9)!important;
+  text-shadow:0 1px 5px rgba(0,0,0,.95)!important;
+}
+
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
