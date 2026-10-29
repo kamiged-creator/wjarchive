@@ -2619,6 +2619,10 @@ function renderMessages(scrollToEnd=true){
   syncJiyunReportUi();
   requestAnimationFrame(()=>{
     if(currentRun!==introTypingRun)return;
+    if(document.body.classList.contains("jiyun-report-open")){
+      feed.scrollTop=0;
+      return;
+    }
     if(selected.id==="jian"&&conversation.length===1&&
        feed.querySelector(".saju-chat-results")&&scrollSajuReadingStart(feed)){
       // Restored Jiyun readings reopen at the first paragraph, not the last.
