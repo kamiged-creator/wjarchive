@@ -1396,10 +1396,28 @@ function makeGuidedIntake(){
    wrapper.append(svg);
    return wrapper;
  }
+ let jiyunChoicePending=false;
  function btn(label,run,secondary=false,calendarIcon=null){
    const b=makeEl("button","guided-choice"+(secondary?" secondary":"")+(calendarIcon?" birth-calendar-choice":""),label);
    if(calendarIcon)b.prepend(calendarLineIcon(calendarIcon));
-   b.type="button";b.addEventListener("click",run);controls.append(b);return b;
+   b.type="button";
+   b.addEventListener("click",()=>{
+     // Jiyun only: keep the existing brown style, show a 200ms gold-brown
+     // confirmation, then proceed. Ignore rapid repeat taps during the flash.
+     if(selected.id!=="jian"||window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){
+       run();return;
+     }
+     if(jiyunChoicePending)return;
+     jiyunChoicePending=true;
+     b.classList.add("jiyun-choice-selected");
+     setTimeout(()=>{
+       if(!b.isConnected||selected.id!=="jian"||guidedDrafts[key]!==wizard)return;
+       jiyunChoicePending=false;
+       b.classList.remove("jiyun-choice-selected");
+       run();
+     },200);
+   });
+   controls.append(b);return b;
  }
  function textInput(label,hint,value,max,mode){
    const f=makeEl("label","guided-input-group");
@@ -3736,6 +3754,21 @@ body.jiyun-video-chat .chat-full .composer{
 }
 @media(max-width:360px){
   body.jiyun-video-chat .chat-full .messages{padding-left:12px!important;padding-right:12px!important}
+}
+
+/* Jiyun: brief selected state only. Ordinary month/day/calendar buttons
+   keep their original brown shade until the visitor taps one. */
+body.jiyun-video-chat .guided-quickbar .guided-choice{
+  transition:background-color .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+body.jiyun-video-chat .guided-quickbar .guided-choice.jiyun-choice-selected{
+  background:#916A49!important;
+  border-color:#D8AE73!important;
+  color:#FFF5E5!important;
+  box-shadow:inset 0 1px 0 rgba(255,241,208,.25),0 0 0 1px rgba(216,174,115,.32)!important;
+}
+@media(prefers-reduced-motion:reduce){
+  body.jiyun-video-chat .guided-quickbar .guided-choice{transition:none!important}
 }
 
 /* Jiyun opening rhythm: the large service title stays visible from frame one.
