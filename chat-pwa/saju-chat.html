@@ -986,7 +986,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
   </main>
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
-    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" src="./arasaju-pingpong.mp4" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSceneVideo" src="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4?v=20261029-21e9a47c" muted playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunLoopVideo" muted loop playsinline webkit-playsinline preload="none" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSmokeVideo" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true" tabindex="-1"></video></div>
+    <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" src="./arasaju-pingpong.mp4" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSceneVideo" src="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun-loop.mp4?v=20261029-fa86f5af" muted loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSmokeVideo" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true" tabindex="-1"></video></div>
     <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <details class="saju-ai-details" id="aiSettingsDetails">
       <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
@@ -1032,11 +1032,9 @@ const advisors=[
 const $=id=>document.getElementById(id);
 const ARA_WELCOME_TEXT="🌸 안녕하세요. 마음상담사 아라예요.\n어떤 이야기든 천천히 들려주셔도 좋아요.";
 const ARA_SAJU_WELCOME_TEXT="🔮 어떤 사주가 궁금하세요?\n원하시는 상담사를 선택해 주세요.";
-// Jiyun's uploaded Vercel Blob MP4 (same silent video player as Ara).
+// Jiyun uses only the standalone, page-turn-free loop video.
 // A valid ?jiyunVideo= preview override remains available for testing.
-const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun.mp4?v=20261029-21e9a47c";
-// Play this standalone clip only after the page-turning introduction finishes.
-const JIYUN_LOOP_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun-loop.mp4?v=20261029-fa86f5af";
+const JIYUN_BLOB_VIDEO_URL="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun-loop.mp4?v=20261029-fa86f5af";
 const JIYUN_WELCOME_TEXT="안녕하세요, 지윤이에요.\n재물과 사업의 흐름을 차근차근 살펴볼게요.";
 const JIYUN_SMOKE_PREVIEW=new URLSearchParams(location.search).get("jiyunSlowSmoke")==="1";
 const JIYUN_VIDEO_URL=(()=>{
@@ -2276,27 +2274,18 @@ function renderAraMenu(starters){
 // Use independent video elements: keep Ara visible while Jiyun buffers.
 // Only reveal Jiyun after the browser has decoded her first painted frame.
 let jiyunFrameGeneration=0;
-let jiyunLoopGeneration=0;
-let jiyunLoopStarted=false;
-let jiyunLoopFirstFrameHold=false;
-const JIYUN_LOOP_FADE_MS=1400;
-const JIYUN_LOOP_HOLD_MS=2000;
 function resetJiyunPlayback(){
   ++jiyunFrameGeneration;
-  ++jiyunLoopGeneration;
-  jiyunLoopStarted=false;
-  jiyunLoopFirstFrameHold=false;
-  const scene=$("sajuScene"),intro=$("jiyunSceneVideo"),loop=$("jiyunLoopVideo");
-  if(scene)scene.classList.remove("jiyun-frame-ready","jiyun-loop-ready","jiyun-smoke-ready","saju-video-pending");
-  if(intro){intro.pause();intro.onended=null;try{intro.currentTime=0;}catch(_){}}
-  if(loop){loop.pause();loop.onplaying=null;loop.onloadeddata=null;try{loop.currentTime=0;}catch(_){}}
+  const scene=$("sajuScene"),video=$("jiyunSceneVideo");
+  if(scene)scene.classList.remove("jiyun-frame-ready","jiyun-smoke-ready","saju-video-pending");
+  if(video){video.pause();video.onended=null;try{video.currentTime=0;}catch(_){}}
 }
 function syncSajuScene(){
   const scene=$("sajuScene"),image=$("sajuScenePortrait");
-  const araVideo=$("sajuSceneVideo"),jiyunVideo=$("jiyunSceneVideo"),loopVideo=$("jiyunLoopVideo"),smokeVideo=$("jiyunSmokeVideo");
+  const araVideo=$("sajuSceneVideo"),jiyunVideo=$("jiyunSceneVideo"),smokeVideo=$("jiyunSmokeVideo");
   if(!scene||!image||!araVideo||!jiyunVideo)return;
   if(smokeVideo){
-    const useSmoke=JIYUN_SMOKE_PREVIEW&&!jiyunLoopStarted&&selected.id==="jian"&&Boolean(JIYUN_VIDEO_URL)&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const useSmoke=JIYUN_SMOKE_PREVIEW&&selected.id==="jian"&&Boolean(JIYUN_VIDEO_URL)&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if(useSmoke){
       if(smokeVideo.getAttribute("src")!==JIYUN_VIDEO_URL){
         smokeVideo.setAttribute("src",JIYUN_VIDEO_URL);
@@ -2337,63 +2326,8 @@ function syncSajuScene(){
   if(isJiyun){
     // Leave the already-visible Ara video underneath until Jiyun has a frame.
     araVideo.hidden=false;
-    jiyunVideo.muted=true;jiyunVideo.loop=false;jiyunVideo.playsInline=true;
+    jiyunVideo.muted=true;jiyunVideo.loop=true;jiyunVideo.playsInline=true;
     jiyunVideo.controls=false;
-    if(loopVideo){
-      loopVideo.muted=true;loopVideo.loop=true;loopVideo.playsInline=true;loopVideo.controls=false;
-      // Buffer the follow-up clip during the first eight seconds, not on initial page load.
-      if(loopVideo.getAttribute("src")!==JIYUN_LOOP_VIDEO_URL){
-        loopVideo.setAttribute("src",JIYUN_LOOP_VIDEO_URL);
-        loopVideo.load();
-      }
-      jiyunVideo.onended=()=>{
-        if(selected.id!=="jian"||jiyunLoopStarted||!loopVideo)return;
-        jiyunLoopStarted=true;
-        jiyunLoopFirstFrameHold=true;
-        const generation=++jiyunLoopGeneration;
-        let requested=false,revealed=false;
-        if(smokeVideo){smokeVideo.pause();scene.classList.remove("jiyun-smoke-ready");}
-        const revealLoopFrame=()=>{
-          if(revealed||generation!==jiyunLoopGeneration||selected.id!=="jian"||loopVideo.readyState<2)return;
-          revealed=true;requested=false;
-          loopVideo.onloadeddata=null;loopVideo.onplaying=null;
-          // Pause on the newly decoded opening frame: soften the visual jump without
-          // slowing or reversing the incense plume and book movements.
-          requestAnimationFrame(()=>{
-            if(generation!==jiyunLoopGeneration||selected.id!=="jian")return;
-            loopVideo.pause();
-            scene.classList.add("jiyun-loop-ready");
-            // The introduction holds its final frame beneath a long, subtle dissolve.
-            setTimeout(()=>{
-              if(generation===jiyunLoopGeneration&&selected.id==="jian"&&scene.classList.contains("jiyun-loop-ready"))jiyunVideo.pause();
-            },JIYUN_LOOP_FADE_MS+100);
-            // Keep the new opening still briefly, then play the rest at normal speed.
-            setTimeout(()=>{
-              if(generation!==jiyunLoopGeneration||selected.id!=="jian")return;
-              jiyunLoopFirstFrameHold=false;
-              loopVideo.play().catch(()=>{});
-            },JIYUN_LOOP_HOLD_MS);
-          });
-        };
-        const waitForLoopFrame=()=>{
-          if(requested||generation!==jiyunLoopGeneration||selected.id!=="jian"||loopVideo.paused||loopVideo.readyState<2)return;
-          requested=true;
-          if(typeof loopVideo.requestVideoFrameCallback==="function"){
-            loopVideo.requestVideoFrameCallback(revealLoopFrame);
-            setTimeout(()=>{
-              if(requested&&generation===jiyunLoopGeneration&&selected.id==="jian"&&loopVideo.readyState>=2&&!loopVideo.paused)revealLoopFrame();
-            },600);
-          }else requestAnimationFrame(()=>requestAnimationFrame(revealLoopFrame));
-        };
-        loopVideo.onloadeddata=waitForLoopFrame;
-        loopVideo.onplaying=waitForLoopFrame;
-        loopVideo.play().then(waitForLoopFrame).catch(()=>{});
-      };
-    }
-    if(jiyunLoopStarted){
-      if(loopVideo&&loopVideo.paused&&!jiyunLoopFirstFrameHold)loopVideo.play().catch(()=>{});
-      return;
-    }
     if(jiyunVideo.getAttribute("src")!==JIYUN_VIDEO_URL){
       jiyunVideo.pause();
       jiyunVideo.setAttribute("src",JIYUN_VIDEO_URL);
@@ -3475,7 +3409,7 @@ body.ara-cinematic-intro.ara-saju-menu .chat-full .messages .message.bot .bubble
 /* Jiyun video scene: reuse Ara's muted vertical-video player while retaining
    the existing solar/lunar birth interview, calculation, and chat controls. */
 body.jiyun-video-chat .chat-full .saju-scene{inset:0 0 62px!important;opacity:1!important;background:#2c2825!important}
-body.jiyun-video-chat .chat-full .saju-scene #jiyunSceneVideo,body.jiyun-video-chat .chat-full .saju-scene #jiyunLoopVideo{object-fit:cover!important;object-position:center 24%!important;filter:saturate(.96)}
+body.jiyun-video-chat .chat-full .saju-scene #jiyunSceneVideo{object-fit:cover!important;object-position:center 24%!important;filter:saturate(.96)}
 /* Preserve Ara's current crop under the crossfade until Jiyun has a frame. */
 body.jiyun-video-chat .chat-full .saju-scene #sajuSceneVideo{top:-58px!important;height:calc(100% + 58px)!important;object-fit:cover!important;object-position:center top!important}
 body.jiyun-video-chat .chat-full .saju-scene::after{background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,.02) 40%,rgba(23,21,19,.64) 77%,#171513 100%)}
@@ -3490,17 +3424,6 @@ body.jiyun-video-chat .chat-full .saju-scene img{display:none!important}
   transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
 }
 body.jiyun-video-chat .chat-full .saju-scene.jiyun-frame-ready #jiyunSceneVideo{opacity:1}
-/* No sideways slide: dissolve over the held first frame of the looping clip.
-   The page-turn introduction remains completely still until the new opening frame
-   has decoded; the slower blend conceals small Flow frame-to-frame differences. */
-.saju-scene #jiyunLoopVideo{
-  z-index:2;opacity:0;pointer-events:none!important;
-  transform:none!important;transition:opacity 1400ms ease-in-out;
-}
-body.jiyun-video-chat .chat-full .saju-scene.jiyun-loop-ready #jiyunLoopVideo{opacity:1}
-body.jiyun-video-chat .chat-full .saju-scene #jiyunSceneVideo{
-  transform:none!important;transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
-}
 /* Opt-in preview: overlay only the incense plume from the same MP4 at 55% speed.
    The woman, book, hands and surrounding room remain at original speed.
    Existing Blob file is untouched. Soft edges avoid a rectangular patch. */
@@ -3547,7 +3470,7 @@ body.jiyun-handoff-entering.jiyun-video-chat .chat-full > .ara-music-toggle{
   body.jiyun-handoff-entering.jiyun-video-chat .chat-full .guided-quickbar:not([hidden]){animation:none!important}
 }
 
-@media(prefers-reduced-motion:reduce){.saju-scene #jiyunSceneVideo,.saju-scene #jiyunLoopVideo{transition:none}}
+@media(prefers-reduced-motion:reduce){.saju-scene #jiyunSceneVideo{transition:none}}
 /* Jiyun: anchor the initial transcript low over the sleeves/desk, leaving
    her face and the top controls unobstructed. Keep the birth-answer dock fixed. */
 body.jiyun-video-chat .chat-full .messages{
