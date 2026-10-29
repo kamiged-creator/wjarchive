@@ -1570,17 +1570,7 @@ function makeGuidedIntake(){
    }
    const jiyunReview=selected.id==="jian";
    let useJiyunAi=jiyunReview;
-   if(jiyunReview){
-     // Keep the essential third-party transfer notice in view, but collapse
-     // supporting details so the affirmative consent button remains visible.
-     const disclosure=makeEl("details","guided-jiyun-ai-disclosure");
-     disclosure.append(makeEl("summary","guided-jiyun-ai-summary",
-       "AI 풀이 시 사주 정보·질문·최근 대화가 OpenAI에 전송됩니다. 자세히 보기"));
-     disclosure.append(makeEl("p","guided-jiyun-ai-more",
-       "계산된 사주 글자와 오행 정보를 전송합니다. 생년월일·출생시간 입력값 자체는 보내지 않지만 질문에 직접 쓴 개인정보는 전송될 수 있어요. 동의하지 않아도 AI 없이 기본 만세력 풀이를 볼 수 있습니다."));
-     controls.append(disclosure);
-   }
-   const confirm=btn(jiyunReview?"🌸 동의하고 지윤 AI 풀이 듣기 →":"✓ 이대로 사주 보기 →",async()=>{
+   const submitReview=async()=>{
      if(wizard.busy)return;
      wizard.error="";wizard.busy=true;confirm.disabled=true;confirm.textContent="만세력 확인 중…";
      try{
@@ -1600,15 +1590,25 @@ function makeGuidedIntake(){
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
        renderMessages("result");
      }catch(err){if(card.isConnected)warn(err?.message||"입력한 날짜를 확인해 주세요.");}
-     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent=jiyunReview?"🌸 동의하고 지윤 AI 풀이 듣기 →":"✓ 이대로 사주 보기 →";}}
-   });
+     finally{wizard.busy=false;if(card.isConnected){confirm.disabled=false;confirm.textContent=jiyunReview?"🌸 동의하고 지윤 상담 시작하기":"✓ 이대로 사주 보기 →";}}
+   };
+   const confirm=btn(jiyunReview?"🌸 동의하고 지윤 상담 시작하기":"✓ 이대로 사주 보기 →",submitReview);
    confirm.classList.add("guided-review-confirm");
    if(jiyunReview){
-     const basic=btn("AI 없이 기본 만세력만 보기",()=>{
+     const basic=btn("AI 전송 없이 기본 사주 보기",()=>{
        useJiyunAi=false;
-       confirm.click();
+       // Invoke the basic calculation directly. Do not flash the AI consent
+       // button or imply that the visitor opted into external transmission.
+       submitReview();
      },true);
      basic.classList.add("guided-basic-confirm");
+     controls.append(makeEl("p","guided-jiyun-ai-brief",
+       "AI 상담 시 계산된 사주 정보·질문·최근 대화가 OpenAI에 전송됩니다."));
+     const disclosure=makeEl("details","guided-jiyun-ai-disclosure");
+     disclosure.append(makeEl("summary","guided-jiyun-ai-summary","정보 전송 자세히 보기"));
+     disclosure.append(makeEl("p","guided-jiyun-ai-more",
+       "계산된 사주 글자와 오행 정보가 OpenAI에 전송됩니다. 생년월일·출생시간 입력값 자체는 보내지 않지만 질문에 직접 적은 개인정보는 전송될 수 있습니다. AI 전송 없이 기본 사주 보기를 선택하면 OpenAI에 전송하지 않습니다."));
+     controls.append(disclosure);
    }
    break;
  }
@@ -3966,14 +3966,12 @@ body.jiyun-video-chat .chat-full .jiyun-consent-actions button:focus-visible{
   }
 }
 
-/* Jiyun review: bring the primary consent action above the fold.
-   Preserve the essential transfer notice while collapsing extra detail. */
+/* Jiyun final review: one clear primary action, one quiet basic-reading
+   text link, and factual privacy disclosure in a compact footer. */
 body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm){
   padding-top:7px!important;padding-bottom:7px!important;
 }
-body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-controls{
-  gap:6px!important;
-}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-controls{gap:4px!important}
 body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-card{
   gap:2px;padding:9px 12px;
 }
@@ -3984,32 +3982,53 @@ body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-revie
   font-size:13px;line-height:1.4;
 }
 body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-edit{
-  min-height:30px;margin:0 0 4px;padding:3px 9px;font-size:12px;
+  min-height:30px;margin:0 0 3px;padding:3px 9px;font-size:12px;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-confirm{
+  min-height:46px;font-size:16px;line-height:1.35;
+  border-color:#c4a17c!important;background:rgba(107,77,55,.88)!important;
+  color:#fff0dc!important;font-weight:700!important;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-confirm.jiyun-choice-selected{
+  background:#916A49!important;border-color:#D8AE73!important;
+}
+body.jiyun-video-chat .guided-quickbar .guided-basic-confirm{
+  grid-column:1/-1;justify-self:center;display:inline-flex;
+  justify-content:center;align-items:center;
+  width:max-content;max-width:100%;min-height:34px;
+  padding:5px 10px;margin:0;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  color:#e5cdb1!important;font-size:13px!important;font-weight:500!important;
+  text-decoration:underline;text-underline-offset:3px;
+}
+body.jiyun-video-chat .guided-quickbar .guided-basic-confirm.jiyun-choice-selected{
+  background:transparent!important;border:0!important;
+  color:#ffe2a8!important;text-decoration-color:#ffe2a8;
+}
+body.jiyun-video-chat .guided-jiyun-ai-brief{
+  grid-column:1/-1;margin:1px 5px 0;
+  color:#cdb8a4;text-align:center;
+  font-size:11px;line-height:1.4;word-break:keep-all;
 }
 body.jiyun-video-chat .guided-jiyun-ai-disclosure{
-  grid-column:1/-1;min-width:0;margin:0 2px;padding:7px 10px;
-  color:#f0dac3;font-size:12px;line-height:1.45;word-break:keep-all;
-  background:rgba(34,26,20,.72);border:1px solid rgba(224,189,145,.25);border-radius:9px;
+  grid-column:1/-1;min-width:0;margin:0 4px 2px;
+  padding:0;background:transparent;border:0;
+  color:#c9b19a;text-align:center;font-size:11px;
 }
 body.jiyun-video-chat .guided-jiyun-ai-summary{
-  display:list-item;cursor:pointer;font-size:12px;line-height:1.45;
-  color:#f0dac3;
+  display:inline-block;cursor:pointer;list-style:none;
+  font-size:11px;line-height:1.5;padding:1px 6px;
+  text-decoration:underline;text-underline-offset:3px;
 }
+body.jiyun-video-chat .guided-jiyun-ai-summary::-webkit-details-marker{display:none}
 body.jiyun-video-chat .guided-jiyun-ai-summary:focus-visible{
   outline:2px solid #dfb986;outline-offset:2px;
 }
 body.jiyun-video-chat .guided-jiyun-ai-more{
-  margin:7px 0 1px;padding-top:6px;
-  border-top:1px solid rgba(224,189,145,.18);
-  font-size:12px;line-height:1.5;color:#e6cfb6;
-}
-body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-confirm{
-  min-height:44px;font-size:15px;
-}
-body.jiyun-video-chat .guided-basic-confirm{
-  grid-column:1/-1;width:100%;min-height:40px;
-  background:rgba(33,26,22,.65)!important;border:1px solid rgba(217,185,146,.37)!important;
-  font-size:14px!important;font-weight:550!important;
+  margin:6px 0 4px;padding:8px 10px;text-align:left;
+  border:1px solid rgba(224,189,145,.2);
+  border-radius:9px;background:rgba(34,26,20,.72);
+  font-size:11px;line-height:1.5;color:#e6cfb6;
 }
 body.jiyun-video-chat .saju-jiyun-ai-offer{
   display:flex;flex-direction:column;gap:8px;padding:10px 12px;
