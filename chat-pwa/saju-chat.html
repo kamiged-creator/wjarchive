@@ -1413,7 +1413,7 @@ function makeGuidedIntake(){
  switch(wizard.step){
  case "calendar":
    controls.classList.add("birth-calendar-choices");
-   ask(titlePerson+" 생일은 양력이세요, 음력이세요?","아래에서 선택하면 다음 질문으로 넘어가요.");
+   ask((titlePerson==="상대방"?"상대방 ":"")+"생년월일은 양력인가요, 음력인가요?","아래에서 선택하면 다음 질문으로 넘어가요.");
    btn("양력",()=>submitAnswer("calendar","solar","양력","year"),false,"sun");
    btn("음력",()=>submitAnswer("calendar","lunar","음력","year"),false,"moon");
    btn("잘 모르겠어요",()=>warn("정확한 만세력 계산을 위해 양력인지 음력인지 먼저 확인해 주세요."),true);
