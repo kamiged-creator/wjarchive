@@ -1015,7 +1015,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
     <div class="jiyun-welcome-overlay" id="jiyunWelcomeOverlay" hidden aria-live="polite"></div>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
-    <form class="composer" id="composer" autocomplete="off"><div class="jiyun-ai-consent-row" id="jiyunAiRow" hidden><label class="jiyun-ai-consent-label"><input type="checkbox" id="jiyunAiConsent"><span>지윤 AI 상담 동의 · 질문·최근 대화·계산된 사주를 OpenAI에 전송</span></label><small id="jiyunAiNotice" role="status" hidden>AI 상담을 이용하려면 먼저 전송에 동의해 주세요.</small></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
+    <form class="composer" id="composer" autocomplete="off"><div class="jiyun-consent-gate" id="jiyunConsentGate" hidden role="group" aria-label="지윤 AI 정보 전송 동의"><p>AI 상담을 선택하면 질문·최근 대화·계산된 사주 정보가 OpenAI에 전송됩니다. 동의하지 않으면 전송되지 않아요.</p><div class="jiyun-consent-actions"><button type="button" id="jiyunConsentApprove">동의하고 전송</button><button type="button" id="jiyunConsentCancel">취소</button></div></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div><details class="jiyun-privacy-details" id="jiyunPrivacyDetails" hidden><summary>개인정보 처리 안내</summary><p>AI 상담 동의 시 계산된 사주 글자와 오행, 질문, 최근 대화가 OpenAI에 전송됩니다. 생년월일·출생시간 입력값 자체는 보내지 않지만, 질문에 직접 적은 개인정보는 전송될 수 있습니다. 동의하지 않아도 기본 만세력 풀이를 이용할 수 있습니다.</p></details></form>
     <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
@@ -1542,7 +1542,7 @@ function makeGuidedIntake(){
    let useJiyunAi=jiyunReview;
    if(jiyunReview){
      controls.append(makeEl("p","guided-jiyun-ai-disclosure",
-       "AI 풀이를 선택하면 계산된 사주 글자와 오행 정보가 OpenAI로 전송돼요. 입력하신 생년월일·태어난 시간 원본은 보내지 않아요. 전통적인 참고 풀이로 미래를 보장하지 않아요."));
+       "동의하고 AI 풀이를 선택하면 계산된 사주 글자와 오행이 OpenAI에 전송됩니다. 이후 상담 질문과 최근 대화도 전송될 수 있습니다. 생년월일·출생시간 입력값 자체는 보내지 않지만 질문에 직접 쓴 개인정보는 전송될 수 있습니다. 동의하지 않아도 기본 만세력 풀이를 볼 수 있습니다."));
    }
    const confirm=btn(jiyunReview?"🌸 동의하고 지윤 AI 풀이 듣기 →":"✓ 이대로 사주 보기 →",async()=>{
      if(wizard.busy)return;
@@ -1556,8 +1556,9 @@ function makeGuidedIntake(){
        if(guidedDrafts[key]!==wizard||birthKey()!==key||!card.isConnected)return;
        delete sajuResultCache[key];
        if(jiyunReview){
+         // AI-reading choice authorizes follow-up questions for this session;
+         // choosing the basic reading does not opt in.
          jiyunIntroConsent[key]=useJiyunAi;
-         jiyunAiConsent.checked=useJiyunAi;
        }
        birthProfiles[key]=profiles;
        birthEditing.delete(key);guidedManualMode.delete(key);delete guidedDrafts[key];
@@ -1738,7 +1739,6 @@ function makeSajuChatResults(profiles,key){
     start.addEventListener("click",()=>{
       if(!root.isConnected||birthProfiles[key]!==profiles||birthKey()!==key)return;
       jiyunIntroConsent[key]=true;
-      jiyunAiConsent.checked=true;
       delete sajuResultCache[key];
       renderMessages("result");
     });
@@ -1869,9 +1869,8 @@ function makeSajuChatResults(profiles,key){
         messages.splice(0,messages.length,body.answer.trim());
       }catch(error){
         if(!isCurrent())return;
-        jiyunIntroConsent[key]=false;
-        jiyunAiConsent.checked=false;
-        messages.unshift("AI 연결이 원활하지 않아 먼저 기본 풀이를 보여드릴게요. 아래 버튼에서 다시 요청하실 수 있어요.\n"+(error?.message||""));
+        // Transient AI errors do not invalidate prior consent.
+        messages.unshift("AI 연결이 원활하지 않아 먼저 기본 풀이를 보여드릴게요. 아래 입력창에서 다시 질문할 수 있어요.\n"+(error?.message||""));
       }
     }
     messages.push(selected.id==="jian"?JIYUN_SAJU_NOTE:"🌸 이 설명은 전통적인 상징을 풀어쓴 참고 자료예요. 미래, 돈, 건강을 단정하지 않아요.\n정확한 숫자와 용어가 궁금하다면 아래 계산표를 펼쳐보세요.");
@@ -2519,15 +2518,28 @@ function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",loc
 const AI_ENDPOINT="/api/saju-ai";
 let aiReady=false,aiTrial=false,aiAraDirect=false,aiJiyunDirect=false;
 const aiConsent=$("aiConsent"),aiPin=$("aiPin"),aiStatus=$("aiStatus");
-const jiyunAiConsent=$("jiyunAiConsent"),jiyunAiRow=$("jiyunAiRow"),jiyunAiNotice=$("jiyunAiNotice");
-jiyunAiConsent.addEventListener("change",()=>{if(jiyunAiConsent.checked)jiyunAiNotice.hidden=true;});
+const jiyunConsentGate=$("jiyunConsentGate"),jiyunConsentApprove=$("jiyunConsentApprove");
+const jiyunConsentCancel=$("jiyunConsentCancel"),jiyunPrivacyDetails=$("jiyunPrivacyDetails");
+jiyunConsentApprove.addEventListener("click",()=>{
+  if(selected.id!=="jian"||!birthProfiles[birthKey()])return;
+  jiyunIntroConsent[birthKey()]=true;
+  jiyunConsentGate.hidden=true;
+  // Only an explicit affirmative action permits this AI transmission.
+  send();
+});
+jiyunConsentCancel.addEventListener("click",()=>{jiyunConsentGate.hidden=true;});
 // Direct Ara AI chat uses no PIN. Other advisers' testing controls remain unchanged.
 function syncAraAiUi(){
   const ara=selected.id==="ara";
   const jiyun=selected.id==="jian"&&aiJiyunDirect;
   $("aiSettingsDetails").hidden=ara||jiyun;
-  jiyunAiRow.hidden=!(jiyun&&Boolean(birthProfiles[birthKey()]));
-  if(jiyunAiRow.hidden)jiyunAiNotice.hidden=true;
+  const jiyunHasBirth=selected.id==="jian"&&Boolean(birthProfiles[birthKey()]);
+  jiyunPrivacyDetails.hidden=!jiyunHasBirth;
+  if(!jiyunHasBirth){
+    jiyunPrivacyDetails.open=false;
+    jiyunConsentGate.hidden=true;
+  }
+  if(jiyunIntroConsent[birthKey()]===true)jiyunConsentGate.hidden=true;
   const chatInput=$("question");
   chatInput.placeholder=ara&&aiAraDirect?"아라 AI 상담 · 메시지 입력":jiyun?"지윤 AI에게 재물·사업 질문":"메시지 입력";
   chatInput.setAttribute("aria-label",ara&&aiAraDirect
@@ -2613,6 +2625,8 @@ async function response(question,previous){
   try{flow=await engine.calculateFlows(chart);}catch(_){}
   const directJiyun=selected.id==="jian"&&aiJiyunDirect;
   if(directJiyun || (aiReady && aiConsent.checked)){
+    if(selected.id==="jian"&&jiyunIntroConsent[birthKey()]!==true)
+      return "AI 상담을 이용하려면 정보 전송에 먼저 동의해 주세요.";
     const pin=directJiyun?"":aiPin.value;
     if(!directJiyun&&pin.length<8)throw new Error("AI 시험 비밀번호를 입력해 줘.");
     const history=previous.filter(x=>x&&["user","bot"].includes(x.role))
@@ -2654,9 +2668,10 @@ function showReplyTyping(){
 async function send(){
   if(sentBusy)return;
   const input=$("question"),content=input.value.trim();if(!content)return;
-  if(selected.id==="jian"&&aiJiyunDirect&&!jiyunAiConsent.checked){
-    jiyunAiNotice.hidden=false;
-    jiyunAiConsent.focus();
+  if(selected.id==="jian"&&(aiJiyunDirect||(aiReady&&aiConsent.checked))&&
+     jiyunIntroConsent[birthKey()]!==true){
+    jiyunConsentGate.hidden=false;
+    jiyunConsentApprove.focus();
     return;
   }
   const oldKey=storageKey(),previous=conversation.slice(-4);
@@ -3799,32 +3814,41 @@ body.jiyun-video-chat .chat-full .saju-chat-results{
 }
 
 
-/* Jiyun's preview-only AI opt-in stays inside the existing bottom input dock.
-   No birth date or birth time is transmitted; only computed pillars/elements. */
-body.jiyun-video-chat .chat-full .composer:has(.jiyun-ai-consent-row:not([hidden])){
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  justify-content:flex-end!important;
-  gap:4px!important;
-  padding-top:6px!important;
+/* Jiyun: one-time opt-in at the birth-review action. Use a compact
+   optional disclosure instead of repeating a checkbox in the chat dock. */
+.jiyun-consent-gate[hidden],.jiyun-privacy-details[hidden]{display:none!important}
+body.jiyun-video-chat .chat-full .composer:has(.jiyun-consent-gate:not([hidden])){
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;
 }
-.jiyun-ai-consent-row[hidden],.jiyun-ai-consent-row small[hidden]{display:none!important}
-body.jiyun-video-chat .chat-full .jiyun-ai-consent-row{
-  display:flex;flex-direction:column;gap:3px;
-  width:min(calc(100% - 44px),450px);margin:0 auto;
-  color:#eed6b8;font-size:12px;line-height:1.35;
+body.jiyun-video-chat .chat-full .jiyun-consent-gate{
+  width:min(calc(100% - 44px),450px);margin:0 auto 5px;padding:10px 12px;
+  background:rgba(36,29,24,.96);border:1px solid rgba(222,179,132,.56);
+  border-radius:12px;color:#f4e2cf;font-size:12px;line-height:1.6;
 }
-body.jiyun-video-chat .chat-full .jiyun-ai-consent-label{
-  display:flex;gap:7px;align-items:center;
-  min-height:26px;cursor:pointer;word-break:keep-all;
+body.jiyun-video-chat .chat-full .jiyun-consent-gate p{margin:0 0 8px}
+body.jiyun-video-chat .chat-full .jiyun-consent-actions{display:flex;justify-content:flex-end;gap:8px}
+body.jiyun-video-chat .chat-full .jiyun-consent-actions button{
+  min-height:35px;padding:6px 12px;border:1px solid #ac886b;
+  border-radius:9px;background:rgba(126,88,58,.82);color:#fff1e0;font:inherit;font-weight:650;
 }
-body.jiyun-video-chat .chat-full .jiyun-ai-consent-label input{
-  width:17px;height:17px;min-width:17px;
-  accent-color:#c19b75;
+body.jiyun-video-chat .chat-full #jiyunConsentCancel{background:transparent}
+body.jiyun-video-chat .chat-full .jiyun-privacy-details{
+  width:min(calc(100% - 44px),450px);margin:5px auto 0;
+  color:#d7b99b;font-size:11px;line-height:1.45;text-align:right;
 }
-body.jiyun-video-chat .chat-full #jiyunAiNotice{
-  padding-left:24px;color:#ffd2b8;font-size:12px;
+body.jiyun-video-chat .chat-full .jiyun-privacy-details summary{
+  display:inline-block;list-style:none;cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;padding:3px 0 2px;
+}
+body.jiyun-video-chat .chat-full .jiyun-privacy-details summary::-webkit-details-marker{display:none}
+body.jiyun-video-chat .chat-full .jiyun-privacy-details p{
+  margin:6px 0 4px;padding:9px 11px;text-align:left;
+  color:#f0dac7;background:rgba(29,23,20,.94);
+  border:1px solid rgba(219,184,149,.4);border-radius:10px;font-size:11px;
+}
+body.jiyun-video-chat .chat-full .jiyun-privacy-details summary:focus-visible,
+body.jiyun-video-chat .chat-full .jiyun-consent-actions button:focus-visible{
+  outline:2px solid #e5b889;outline-offset:2px;
 }
 
 /* Jiyun mobile keyboard: reclaim the upper empty portrait space for recent
@@ -3852,11 +3876,6 @@ body.jiyun-video-chat .chat-full #jiyunAiNotice{
     min-height:0!important;
     padding-top:4px!important;
     padding-bottom:4px!important;
-  }
-  body.jiyun-video-chat.ara-keyboard-open .chat-full .jiyun-ai-consent-row{
-    gap:2px!important;
-    font-size:11px!important;
-    line-height:1.35!important;
   }
 }
 @media(max-width:599px) and (max-height:420px) and (pointer:coarse){
