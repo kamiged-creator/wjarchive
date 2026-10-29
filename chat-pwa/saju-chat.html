@@ -1793,6 +1793,7 @@ function sajuResultRow(role,message,showAdvisor=false,at=null){
 // Keep Jiyun's initial interpretation at a readable fixed starting point.
 // Only a user's finger scrolls the result from there; never chase new text.
 function scrollSajuReadingStart(feed){
+  if(document.body.classList.contains("jiyun-report-open"))return false;
   if(!feed||!document.body.classList.contains("jiyun-video-chat"))return false;
   const first=feed.querySelector(".saju-chat-results .saju-jiyun-ai-offer")||
     feed.querySelector(".saju-chat-results .saju-reading-first");
@@ -1886,6 +1887,7 @@ function makeSajuChatResults(profiles,key){
     // The opening paragraph stays at the top until the visitor swipes to read more.
     if(selected.id==="jian"){
       revealAll();
+      syncJiyunReportUi();
       // Jiyun's typing field appears after the first reading is actually rendered,
       // not merely because birth details were saved while AI was loading.
       const composer=$("composer"),question=$("question"),sendButton=$("send");
