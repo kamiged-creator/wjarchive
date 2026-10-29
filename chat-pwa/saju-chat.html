@@ -1571,8 +1571,14 @@ function makeGuidedIntake(){
    const jiyunReview=selected.id==="jian";
    let useJiyunAi=jiyunReview;
    if(jiyunReview){
-     controls.append(makeEl("p","guided-jiyun-ai-disclosure",
-       "동의하고 AI 풀이를 선택하면 계산된 사주 글자와 오행이 OpenAI에 전송됩니다. 이후 상담 질문과 최근 대화도 전송될 수 있습니다. 생년월일·출생시간 입력값 자체는 보내지 않지만 질문에 직접 쓴 개인정보는 전송될 수 있습니다. 동의하지 않아도 기본 만세력 풀이를 볼 수 있습니다."));
+     // Keep the essential third-party transfer notice in view, but collapse
+     // supporting details so the affirmative consent button remains visible.
+     const disclosure=makeEl("details","guided-jiyun-ai-disclosure");
+     disclosure.append(makeEl("summary","guided-jiyun-ai-summary",
+       "AI 풀이 시 사주 정보·질문·최근 대화가 OpenAI에 전송됩니다. 자세히 보기"));
+     disclosure.append(makeEl("p","guided-jiyun-ai-more",
+       "계산된 사주 글자와 오행 정보를 전송합니다. 생년월일·출생시간 입력값 자체는 보내지 않지만 질문에 직접 쓴 개인정보는 전송될 수 있어요. 동의하지 않아도 AI 없이 기본 만세력 풀이를 볼 수 있습니다."));
+     controls.append(disclosure);
    }
    const confirm=btn(jiyunReview?"🌸 동의하고 지윤 AI 풀이 듣기 →":"✓ 이대로 사주 보기 →",async()=>{
      if(wizard.busy)return;
@@ -3960,11 +3966,45 @@ body.jiyun-video-chat .chat-full .jiyun-consent-actions button:focus-visible{
   }
 }
 
-/* Jiyun opt-in at final birth review and at existing basic results. */
+/* Jiyun review: bring the primary consent action above the fold.
+   Preserve the essential transfer notice while collapsing extra detail. */
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm){
+  padding-top:7px!important;padding-bottom:7px!important;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-controls{
+  gap:6px!important;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-card{
+  gap:2px;padding:9px 12px;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-primary{
+  font-size:15px;line-height:1.35;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-detail{
+  font-size:13px;line-height:1.4;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-edit{
+  min-height:30px;margin:0 0 4px;padding:3px 9px;font-size:12px;
+}
 body.jiyun-video-chat .guided-jiyun-ai-disclosure{
-  grid-column:1/-1;margin:3px 5px;padding:9px 11px;
-  color:#f0dac3;font-size:12px;line-height:1.5;word-break:keep-all;
-  background:rgba(34,26,20,.72);border:1px solid rgba(224,189,145,.25);border-radius:10px;
+  grid-column:1/-1;min-width:0;margin:0 2px;padding:7px 10px;
+  color:#f0dac3;font-size:12px;line-height:1.45;word-break:keep-all;
+  background:rgba(34,26,20,.72);border:1px solid rgba(224,189,145,.25);border-radius:9px;
+}
+body.jiyun-video-chat .guided-jiyun-ai-summary{
+  display:list-item;cursor:pointer;font-size:12px;line-height:1.45;
+  color:#f0dac3;
+}
+body.jiyun-video-chat .guided-jiyun-ai-summary:focus-visible{
+  outline:2px solid #dfb986;outline-offset:2px;
+}
+body.jiyun-video-chat .guided-jiyun-ai-more{
+  margin:7px 0 1px;padding-top:6px;
+  border-top:1px solid rgba(224,189,145,.18);
+  font-size:12px;line-height:1.5;color:#e6cfb6;
+}
+body.jiyun-video-chat .guided-quickbar:has(.guided-review-confirm) .guided-review-confirm{
+  min-height:44px;font-size:15px;
 }
 body.jiyun-video-chat .guided-basic-confirm{
   grid-column:1/-1;width:100%;min-height:40px;
