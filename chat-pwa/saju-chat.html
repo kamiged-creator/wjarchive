@@ -4447,6 +4447,30 @@ body.jiyun-video-chat .jiyun-chat-invitation-text{
   word-break:keep-all;overflow-wrap:break-word;
 }
 
+/* Jiyun chat: quiet 1px border instead of the prominent gold outline.
+   Keep the established pill dimensions, input field and submit behavior. */
+body.jiyun-video-chat .chat-full .composer .composer-inner{
+  border:1px solid rgba(195,160,120,.38)!important;
+  background:rgba(39,31,26,.82)!important;
+  box-shadow:none!important;
+  transition:border-color .18s ease,background-color .18s ease;
+}
+body.jiyun-video-chat .chat-full .composer .composer-inner:focus-within{
+  border-color:rgba(219,186,144,.68)!important;
+  box-shadow:none!important;
+}
+body.jiyun-video-chat .chat-full .composer .composer-inner .send{
+  border:0!important;
+  background:rgba(129,94,68,.89)!important;
+  box-shadow:none!important;
+}
+body.jiyun-video-chat .chat-full .composer .composer-inner .send:disabled{
+  background:rgba(92,75,63,.86)!important;
+}
+@media(prefers-reduced-motion:reduce){
+  body.jiyun-video-chat .chat-full .composer .composer-inner{transition:none}
+}
+
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
