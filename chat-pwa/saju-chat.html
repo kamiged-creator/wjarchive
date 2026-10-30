@@ -4572,6 +4572,28 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-ai-note{
   text-shadow:0 1px 5px rgba(0,0,0,.95)!important;
 }
 
+/* A subtle, feathered 28% shadow behind Jiyun's TWO greeting lines only.
+   Preserve the title, subtitle, face, film and welcome typography. */
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
+  position:relative;
+  isolation:isolate;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before{
+  content:"";
+  position:absolute;
+  inset:-12px -22px -14px -14px;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(
+    ellipse 66% 70% at 45% 49%,
+    rgba(6,5,4,.28) 0%,
+    rgba(6,5,4,.22) 42%,
+    rgba(6,5,4,.08) 74%,
+    transparent 100%
+  );
+  filter:blur(9px);
+}
+
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
