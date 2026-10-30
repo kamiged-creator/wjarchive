@@ -2359,6 +2359,13 @@ function switchAraStartMode(mode,starters){
       greetingBubble.setAttribute("aria-label",greetingText);
     }
     renderAraMenu(starters);
+    // No text-entry dock on the two advisor-choice screens.
+    // Heart-story mode restores it without changing the chat history.
+    const hideComposer=araMenuEnabled&&conversation.length===1&&mode!=="heart";
+    document.body.classList.toggle("ara-chooser-no-input",hideComposer);
+    $("composer").hidden=hideComposer;
+    $("question").disabled=hideComposer;
+    $("send").disabled=hideComposer;
     syncSajuScene();
   };
   const reduced=window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -2729,9 +2736,11 @@ function renderMessages(scrollToEnd=true){
   syncSimliControls();
   const hasBirth=Boolean(birthProfiles[birthKey()]);
   const hasJiyunReading=Boolean(sajuResultCache[birthKey()]?.messages?.length);
-  const ready=selected.id==="ara"||(hasBirth&&(selected.id!=="jian"||hasJiyunReading));
-  // Jiyun's typing dock waits for the first finished reading, not just birth intake.
-  // Ara keeps free chat; the other three advisors start chat after birth intake.
+  const araChooserOnly=selected.id==="ara"&&araMenuEnabled&&conversation.length===1&&araStartMode!=="heart";
+  document.body.classList.toggle("ara-chooser-no-input",araChooserOnly);
+  const ready=(selected.id==="ara"&&!araChooserOnly)||(hasBirth&&(selected.id!=="jian"||hasJiyunReading));
+  // Hide the Ara input until a heart-story conversation actually begins.
+  // Preserve the separate birth-intake gate for specialist counselors.
   $("composer").hidden=!ready;
   $("question").disabled=!ready;
   $("send").disabled=!ready;
@@ -2774,7 +2783,7 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(scrollMode){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages(scrollMode==="jiyun-entry"?"intro":true);save();}
-function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+function syncChatView(){if(location.hash!=="#chat")stopAraMusic();const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","ara-chooser-no-input","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -4679,6 +4688,24 @@ body.ara-portrait-chat .chat-full .saju-scene #araCounselingVideo{
   object-fit:cover!important;
   object-position:center 42%!important;
   filter:saturate(.96);
+}
+
+/* Ara first-stage chooser: clean cinematic screen with no input dock.
+   Keep the old standing video and lower controls; fill the freed bottom area. */
+body.ara-cinematic-intro.ara-chooser-no-input .chat-full .saju-scene{
+  inset:0!important;
+}
+body.ara-chooser-no-input .chat-full .composer{display:none!important}
+
+/* Conversational mode only: an almost full-width pill with 20px mobile gutters.
+   Preserve the existing colors, rounded edges, send control, and keyboard behavior. */
+body.ara-cinematic-intro:not(.ara-chooser-no-input) .chat-full .composer:not([hidden]) .composer-inner,
+body.ara-portrait-chat .chat-full .composer:not([hidden]) .composer-inner,
+body.jiyun-video-chat .chat-full .composer:not([hidden]) .composer-inner{
+  width:min(calc(100% - 16px),560px)!important;
+  max-width:100%!important;
+  box-sizing:border-box;
+  margin-inline:auto!important;
 }
 
 </style>
