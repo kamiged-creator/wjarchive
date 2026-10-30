@@ -2017,9 +2017,14 @@ function makeSajuChatResults(profiles,key){
 function makeJiyunChatInvitation(){
   const row=makeEl("div","message bot jiyun-chat-invitation");
   const bubble=makeEl("div","bubble");
+  const invitationText=makeEl("span","jiyun-chat-invitation-text");
+  invitationText.append(
+    makeEl("span","jiyun-chat-invitation-lead","사주 풀이를 잘 살펴보셨나요?"),
+    makeEl("span","jiyun-chat-invitation-detail","재물·사업에 관해 더 궁금한 점이 있다면 아래 채팅창에 편하게 질문해 주세요.")
+  );
   bubble.append(
     makeEl("strong","jiyun-chat-invitation-title","🌸 지윤과 채팅 상담"),
-    makeEl("span","jiyun-chat-invitation-text","사주 풀이를 잘 살펴보셨나요?\n재물·사업에 관해 더 궁금한 점이 있다면 아래 채팅창에 편하게 질문해 주세요.")
+    invitationText
   );
   row.append(bubble);
   return row;
@@ -4469,11 +4474,17 @@ body.jiyun-video-chat:not(.jiyun-report-open) .chat-full .messages .jiyun-chat-i
   text-shadow:0 1px 4px rgba(0,0,0,.42)!important;
 }
 body.jiyun-video-chat .jiyun-chat-invitation-title{
-  display:block;font-size:15px;font-weight:750;color:#f1cda0;line-height:1.4;
+  display:block;font-size:15px;font-weight:600;color:#f1cda0;line-height:1.4;
 }
 body.jiyun-video-chat .jiyun-chat-invitation-text{
-  display:block;font-size:15px;font-weight:450;line-height:1.62;white-space:pre-line;
+  display:block;font-size:15px;font-weight:430;line-height:1.7;
   word-break:keep-all;overflow-wrap:break-word;
+}
+body.jiyun-video-chat .jiyun-chat-invitation-lead{
+  display:block;font-weight:520;
+}
+body.jiyun-video-chat .jiyun-chat-invitation-detail{
+  display:block;font-weight:430;
 }
 
 /* Jiyun chat: quiet 1px border instead of the prominent gold outline.
