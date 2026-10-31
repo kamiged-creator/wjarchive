@@ -1768,6 +1768,7 @@ function updateJiyunSpeechUi(){
   const panel=document.querySelector(".jiyun-reading-audio");
   if(!panel)return;
   const play=panel.querySelector(".jiyun-reading-audio-play");
+  const regenerate=panel.querySelector(".jiyun-reading-audio-regenerate");
   const status=panel.querySelector(".jiyun-reading-audio-status");
   const progress=panel.querySelector(".jiyun-reading-audio-progress-fill");
   const text=jiyunReadingForSpeech(),ready=Boolean(text);
@@ -1776,6 +1777,8 @@ function updateJiyunSpeechUi(){
   const action=jiyunSpeechState==="speaking"?"일시정지":
     jiyunSpeechState==="paused"?"계속 듣기":"재생";
   play.disabled=!ready||loading;
+  regenerate.disabled=!ready||loading;
+  regenerate.title="2번 지윤 목소리로 음성을 새로 생성 (API 비용 발생)";
   play.textContent=loading?"…":jiyunSpeechState==="speaking"?"Ⅱ":"▶";
   play.setAttribute("aria-label","지윤의 AI 음성 풀이 "+(loading?"생성 중":action));
   play.setAttribute("title",loading?"AI 음성 생성 중":action);
@@ -1805,6 +1808,7 @@ function playJiyunAiAudio(token){
   const audio=jiyunSpeechAudio;
   if(!audio||token!==jiyunSpeechToken)return;
   audio.playbackRate=jiyunSpeechRate;
+  audio.volume=.88;
   jiyunSpeechNotice="";
   jiyunSpeechState="speaking";
   updateJiyunSpeechUi();
@@ -1865,6 +1869,7 @@ async function toggleJiyunSpeech(){
     jiyunSpeechAudioText=text;
     const audio=new Audio(jiyunSpeechAudioUrl);
     audio.preload="auto";
+    audio.volume=.88;
     audio.playbackRate=jiyunSpeechRate;
     jiyunSpeechAudio=audio;
     audio.ontimeupdate=()=>{if(token===jiyunSpeechToken)updateJiyunSpeechUi();};
@@ -1890,6 +1895,15 @@ async function toggleJiyunSpeech(){
     if(jiyunSpeechAbort===controller)jiyunSpeechAbort=null;
   }
 }
+async function regenerateJiyunSpeech(){
+  if(jiyunSpeechState==="loading")return;
+  if(!document.body.classList.contains("jiyun-report-open")||!jiyunReadingForSpeech())return;
+  // A fresh synthesis can resolve a transient pop baked into the prior MP3.
+  // This is a deliberate extra paid request; never run it automatically.
+  stopJiyunSpeech();
+  clearJiyunSpeechCache();
+  await toggleJiyunSpeech();
+}
 function makeJiyunReadingAudio(){
   const panel=makeEl("div","jiyun-reading-audio");
   panel.setAttribute("role","group");
@@ -1909,14 +1923,19 @@ function makeJiyunReadingAudio(){
     if(jiyunSpeechAudio)jiyunSpeechAudio.playbackRate=jiyunSpeechRate;
     updateJiyunSpeechUi();
   });
+  const regenerate=makeEl("button","jiyun-reading-audio-regenerate","↻");
+  regenerate.type="button";
+  regenerate.setAttribute("aria-label","지윤 음성 다시 생성 · 추가 비용 발생");
+  regenerate.title="잡음이 들리면 새 음성 만들기 (소액 API 비용)";
+  regenerate.addEventListener("click",regenerateJiyunSpeech);
   const play=makeEl("button","jiyun-reading-audio-play","▶");
   play.type="button";play.setAttribute("aria-label","지윤의 AI 음성 풀이 재생");
   play.addEventListener("click",toggleJiyunSpeech);
-  row.append(label,speed,play);
+  row.append(label,regenerate,speed,play);
   const track=makeEl("div","jiyun-reading-audio-progress");
   track.setAttribute("aria-hidden","true");
   track.append(makeEl("div","jiyun-reading-audio-progress-fill"));
-  const note=makeEl("small","jiyun-reading-audio-disclosure","AI로 생성된 목소리이며 실제 상담사 녹음은 아닙니다.");
+  const note=makeEl("small","jiyun-reading-audio-disclosure","AI 생성 음성 · ↻ 다시 만들면 소액의 API 비용이 발생합니다.");
   const status=makeEl("div","jiyun-reading-audio-status","사주 풀이가 완성되면 들을 수 있어요.");
   status.setAttribute("role","status");
   panel.append(row,track,note,status);
@@ -4963,6 +4982,15 @@ body.jiyun-report-open .jiyun-reading-audio.show-status .jiyun-reading-audio-sta
   clip:auto!important;white-space:normal!important;
   color:#f0d9b8;font-size:11px;line-height:1.5;
 }
+
+/* Small opt-in refresh control for one-off synthesis artifacts; keep compact layout. */
+body.jiyun-report-open .jiyun-reading-audio-regenerate{
+  flex:0 0 32px;width:32px;height:36px;padding:0;
+  border:0;border-radius:50%;background:transparent;
+  color:#e2bd89;font:inherit;font-size:22px;font-weight:500;
+  line-height:1;cursor:pointer;
+}
+body.jiyun-report-open .jiyun-reading-audio-regenerate:disabled{opacity:.42;cursor:default}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
