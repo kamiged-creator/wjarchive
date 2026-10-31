@@ -1770,19 +1770,23 @@ function updateJiyunSpeechUi(){
   const panel=document.querySelector(".jiyun-reading-audio");
   if(!panel)return;
   const play=panel.querySelector(".jiyun-reading-audio-play");
-  const stop=panel.querySelector(".jiyun-reading-audio-stop");
   const status=panel.querySelector(".jiyun-reading-audio-status");
   const progress=panel.querySelector(".jiyun-reading-audio-progress-fill");
   const supported=jiyunSpeechSupported(),ready=Boolean(jiyunReadingForSpeech());
   const active=jiyunSpeechState==="speaking"||jiyunSpeechState==="paused";
+  const action=jiyunSpeechState==="speaking"?"일시정지":
+    jiyunSpeechState==="paused"?"이어서 재생":"재생";
   play.disabled=!supported||!ready;
-  stop.disabled=!active;
-  play.textContent=jiyunSpeechState==="speaking"?"⏸ 일시정지":jiyunSpeechState==="paused"?"▶ 계속 듣기":"🔊 지윤의 음성 풀이 듣기";
+  play.textContent=jiyunSpeechState==="speaking"?"Ⅱ":"▶";
+  play.setAttribute("aria-label","지윤의 음성 풀이 "+action);
+  play.setAttribute("title",action);
   play.setAttribute("aria-pressed",String(active));
   status.textContent=!supported?"이 브라우저에서는 음성 읽기를 지원하지 않아요.":
     !ready?"사주 풀이가 완성되면 들을 수 있어요.":
     jiyunSpeechNotice||(jiyunSpeechState==="speaking"?"음성 재생 중":
-    jiyunSpeechState==="paused"?"일시정지됨":"버튼을 누르면 음성으로 읽어드려요.");
+    jiyunSpeechState==="paused"?"일시정지됨":"음성 풀이 재생 준비됨");
+  panel.classList.toggle("has-error",!supported||
+    /재생하지 못했어요|시작하지 못했어요|확인해 주세요/.test(jiyunSpeechNotice));
   const ratio=jiyunSpeechParts.length?jiyunSpeechIndex/jiyunSpeechParts.length:0;
   progress.style.width=Math.min(100,Math.round(ratio*100))+"%";
 }
@@ -1862,15 +1866,12 @@ function toggleJiyunSpeech(){
 function makeJiyunReadingAudio(){
   const panel=makeEl("div","jiyun-reading-audio");
   panel.setAttribute("role","group");
-  panel.setAttribute("aria-label","지윤 사주 풀이 음성 읽기");
+  panel.setAttribute("aria-label","지윤 사주 풀이 음성 읽기 · 기기의 한국어 음성으로 낭독하며 실제 상담사 녹음은 아닙니다.");
   const row=makeEl("div","jiyun-reading-audio-row");
-  const play=makeEl("button","jiyun-reading-audio-play","🔊 지윤의 음성 풀이 듣기");
-  play.type="button";play.addEventListener("click",toggleJiyunSpeech);
-  const stop=makeEl("button","jiyun-reading-audio-stop","■ 정지");
-  stop.type="button";stop.disabled=true;
-  stop.addEventListener("click",()=>stopJiyunSpeech("재생을 정지했어요."));
+  const label=makeEl("span","jiyun-reading-audio-label","♬ 지윤의 음성 풀이");
   const speed=makeEl("select","jiyun-reading-audio-speed");
   speed.setAttribute("aria-label","음성 재생 속도");
+  speed.title="재생 속도";
   for(const rate of [1,1.25,1.5]){
     const option=makeEl("option","",String(rate)+"배");
     option.value=String(rate);speed.append(option);
@@ -1882,52 +1883,20 @@ function makeJiyunReadingAudio(){
       jiyunSpeechNotice="배속은 다음 문장부터 적용돼요.";
     updateJiyunSpeechUi();
   });
-  row.append(play,stop,speed);
+  const play=makeEl("button","jiyun-reading-audio-play","▶");
+  play.type="button";play.setAttribute("aria-label","지윤의 음성 풀이 재생");
+  play.addEventListener("click",toggleJiyunSpeech);
+  row.append(label,speed,play);
   const track=makeEl("div","jiyun-reading-audio-progress");
   track.setAttribute("aria-hidden","true");
   track.append(makeEl("div","jiyun-reading-audio-progress-fill"));
   const status=makeEl("div","jiyun-reading-audio-status","사주 풀이가 완성되면 들을 수 있어요.");
   status.setAttribute("role","status");
-  const note=makeEl("small","jiyun-reading-audio-note","기기의 한국어 음성으로 읽습니다 · 실제 상담사 녹음은 아닙니다.");
-  panel.append(row,track,status,note);
+  panel.append(row,track,status);
   return panel;
 }
-// Illustrations are local, decorative Korean landscape artwork. No external image service.
-function jiyunReportFigure(variant){
- const figure=makeEl("figure","jiyun-report-figure");
- const sky=variant===2?"#604733":"#2e353a";
- const sunX=variant===2?320:730;
- const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 450"><defs><linearGradient id="s" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="#c3a47b"/></linearGradient><radialGradient id="g"><stop stop-color="#ffe1aa" stop-opacity=".8"/><stop offset="1" stop-color="#f1c88b" stop-opacity="0"/></radialGradient></defs><rect width="960" height="450" fill="url(#s)"/><circle cx="${sunX}" cy="133" r="145" fill="url(#g)"/><circle cx="${sunX}" cy="133" r="47" fill="#ecd6ac"/><path d="M0 280 128 205 250 280 390 139 500 267 625 184 760 295 885 228 960 286V450H0Z" fill="#6f6858" opacity=".55"/><path d="M0 350 175 283 308 330 480 234 635 326 798 260 960 325V450H0Z" fill="#45504a" opacity=".86"/><path d="M0 397Q300 344 535 393T960 368V450H0Z" fill="#283737"/><g fill="none" stroke="#ead1a2" opacity=".4"><path d="M110 414Q470 387 840 406"/><path d="M240 434Q565 415 935 425"/></g><g stroke="#242b26" stroke-linecap="round" fill="none"><path d="M128 423Q143 279 166 184M160 215Q112 165 57 161M160 213Q206 165 271 173M148 293Q100 242 39 254" stroke-width="11"/><path d="M58 162Q30 132 3 132M273 173Q309 147 349 155M40 254Q5 234 0 217" stroke-width="7"/></g><g fill="#334438" opacity=".91"><ellipse cx="55" cy="154" rx="65" ry="17" transform="rotate(10 55 154)"/><ellipse cx="267" cy="169" rx="91" ry="20" transform="rotate(-10 267 169)"/><ellipse cx="42" cy="250" rx="65" ry="17"/></g><rect x="12" y="12" width="936" height="426" fill="none" stroke="#e8c89c" stroke-opacity=".4"/></svg>`;
- const img=document.createElement("img");img.alt="산과 소나무, 햇빛이 어우러진 동양화 풍경";img.loading="lazy";img.src="data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
- figure.append(img,makeEl("figcaption","",variant===2?"삶의 뿌리와 성장의 기운":"한 걸음씩 열리는 새로운 흐름"));return figure;
-}
-function decorateJiyunReading(row,text){
- if(selected.id!=="jian"||!text||text.length<280)return;
- const bubble=row.querySelector(".bubble");if(!bubble)return;
- let parts=text.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
- if(parts.length<3){
-   const sentences=text.split(/(?<=[.!?。])\s+/).map(x=>x.trim()).filter(Boolean);
-   if(sentences.length>=4){
-     parts=[];let buffer="";
-     for(const sentence of sentences){
-       if(buffer.length>220){parts.push(buffer.trim());buffer="";}
-       buffer+=(buffer?" ":"")+sentence;
-     }
-     if(buffer)parts.push(buffer.trim());
-   }
- }
- if(parts.length<2)return;
- bubble.replaceChildren();
- const first=Math.max(1,Math.floor(parts.length*.4));
- const second=Math.max(first+1,Math.floor(parts.length*.78));
- parts.forEach((part,i)=>{
-   const paragraph=makeEl("p","jiyun-report-paragraph",part);
-   if(/^(?:\d+[.)]|[①②③④⑤]|【)/.test(part))paragraph.classList.add("jiyun-report-heading-text");
-   bubble.append(paragraph);
-   if(i+1===first)bubble.append(jiyunReportFigure(1));
-   if(parts.length>=5&&i+1===second&&second<parts.length)bubble.append(jiyunReportFigure(2));
- });
-}
+
+
 function syncJiyunReportUi(){
  const show=selected.id==="jian"&&jiyunReportVisible&&Boolean(birthProfiles[birthKey()])&&!birthEditing.has(birthKey());
  document.body.classList.toggle("jiyun-report-open",show);
@@ -4868,38 +4837,54 @@ body.jiyun-video-chat .chat-full .composer:not([hidden]) .composer-inner{
 }
 
 
-/* Jiyun report: user-initiated Korean speech of the completed written reading. */
+/* Compact Jiyun report audio player: one row + a quiet progress line. */
 body.jiyun-report-open .jiyun-reading-audio{
-  max-width:540px;margin:20px auto 0;padding:13px 13px 11px;
-  border:1px solid rgba(216,178,125,.42);border-radius:15px;
-  background:rgba(64,46,33,.52);box-sizing:border-box;text-align:left;
+  max-width:540px;margin:17px auto 0;padding:8px 11px 7px;
+  border:1px solid rgba(216,178,125,.35);border-radius:15px;
+  background:rgba(64,46,33,.38);box-sizing:border-box;text-align:left;
 }
 body.jiyun-report-open .jiyun-reading-audio-row{
-  display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:10px;min-height:40px;flex-wrap:nowrap;
 }
-body.jiyun-report-open .jiyun-reading-audio-row button,
-body.jiyun-report-open .jiyun-reading-audio-row select{
-  min-height:40px;border-radius:11px;border:1px solid rgba(213,176,128,.55);
-  font:inherit;font-size:13px;font-weight:650;color:#fce9d0;
-  background:rgba(55,40,30,.8);
+body.jiyun-report-open .jiyun-reading-audio-label{
+  min-width:0;flex:1;color:#f4dfc1;font-size:14px;font-weight:650;
+  line-height:1.4;white-space:nowrap;
+}
+body.jiyun-report-open .jiyun-reading-audio-speed{
+  flex:0 0 auto;max-width:66px;min-height:38px;
+  border:0;border-radius:7px;padding:0 2px;color:#e8c99f;
+  font:inherit;font-size:12px;font-weight:600;background:transparent;
+  text-align:center;cursor:pointer;color-scheme:dark;
 }
 body.jiyun-report-open .jiyun-reading-audio-play{
-  flex:1 1 170px;padding:8px 11px;
+  flex:0 0 40px;width:40px;height:40px;padding:0;
+  border:1px solid rgba(224,188,139,.5);border-radius:50%;
+  background:rgba(119,84,56,.74);color:#ffedd2;
+  font:inherit;font-size:18px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
 }
-body.jiyun-report-open .jiyun-reading-audio-stop{padding:8px 12px;flex:0 0 auto}
-body.jiyun-report-open .jiyun-reading-audio-speed{padding:8px 4px;flex:0 0 68px}
-body.jiyun-report-open .jiyun-reading-audio-row button:disabled{opacity:.48;cursor:default}
+body.jiyun-report-open .jiyun-reading-audio-play:disabled{opacity:.48;cursor:default}
+body.jiyun-report-open .jiyun-reading-audio-row :is(button,select):focus-visible{
+  outline:2px solid #eecb96;outline-offset:2px;
+}
 body.jiyun-report-open .jiyun-reading-audio-progress{
-  height:3px;margin-top:11px;border-radius:5px;overflow:hidden;background:rgba(225,195,154,.2);
+  height:2px;margin-top:6px;border-radius:999px;overflow:hidden;
+  background:rgba(225,195,154,.17);
 }
 body.jiyun-report-open .jiyun-reading-audio-progress-fill{
   height:100%;width:0;background:#e6c08a;transition:width .2s ease;
 }
+/* Keep screen reader announcements, but show no verbose helper copy unless playback fails. */
 body.jiyun-report-open .jiyun-reading-audio-status{
-  color:#f0d9b8;font-size:12px;line-height:1.5;margin-top:7px;
+  position:absolute!important;width:1px!important;height:1px!important;
+  padding:0!important;margin:-1px!important;overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
 }
-body.jiyun-report-open .jiyun-reading-audio-note{
-  display:block;color:#bda58e;font-size:11px;line-height:1.55;margin-top:3px;
+body.jiyun-report-open .jiyun-reading-audio.has-error .jiyun-reading-audio-status{
+  position:static!important;width:auto!important;height:auto!important;
+  padding:3px 1px 0!important;margin:0!important;overflow:visible!important;
+  clip:auto!important;white-space:normal!important;
+  color:#f0d9b8;font-size:11px;line-height:1.5;
 }
 @media(prefers-reduced-motion:reduce){
   body.jiyun-report-open .jiyun-reading-audio-progress-fill{transition:none}
