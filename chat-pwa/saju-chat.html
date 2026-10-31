@@ -1104,6 +1104,11 @@ function selectAdvisorCard(advisor,button){
   selected=advisor;
   topic=advisor.topics[0];
   conversation=read();
+  // Unlock Web Audio in the adviser-card tap. The transition itself is delayed,
+  // and mobile browsers may reject audio started only after that delay.
+  araMusicAutoWanted=true;
+  if(araMusicContext&&araMusicProfileId!==advisor.id)stopAraMusic();
+  if(ARA_MUSIC_PROFILES[advisor.id])startAraMusic(true);
   // Open the separate voice window synchronously from the user's tap;
   // deferring it would trigger mobile popup blockers.
   if(advisor.id==="harin"){
@@ -1839,6 +1844,8 @@ async function toggleJiyunSpeech(){
     jiyunSpeechNotice="풀이가 길어 AI 음성을 생성하지 못했어요. 글자 수 제한을 확인해 주세요.";
     updateJiyunSpeechUi();return;
   }
+  // Narration takes priority; do not restart the background on the next tap.
+  araMusicAutoWanted=false;
   stopAraMusic();
   const token=++jiyunSpeechToken;
   if(jiyunSpeechAudio&&jiyunSpeechAudioText===text){
@@ -2993,14 +3000,21 @@ function renderMessages(scrollToEnd=true){
   });
 }
 function renderAll(scrollMode){
-  // Switching counselors must never reuse the prior counselor's soundtrack.
+  // Each new counselor has their own automatic-music preference by default.
+  if(araMusicLastAdvisorId!==selected.id){
+    araMusicLastAdvisorId=selected.id;
+    araMusicAutoWanted=true;
+  }
   if(araMusicContext&&araMusicProfileId!==selected.id)stopAraMusic();
   document.body.dataset.sajuMusicProfile=selected.id;
-  renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages(scrollMode==="jiyun-entry"?"intro":true);refreshAraMusicToggle();save();}
+  renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages(scrollMode==="jiyun-entry"?"intro":true);
+  if(location.hash==="#chat"&&araMusicAutoWanted)startAraMusic();
+  refreshAraMusicToggle();save();}
 function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;
-  // Every fresh chat entrance begins silent. Never carry music from a previous view.
-  // The first button label is always "음악 켜기" until the visitor explicitly plays.
-  if(!open||justOpened)stopAraMusic();if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","ara-chooser-no-input","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro")}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+  // Try the selected counselor's background score on chat entrance.
+  // On mobile a direct page load may be blocked until the next real user tap.
+  if(justOpened)araMusicAutoWanted=true;
+  if(!open)stopAraMusic();if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","ara-chooser-no-input","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro");if(araMusicAutoWanted)startAraMusic();}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
@@ -3280,6 +3294,7 @@ $("simliStop").addEventListener("click",()=>{
 // Never autoplay: every counselor begins silent, opt-in via Music On only.
 // The four profiles intentionally differ in key, pacing, note order and timbre.
 let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0,araMusicNextAt=0,araMusicProfileId=null;
+let araMusicAutoWanted=true,araMusicLastAdvisorId=null;
 const ARA_MUSIC_STEPS=32;
 const ARA_MUSIC_PROFILES={
   ara:{
@@ -3328,7 +3343,9 @@ const ARA_MUSIC_PROFILES={
   }
 };
 function refreshAraMusicToggle(){
-  const playing=Boolean(araMusicContext)&&araMusicProfileId===selected.id;
+  // Do not call a suspended AudioContext "playing": the browser may block it.
+  const playing=Boolean(araMusicContext)&&araMusicProfileId===selected.id&&
+    araMusicContext.state==="running"&&araMusicTimer!==null;
   const label=playing?"음악 끄기":"음악 켜기";
   const name=ARA_MUSIC_PROFILES[selected.id]?.title||"배경 음악";
   for(const id of ["araMusicToggle","headerMusicToggle"]){
@@ -3388,32 +3405,68 @@ function stopAraMusic(){
   }
   refreshAraMusicToggle();
 }
-function startAraMusic(){
-  if(araMusicContext||!ARA_MUSIC_PROFILES[selected.id]||location.hash!=="#chat")return;
+function startAraMusic(allowBeforeChat=false){
+  if(!ARA_MUSIC_PROFILES[selected.id]||!araMusicAutoWanted||
+    (!allowBeforeChat&&location.hash!=="#chat")||document.hidden)return;
   const Context=window.AudioContext||window.webkitAudioContext;
-  if(!Context){$("araMusicToggle").title="이 브라우저는 배경음악을 지원하지 않아요.";return;}
+  if(!Context){
+    $("araMusicToggle").title="이 브라우저는 배경음악을 지원하지 않아요.";
+    return;
+  }
   try{
-    const ctx=new Context(),master=ctx.createGain();
-    master.gain.setValueAtTime(.0001,ctx.currentTime);
-    master.gain.setTargetAtTime(.13,ctx.currentTime,.8);
-    master.connect(ctx.destination);
-    araMusicContext=ctx;araMusicMaster=master;araMusicStep=0;araMusicProfileId=selected.id;
+    if(araMusicContext&&araMusicProfileId!==selected.id)stopAraMusic();
+    if(!araMusicContext){
+      const ctx=new Context(),master=ctx.createGain();
+      master.gain.setValueAtTime(.0001,ctx.currentTime);
+      master.gain.setTargetAtTime(.13,ctx.currentTime,.8);
+      master.connect(ctx.destination);
+      araMusicContext=ctx;araMusicMaster=master;
+      araMusicStep=0;araMusicProfileId=selected.id;
+    }
+    const ctx=araMusicContext;
+    // Web Audio can remain suspended on a page opened without a gesture.
+    // Preserve this one context and retry resuming on the visitor's first tap.
+    const scheduleOnce=()=>{
+      if(araMusicContext!==ctx||!araMusicAutoWanted||ctx.state!=="running")return;
+      if(araMusicTimer===null){
+        araMusicNextAt=ctx.currentTime+.08;
+        araMusicSchedule();
+        araMusicTimer=setInterval(araMusicSchedule,100);
+      }
+      refreshAraMusicToggle();
+    };
+    if(ctx.state==="running")scheduleOnce();
+    else ctx.resume().then(scheduleOnce).catch(()=>{
+      if(araMusicContext===ctx)refreshAraMusicToggle();
+    });
     refreshAraMusicToggle();
-    // Creating/resuming AudioContext requires an explicit visitor tap.
-    ctx.resume().then(()=>{
-      if(araMusicContext!==ctx)return;
-      araMusicNextAt=ctx.currentTime+.08;
-      araMusicSchedule();
-      araMusicTimer=setInterval(araMusicSchedule,100);
-    }).catch(()=>{if(araMusicContext===ctx)stopAraMusic();});
-  }catch(_){stopAraMusic();}
+  }catch(_){
+    stopAraMusic();
+  }
 }
+// Autoplay unlock: this is only a fallback when a browser refused the initial
+// automatic attempt. A manual Music Off remains off until a fresh chat entry.
+function onAraMusicActivation(event){
+  if(!araMusicAutoWanted||location.hash!=="#chat"||document.hidden)return;
+  if(event.target?.closest?.("#araMusicToggle,#headerMusicToggle"))return;
+  if(araMusicContext&&araMusicContext.state==="running")return;
+  startAraMusic();
+}
+document.addEventListener("pointerdown",onAraMusicActivation,{capture:true,passive:true});
+document.addEventListener("keydown",event=>{
+  if(!event.repeat)onAraMusicActivation(event);
+},{capture:true});
+
 
 const form=$("composer"),input=$("question"),sendBtn=$("send");
 $("jiyunReportClose").addEventListener("click",closeJiyunReport);
 $("jiyunReportChat").addEventListener("click",closeJiyunReport);
 $("jiyunReportReopen").addEventListener("click",()=>{jiyunReportVisible=true;renderMessages(false);});
-const toggleCounselorMusic=()=>{if(araMusicContext)stopAraMusic();else startAraMusic();};
+const toggleCounselorMusic=()=>{
+  const playing=Boolean(araMusicContext)&&araMusicContext.state==="running"&&araMusicTimer!==null;
+  if(playing){araMusicAutoWanted=false;stopAraMusic();}
+  else{araMusicAutoWanted=true;startAraMusic();}
+};
 $("araMusicToggle").addEventListener("click",toggleCounselorMusic);
 $("headerMusicToggle").addEventListener("click",toggleCounselorMusic);
 document.addEventListener("visibilitychange",()=>{if(document.hidden){stopAraMusic();stopJiyunSpeech();}});
