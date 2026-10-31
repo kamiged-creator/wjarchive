@@ -2005,7 +2005,15 @@ function makeSajuChatResults(profiles,key){
       if(!isCurrent())return;
       messages.forEach((step,i)=>{
         const row=sajuResultRow("bot",step,false,i===messages.length-1?(sajuResultCache[key]?.generatedAt||Date.now()):null);
-        if(i===0){row.classList.add("saju-reading-first");decorateJiyunReading(row,step);}
+        if(i===0){
+          row.classList.add("saju-reading-first");
+          try{decorateJiyunReading(row,step);}
+          catch(error){
+            // Rich decorations are optional: never let an illustration hide the reading.
+            row.querySelector(".bubble").textContent=step;
+            console.warn("Jiyun reading decoration skipped:",error);
+          }
+        }
         if(selected.id==="jian"&&i===messages.length-2&&messages[messages.length-1]===JIYUN_SAJU_NOTE)
           row.classList.add("jiyun-reading-last");
         root.append(row);
@@ -2046,16 +2054,23 @@ function makeSajuChatResults(profiles,key){
     setTimeout(next,550);
   }
   const cached=sajuResultCache[key];
-  if(cached?.source===profiles){
-    if(selected.id==="jian")starting.remove();
-    else startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
+  if(cached?.source===profiles&&Array.isArray(cached.messages)&&cached.messages.some(message=>typeof message==="string"&&message.trim())){
+    if(selected.id!=="jian")startingBubble.textContent="이전에 계산한 쉬운 사주 풀이를 다시 보여드릴게요.";
     cached.messages.forEach((message,i)=>{
       const row=sajuResultRow("bot",message,false,i===cached.messages.length-1?cached.generatedAt:null);
-      if(i===0){row.classList.add("saju-reading-first");decorateJiyunReading(row,message);}
+      if(i===0){
+        row.classList.add("saju-reading-first");
+        try{decorateJiyunReading(row,message);}
+        catch(error){
+          row.querySelector(".bubble").textContent=message;
+          console.warn("Cached Jiyun reading decoration skipped:",error);
+        }
+      }
       if(selected.id==="jian"&&i===cached.messages.length-2&&cached.messages[cached.messages.length-1]===JIYUN_SAJU_NOTE)
         row.classList.add("jiyun-reading-last");
       root.append(row);
     });
+    if(selected.id==="jian")starting.remove();
     const drawer=sajuTechnicalDrawer(cached.technical);
     if(drawer)root.append(drawer);
     root.append(actions);
@@ -2133,13 +2148,33 @@ function makeSajuChatResults(profiles,key){
     messages.push(selected.id==="jian"?JIYUN_SAJU_NOTE:"🌸 이 설명은 전통적인 상징을 풀어쓴 참고 자료예요. 미래, 돈, 건강을 단정하지 않아요.\n정확한 숫자와 용어가 궁금하다면 아래 계산표를 펼쳐보세요.");
     if(!isCurrent())return;
     sajuResultCache[key]={source:profiles,messages,technical,generatedAt:Date.now()};
-    if(selected.id==="jian")starting.remove();
-    else startingBubble.textContent="계산을 마쳤어요. 🌿 어려운 말 대신 쉽게 설명해 드릴게요.";
+    if(selected.id!=="jian")startingBubble.textContent="계산을 마쳤어요. 🌿 어려운 말 대신 쉽게 설명해 드릴게요.";
     showMessages(messages,true,technical);
+    // Remove the loading row only AFTER the reading has rendered successfully.
+    // Previously a render error removed the only visible message and left an empty result.
+    if(selected.id==="jian")starting.remove();
   }).catch(error=>{
     if(!isCurrent())return;
-    startingBubble.textContent=error?.message||"만세력 계산에 실패했어. 입력 정보를 확인해 줘.";
-    root.append(actions);
+    console.error("Saju reading failed:",error);
+    // The loading row must never be detached when reporting an error.
+    if(!starting.isConnected)root.insertBefore(starting,root.firstChild?.nextSibling||null);
+    const errorText=selected.id==="jian"
+      ?"풀이를 화면에 표시하지 못했어요. 아래 버튼으로 다시 시도할 수 있습니다."
+      :"사주 계산을 완료하지 못했어요. 다시 시도해 주세요.";
+    startingBubble.textContent=errorText;
+    const retry=makeEl("button","saju-chat-edit","↻ 사주 풀이 다시 보기");
+    retry.type="button";
+    retry.addEventListener("click",()=>{
+      // Reuse a fully calculated result when possible; otherwise calculate again.
+      if(!Array.isArray(sajuResultCache[key]?.messages)||!sajuResultCache[key].messages.length)
+        delete sajuResultCache[key];
+      renderMessages("result");
+    });
+    const controls=makeEl("div","saju-chat-actions");
+    controls.append(retry,edit);
+    root.querySelector(".saju-chat-actions")?.remove();
+    root.append(controls);
+    syncJiyunReportUi();
   });
   return root;
 }
