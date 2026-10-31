@@ -1737,34 +1737,32 @@ const sajuResultCache=Object.create(null);
 const jiyunIntroConsent=Object.create(null);
 let jiyunReportVisible=false;
 
-// Read the written Jiyun interpretation using the browser/device Korean voice.
-// No automatic playback and no additional text-to-speech API request.
+// Jiyun's second audition voice ("shimmer"): AI-generated on a deliberate click.
+// Audio is kept only in this page session, never written to local storage.
 let jiyunSpeechToken=0;
-let jiyunSpeechParts=[];
-let jiyunSpeechIndex=0;
 let jiyunSpeechState="idle";
 let jiyunSpeechRate=1;
 let jiyunSpeechNotice="";
-function jiyunSpeechSupported(){
-  return "speechSynthesis" in window&&"SpeechSynthesisUtterance" in window;
-}
+let jiyunSpeechAudio=null;
+let jiyunSpeechAudioUrl="";
+let jiyunSpeechAudioText="";
+let jiyunSpeechAbort=null;
 function jiyunReadingForSpeech(){
   const key=birthKey(),entry=sajuResultCache[key];
   if(selected.id!=="jian"||!entry?.messages?.length||entry.source!==birthProfiles[key])return "";
   return entry.messages.filter(text=>typeof text==="string"&&text.trim()&&text!==JIYUN_SAJU_NOTE).join("  ").trim();
 }
-function makeJiyunSpeechParts(text){
-  const parts=[];let current="";
-  for(const word of text.replace(/\s+/g," ").trim().split(" ")){
-    if(!word)continue;
-    if(current&&current.length+word.length+1>100){parts.push(current);current="";}
-    if(word.length>100){
-      if(current){parts.push(current);current="";}
-      for(let i=0;i<word.length;i+=100)parts.push(word.slice(i,i+100));
-    }else current+=(current?" ":"")+word;
+function clearJiyunSpeechCache(){
+  if(jiyunSpeechAudio){
+    jiyunSpeechAudio.pause();
+    jiyunSpeechAudio.onended=null;
+    jiyunSpeechAudio.onerror=null;
+    jiyunSpeechAudio.ontimeupdate=null;
+    jiyunSpeechAudio=null;
   }
-  if(current)parts.push(current);
-  return parts;
+  if(jiyunSpeechAudioUrl)URL.revokeObjectURL(jiyunSpeechAudioUrl);
+  jiyunSpeechAudioUrl="";
+  jiyunSpeechAudioText="";
 }
 function updateJiyunSpeechUi(){
   const panel=document.querySelector(".jiyun-reading-audio");
@@ -1772,103 +1770,132 @@ function updateJiyunSpeechUi(){
   const play=panel.querySelector(".jiyun-reading-audio-play");
   const status=panel.querySelector(".jiyun-reading-audio-status");
   const progress=panel.querySelector(".jiyun-reading-audio-progress-fill");
-  const supported=jiyunSpeechSupported(),ready=Boolean(jiyunReadingForSpeech());
+  const text=jiyunReadingForSpeech(),ready=Boolean(text);
   const active=jiyunSpeechState==="speaking"||jiyunSpeechState==="paused";
+  const loading=jiyunSpeechState==="loading";
   const action=jiyunSpeechState==="speaking"?"일시정지":
-    jiyunSpeechState==="paused"?"이어서 재생":"재생";
-  play.disabled=!supported||!ready;
-  play.textContent=jiyunSpeechState==="speaking"?"Ⅱ":"▶";
-  play.setAttribute("aria-label","지윤의 음성 풀이 "+action);
-  play.setAttribute("title",action);
+    jiyunSpeechState==="paused"?"계속 듣기":"재생";
+  play.disabled=!ready||loading;
+  play.textContent=loading?"…":jiyunSpeechState==="speaking"?"Ⅱ":"▶";
+  play.setAttribute("aria-label","지윤의 AI 음성 풀이 "+(loading?"생성 중":action));
+  play.setAttribute("title",loading?"AI 음성 생성 중":action);
   play.setAttribute("aria-pressed",String(active));
-  status.textContent=!supported?"이 브라우저에서는 음성 읽기를 지원하지 않아요.":
-    !ready?"사주 풀이가 완성되면 들을 수 있어요.":
-    jiyunSpeechNotice||(jiyunSpeechState==="speaking"?"음성 재생 중":
-    jiyunSpeechState==="paused"?"일시정지됨":"음성 풀이 재생 준비됨");
-  panel.classList.toggle("has-error",!supported||
-    /재생하지 못했어요|시작하지 못했어요|확인해 주세요/.test(jiyunSpeechNotice));
-  const ratio=jiyunSpeechParts.length?jiyunSpeechIndex/jiyunSpeechParts.length:0;
+  const error=Boolean(jiyunSpeechNotice)&&/실패|못했|오류|확인|지원|초과|제한|지연/.test(jiyunSpeechNotice);
+  status.textContent=!ready?"사주 풀이가 완성되면 들을 수 있어요.":
+    jiyunSpeechNotice||(loading?"AI 음성을 생성하고 있어요…":
+    active?(jiyunSpeechState==="paused"?"일시정지됨":"AI 음성 재생 중"):"재생 버튼을 누르면 AI 음성이 생성됩니다.");
+  panel.classList.toggle("has-error",error);
+  panel.classList.toggle("show-status",loading||error||/다시 눌러/.test(jiyunSpeechNotice));
+  const audio=jiyunSpeechAudioText===text?jiyunSpeechAudio:null;
+  const ratio=audio&&Number.isFinite(audio.duration)&&audio.duration>0?audio.currentTime/audio.duration:0;
   progress.style.width=Math.min(100,Math.round(ratio*100))+"%";
 }
 function stopJiyunSpeech(notice=""){
   ++jiyunSpeechToken;
-  if(jiyunSpeechSupported())window.speechSynthesis.cancel();
-  jiyunSpeechParts=[];
-  jiyunSpeechIndex=0;
+  if(jiyunSpeechAbort){jiyunSpeechAbort.abort();jiyunSpeechAbort=null;}
+  if(jiyunSpeechAudio){
+    jiyunSpeechAudio.pause();
+    try{jiyunSpeechAudio.currentTime=0;}catch(_){}
+  }
   jiyunSpeechState="idle";
   jiyunSpeechNotice=notice;
   updateJiyunSpeechUi();
 }
-function speakJiyunPart(token){
-  if(token!==jiyunSpeechToken||jiyunSpeechState!=="speaking")return;
-  if(jiyunSpeechIndex>=jiyunSpeechParts.length){
+function playJiyunAiAudio(token){
+  const audio=jiyunSpeechAudio;
+  if(!audio||token!==jiyunSpeechToken)return;
+  audio.playbackRate=jiyunSpeechRate;
+  jiyunSpeechNotice="";
+  jiyunSpeechState="speaking";
+  updateJiyunSpeechUi();
+  audio.play().then(()=>{
+    if(token===jiyunSpeechToken){jiyunSpeechState="speaking";updateJiyunSpeechUi();}
+  }).catch(()=>{
+    if(token!==jiyunSpeechToken)return;
     jiyunSpeechState="idle";
-    jiyunSpeechNotice="음성 풀이를 모두 들었어요. 다시 들을 수 있습니다.";
+    jiyunSpeechNotice="음성이 준비됐어요. 재생 버튼을 다시 눌러주세요.";
     updateJiyunSpeechUi();
-    return;
-  }
-  if(!document.body.classList.contains("jiyun-report-open")){
-    stopJiyunSpeech();
-    return;
-  }
-  const phrase=new SpeechSynthesisUtterance(jiyunSpeechParts[jiyunSpeechIndex]);
-  phrase.lang="ko-KR";
-  phrase.rate=jiyunSpeechRate;
-  phrase.pitch=1;
-  const voices=window.speechSynthesis.getVoices();
-  const korean=voices.find(voice=>/^ko(?:-|$)/i.test(voice.lang));
-  if(korean)phrase.voice=korean;
-  phrase.onend=()=>{
-    if(token!==jiyunSpeechToken)return;
-    jiyunSpeechIndex++;
-    jiyunSpeechNotice="";
-    updateJiyunSpeechUi();
-    speakJiyunPart(token);
-  };
-  phrase.onerror=event=>{
-    if(token!==jiyunSpeechToken)return;
-    stopJiyunSpeech("음성을 재생하지 못했어요. 기기의 한국어 음성 설정을 확인해 주세요.");
-  };
-  try{
-    window.speechSynthesis.speak(phrase);
-    jiyunSpeechNotice="읽는 중 · "+(jiyunSpeechIndex+1)+" / "+jiyunSpeechParts.length;
-    updateJiyunSpeechUi();
-  }catch(_){
-    stopJiyunSpeech("음성 재생을 시작하지 못했어요.");
-  }
+  });
 }
-function toggleJiyunSpeech(){
-  if(!jiyunSpeechSupported())return;
-  if(jiyunSpeechState==="speaking"){
-    window.speechSynthesis.pause();
+async function toggleJiyunSpeech(){
+  if(jiyunSpeechState==="loading")return;
+  if(jiyunSpeechState==="speaking"&&jiyunSpeechAudio){
+    jiyunSpeechAudio.pause();
     jiyunSpeechState="paused";
     jiyunSpeechNotice="일시정지됨";
     updateJiyunSpeechUi();return;
   }
-  if(jiyunSpeechState==="paused"){
-    window.speechSynthesis.resume();
-    jiyunSpeechState="speaking";
-    jiyunSpeechNotice="읽는 중 · "+(jiyunSpeechIndex+1)+" / "+jiyunSpeechParts.length;
-    updateJiyunSpeechUi();return;
+  if(jiyunSpeechState==="paused"&&jiyunSpeechAudio){
+    playJiyunAiAudio(jiyunSpeechToken);return;
   }
   if(!document.body.classList.contains("jiyun-report-open"))return;
   const text=jiyunReadingForSpeech();
   if(!text){jiyunSpeechNotice="사주 풀이가 완성되면 들을 수 있어요.";updateJiyunSpeechUi();return;}
+  if(text.length>3300){
+    jiyunSpeechNotice="풀이가 길어 AI 음성을 생성하지 못했어요. 글자 수 제한을 확인해 주세요.";
+    updateJiyunSpeechUi();return;
+  }
   stopAraMusic();
-  ++jiyunSpeechToken;
-  window.speechSynthesis.cancel();
-  jiyunSpeechParts=makeJiyunSpeechParts(text);
-  jiyunSpeechIndex=0;
-  jiyunSpeechState="speaking";
-  jiyunSpeechNotice="";
-  speakJiyunPart(jiyunSpeechToken);
+  const token=++jiyunSpeechToken;
+  if(jiyunSpeechAudio&&jiyunSpeechAudioText===text){
+    try{jiyunSpeechAudio.currentTime=0;}catch(_){}
+    playJiyunAiAudio(token);return;
+  }
+  clearJiyunSpeechCache();
+  const controller=new AbortController();
+  jiyunSpeechAbort=controller;
+  jiyunSpeechState="loading";
+  jiyunSpeechNotice="AI 음성을 생성하고 있어요…";
+  updateJiyunSpeechUi();
+  try{
+    // Only the visible interpretation text is sent, never the raw birth fields.
+    const response=await fetch("/api/jiyun-reading-voice",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({text}),cache:"no-store",signal:controller.signal
+    });
+    if(token!==jiyunSpeechToken)return;
+    if(!response.ok){
+      const error=await response.json().catch(()=>({}));
+      throw new Error(error.error||"AI 음성 생성에 실패했습니다.");
+    }
+    const blob=await response.blob();
+    if(token!==jiyunSpeechToken)return;
+    if(!blob.size||!blob.type.includes("audio"))throw new Error("음성 데이터를 확인하지 못했어요.");
+    jiyunSpeechAudioUrl=URL.createObjectURL(blob);
+    jiyunSpeechAudioText=text;
+    const audio=new Audio(jiyunSpeechAudioUrl);
+    audio.preload="auto";
+    audio.playbackRate=jiyunSpeechRate;
+    jiyunSpeechAudio=audio;
+    audio.ontimeupdate=()=>{if(token===jiyunSpeechToken)updateJiyunSpeechUi();};
+    audio.onended=()=>{
+      if(token!==jiyunSpeechToken)return;
+      jiyunSpeechState="idle";
+      jiyunSpeechNotice="음성 풀이가 끝났어요.";
+      try{audio.currentTime=0;}catch(_){}
+      updateJiyunSpeechUi();
+    };
+    audio.onerror=()=>{
+      if(token!==jiyunSpeechToken)return;
+      stopJiyunSpeech("AI 음성을 재생하지 못했어요.");
+      clearJiyunSpeechCache();
+    };
+    playJiyunAiAudio(token);
+  }catch(error){
+    if(token!==jiyunSpeechToken)return;
+    jiyunSpeechState="idle";
+    jiyunSpeechNotice=error?.message||"AI 음성 생성에 실패했습니다.";
+    updateJiyunSpeechUi();
+  }finally{
+    if(jiyunSpeechAbort===controller)jiyunSpeechAbort=null;
+  }
 }
 function makeJiyunReadingAudio(){
   const panel=makeEl("div","jiyun-reading-audio");
   panel.setAttribute("role","group");
-  panel.setAttribute("aria-label","지윤 사주 풀이 음성 읽기 · 기기의 한국어 음성으로 낭독하며 실제 상담사 녹음은 아닙니다.");
+  panel.setAttribute("aria-label","지윤 사주 풀이 AI 음성 듣기");
   const row=makeEl("div","jiyun-reading-audio-row");
-  const label=makeEl("span","jiyun-reading-audio-label","♬ 지윤의 음성 풀이");
+  const label=makeEl("span","jiyun-reading-audio-label","♬ 지윤의 AI 음성 풀이");
   const speed=makeEl("select","jiyun-reading-audio-speed");
   speed.setAttribute("aria-label","음성 재생 속도");
   speed.title="재생 속도";
@@ -1879,20 +1906,20 @@ function makeJiyunReadingAudio(){
   speed.value=String(jiyunSpeechRate);
   speed.addEventListener("change",()=>{
     jiyunSpeechRate=Number(speed.value)||1;
-    if(jiyunSpeechState==="speaking"||jiyunSpeechState==="paused")
-      jiyunSpeechNotice="배속은 다음 문장부터 적용돼요.";
+    if(jiyunSpeechAudio)jiyunSpeechAudio.playbackRate=jiyunSpeechRate;
     updateJiyunSpeechUi();
   });
   const play=makeEl("button","jiyun-reading-audio-play","▶");
-  play.type="button";play.setAttribute("aria-label","지윤의 음성 풀이 재생");
+  play.type="button";play.setAttribute("aria-label","지윤의 AI 음성 풀이 재생");
   play.addEventListener("click",toggleJiyunSpeech);
   row.append(label,speed,play);
   const track=makeEl("div","jiyun-reading-audio-progress");
   track.setAttribute("aria-hidden","true");
   track.append(makeEl("div","jiyun-reading-audio-progress-fill"));
+  const note=makeEl("small","jiyun-reading-audio-disclosure","AI로 생성된 목소리이며 실제 상담사 녹음은 아닙니다.");
   const status=makeEl("div","jiyun-reading-audio-status","사주 풀이가 완성되면 들을 수 있어요.");
   status.setAttribute("role","status");
-  panel.append(row,track,status);
+  panel.append(row,track,note,status);
   return panel;
 }
 
@@ -1903,7 +1930,7 @@ function syncJiyunReportUi(){
  $("jiyunReportTop").hidden=!show;
  $("jiyunReportBottom").hidden=!show||!sajuResultCache[birthKey()]?.messages?.length;
  $("jiyunReportReopen").hidden=selected.id!=="jian"||show||!sajuResultCache[birthKey()]?.messages?.length;
- if(!show&&(jiyunSpeechState==="speaking"||jiyunSpeechState==="paused"))stopJiyunSpeech();
+ if(!show&&jiyunSpeechState!=="idle")stopJiyunSpeech();
  updateJiyunSpeechUi();
 }
 function closeJiyunReport(){
@@ -2792,7 +2819,7 @@ function renderJiyunChatParagraphs(bubble,text){
   blocks.forEach(block=>bubble.append(makeEl("p","jiyun-chat-paragraph",block)));
 }
 function renderMessages(scrollToEnd=true){
-  if(jiyunSpeechState==="speaking"||jiyunSpeechState==="paused")stopJiyunSpeech();
+  if(jiyunSpeechState!=="idle")stopJiyunSpeech();
   syncSajuScene();
   introTypingRun++;
   const currentRun=introTypingRun;
@@ -3320,7 +3347,7 @@ $("jiyunReportChat").addEventListener("click",closeJiyunReport);
 $("jiyunReportReopen").addEventListener("click",()=>{jiyunReportVisible=true;renderMessages(false);});
 $("araMusicToggle").addEventListener("click",()=>{if(araMusicContext)stopAraMusic();else startAraMusic();});
 document.addEventListener("visibilitychange",()=>{if(document.hidden){stopAraMusic();stopJiyunSpeech();}});
-window.addEventListener("pagehide",()=>{stopAraMusic();stopJiyunSpeech();});
+window.addEventListener("pagehide",()=>{stopAraMusic();stopJiyunSpeech();clearJiyunSpeechCache();});
 $("startChat").addEventListener("click",openChat);
 $("backToSelect").addEventListener("click",()=>{if(selected.id!=="ara")returnToAraChoices();else if(araStartMode!=="home"){araStartMode="home";renderMessages(false);}else location.assign("/");});
 window.addEventListener("hashchange",syncChatView);
@@ -4923,6 +4950,18 @@ body.jiyun-report-open .jiyun-reading-audio.has-error .jiyun-reading-audio-statu
 }
 @media(prefers-reduced-motion:reduce){
   body.jiyun-report-open .jiyun-reading-audio-progress-fill{transition:none}
+}
+
+/* Clear AI voice disclosure without expanding the compact player. */
+body.jiyun-report-open .jiyun-reading-audio-disclosure{
+  display:block;margin-top:5px;color:#bea78d;
+  font-size:10px;line-height:1.4;text-align:left;
+}
+body.jiyun-report-open .jiyun-reading-audio.show-status .jiyun-reading-audio-status{
+  position:static!important;width:auto!important;height:auto!important;
+  padding:3px 1px 0!important;margin:0!important;overflow:visible!important;
+  clip:auto!important;white-space:normal!important;
+  color:#f0d9b8;font-size:11px;line-height:1.5;
 }
 </style>
 <script defer src="./saju-ara-tone.js"></script>
