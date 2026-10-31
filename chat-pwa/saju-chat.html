@@ -1024,6 +1024,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
       </div>
     </section>
     <button type="button" id="araMusicToggle" class="ara-music-toggle" aria-label="잔잔한 배경음악 켜기" aria-pressed="false" title="잔잔한 배경음악 켜기"><span class="ara-music-symbol" aria-hidden="true">♫</span><span class="ara-music-label">음악 켜기</span></button>
+    <button type="button" id="araMusicActivationHint" class="ara-music-activation-hint" hidden aria-label="화면을 터치해 음악 시작">♪ 화면을 터치하면 음악이 시작돼요</button>
     <div class="jiyun-welcome-overlay" id="jiyunWelcomeOverlay" hidden aria-live="polite"></div>
     <div class="messages" id="messages" role="log" aria-label="체험 상담 대화" aria-live="polite"></div>
     <header class="jiyun-report-top" id="jiyunReportTop" hidden><button type="button" id="jiyunReportClose">‹ <span>지윤 상담으로</span></button><strong>복작소 · 사주 결과</strong><span aria-hidden="true">✦</span></header>
@@ -3352,6 +3353,11 @@ function refreshAraMusicToggle(){
     araMusicContext.state==="running"&&araMusicTimer!==null;
   const label=playing?"음악 끄기":"음악 켜기";
   const name=ARA_MUSIC_PROFILES[selected.id]?.title||"배경 음악";
+  const hint=$("araMusicActivationHint");
+  // Browsers can hold Web Audio in "suspended" until the first tap.
+  // Don't pretend audio is playing; show a small one-tap prompt instead.
+  if(hint)hint.hidden=!(araMusicAutoWanted&&!playing&&
+    Boolean(ARA_MUSIC_PROFILES[selected.id])&&location.hash==="#chat");
   for(const id of ["araMusicToggle","headerMusicToggle"]){
     const button=$(id);
     if(!button)continue;
@@ -3439,6 +3445,14 @@ function startAraMusic(allowBeforeChat=false,requestedAdvisorId=selected.id){
       }
       refreshAraMusicToggle();
     };
+    if(!ctx._bokjaksoMusicStateWatch){
+      ctx._bokjaksoMusicStateWatch=true;
+      ctx.addEventListener("statechange",()=>{
+        if(araMusicContext!==ctx)return;
+        if(ctx.state==="running")scheduleOnce();
+        else refreshAraMusicToggle();
+      });
+    }
     if(ctx.state==="running")scheduleOnce();
     else ctx.resume().then(scheduleOnce).catch(()=>{
       if(araMusicContext===ctx)refreshAraMusicToggle();
@@ -3453,10 +3467,12 @@ function startAraMusic(allowBeforeChat=false,requestedAdvisorId=selected.id){
 function onAraMusicActivation(event){
   if(!araMusicAutoWanted||location.hash!=="#chat"||document.hidden)return;
   if(event.target?.closest?.("#araMusicToggle,#headerMusicToggle"))return;
-  if(araMusicContext&&araMusicContext.state==="running")return;
+  if(araMusicContext&&araMusicContext.state==="running"&&araMusicTimer!==null)return;
   startAraMusic();
 }
 document.addEventListener("pointerdown",onAraMusicActivation,{capture:true,passive:true});
+// Some Android in-app browsers dispatch touchstart before or instead of pointerdown.
+document.addEventListener("touchstart",onAraMusicActivation,{capture:true,passive:true});
 // Also recover on browsers that expose only click, not a trusted pointer event.
 document.addEventListener("click",onAraMusicActivation,{capture:true,passive:true});
 document.addEventListener("keydown",event=>{
@@ -3475,6 +3491,10 @@ const toggleCounselorMusic=()=>{
 };
 $("araMusicToggle").addEventListener("click",toggleCounselorMusic);
 $("headerMusicToggle").addEventListener("click",toggleCounselorMusic);
+$("araMusicActivationHint").addEventListener("click",()=>{
+  araMusicAutoWanted=true;
+  startAraMusic();
+});
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){stopAraMusic();stopJiyunSpeech();}
   else if(location.hash==="#chat"&&araMusicAutoWanted)startAraMusic();
@@ -5125,6 +5145,21 @@ body.chat-active .chat-full .chat-heading .header-music-toggle[aria-pressed="tru
 }
 body.chat-active .chat-full .chat-heading .header-music-toggle:focus-visible{
   outline:2px solid #c99d6e;outline-offset:2px;
+}
+
+/* Only shown when the browser has blocked audible autoplay on entry.
+   No blocking overlay: one touch anywhere or on this chip starts the score. */
+.ara-music-activation-hint[hidden]{display:none!important}
+body:is(.ara-cinematic-intro,.ara-portrait-chat,.jiyun-video-chat):not(.jiyun-report-open)
+.chat-full > .ara-music-activation-hint:not([hidden]){
+  position:absolute!important;display:inline-flex!important;
+  top:66px!important;right:13px!important;z-index:22!important;
+  align-items:center;justify-content:center;
+  max-width:min(calc(100% - 40px),250px);min-height:32px;
+  border:1px solid rgba(246,221,180,.34);border-radius:18px;
+  padding:6px 11px;background:rgba(28,23,21,.63);
+  color:#f7e4c9;font:inherit;font-size:11px;line-height:1.4;
+  cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
 }
 </style>
 <script defer src="./saju-ara-tone.js"></script>
