@@ -2518,8 +2518,11 @@ function openAdvisorFromAra(id){
   if(sentBusy||araToJiyunSwitching||selected.id!=="ara"||location.hash!=="#chat")return;
   const advisor=advisors.find(item=>item.id===id);
   if(!advisor)return;
+  // Start the destination score inside this tap, before the animated change.
+  // Browsers that reject autoplay often allow sound only during this gesture.
+  araMusicAutoWanted=true;
+  startAraMusic(true,id);
   const change=()=>{
-    stopAraMusic();
     selected=advisor;
     topic=advisor.topics[0];
     conversation=read();
@@ -3291,7 +3294,8 @@ $("simliStop").addEventListener("click",()=>{
 });
 
 // Counselor-specific original Web Audio ambient pieces (no external recordings).
-// Never autoplay: every counselor begins silent, opt-in via Music On only.
+// Default ON on entry; browsers may suspend audible autoplay until a real gesture.
+// One counselor's score at a time. Music Off is always respected within the room.
 // The four profiles intentionally differ in key, pacing, note order and timbre.
 let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0,araMusicNextAt=0,araMusicProfileId=null;
 let araMusicAutoWanted=true,araMusicLastAdvisorId=null;
@@ -3405,8 +3409,8 @@ function stopAraMusic(){
   }
   refreshAraMusicToggle();
 }
-function startAraMusic(allowBeforeChat=false){
-  if(!ARA_MUSIC_PROFILES[selected.id]||!araMusicAutoWanted||
+function startAraMusic(allowBeforeChat=false,requestedAdvisorId=selected.id){
+  if(!ARA_MUSIC_PROFILES[requestedAdvisorId]||!araMusicAutoWanted||
     (!allowBeforeChat&&location.hash!=="#chat")||document.hidden)return;
   const Context=window.AudioContext||window.webkitAudioContext;
   if(!Context){
@@ -3414,14 +3418,14 @@ function startAraMusic(allowBeforeChat=false){
     return;
   }
   try{
-    if(araMusicContext&&araMusicProfileId!==selected.id)stopAraMusic();
+    if(araMusicContext&&araMusicProfileId!==requestedAdvisorId)stopAraMusic();
     if(!araMusicContext){
       const ctx=new Context(),master=ctx.createGain();
       master.gain.setValueAtTime(.0001,ctx.currentTime);
       master.gain.setTargetAtTime(.13,ctx.currentTime,.8);
       master.connect(ctx.destination);
       araMusicContext=ctx;araMusicMaster=master;
-      araMusicStep=0;araMusicProfileId=selected.id;
+      araMusicStep=0;araMusicProfileId=requestedAdvisorId;
     }
     const ctx=araMusicContext;
     // Web Audio can remain suspended on a page opened without a gesture.
@@ -3453,6 +3457,8 @@ function onAraMusicActivation(event){
   startAraMusic();
 }
 document.addEventListener("pointerdown",onAraMusicActivation,{capture:true,passive:true});
+// Also recover on browsers that expose only click, not a trusted pointer event.
+document.addEventListener("click",onAraMusicActivation,{capture:true,passive:true});
 document.addEventListener("keydown",event=>{
   if(!event.repeat)onAraMusicActivation(event);
 },{capture:true});
@@ -3469,7 +3475,13 @@ const toggleCounselorMusic=()=>{
 };
 $("araMusicToggle").addEventListener("click",toggleCounselorMusic);
 $("headerMusicToggle").addEventListener("click",toggleCounselorMusic);
-document.addEventListener("visibilitychange",()=>{if(document.hidden){stopAraMusic();stopJiyunSpeech();}});
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){stopAraMusic();stopJiyunSpeech();}
+  else if(location.hash==="#chat"&&araMusicAutoWanted)startAraMusic();
+});
+window.addEventListener("pageshow",event=>{
+  if(event.persisted&&location.hash==="#chat"&&araMusicAutoWanted)startAraMusic();
+});
 window.addEventListener("pagehide",()=>{stopAraMusic();stopJiyunSpeech();clearJiyunSpeechCache();});
 $("startChat").addEventListener("click",openChat);
 $("backToSelect").addEventListener("click",()=>{if(selected.id!=="ara")returnToAraChoices();else if(araStartMode!=="home"){araStartMode="home";renderMessages(false);}else location.assign("/");});
