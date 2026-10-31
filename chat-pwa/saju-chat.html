@@ -1759,6 +1759,7 @@ function makeJiyunSpeechParts(text){
     if(!word)continue;
     if(current&&current.length+word.length+1>100){parts.push(current);current="";}
     if(word.length>100){
+      if(current){parts.push(current);current="";}
       for(let i=0;i<word.length;i+=100)parts.push(word.slice(i,i+100));
     }else current+=(current?" ":"")+word;
   }
@@ -1871,7 +1872,7 @@ function makeJiyunReadingAudio(){
   const speed=makeEl("select","jiyun-reading-audio-speed");
   speed.setAttribute("aria-label","음성 재생 속도");
   for(const rate of [1,1.25,1.5]){
-    const option=makeEl("option","",rate.toFixed(rate===1?1:2).replace(/0$/,"")+"배");
+    const option=makeEl("option","",String(rate)+"배");
     option.value=String(rate);speed.append(option);
   }
   speed.value=String(jiyunSpeechRate);
