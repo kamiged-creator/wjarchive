@@ -3015,8 +3015,8 @@ function renderAll(scrollMode){
   if(location.hash==="#chat"&&araMusicAutoWanted)startAraMusic();
   refreshAraMusicToggle();save();}
 function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;
-  // Try the selected counselor's background score on chat entrance.
-  // On mobile a direct page load may be blocked until the next real user tap.
+  // First page music waits for one genuine touch; later rooms start automatically.
+  // A browser may still block audio if it loses user activation between views.
   if(justOpened)araMusicAutoWanted=true;
   if(!open)stopAraMusic();if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","ara-chooser-no-input","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro");if(araMusicAutoWanted)startAraMusic();}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
@@ -3300,6 +3300,9 @@ $("simliStop").addEventListener("click",()=>{
 // The four profiles intentionally differ in key, pacing, note order and timbre.
 let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0,araMusicNextAt=0,araMusicProfileId=null;
 let araMusicAutoWanted=true,araMusicLastAdvisorId=null;
+// First page is silent until an actual visitor gesture. After that, moving to a
+// different counselor may automatically switch the soundtrack.
+let araMusicFirstTouchUnlocked=false;
 const ARA_MUSIC_STEPS=32;
 const ARA_MUSIC_PROFILES={
   ara:{
@@ -3416,7 +3419,9 @@ function stopAraMusic(){
   refreshAraMusicToggle();
 }
 function startAraMusic(allowBeforeChat=false,requestedAdvisorId=selected.id){
-  if(!ARA_MUSIC_PROFILES[requestedAdvisorId]||!araMusicAutoWanted||
+  // Never attempt audible music on the initial page load. The first real tap
+  // unlocks Web Audio; transitions between counselors stay automatic.
+  if(!araMusicFirstTouchUnlocked||!ARA_MUSIC_PROFILES[requestedAdvisorId]||!araMusicAutoWanted||
     (!allowBeforeChat&&location.hash!=="#chat")||document.hidden)return;
   const Context=window.AudioContext||window.webkitAudioContext;
   if(!Context){
@@ -3467,6 +3472,8 @@ function startAraMusic(allowBeforeChat=false,requestedAdvisorId=selected.id){
 function onAraMusicActivation(event){
   if(!araMusicAutoWanted||location.hash!=="#chat"||document.hidden)return;
   if(event.target?.closest?.("#araMusicToggle,#headerMusicToggle"))return;
+  // This callback runs on a real pointer/touch/key/click; do not unlock on load.
+  araMusicFirstTouchUnlocked=true;
   if(araMusicContext&&araMusicContext.state==="running"&&araMusicTimer!==null)return;
   startAraMusic();
 }
@@ -3487,12 +3494,17 @@ $("jiyunReportReopen").addEventListener("click",()=>{jiyunReportVisible=true;ren
 const toggleCounselorMusic=()=>{
   const playing=Boolean(araMusicContext)&&araMusicContext.state==="running"&&araMusicTimer!==null;
   if(playing){araMusicAutoWanted=false;stopAraMusic();}
-  else{araMusicAutoWanted=true;startAraMusic();}
+  else{
+    araMusicAutoWanted=true;
+    araMusicFirstTouchUnlocked=true; // Manual play button is also a real tap.
+    startAraMusic();
+  }
 };
 $("araMusicToggle").addEventListener("click",toggleCounselorMusic);
 $("headerMusicToggle").addEventListener("click",toggleCounselorMusic);
 $("araMusicActivationHint").addEventListener("click",()=>{
   araMusicAutoWanted=true;
+  araMusicFirstTouchUnlocked=true;
   startAraMusic();
 });
 document.addEventListener("visibilitychange",()=>{
