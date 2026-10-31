@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>지윤 목소리 비교 · 복작소</title><meta name="robots" content="noindex,nofollow">
+<style>
+:root{color-scheme:dark;font-family:Pretendard,"Noto Sans KR",system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;color:#f4e8d7;background:radial-gradient(ellipse at 82% 0%,#443121 0%,transparent 42%),#1d1916}
+main{max-width:620px;margin:0 auto;padding:24px 20px 70px}a{color:#eecb94;text-decoration:none}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 0 32px;border-bottom:1px solid #665039}
+header strong{font-size:16px;color:#efcda3}header a{font-size:13px}
+.eyebrow{font-size:11px;letter-spacing:.22em;color:#cdab7c;text-align:center;margin:37px 0 11px}
+h1{font-family:Georgia,"Noto Serif KR",serif;font-size:clamp(30px,7.2vw,40px);font-weight:500;text-align:center;color:#f1d4a8;margin:0 0 12px}
+.lead{text-align:center;color:#d7c6b5;line-height:1.7;margin:0 0 27px;font-size:15px}
+.sample{border:1px solid #614d3b;border-radius:16px;background:#2b231d;padding:18px;margin:0 0 25px;font-size:14px;color:#e7d6c2;line-height:1.85}
+.sample b{display:block;color:#efcfaa;font-size:12px;margin-bottom:7px}
+.voice-card{display:grid;grid-template-columns:1fr auto;gap:6px 14px;border:1px solid #68513a;border-radius:17px;background:rgba(63,44,31,.7);padding:17px 16px;margin:12px 0}
+.voice-card h2{font-size:18px;margin:0 0 5px;color:#f7dec0}.voice-card p{margin:0;color:#c9b7a4;font-size:13px;line-height:1.5}
+.voice-card .listen{align-self:center;min-width:98px;min-height:45px;border:1px solid #d5ae7f;border-radius:22px;background:#77553a;color:#fff3e2;font-size:14px;font-weight:700;cursor:pointer}
+.listen:disabled{opacity:.55;cursor:wait}.voice-card .status{grid-column:1/-1;font-size:12px;color:#d2b997;min-height:0}
+.selection{margin:30px 0;padding:20px 16px;border-top:1px solid #6b5139;border-bottom:1px solid #6b5139;text-align:center}
+.selection p{font-size:14px;color:#e0c6a5}.options{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+.options button{background:#33271f;color:#e7c9a0;border:1px solid #765a42;border-radius:100px;padding:10px 13px;min-height:40px;font-weight:650}
+.options button.selected{background:#86603e;color:#fff;border-color:#e7ba80}
+#chosen{min-height:23px;line-height:1.7}small.note{display:block;font-size:12px;line-height:1.8;color:#bda58b;margin:22px 0}
+footer{text-align:center;font-size:12px;color:#96816c}
+@media(max-width:375px){.voice-card{padding:14px 12px}.voice-card .listen{min-width:87px}}
+</style></head>
+<body><main>
+<header><strong>✦ 복작소 · 지윤 상담사</strong><a href="./saju-chat.html">상담 화면으로 ↗</a></header>
+<div class="eyebrow">JIYUN · VOICE STUDIO</div>
+<h1>지윤 목소리 비교</h1>
+<p class="lead">세 가지 AI 목소리로 같은 인사말을 들어보세요.<br>가장 편안하고 자연스러운 음색을 골라주세요.</p>
+<div class="sample"><b>모든 후보의 공통 대본</b>안녕하세요. 저는 복작소 지윤 상담사입니다. 오늘은 재물과 사업의 흐름을 차분히 살펴볼게요. 오래된 이야기를 들려드리듯, 하나씩 천천히 말씀드리겠습니다.</div>
+<div class="voice-card" data-voice="coral"><div><h2>① 다정한 지윤</h2><p>따뜻하고 친근하게 말하는 상담사 느낌</p></div><button class="listen" type="button">▶ 들어보기</button><div class="status" aria-live="polite"></div></div>
+<div class="voice-card" data-voice="shimmer"><div><h2>② 부드러운 지윤</h2><p>조용하고 포근한 분위기</p></div><button class="listen" type="button">▶ 들어보기</button><div class="status" aria-live="polite"></div></div>
+<div class="voice-card" data-voice="marin"><div><h2>③ 차분한 지윤</h2><p>안정적이고 믿음직한 분위기</p></div><button class="listen" type="button">▶ 들어보기</button><div class="status" aria-live="polite"></div></div>
+<section class="selection"><p>어떤 목소리가 지윤에게 가장 잘 어울리나요?</p><div class="options"><button type="button" data-pick="coral">① 다정한</button><button type="button" data-pick="shimmer">② 부드러운</button><button type="button" data-pick="marin">③ 차분한</button></div><p id="chosen" role="status">선택 결과는 이 브라우저에만 보관됩니다.</p></section>
+<small class="note">AI로 생성된 목소리이며 실제 사람의 녹음이 아닙니다. 재생을 누르면 짧은 음성을 새로 만들며 소액의 API 비용이 발생합니다. 한 번 만든 샘플은 이 화면을 닫기 전까지 재사용합니다. 시험 페이지일 뿐, 실제 지윤 상담 목소리는 아직 변경되지 않았어요.</small>
+<footer>복작소 · 음성 비교 시험판</footer>
+</main>
+<script>
+(()=>{
+"use strict";
+const cache=new Map();
+let playing=null;
+let playingVoice=null;
+let inFlight=null;
+const cards=[...document.querySelectorAll(".voice-card")];
+const labels={coral:"① 다정한 지윤",shimmer:"② 부드러운 지윤",marin:"③ 차분한 지윤"};
+function stopAudio(){
+ if(playing){playing.pause();playing.currentTime=0;playing=null;playingVoice=null;}
+ for(const card of cards){card.querySelector(".listen").textContent="▶ 들어보기";}
+}
+for(const card of cards){
+ const voice=card.dataset.voice,button=card.querySelector(".listen"),status=card.querySelector(".status");
+ button.addEventListener("click",async()=>{
+  if(playingVoice===voice&&playing&&!playing.paused){stopAudio();return;}
+  if(inFlight)return;
+  stopAudio();
+  if(!cache.has(voice)){
+   inFlight=voice;button.disabled=true;button.textContent="생성 중…";status.textContent="AI 목소리를 준비하고 있습니다.";
+   try{
+    const response=await fetch("/api/jiyun-voice-demo",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({voice}),cache:"no-store"});
+    if(!response.ok){const x=await response.json().catch(()=>({}));throw new Error(x.error||"음성을 불러오지 못했습니다.");}
+    const blob=await response.blob();
+    if(blob.size===0||!blob.type.includes("audio"))throw new Error("음성 데이터가 올바르지 않습니다.");
+    cache.set(voice,URL.createObjectURL(blob));
+    status.textContent="샘플 생성 완료 · 다시 듣기는 추가 비용이 없습니다.";
+   }catch(error){status.textContent=error.message;button.disabled=false;button.textContent="▶ 다시 시도";inFlight=null;return;}
+   button.disabled=false;inFlight=null;
+  }
+  const audio=new Audio(cache.get(voice));playing=audio;playingVoice=voice;
+  button.textContent="Ⅱ 멈추기";
+  audio.onended=()=>{if(playing===audio)stopAudio();};
+  audio.onerror=()=>{if(playing===audio){stopAudio();status.textContent="재생할 수 없습니다. 다른 브라우저에서 확인해 주세요.";}}
+  try{await audio.play();}catch(_){stopAudio();status.textContent="소리가 차단됐습니다. 다시 눌러주세요.";}
+ });
+}
+for(const button of document.querySelectorAll("[data-pick]")){
+ button.addEventListener("click",()=>{
+  for(const b of document.querySelectorAll("[data-pick]"))b.classList.toggle("selected",b===button);
+  try{localStorage.setItem("bokjakso-jiyun-voice-preference",button.dataset.pick);}catch(_){}
+  document.getElementById("chosen").textContent="선택한 목소리: "+labels[button.dataset.pick]+" · 실제 상담에는 아직 적용되지 않았습니다.";
+ });
+}
+try{
+ const saved=localStorage.getItem("bokjakso-jiyun-voice-preference");
+ const b=document.querySelector('[data-pick="'+saved+'"]');if(b)b.click();
+}catch(_){}
+window.addEventListener("pagehide",()=>{stopAudio();for(const url of cache.values())URL.revokeObjectURL(url);});
+})();
+</script></body></html>
