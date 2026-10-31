@@ -999,7 +999,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
   <div id="chatView" class="chat-view" hidden>
   <section class="panel chat-panel chat-full" aria-labelledby="chatTitle">
     <div class="saju-scene" id="sajuScene" aria-hidden="true"><img id="sajuScenePortrait" alt=""><video id="sajuSceneVideo" src="./arasaju-pingpong.mp4" muted autoplay loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="araCounselingVideo" muted loop playsinline webkit-playsinline preload="none" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSceneVideo" src="https://pherh2oisbugqyou.public.blob.vercel-storage.com/jiyun-loop.mp4?v=20261029-fa86f5af" muted loop playsinline webkit-playsinline preload="auto" controlslist="nodownload nofullscreen noremoteplayback noplaybackrate" disablepictureinpicture disableremoteplayback aria-hidden="true" tabindex="-1"></video><video id="jiyunSmokeVideo" muted loop playsinline webkit-playsinline preload="none" aria-hidden="true" tabindex="-1"></video></div>
-    <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="clearChat" class="clear">지우기</button></div>
+    <div class="chat-heading"><button type="button" class="back-to-select" id="backToSelect" aria-label="상담사 다시 선택">‹</button><span id="chatPortrait"></span><div class="chat-info"><h2 id="chatTitle">아라 · 사주</h2><small id="chatSpecialty">따뜻한 상담 · 체험판</small></div><button type="button" id="themeToggle" class="theme-toggle" aria-label="다크 모드로 전환" aria-pressed="false" title="다크 모드로 전환">☾</button><button type="button" id="headerMusicToggle" class="header-music-toggle" aria-label="상담사 배경 음악 켜기" aria-pressed="false" title="음악 켜기">♫</button><button type="button" id="clearChat" class="clear">지우기</button></div>
     <details class="saju-ai-details" id="aiSettingsDetails">
       <summary aria-label="무료 만세력 및 AI 시험 설정 펼치기 또는 접기"><span class="saju-ai-summary"><strong>📜 무료 만세력 풀이</strong><small>AI 시험 설정</small></span><span class="saju-ai-expand" aria-hidden="true">⌄</span></summary>
       <p class="disclaimer">개발 미리보기 · 만세력 기본 풀이 제공. 실제 AI 답변은 시험 기능을 켜고 동의한 경우에만 사용해.</p>
@@ -2992,7 +2992,11 @@ function renderMessages(scrollToEnd=true){
     }
   });
 }
-function renderAll(scrollMode){renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages(scrollMode==="jiyun-entry"?"intro":true);save();}
+function renderAll(scrollMode){
+  // Switching counselors must never reuse the prior counselor's soundtrack.
+  if(araMusicContext&&araMusicProfileId!==selected.id)stopAraMusic();
+  document.body.dataset.sajuMusicProfile=selected.id;
+  renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages(scrollMode==="jiyun-entry"?"intro":true);refreshAraMusicToggle();save();}
 function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;
   // Every fresh chat entrance begins silent. Never carry music from a previous view.
   // The first button label is always "음악 켜기" until the visitor explicitly plays.
@@ -3272,66 +3276,109 @@ $("simliStop").addEventListener("click",()=>{
   syncSimliControls();
 });
 
-// Ara-only gentle soundtrack. No autoplay: sound begins ONLY on Music On.
-// Web Audio's clock schedules notes early so the 32-beat phrase loops
-// continuously, with note tails overlapping across the final/first beat.
-let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0,araMusicNextAt=0;
-const ARA_MUSIC_BEAT_SECONDS=1.5;
+// Counselor-specific original Web Audio ambient pieces (no external recordings).
+// Never autoplay: every counselor begins silent, opt-in via Music On only.
+// The four profiles intentionally differ in key, pacing, note order and timbre.
+let araMusicContext=null,araMusicMaster=null,araMusicTimer=null,araMusicStep=0,araMusicNextAt=0,araMusicProfileId=null;
 const ARA_MUSIC_STEPS=32;
-const ARA_MUSIC_CHORDS=[
-  [174.61,220,261.63,329.63],
-  [196,246.94,293.66,392],
-  [164.81,196,246.94,293.66],
-  [174.61,220,261.63,349.23]
-];
-const ARA_MUSIC_ORDER=[0,2,1,3,2,1,0,2];
+const ARA_MUSIC_PROFILES={
+  ara:{
+    title:"따뜻한 쉼",beat:1.55,tone:"sine",attack:.24,tail:3.4,
+    level:.125,bass:.055,bassTail:13.4,restEvery:0,
+    chords:[
+      [174.61,220,261.63,329.63],
+      [196,246.94,293.66,392],
+      [164.81,196,246.94,293.66],
+      [174.61,220,261.63,349.23]
+    ],
+    order:[0,2,1,3,2,1,0,2]
+  },
+  jian:{
+    title:"달빛의 이야기",beat:1.95,tone:"sine",attack:.58,tail:4.5,
+    level:.103,bass:.054,bassTail:17.0,restEvery:0,
+    chords:[
+      [146.83,174.61,220,293.66],
+      [130.81,164.81,196,261.63],
+      [146.83,174.61,220,261.63],
+      [110,146.83,174.61,220]
+    ],
+    order:[0,2,3,1,0,3,2,1]
+  },
+  seoyun:{
+    title:"연분홍 마음",beat:1.35,tone:"triangle",attack:.11,tail:2.9,
+    level:.073,bass:.038,bassTail:12.2,restEvery:0,
+    chords:[
+      [261.63,329.63,392,523.25],
+      [220,261.63,329.63,440],
+      [246.94,293.66,369.99,493.88],
+      [261.63,329.63,392,523.25]
+    ],
+    order:[0,1,2,1,3,2,1,2]
+  },
+  doyun:{
+    title:"고요한 산길",beat:2.15,tone:"sine",attack:.38,tail:4.8,
+    level:.112,bass:.073,bassTail:19.5,restEvery:2,
+    chords:[
+      [110,146.83,164.81,220],
+      [130.81,164.81,196,261.63],
+      [123.47,146.83,185,246.94],
+      [110,146.83,164.81,220]
+    ],
+    order:[0,2,1,3,0,1,2,1]
+  }
+};
 function refreshAraMusicToggle(){
-  const button=$("araMusicToggle"),playing=Boolean(araMusicContext);
+  const playing=Boolean(araMusicContext)&&araMusicProfileId===selected.id;
   const label=playing?"음악 끄기":"음악 켜기";
-  button.setAttribute("aria-pressed",String(playing));
-  button.setAttribute("aria-label","잔잔한 배경"+label);
-  button.title="잔잔한 배경"+label;
-  button.querySelector(".ara-music-label").textContent=label;
+  const name=ARA_MUSIC_PROFILES[selected.id]?.title||"배경 음악";
+  for(const id of ["araMusicToggle","headerMusicToggle"]){
+    const button=$(id);
+    if(!button)continue;
+    button.setAttribute("aria-pressed",String(playing));
+    button.setAttribute("aria-label",selected.name+" · "+name+" · "+label);
+    button.title=selected.name+" · "+name+" · "+label;
+    const span=button.querySelector(".ara-music-label");
+    if(span)span.textContent=label;
+  }
 }
-function araMusicNote(ctx,freq,when,duration,level){
-  const start=Math.max(ctx.currentTime,when);
-  for(const [multiple,volume] of [[1,level],[2,level*.1]]){
+function araMusicNote(ctx,freq,when,duration,level,profile){
+  const start=Math.max(ctx.currentTime+.005,when);
+  for(const [multiple,volume] of [[1,level],[2,level*.07]]){
     const tone=ctx.createOscillator(),envelope=ctx.createGain();
-    tone.type="sine";
+    tone.type=profile.tone;
     tone.frequency.value=freq*multiple;
+    const end=start+duration;
     envelope.gain.setValueAtTime(.0001,start);
-    envelope.gain.exponentialRampToValueAtTime(Math.max(.0002,volume),start+.18);
-    envelope.gain.exponentialRampToValueAtTime(.0001,start+duration);
+    envelope.gain.exponentialRampToValueAtTime(Math.max(.0002,volume),start+Math.min(profile.attack,duration*.35));
+    envelope.gain.exponentialRampToValueAtTime(.0001,end);
     tone.connect(envelope);
     envelope.connect(araMusicMaster);
     tone.start(start);
-    tone.stop(start+duration+.06);
+    tone.stop(end+.06);
     tone.onended=()=>{tone.disconnect();envelope.disconnect();};
   }
 }
 function araMusicSchedule(){
-  const ctx=araMusicContext;
-  if(!ctx||ctx.state!=="running")return;
-  // Future notes are handled by the audio clock, rather than setInterval timing.
-  // A short look-ahead avoids gaps when mobile JavaScript is briefly delayed.
+  const ctx=araMusicContext,profile=ARA_MUSIC_PROFILES[araMusicProfileId];
+  if(!ctx||!profile||ctx.state!=="running")return;
   if(araMusicNextAt<ctx.currentTime-.2)araMusicNextAt=ctx.currentTime+.08;
   const horizon=ctx.currentTime+3.2;
   while(araMusicNextAt<horizon){
     const beat=araMusicStep%ARA_MUSIC_STEPS;
-    const notes=ARA_MUSIC_CHORDS[Math.floor(beat/8)];
-    const at=araMusicNextAt;
-    // The main voice overlaps the next beat, including beat 31 -> beat 0.
-    araMusicNote(ctx,notes[ARA_MUSIC_ORDER[beat%8]],at,3.1,.15);
-    // Long, quiet bass release crosses chord/loop boundaries without a hard cut.
-    if(beat%8===0)araMusicNote(ctx,notes[0]/2,at,13.2,.065);
+    const chord=profile.chords[Math.floor(beat/8)];
+    const when=araMusicNextAt;
+    if(!profile.restEvery||beat%profile.restEvery===0)
+      araMusicNote(ctx,chord[profile.order[beat%8]],when,profile.tail,profile.level,profile);
+    if(beat%8===0)
+      araMusicNote(ctx,chord[0]/2,when,profile.bassTail,profile.bass,profile);
     araMusicStep=(beat+1)%ARA_MUSIC_STEPS;
-    araMusicNextAt+=ARA_MUSIC_BEAT_SECONDS;
+    araMusicNextAt+=profile.beat;
   }
 }
 function stopAraMusic(){
   if(araMusicTimer!==null){clearInterval(araMusicTimer);araMusicTimer=null;}
   const ctx=araMusicContext,master=araMusicMaster;
-  araMusicContext=null;araMusicMaster=null;araMusicStep=0;araMusicNextAt=0;
+  araMusicContext=null;araMusicMaster=null;araMusicStep=0;araMusicNextAt=0;araMusicProfileId=null;
   if(ctx){
     if(master){
       master.gain.cancelScheduledValues(ctx.currentTime);
@@ -3342,18 +3389,17 @@ function stopAraMusic(){
   refreshAraMusicToggle();
 }
 function startAraMusic(){
-  if(araMusicContext||(selected.id!=="ara"&&selected.id!=="jian")||location.hash!=="#chat")return;
+  if(araMusicContext||!ARA_MUSIC_PROFILES[selected.id]||location.hash!=="#chat")return;
   const Context=window.AudioContext||window.webkitAudioContext;
   if(!Context){$("araMusicToggle").title="이 브라우저는 배경음악을 지원하지 않아요.";return;}
   try{
-    const ctx=new Context();
-    const master=ctx.createGain();
+    const ctx=new Context(),master=ctx.createGain();
     master.gain.setValueAtTime(.0001,ctx.currentTime);
-    master.gain.setTargetAtTime(.17,ctx.currentTime,.8);
+    master.gain.setTargetAtTime(.13,ctx.currentTime,.8);
     master.connect(ctx.destination);
-    araMusicContext=ctx;araMusicMaster=master;araMusicStep=0;
+    araMusicContext=ctx;araMusicMaster=master;araMusicStep=0;araMusicProfileId=selected.id;
     refreshAraMusicToggle();
-    // AudioContext is created/resumed only in response to this explicit click.
+    // Creating/resuming AudioContext requires an explicit visitor tap.
     ctx.resume().then(()=>{
       if(araMusicContext!==ctx)return;
       araMusicNextAt=ctx.currentTime+.08;
@@ -3367,7 +3413,9 @@ const form=$("composer"),input=$("question"),sendBtn=$("send");
 $("jiyunReportClose").addEventListener("click",closeJiyunReport);
 $("jiyunReportChat").addEventListener("click",closeJiyunReport);
 $("jiyunReportReopen").addEventListener("click",()=>{jiyunReportVisible=true;renderMessages(false);});
-$("araMusicToggle").addEventListener("click",()=>{if(araMusicContext)stopAraMusic();else startAraMusic();});
+const toggleCounselorMusic=()=>{if(araMusicContext)stopAraMusic();else startAraMusic();};
+$("araMusicToggle").addEventListener("click",toggleCounselorMusic);
+$("headerMusicToggle").addEventListener("click",toggleCounselorMusic);
 document.addEventListener("visibilitychange",()=>{if(document.hidden){stopAraMusic();stopJiyunSpeech();}});
 window.addEventListener("pagehide",()=>{stopAraMusic();stopJiyunSpeech();clearJiyunSpeechCache();});
 $("startChat").addEventListener("click",openChat);
@@ -4995,6 +5043,24 @@ body.jiyun-report-open .jiyun-reading-audio-regenerate{
   line-height:1;cursor:pointer;
 }
 body.jiyun-report-open .jiyun-reading-audio-regenerate:disabled{opacity:.42;cursor:default}
+
+/* Specialists without a video backdrop still receive their own opt-in music.
+   A compact single-icon button fits the existing mobile chat header. */
+.chat-heading .header-music-toggle{display:none}
+body.chat-active[data-saju-music-profile="doyun"] .chat-full .chat-heading .header-music-toggle,
+body.chat-active[data-saju-music-profile="seoyun"] .chat-full .chat-heading .header-music-toggle{
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  width:38px;min-width:38px;height:38px;padding:0;
+  border:1px solid rgba(155,111,74,.36);border-radius:50%;
+  background:transparent;color:inherit;font:inherit;font-size:20px;
+  cursor:pointer;
+}
+body.chat-active .chat-full .chat-heading .header-music-toggle[aria-pressed="true"]{
+  background:rgba(182,136,83,.17);border-color:#ba946e;
+}
+body.chat-active .chat-full .chat-heading .header-music-toggle:focus-visible{
+  outline:2px solid #c99d6e;outline-offset:2px;
+}
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
