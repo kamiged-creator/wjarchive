@@ -1533,6 +1533,10 @@
       from{opacity:.45;transform:translate(-50%,22px)}
       to{opacity:1;transform:translate(-50%,0)}
     }
+
+    /* No PWA install pop-up on the public site, including first-time visitors.
+       Leave the manifest and service worker intact for optional installation. */
+    .bokjakso-install-backdrop,.bokjakso-install-offer{display:none!important}
 </style>
 </head>
 <body id="top" class="is-loading">
@@ -2770,9 +2774,10 @@
   // Only suppress the banner in the app itself or the install-completion tab.
   function alreadyInstalled(){return runningAsApp() || readSession(installedKey)}
   function refreshOffer(){
-    const shouldShow=isMobile && !alreadyInstalled() && !read(dismissKey);
-    bar.hidden=!shouldShow;
-    backdrop.hidden=!shouldShow;
+    // Installation remains available from the browser menu, but never block
+    // a first-time visitor with a PWA install prompt or dark backdrop.
+    bar.hidden=true;
+    backdrop.hidden=true;
   }
   function hide(){bar.hidden=true;backdrop.hidden=true}
   // Browser storage can survive app uninstall. A deliberate reinstall link
