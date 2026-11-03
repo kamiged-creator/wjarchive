@@ -60,16 +60,32 @@
     footer{padding:42px 0 60px;color:#8e877c;font-size:13px}
     .sticky{display:none}
     @media(max-width:760px){
-      .hero{min-height:88svh}
-      .hero-inner{padding:70px 0 48px}
+      .wrap{padding-left:24px;padding-right:24px}
+      .hero{min-height:88svh;align-items:flex-start}
+      .hero-inner{padding-top:72px;padding-bottom:52px;width:100%}
+      .eyebrow{font-size:10.5px;line-height:1.7;letter-spacing:.16em;margin-bottom:22px;max-width:100%;overflow-wrap:anywhere}
+      h1{font-size:clamp(42px,11.3vw,56px);line-height:1.08;letter-spacing:-.055em;max-width:100%;margin-bottom:28px;word-break:keep-all}
+      h1 em{font-size:.94em;line-height:1.1}
+      .lead{font-size:18px;line-height:1.75;max-width:100%;word-break:keep-all;margin-bottom:30px}
+      .hero-meta{gap:10px;margin:28px 0 34px}
+      .pill{font-size:12.5px;padding:8px 13px}
+      .cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+      .cta-row .btn{width:100%;padding:0 14px;min-height:54px;font-size:16px}
       .intro-grid,.apply-box{grid-template-columns:1fr}
       .artists{grid-template-columns:1fr}
       .artist{min-height:220px}
       .conditions{grid-template-columns:1fr}
       section{padding:64px 0}
-      .sticky{display:block;position:fixed;left:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20}
+      h2{font-size:clamp(34px,9vw,46px);word-break:keep-all}
+      .copy{font-size:17px;word-break:keep-all}
+      .sticky{display:block;position:fixed;left:18px;right:18px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20}
       .sticky .btn{width:100%;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-      body{padding-bottom:78px}
+      body{padding-bottom:86px}
+    }
+    @media(max-width:390px){
+      h1{font-size:40px}
+      .cta-row{grid-template-columns:1fr}
+      .eyebrow{letter-spacing:.12em}
     }
   </style>
 </head>
