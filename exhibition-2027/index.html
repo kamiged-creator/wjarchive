@@ -20,6 +20,36 @@
     .hero:before{content:"";position:absolute;inset:-20%;background:
       radial-gradient(circle at 78% 20%,rgba(184,154,91,.16),transparent 28%),
       radial-gradient(circle at 18% 80%,rgba(255,255,255,.05),transparent 25%)}
+    .hero:after{
+      content:"";
+      position:absolute;
+      top:-40px;
+      right:-32px;
+      width:min(56vw,420px);
+      height:min(56vw,420px);
+      pointer-events:none;
+      opacity:.13;
+      border-radius:50%;
+      background:
+        radial-gradient(circle at 50% 50%,rgba(207,176,108,.14),transparent 64%),
+        repeating-radial-gradient(circle at 50% 50%,rgba(207,176,108,.28) 0 1px,transparent 1px 24px);
+      filter:blur(.15px)
+    }
+    .hero-pattern{
+      position:absolute;
+      top:72px;
+      right:26px;
+      width:min(40vw,230px);
+      height:min(40vw,230px);
+      pointer-events:none;
+      opacity:.11;
+      background-image:
+        linear-gradient(45deg,rgba(207,176,108,.55) 1px,transparent 1px),
+        linear-gradient(-45deg,rgba(207,176,108,.34) 1px,transparent 1px);
+      background-size:18px 18px;
+      -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 0 68%,transparent 73%);
+      mask-image:radial-gradient(circle at 50% 50%,#000 0 68%,transparent 73%)
+    }
     .hero-inner{position:relative;padding:80px 0 60px}
     .eyebrow{font-size:12px;letter-spacing:.32em;color:#d8c59a;margin-bottom:24px}
     h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,9vw,92px);line-height:1.02;font-weight:500;letter-spacing:-.045em;margin:0 0 28px;max-width:900px}
@@ -62,6 +92,8 @@
     @media(max-width:760px){
       .wrap{padding-left:24px;padding-right:24px}
       .hero{min-height:88svh;align-items:flex-start}
+      .hero:after{width:310px;height:310px;right:-92px;top:-40px;opacity:.10}
+      .hero-pattern{width:190px;height:190px;right:-26px;top:86px;opacity:.085}
       .hero-inner{padding-top:72px;padding-bottom:52px;width:100%}
       .eyebrow{font-size:10.5px;line-height:1.7;letter-spacing:.16em;margin-bottom:22px;max-width:100%;overflow-wrap:anywhere}
       h1{font-size:clamp(42px,11.3vw,56px);line-height:1.08;letter-spacing:-.055em;max-width:100%;margin-bottom:28px;word-break:keep-all}
@@ -87,6 +119,7 @@
 </head>
 <body>
   <header class="hero">
+    <div class="hero-pattern" aria-hidden="true"></div>
     <div class="wrap hero-inner">
       <div class="eyebrow">2027 · SUSUNG ARTPia · THREE ARTISTS EXHIBITION</div>
       <h1>세 사람의 시선이<br><em>하나의 전시가 됩니다.</em></h1>
