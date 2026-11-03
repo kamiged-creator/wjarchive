@@ -245,21 +245,21 @@
   <div class="flex flex-col gap-y-2">
     <span class="font-eyebrow text-eyebrow text-primary uppercase tracking-widest">APPLICATION FORM</span>
     <h3 class="font-headline-lg text-headline-lg text-text-parchment">참여작가 신청서</h3>
-    <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+    <p class="font-body-md text-body-md text-stone-300 leading-relaxed">
       복작소에서 직접 접수합니다. 제출된 내용은 참여작가 선정과 전시 관련 연락을 위해서만 사용합니다.
     </p>
   </div>
 
-  <form id="exhibition-application-form" class="rounded-xl border border-primary/25 bg-surface-elevated p-5 shadow-xl flex flex-col gap-5" novalidate>
+  <form id="exhibition-application-form" class="rounded-xl border border-primary/40 bg-surface-elevated p-5 shadow-xl flex flex-col gap-5" novalidate>
     <div class="grid grid-cols-1 gap-4">
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">작가명 / 활동명 <span class="text-primary">*</span></span>
-        <input name="artist_name" required maxlength="80" autocomplete="name" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="예: 이원주"/>
+        <input name="artist_name" required maxlength="80" autocomplete="name" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary" placeholder="예: 이원주"/>
       </label>
 
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">활동 분야 <span class="text-primary">*</span></span>
-        <select name="art_field" required class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary">
+        <select name="art_field" required class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary">
           <option value="">선택해 주세요</option>
           <option>회화</option>
           <option>공예</option>
@@ -273,28 +273,28 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label class="flex flex-col gap-2">
           <span class="font-label-strong text-label-strong text-text-parchment">이메일 <span class="text-primary">*</span></span>
-          <input type="email" name="email" required maxlength="160" autocomplete="email" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="artist@example.com"/>
+          <input type="email" name="email" required maxlength="160" autocomplete="email" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary" placeholder="artist@example.com"/>
         </label>
         <label class="flex flex-col gap-2">
           <span class="font-label-strong text-label-strong text-text-parchment">연락처</span>
-          <input type="tel" name="phone" maxlength="40" autocomplete="tel" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="010-0000-0000"/>
+          <input type="tel" name="phone" maxlength="40" autocomplete="tel" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary" placeholder="010-0000-0000"/>
         </label>
       </div>
 
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">작가 소개 / 작업 세계 <span class="text-primary">*</span></span>
-        <textarea name="bio" required maxlength="1500" rows="5" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary resize-y" placeholder="활동 이력과 작품 세계를 간단히 소개해 주세요."></textarea>
+        <textarea name="bio" required maxlength="1500" rows="5" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary resize-y" placeholder="활동 이력과 작품 세계를 간단히 소개해 주세요."></textarea>
       </label>
 
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">포트폴리오 링크 <span class="text-primary">*</span></span>
-        <input type="url" name="portfolio_url" required maxlength="600" inputmode="url" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="https://..."/>
+        <input type="url" name="portfolio_url" required maxlength="600" inputmode="url" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary" placeholder="https://..."/>
         <span class="font-caption text-caption text-text-muted">웹사이트, Google Drive 공유 링크, Notion 등 열람 가능한 주소를 입력해 주세요.</span>
       </label>
 
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">2027년 전시 참여 가능 여부 <span class="text-primary">*</span></span>
-        <select name="availability" required class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary">
+        <select name="availability" required class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary">
           <option value="">선택해 주세요</option>
           <option>참여 가능합니다</option>
           <option>일정 협의 후 가능합니다</option>
@@ -304,7 +304,7 @@
 
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">기타 전달사항</span>
-        <textarea name="note" maxlength="1000" rows="3" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary resize-y" placeholder="전시에 관해 미리 전달할 내용이 있다면 적어 주세요."></textarea>
+        <textarea name="note" maxlength="1000" rows="3" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary resize-y" placeholder="전시에 관해 미리 전달할 내용이 있다면 적어 주세요."></textarea>
       </label>
 
       <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden"/>
