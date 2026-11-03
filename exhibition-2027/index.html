@@ -246,36 +246,153 @@
     <span class="font-eyebrow text-eyebrow text-primary uppercase tracking-widest">APPLICATION FORM</span>
     <h3 class="font-headline-lg text-headline-lg text-text-parchment">참여작가 신청서</h3>
     <p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-      신청 내용은 Google Forms를 통해 안전하게 제출되며, 포트폴리오 검토 후 개별 연락드립니다.
+      복작소에서 직접 접수합니다. 제출된 내용은 참여작가 선정과 전시 관련 연락을 위해서만 사용합니다.
     </p>
   </div>
 
-  <div class="rounded-xl overflow-hidden border border-border-subtle bg-surface-parchment shadow-xl">
-    <div class="px-4 py-3 bg-surface-elevated flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
-        <span class="font-label-strong text-label-strong text-text-parchment">복작소 · 전시 참여 신청</span>
+  <form id="exhibition-application-form" class="rounded-xl border border-primary/25 bg-surface-elevated p-5 shadow-xl flex flex-col gap-5" novalidate>
+    <div class="grid grid-cols-1 gap-4">
+      <label class="flex flex-col gap-2">
+        <span class="font-label-strong text-label-strong text-text-parchment">작가명 / 활동명 <span class="text-primary">*</span></span>
+        <input name="artist_name" required maxlength="80" autocomplete="name" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="예: 이원주"/>
+      </label>
+
+      <label class="flex flex-col gap-2">
+        <span class="font-label-strong text-label-strong text-text-parchment">활동 분야 <span class="text-primary">*</span></span>
+        <select name="art_field" required class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary">
+          <option value="">선택해 주세요</option>
+          <option>회화</option>
+          <option>공예</option>
+          <option>서예·전각</option>
+          <option>조각·입체</option>
+          <option>현대미술</option>
+          <option>기타</option>
+        </select>
+      </label>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="flex flex-col gap-2">
+          <span class="font-label-strong text-label-strong text-text-parchment">이메일 <span class="text-primary">*</span></span>
+          <input type="email" name="email" required maxlength="160" autocomplete="email" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="artist@example.com"/>
+        </label>
+        <label class="flex flex-col gap-2">
+          <span class="font-label-strong text-label-strong text-text-parchment">연락처</span>
+          <input type="tel" name="phone" maxlength="40" autocomplete="tel" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="010-0000-0000"/>
+        </label>
       </div>
-      <span class="font-caption text-caption text-text-muted">Google Forms</span>
+
+      <label class="flex flex-col gap-2">
+        <span class="font-label-strong text-label-strong text-text-parchment">작가 소개 / 작업 세계 <span class="text-primary">*</span></span>
+        <textarea name="bio" required maxlength="1500" rows="5" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary resize-y" placeholder="활동 이력과 작품 세계를 간단히 소개해 주세요."></textarea>
+      </label>
+
+      <label class="flex flex-col gap-2">
+        <span class="font-label-strong text-label-strong text-text-parchment">포트폴리오 링크 <span class="text-primary">*</span></span>
+        <input type="url" name="portfolio_url" required maxlength="600" inputmode="url" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary" placeholder="https://..."/>
+        <span class="font-caption text-caption text-text-muted">웹사이트, Google Drive 공유 링크, Notion 등 열람 가능한 주소를 입력해 주세요.</span>
+      </label>
+
+      <label class="flex flex-col gap-2">
+        <span class="font-label-strong text-label-strong text-text-parchment">2027년 전시 참여 가능 여부 <span class="text-primary">*</span></span>
+        <select name="availability" required class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary">
+          <option value="">선택해 주세요</option>
+          <option>참여 가능합니다</option>
+          <option>일정 협의 후 가능합니다</option>
+          <option>세부 일정 확인이 필요합니다</option>
+        </select>
+      </label>
+
+      <label class="flex flex-col gap-2">
+        <span class="font-label-strong text-label-strong text-text-parchment">기타 전달사항</span>
+        <textarea name="note" maxlength="1000" rows="3" class="w-full rounded-lg border border-border-muted bg-surface-container px-4 py-3 text-text-parchment outline-none focus:border-primary resize-y" placeholder="전시에 관해 미리 전달할 내용이 있다면 적어 주세요."></textarea>
+      </label>
+
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden"/>
+
+      <label class="flex items-start gap-3 p-4 rounded-lg bg-surface-container">
+        <input id="privacy-agreed" type="checkbox" name="privacy_agreed" required class="mt-1 accent-[#c7aa6d]"/>
+        <span class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+          <strong class="text-text-parchment">개인정보 수집·이용에 동의합니다.</strong><br/>
+          수집 항목은 작가명, 활동 분야, 이메일, 연락처 및 신청 내용이며, 참여작가 선정과 전시 관련 연락 목적으로 사용합니다.
+        </span>
+      </label>
     </div>
-    <iframe
-      src="https://docs.google.com/forms/d/1gOEF5jFHSW4wU2bYEsCzMGv9cdzTpPv7V-ZUMyqgBKE/viewform?embedded=true"
-      title="2027 수성아트피아 3인 기획전 참여작가 신청서"
-      width="100%"
-      height="920"
-      frameborder="0"
-      marginheight="0"
-      marginwidth="0"
-      loading="lazy"
-      class="w-full bg-white">
-      로드 중…
-    </iframe>
-  </div>
+
+    <button id="application-submit" type="submit" class="w-full py-4 px-5 rounded-xl bg-primary-container text-on-primary-container font-label-strong text-label-strong font-bold text-center shadow-md active:scale-[0.99] transition-transform disabled:opacity-50 disabled:cursor-not-allowed">
+      신청서 제출하기
+    </button>
+
+    <div id="application-status" class="hidden rounded-lg px-4 py-3 font-body-md text-body-md leading-relaxed" role="status" aria-live="polite"></div>
+  </form>
 
   <p class="font-caption text-caption text-text-muted text-center leading-relaxed">
-    제출 정보는 참여작가 선정 및 전시 관련 연락 목적으로만 사용됩니다.
+    접수 후 포트폴리오와 전시 방향의 조화를 검토하여 개별 연락드립니다.
   </p>
 </section>
+
+<script>
+(() => {
+  const form = document.getElementById('exhibition-application-form');
+  const submit = document.getElementById('application-submit');
+  const statusBox = document.getElementById('application-status');
+  if (!form || !submit || !statusBox) return;
+
+  const endpoint = 'https://vefeplfczeztbplowjmj.supabase.co/functions/v1/submit-exhibition-application';
+
+  const showStatus = (message, ok) => {
+    statusBox.textContent = message;
+    statusBox.className = ok
+      ? 'rounded-lg px-4 py-3 font-body-md text-body-md leading-relaxed bg-emerald-500/10 text-emerald-300 border border-emerald-500/25'
+      : 'rounded-lg px-4 py-3 font-body-md text-body-md leading-relaxed bg-red-500/10 text-red-300 border border-red-500/25';
+  };
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const data = new FormData(form);
+    const payload = {
+      artist_name: data.get('artist_name'),
+      art_field: data.get('art_field'),
+      email: data.get('email'),
+      phone: data.get('phone'),
+      bio: data.get('bio'),
+      portfolio_url: data.get('portfolio_url'),
+      availability: data.get('availability'),
+      note: data.get('note'),
+      website: data.get('website'),
+      privacy_agreed: data.get('privacy_agreed') === 'on'
+    };
+
+    submit.disabled = true;
+    submit.textContent = '제출 중…';
+    statusBox.className = 'hidden';
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message || '신청서를 제출하지 못했습니다.');
+      }
+
+      form.reset();
+      showStatus(result.message || '신청이 접수되었습니다. 포트폴리오 검토 후 개별 연락드리겠습니다.', true);
+      statusBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (error) {
+      showStatus(error?.message || '접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', false);
+    } finally {
+      submit.disabled = false;
+      submit.textContent = '신청서 제출하기';
+    }
+  });
+})();
+</script>
 
 <!-- 6. FOOTER CITATION -->
 <footer class="px-margin py-8 text-center bg-surface-container-lowest">
