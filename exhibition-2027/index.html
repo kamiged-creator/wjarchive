@@ -257,18 +257,14 @@
         <input name="artist_name" required maxlength="80" autocomplete="name" class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary" placeholder="예: 이원주"/>
       </label>
 
-      <label class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">활동 분야 <span class="text-primary">*</span></span>
-        <select name="art_field" required class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary">
-          <option value="">선택해 주세요</option>
-          <option>회화</option>
-          <option>공예</option>
-          <option>서예·전각</option>
-          <option>조각·입체</option>
-          <option>현대미술</option>
-          <option>기타</option>
-        </select>
-      </label>
+        <input type="hidden" name="art_field" required>
+        <button type="button" class="custom-select-trigger w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-left text-text-parchment outline-none focus:border-primary flex items-center justify-between" data-select="art_field">
+          <span class="custom-select-value text-stone-300">선택해 주세요</span>
+          <span class="material-symbols-outlined text-primary text-[20px]">expand_more</span>
+        </button>
+      </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label class="flex flex-col gap-2">
@@ -292,15 +288,14 @@
         <span class="font-caption text-caption text-text-muted">웹사이트, Google Drive 공유 링크, Notion 등 열람 가능한 주소를 입력해 주세요.</span>
       </label>
 
-      <label class="flex flex-col gap-2">
+      <div class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">2027년 전시 참여 가능 여부 <span class="text-primary">*</span></span>
-        <select name="availability" required class="w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-text-parchment placeholder:text-stone-400 outline-none focus:border-primary">
-          <option value="">선택해 주세요</option>
-          <option>참여 가능합니다</option>
-          <option>일정 협의 후 가능합니다</option>
-          <option>세부 일정 확인이 필요합니다</option>
-        </select>
-      </label>
+        <input type="hidden" name="availability" required>
+        <button type="button" class="custom-select-trigger w-full rounded-lg border border-primary/30 bg-surface-container-high px-4 py-3 text-left text-text-parchment outline-none focus:border-primary flex items-center justify-between" data-select="availability">
+          <span class="custom-select-value text-stone-300">선택해 주세요</span>
+          <span class="material-symbols-outlined text-primary text-[20px]">expand_more</span>
+        </button>
+      </div>
 
       <label class="flex flex-col gap-2">
         <span class="font-label-strong text-label-strong text-text-parchment">기타 전달사항</span>
@@ -330,12 +325,99 @@
   </p>
 </section>
 
+<div id="custom-select-modal" class="fixed inset-0 z-[100] hidden items-end sm:items-center justify-center bg-black/55 backdrop-blur-sm px-4 pb-4 sm:pb-0">
+  <div class="w-full max-w-md rounded-2xl border border-primary/25 bg-surface-elevated shadow-2xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-border-muted flex items-center justify-between">
+      <div>
+        <span class="font-eyebrow text-eyebrow text-primary tracking-widest">SELECT</span>
+        <h4 id="custom-select-title" class="font-headline-md text-headline-md text-text-parchment mt-1">선택해 주세요</h4>
+      </div>
+      <button type="button" id="custom-select-close" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+    <div id="custom-select-options" class="p-3 flex flex-col gap-2"></div>
+  </div>
+</div>
+
+
 <script>
 (() => {
   const form = document.getElementById('exhibition-application-form');
   const submit = document.getElementById('application-submit');
   const statusBox = document.getElementById('application-status');
   if (!form || !submit || !statusBox) return;
+
+  const selectConfig = {
+    art_field: {
+      title: '활동 분야',
+      options: ['회화', '공예', '서예·전각', '조각·입체', '현대미술', '기타']
+    },
+    availability: {
+      title: '2027년 전시 참여 가능 여부',
+      options: ['참여 가능합니다', '일정 협의 후 가능합니다', '세부 일정 확인이 필요합니다']
+    }
+  };
+
+  const modal = document.getElementById('custom-select-modal');
+  const modalTitle = document.getElementById('custom-select-title');
+  const modalOptions = document.getElementById('custom-select-options');
+  const modalClose = document.getElementById('custom-select-close');
+  let activeSelect = null;
+
+  const closeSelect = () => {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    activeSelect = null;
+  };
+
+  document.querySelectorAll('.custom-select-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const name = trigger.dataset.select;
+      const config = selectConfig[name];
+      if (!config || !modal || !modalTitle || !modalOptions) return;
+
+      activeSelect = name;
+      modalTitle.textContent = config.title;
+      modalOptions.innerHTML = '';
+
+      const currentValue = form.elements[name]?.value || '';
+      config.options.forEach((option) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full rounded-xl px-4 py-3.5 flex items-center justify-between text-left border transition-colors ' +
+          (option === currentValue
+            ? 'border-primary bg-primary/12 text-primary'
+            : 'border-border-muted bg-surface-container text-text-parchment');
+        button.innerHTML = '<span class="font-body-lg text-body-lg font-medium">' + option + '</span>' +
+          (option === currentValue
+            ? '<span class="material-symbols-outlined text-primary">check_circle</span>'
+            : '<span class="w-5 h-5 rounded-full border border-outline"></span>');
+
+        button.addEventListener('click', () => {
+          const input = form.elements[name];
+          if (input) input.value = option;
+          const valueEl = trigger.querySelector('.custom-select-value');
+          if (valueEl) {
+            valueEl.textContent = option;
+            valueEl.classList.remove('text-stone-300');
+            valueEl.classList.add('text-text-parchment');
+          }
+          closeSelect();
+        });
+        modalOptions.appendChild(button);
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    });
+  });
+
+  modalClose?.addEventListener('click', closeSelect);
+  modal?.addEventListener('click', (event) => {
+    if (event.target === modal) closeSelect();
+  });
 
   const endpoint = 'https://vefeplfczeztbplowjmj.supabase.co/functions/v1/submit-exhibition-application';
 
