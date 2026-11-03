@@ -107,7 +107,7 @@
 <div class="p-5 rounded-xl bg-surface-elevated shadow-md flex items-center justify-between border border-primary/45">
 <div class="flex flex-col justify-center min-w-0">
 <span class="font-eyebrow text-eyebrow text-on-surface-variant tracking-widest">ARTIST 02</span>
-<h4 class="font-headline-md text-headline-md text-text-parchment mt-1">
+<h4 class="font-headline-md text-[20px] leading-7 text-text-parchment mt-1">
             참여작가 · 작품 공개 예정
           </h4>
 <p class="font-caption text-caption text-text-muted mt-1">
@@ -326,8 +326,8 @@
 </section>
 
 <div id="custom-select-modal" class="fixed inset-0 z-[100] hidden items-end sm:items-center justify-center bg-black/55 backdrop-blur-sm px-4 pb-4 sm:pb-0">
-  <div class="w-full max-w-md rounded-2xl border border-primary/25 bg-surface-elevated shadow-2xl overflow-hidden">
-    <div class="px-5 py-4 border-b border-border-muted flex items-center justify-between">
+  <div class="w-[92%] max-w-sm rounded-2xl border border-primary/25 bg-surface-elevated shadow-2xl overflow-hidden">
+    <div class="px-4 py-3 border-b border-border-muted flex items-center justify-between">
       <div>
         <span class="font-eyebrow text-eyebrow text-primary tracking-widest">SELECT</span>
         <h4 id="custom-select-title" class="font-headline-md text-headline-md text-text-parchment mt-1">선택해 주세요</h4>
@@ -336,7 +336,7 @@
         <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </div>
-    <div id="custom-select-options" class="p-3 flex flex-col gap-2"></div>
+    <div id="custom-select-options" class="p-2.5 flex flex-col gap-2"></div>
   </div>
 </div>
 
@@ -386,7 +386,7 @@
       config.options.forEach((option) => {
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'w-full rounded-xl px-4 py-3.5 flex items-center justify-between text-left border transition-colors ' +
+        button.className = 'w-full rounded-xl px-4 py-3 flex items-center justify-between text-left border transition-colors ' +
           (option === currentValue
             ? 'border-primary bg-primary/12 text-primary'
             : 'border-border-muted bg-surface-container text-text-parchment');
