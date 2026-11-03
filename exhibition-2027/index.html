@@ -1,213 +1,236 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#17140f" />
-  <meta name="description" content="2027 수성아트피아 3인 기획전 참여작가 1인을 모집합니다." />
-  <title>2027 수성아트피아 3인 기획전 · 참여작가 모집</title>
-  <style>
-    :root{
-      --bg:#17140f; --paper:#f3eee3; --ink:#1b1813; --gold:#b89a5b;
-      --line:rgba(184,154,91,.35); --muted:#a89f91; --card:#201b14;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:#f8f5ef;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
-    .hero{min-height:92svh;display:flex;align-items:center;position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
-    .hero:before{content:"";position:absolute;inset:-20%;background:
-      radial-gradient(circle at 78% 20%,rgba(184,154,91,.16),transparent 28%),
-      radial-gradient(circle at 18% 80%,rgba(255,255,255,.05),transparent 25%)}
-    .hero:after{
-      content:"";
-      position:absolute;
-      top:-40px;
-      right:-32px;
-      width:min(56vw,420px);
-      height:min(56vw,420px);
-      pointer-events:none;
-      opacity:.13;
-      border-radius:50%;
-      background:
-        radial-gradient(circle at 50% 50%,rgba(207,176,108,.14),transparent 64%),
-        repeating-radial-gradient(circle at 50% 50%,rgba(207,176,108,.28) 0 1px,transparent 1px 24px);
-      filter:blur(.15px)
-    }
-    .hero-pattern{
-      position:absolute;
-      top:72px;
-      right:26px;
-      width:min(40vw,230px);
-      height:min(40vw,230px);
-      pointer-events:none;
-      opacity:.11;
-      background-image:
-        linear-gradient(45deg,rgba(207,176,108,.55) 1px,transparent 1px),
-        linear-gradient(-45deg,rgba(207,176,108,.34) 1px,transparent 1px);
-      background-size:18px 18px;
-      -webkit-mask-image:radial-gradient(circle at 50% 50%,#000 0 68%,transparent 73%);
-      mask-image:radial-gradient(circle at 50% 50%,#000 0 68%,transparent 73%)
-    }
-    .hero-inner{position:relative;padding:80px 0 60px}
-    .eyebrow{font-size:12px;letter-spacing:.32em;color:#d8c59a;margin-bottom:24px}
-    h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,9vw,92px);line-height:1.02;font-weight:500;letter-spacing:-.045em;margin:0 0 28px;max-width:900px}
-    h1 em{display:block;font-style:normal;color:#c7aa6d}
-    .lead{font-size:clamp(18px,2.5vw,24px);max-width:670px;color:#d9d2c6;margin:0 0 36px}
-    .hero-meta{display:flex;gap:14px;flex-wrap:wrap;margin:34px 0 44px}
-    .pill{border:1px solid var(--line);padding:9px 14px;border-radius:999px;font-size:13px;color:#e7dfcf;background:rgba(255,255,255,.02)}
-    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 22px;border-radius:6px;font-weight:700}
-    .btn-primary{background:#d0b06c;color:#17140f}
-    .btn-ghost{border:0;color:#cfc7bb;background:transparent;padding:0 4px;min-height:auto;font-weight:600;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(207,199,187,.35)}
-    section{padding:68px 0;border-bottom:1px solid rgba(255,255,255,.08)}
-    .section-kicker{font-size:12px;letter-spacing:.26em;color:#c5aa70;margin-bottom:12px}
-    h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,6vw,58px);line-height:1.12;margin:0 0 24px;font-weight:500}
-    .intro-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:42px}
-    .copy{font-size:18px;color:#d7d0c5}
-    .quote{background:var(--paper);color:var(--ink);padding:26px;border-radius:8px;min-height:auto;display:flex;align-items:flex-end}
-    .quote p{font-family:Georgia,serif;font-size:27px;line-height:1.4;margin:0}
-    .artists{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .artist{min-height:320px;background:linear-gradient(160deg,#2d271e,#191510);border:1px solid var(--line);border-radius:8px;padding:26px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
-    .artist.has-art{background:linear-gradient(160deg,#241e16,#15110d);padding:0}
-    .artist.has-art:before{display:none}
-    .artist-art{position:absolute;inset:16px;width:calc(100% - 32px);height:calc(100% - 32px);object-fit:contain;object-position:center;border-radius:6px}
-    .artist-shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,10,7,.84) 0%,rgba(12,10,7,.28) 48%,rgba(12,10,7,.04) 72%)}
-    .artist-copy{position:relative;z-index:2;padding:26px}
-    .artist-copy small{display:block;margin-top:7px;color:#d0c7b8;font-size:13px;letter-spacing:.02em}
-    .artist:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 60% 25%,rgba(184,154,91,.12),transparent 34%)}
-    .artist strong,.artist span{position:relative}
-    .artist strong{font-family:Georgia,serif;font-size:25px;font-weight:500}
-    .artist span{font-size:13px;color:#aaa194;margin-top:6px}
-    .artist.open{background:var(--paper);color:var(--ink)}
-    .artist.open span{color:#6a6257}
-    .conditions{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1)}
-    .condition{background:var(--bg);padding:24px}
-    .condition b{display:block;color:#cdb276;margin-bottom:6px;font-size:13px}
-    .condition span{color:#e2ddd4;font-size:17px}
-    .apply{background:var(--paper);color:var(--ink)}
-    .apply .section-kicker{color:#846b39}
-    .apply-box{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start}
-    .steps{counter-reset:step;display:grid;gap:12px}
-    .step{counter-increment:step;padding:18px 18px 18px 58px;border:1px solid rgba(0,0,0,.12);border-radius:7px;position:relative;background:rgba(255,255,255,.35)}
-    .step:before{content:counter(step);position:absolute;left:18px;top:17px;width:26px;height:26px;border-radius:50%;background:#1c1812;color:#fff;display:grid;place-items:center;font-size:12px}
-    .notice{border-left:3px solid var(--gold);padding:4px 0 4px 18px;color:#4e463b}
-    footer{padding:42px 0 60px;color:#8e877c;font-size:13px}
-    
-    @media(max-width:760px){
-      .wrap{padding-left:24px;padding-right:24px}
-      .hero{min-height:auto;align-items:flex-start}
-      .hero:after{width:310px;height:310px;right:-92px;top:-40px;opacity:.10}
-      .hero-pattern{width:190px;height:190px;right:-26px;top:86px;opacity:.085}
-      .hero-inner{padding-top:58px;padding-bottom:38px;width:100%}
-      .eyebrow{font-size:10.5px;line-height:1.7;letter-spacing:.16em;margin-bottom:22px;max-width:100%;overflow-wrap:anywhere}
-      h1{font-size:clamp(42px,11.3vw,56px);line-height:1.08;letter-spacing:-.055em;max-width:100%;margin-bottom:28px;word-break:keep-all}
-      h1 em{font-size:.94em;line-height:1.1}
-      .lead{font-size:18px;line-height:1.75;max-width:100%;word-break:keep-all;margin-bottom:30px}
-      .hero-meta{gap:10px;margin:28px 0 34px}
-      .pill{font-size:12.5px;padding:8px 13px}
-      .cta-row{display:flex;align-items:center;gap:16px;width:100%}
-      .cta-row .btn-primary{min-width:190px;padding:0 18px;min-height:50px;font-size:16px}.cta-row .btn-ghost{font-size:14px}
-      .intro-grid,.apply-box{grid-template-columns:1fr}
-      .artists{grid-template-columns:1fr}
-      .artist{min-height:220px}
-      .conditions{grid-template-columns:1fr}
-      section{padding:46px 0}
-      h2{font-size:clamp(34px,9vw,46px);word-break:keep-all}
-      .copy{font-size:17px;word-break:keep-all}
-    }
-    @media(max-width:390px){
-      h1{font-size:40px}
-      .eyebrow{letter-spacing:.12em}
+<!DOCTYPE html>
+
+<html class="dark" lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Noto+Serif+KR:wght@400;500;600;700&amp;family=Noto+Serif:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#16130e;color:#e9e1d8;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-error": "#690005", "tertiary": "#e3c58d", "primary-fixed-dim": "#e1c383", "tertiary-fixed-dim": "#e0c38b", "on-secondary-fixed": "#241a00", "secondary-container": "#54451d", "surface-tint": "#e1c383", "inverse-on-surface": "#34302a", "inverse-surface": "#e9e1d8", "surface-container-lowest": "#110e09", "surface-container": "#221f1a", "on-primary-container": "#523e0b", "border-subtle": "rgba(199, 170, 109, 0.2)", "surface-container-high": "#2d2924", "surface-base": "#17140F", "on-background": "#e9e1d8", "secondary-fixed": "#f8e0ab", "on-tertiary-fixed-variant": "#584418", "surface": "#16130e", "secondary-fixed-dim": "#dac491", "secondary": "#dac491", "on-surface": "#e9e1d8", "text-muted": "rgba(248, 245, 239, 0.65)", "error-container": "#93000a", "on-tertiary": "#3f2e03", "on-error-container": "#ffdad6", "surface-dim": "#16130e", "primary-fixed": "#ffdf9d", "surface-container-highest": "#38342e", "border-muted": "rgba(243, 238, 227, 0.12)", "surface-elevated": "#211D17", "on-tertiary-fixed": "#261a00", "on-tertiary-container": "#523e12", "on-secondary-fixed-variant": "#54451d", "tertiary-fixed": "#fedfa4", "error": "#ffb4ab", "surface-container-low": "#1e1b16", "surface-parchment": "#F3EEE3", "outline-variant": "#4d463a", "primary-container": "#c7aa6d", "on-primary": "#3f2e00", "text-dark": "#17140F", "primary": "#e4c586", "on-surface-variant": "#d0c5b5", "text-parchment": "#F8F5EF", "tertiary-container": "#c6aa74", "on-primary-fixed": "#251a00", "accent-gold-glow": "rgba(199, 170, 109, 0.15)", "on-secondary": "#3c2f09", "inverse-primary": "#725b26", "on-secondary-container": "#c8b381", "background": "#16130e", "surface-parchment-light": "#F8F5EF", "surface-variant": "#38342e", "on-primary-fixed-variant": "#584410", "surface-bright": "#3d3933", "outline": "#999081" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-lg": "1.5rem", "space-xl": "2.5rem", "space-sm": "0.5rem", "gutter": "1rem", "space-md": "1rem", "margin": "1.25rem" }, "fontFamily": { "eyebrow": ["Manrope"], "body-md": ["Manrope"], "label-strong": ["Manrope"], "headline-lg": ["Noto Serif", "Noto Serif KR"], "label-sm": ["Manrope"], "display-hero": ["Noto Serif", "Noto Serif KR"], "headline-md": ["Noto Serif", "Noto Serif KR"], "body-lg": ["Manrope"], "curatorial-quote": ["Noto Serif", "Noto Serif KR"], "caption": ["Manrope"] }, "fontSize": { "eyebrow": ["11px", { "lineHeight": "16px", "letterSpacing": "0.18em", "fontWeight": "700" }], "body-md": ["14px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "label-strong": ["13px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-lg": ["26px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }], "display-hero": ["32px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-lg": ["15px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "curatorial-quote": ["20px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "caption": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "400" }] } } } };</script><style>
+    html{scroll-behavior:smooth;}
+    section[id]{scroll-margin-top:76px;}
+    body {
+      min-height: max(884px, 100dvh);
     }
   </style>
-</head>
-<body>
-  <header class="hero">
-    <div class="hero-pattern" aria-hidden="true"></div>
-    <div class="wrap hero-inner">
-      <div class="eyebrow">2027 · SUSUNG ARTPia · THREE ARTISTS EXHIBITION</div>
-      <h1>세 사람의 시선이<br><em>하나의 전시가 됩니다.</em></h1>
-      <p class="lead">2027년 대구 수성아트피아에서 열릴 3인 기획전에 함께할 마지막 한 분의 작가를 찾습니다.</p>
-      <div class="hero-meta">
-        <span class="pill">대구 수성아트피아</span>
-        <span class="pill">2027년 개최 예정</span>
-        <span class="pill">현재 2인 확정</span>
-        <span class="pill">1인 추가 모집</span>
-      </div>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#apply">참여 안내 보기</a>
-        <a class="btn btn-ghost" href="#about">전시 소개</a>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <section id="about">
-      <div class="wrap intro-grid">
-        <div>
-          <div class="section-kicker">ABOUT THE EXHIBITION</div>
-          <h2>단순한 출품이 아니라,<br>함께 완성하는 전시</h2>
-          <p class="copy">이미 두 명의 작가가 참여를 확정했습니다. 남은 한 자리는 작품의 개성과 전시 전체의 조화를 함께 만들어갈 작가를 위해 비워두었습니다. 서로 다른 표현이 만나도 하나의 흐름으로 기억되는, 완성도 있는 3인전을 지향합니다.</p>
-        </div>
-        <div class="quote"><p>“작품을 채우는 한 사람이 아니라,<br>전시의 결을 완성할 한 사람.”</p></div>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap">
-        <div class="section-kicker">THREE ARTISTS</div>
-        <h2>현재 두 자리 확정,<br>마지막 한 자리</h2>
-        <div class="artists">
-          <article class="artist has-art">
-            <img class="artist-art" src="https://ik.imagekit.io/wonjuart/mon.png?updatedAt=1777978787964" alt="흙에 새긴 금빛 마음 · 복작소 대표 작품">
-            <div class="artist-shade" aria-hidden="true"></div>
-            <div class="artist-copy">
-              <strong>ARTIST 01</strong>
-              <small>흙에 새긴 금빛 마음 · 이원주 作</small>
-            </div>
-          </article>
-          <article class="artist"><strong>ARTIST 02</strong><span>참여작가 · 작품 공개 예정</span></article>
-          <article class="artist open"><strong>YOUR PLACE</strong><span>함께할 작가 1인을 기다립니다.</span></article>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="wrap">
-        <div class="section-kicker">RECRUITMENT</div>
-        <h2>이런 작가를 기다립니다</h2>
-        <div class="conditions">
-          <div class="condition"><b>모집 인원</b><span>1명</span></div>
-          <div class="condition"><b>전시 장소</b><span>대구 수성아트피아</span></div>
-          <div class="condition"><b>전시 시기</b><span>2027년 예정</span></div>
-          <div class="condition"><b>모집 분야</b><span>회화 · 공예 · 현대미술 등 협의</span></div>
-          <div class="condition"><b>선정 방식</b><span>작품 포트폴리오 검토 후 협의</span></div>
-          <div class="condition"><b>참여 조건</b><span>전시 일정·비용 등 개별 협의</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="apply" class="apply">
-      <div class="wrap apply-box">
-        <div>
-          <div class="section-kicker">HOW TO APPLY</div>
-          <h2>당신의 작품을<br>보여주세요.</h2>
-          <p class="copy" style="color:#50493f">포트폴리오를 보고 작품성과 전시 방향의 조화를 중심으로 함께할 한 분을 결정합니다.</p>
-          <p class="notice">지원 연락처와 제출 링크는 모집 게시글에 함께 안내됩니다. 이 페이지는 전시의 상세 소개 페이지입니다.</p>
-        </div>
-        <div class="steps">
-          <div class="step"><strong>작가 소개</strong><br><span>활동 분야와 간단한 이력을 준비해주세요.</span></div>
-          <div class="step"><strong>대표 작품</strong><br><span>최근 작품 사진 또는 포트폴리오 링크를 준비해주세요.</span></div>
-          <div class="step"><strong>참여 의사</strong><br><span>2027년 전시 참여 가능 여부를 함께 알려주세요.</span></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="wrap">2027 수성아트피아 3인 기획전 · 참여작가 모집 페이지</div>
-  </footer>
-</body>
-</html>
+</head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary selection:text-on-primary"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe"><div class="h-16 px-margin flex items-center justify-between"><div class="flex flex-col justify-center"><span class="font-eyebrow text-eyebrow uppercase text-primary tracking-widest">2027 SUSEONG ARTPia</span><h1 class="font-headline-md text-headline-md text-on-surface tracking-tight leading-none">Open Call Overview</h1></div><div class="flex items-center gap-space-xs"><a aria-label="전시 및 공모 문의" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary transition-colors" data-path="curatorial-inquiry" href="#how-to-apply"><span class="material-symbols-outlined text-[20px]">chat_bubble_outline</span></a><a href="/" aria-label="복작소 홈" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-space-xs shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">home</span></a></div></div></header><main class="flex flex-col relative w-full pt-16 pb-20 bg-surface min-h-screen"><div class="flex flex-col w-full text-on-surface">
+<!-- 1. HERO & INTRO -->
+<section id="overview" class="relative px-margin pt-6 pb-12 overflow-hidden">
+<!-- Subtle Golden Atmosphere Radial Glow -->
+<div class="absolute -top-16 -right-16 w-72 h-72 rounded-full pointer-events-none opacity-40 bg-[radial-gradient(circle,#c7aa6d_0%,transparent_70%)] blur-2xl"></div>
+<div class="relative z-10 flex flex-col gap-y-4">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-eyebrow text-eyebrow text-primary uppercase tracking-[0.18em]">
+          2027 · SUSUNG ARTPia · THREE ARTISTS EXHIBITION
+        </span>
+</div>
+<h2 class="font-display-hero text-display-hero text-text-parchment leading-tight tracking-tight">
+        세 사람의 시선이<br/>
+<span class="text-primary italic font-headline-lg">하나의 전시가 됩니다.</span>
+</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant pt-1 leading-relaxed">
+        2027년 대구 수성아트피아에서 열릴 3인 기획전에 함께할 마지막 한 분의 작가를 찾습니다.
+      </p><div class="relative w-full overflow-hidden rounded-xl bg-surface-container-high shadow-xl my-2"><img alt="Art exhibition gallery hall with warm atmospheric lighting" class="w-full h-48 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6SsFNEkLjso6hSOOPYhbLOcUGgFDmYCaORTUIcoQzV_RW_wThFb7Oo_-A5wgAg28lq5ObzwYlhO_rXlqY-f8d6gQe1nPQMnhMSHn6Hv5i5RXbYvXdCtXR5nasd78wJdFiXbWII0426wxic-Jx8Tn0iq0leqXGAz3O_dxr-GTi2vjQqYSU9L51505h6SXhZnb0RlydXrnK4JDvuw6wfU9VD8o0R6sosHi9YgfOULGm"/><div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-surface-base/90 via-surface-base/40 to-transparent p-3 flex items-center justify-between"><span class="font-caption text-caption text-text-muted flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary">location_on</span>2027 수성아트피아 기획전시실</span><span class="font-eyebrow text-[11px] text-primary tracking-wider uppercase">EXHIBITION SPACE</span></div></div>
+<!-- Key metadata chips -->
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+          대구 수성아트피아
+        </span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+          2027년 개최 예정
+        </span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm shadow-sm">
+          현재 2인 확정
+        </span>
+<span class="px-3 py-1 rounded-full bg-primary/15 text-primary font-label-sm text-label-sm font-semibold shadow-sm">
+          1인 추가 모집
+        </span>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-3 pt-4">
+<a class="flex-1 py-3 px-5 rounded-lg bg-primary-container text-on-primary-container font-label-strong text-label-strong text-center shadow-md active:scale-[0.98] transition-transform" href="#how-to-apply">
+          참여 안내 보기
+        </a>
+<a class="py-3 px-5 rounded-lg bg-surface-container-high text-text-parchment font-label-strong text-label-strong text-center active:scale-[0.98] transition-transform" href="#about-exhibition">
+          전시 소개
+        </a>
+</div>
+</div>
+</section>
+<!-- 2. ABOUT THE EXHIBITION -->
+<section class="px-margin py-10 flex flex-col gap-y-6" id="about-exhibition">
+<div class="flex flex-col gap-y-2">
+<span class="font-eyebrow text-eyebrow text-primary uppercase tracking-widest">
+        ABOUT THE EXHIBITION
+      </span>
+<h3 class="font-headline-lg text-headline-lg text-text-parchment leading-snug">
+        단순한 출품이 아니라,<br/>
+        함께 완성하는 전시
+      </h3>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+      이미 두 명의 작가가 참여를 확정했습니다. 남은 한 자리는 작품의 개성과 전시 전체의 조화를 함께 만들어갈 작가를 위해 비워두었습니다. 서로 다른 표현이 만나도 하나의 흐름으로 기억되는, 완성도 있는 3인전을 지향합니다.
+    </p>
+<!-- Curatorial Quote Callout Card -->
+<div class="p-6 rounded-xl bg-surface-parchment text-text-dark shadow-xl relative overflow-hidden">
+<div class="absolute -top-4 -right-2 text-stone-300/40 select-none pointer-events-none font-headline-lg text-7xl font-serif">”</div>
+<p class="font-curatorial-quote text-curatorial-quote leading-relaxed tracking-tight relative z-10 text-stone-900">
+        “작품을 채우는 한 사람이 아니라,<br/>전시의 결을 완성할 한 사람.”
+      </p>
+</div>
+</section>
+<!-- 3. THREE ARTISTS STATUS -->
+<section id="artist-selection" class="px-margin py-10 flex flex-col gap-y-6">
+<div class="flex flex-col gap-y-2">
+<span class="font-eyebrow text-eyebrow text-primary uppercase tracking-widest">
+        THREE ARTISTS
+      </span>
+<h3 class="font-headline-lg text-headline-lg text-text-parchment">
+        현재 두 자리 확정,<br/>
+        마지막 한 자리
+      </h3>
+</div>
+<div class="flex flex-col gap-y-4">
+<!-- Confirmed Artist 01 -->
+<div class="p-4 rounded-xl bg-surface-elevated shadow-lg flex items-center gap-4">
+<div class="w-24 h-28 rounded-lg overflow-hidden shrink-0 bg-surface-container-high relative shadow-inner">
+<img alt="이원주 작가 작품 - 흙에 새긴 금빛 마음" class="w-full h-full object-cover" src="https://ik.imagekit.io/wonjuart/mon.png?updatedAt=1777978787964"/>
+</div>
+<div class="flex flex-col justify-center min-w-0 flex-1">
+<span class="font-eyebrow text-eyebrow text-primary tracking-widest">ARTIST 01</span>
+<h4 class="font-headline-md text-headline-md text-text-parchment mt-0.5 truncate">
+            흙에 새긴 금빛 마음
+          </h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            이원주 作
+          </p>
+</div>
+</div>
+<!-- Confirmed Artist 02 (Pending Reveal) -->
+<div class="p-5 rounded-xl bg-surface-elevated shadow-md flex items-center justify-between">
+<div class="flex flex-col justify-center min-w-0">
+<span class="font-eyebrow text-eyebrow text-on-surface-variant tracking-widest">ARTIST 02</span>
+<h4 class="font-headline-md text-headline-md text-text-parchment mt-1">
+            참여작가 · 작품 공개 예정
+          </h4>
+<p class="font-caption text-caption text-text-muted mt-1">
+            선정 완료 후 기획 큐레이션 매칭 진행 중
+          </p>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">lock_clock</span>
+</div>
+</div>
+<!-- Slot 03: YOUR PLACE (Spotlight Callout) -->
+<div class="p-6 rounded-xl bg-surface-parchment text-text-dark shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:shadow-2xl">
+<div class="flex items-center justify-between pb-4">
+<span class="font-eyebrow text-eyebrow text-secondary-container tracking-widest uppercase font-bold">
+            ARTIST 03
+          </span>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-secondary-fixed text-[11px] font-semibold tracking-wider uppercase">
+            NOW OPEN
+          </span>
+</div>
+<div class="flex flex-col">
+<h4 class="font-display-hero text-headline-lg font-headline-lg text-stone-900 tracking-tight">
+            YOUR PLACE
+          </h4>
+<p class="font-body-lg text-body-lg text-stone-700 mt-2 font-medium">
+            함께할 작가 1인을 기다립니다.
+          </p>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. RECRUITMENT SPECIFICATIONS -->
+<section id="application-guidelines" class="px-margin py-10 flex flex-col gap-y-6">
+<div class="flex flex-col gap-y-2">
+<span class="font-eyebrow text-eyebrow text-primary uppercase tracking-widest">
+        RECRUITMENT
+      </span>
+<h3 class="font-headline-lg text-headline-lg text-text-parchment">
+        이런 작가를 기다립니다
+      </h3>
+</div>
+<!-- Metadata Spec List Card -->
+<div class="rounded-xl bg-surface-elevated p-2 shadow-lg flex flex-col">
+<div class="flex items-center justify-between p-3.5 bg-surface-container/40 rounded-lg">
+<span class="font-label-sm text-label-sm text-primary">모집 인원</span>
+<span class="font-label-strong text-label-strong text-text-parchment">1명</span>
+</div>
+<div class="flex items-center justify-between p-3.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">전시 장소</span>
+<span class="font-body-md text-body-md font-medium text-text-parchment">대구 수성아트피아</span>
+</div>
+<div class="flex items-center justify-between p-3.5 bg-surface-container/40 rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant">전시 시기</span>
+<span class="font-body-md text-body-md font-medium text-text-parchment">2027년 예정</span>
+</div>
+<div class="flex items-center justify-between p-3.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">모집 분야</span>
+<span class="font-body-md text-body-md font-medium text-text-parchment">회화 · 공예 · 현대미술 등 협의</span>
+</div>
+<div class="flex items-center justify-between p-3.5 bg-surface-container/40 rounded-lg">
+<span class="font-label-sm text-label-sm text-on-surface-variant">선정 방식</span>
+<span class="font-body-md text-body-md font-medium text-text-parchment">작품 포트폴리오 검토 후 협의</span>
+</div>
+<div class="flex items-center justify-between p-3.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant">참여 조건</span>
+<span class="font-body-md text-body-md font-medium text-text-parchment">전시 일정·비용 등 개별 협의</span>
+</div>
+</div>
+</section>
+<!-- 5. HOW TO APPLY & SUBMISSION STEPS -->
+<section class="px-margin py-10 bg-surface-parchment text-text-dark flex flex-col gap-y-6" id="how-to-apply">
+<div class="flex flex-col gap-y-2">
+<span class="font-eyebrow text-eyebrow text-stone-600 uppercase tracking-widest font-semibold">
+        HOW TO APPLY
+      </span>
+<h3 class="font-headline-lg text-headline-lg text-stone-900 leading-snug">
+        당신의 작품을<br/>보여주세요.
+      </h3>
+<p class="font-body-md text-body-md text-stone-700 mt-1 leading-relaxed">
+        포트폴리오를 보고 작품성과 전시 방향의 조화를 중심으로 함께할 한 분을 결정합니다.
+      </p>
+</div>
+<!-- Curatorial Alert Notice Banner -->
+<div class="p-4 rounded-lg bg-surface-parchment-light shadow-sm flex gap-3">
+<div class="w-1 self-stretch bg-primary-container rounded-full shrink-0"></div>
+<p class="font-body-md text-body-md text-stone-700 leading-relaxed">
+        지원 연락처와 제출 링크는 모집 게시글에 함께 안내됩니다. 이 페이지는 전시의 상세 소개 페이지입니다.
+      </p>
+</div>
+<!-- 3-Step Preparation Cards -->
+<div class="flex flex-col gap-y-3 pt-2">
+<div class="p-4 rounded-xl bg-surface-parchment-light shadow-sm flex items-start gap-3.5">
+<span class="w-6 h-6 rounded-full bg-text-dark text-surface-parchment flex items-center justify-center font-eyebrow text-xs shrink-0 mt-0.5">
+          1
+        </span>
+<div class="flex flex-col">
+<h5 class="font-label-strong text-label-strong text-stone-900">작가 소개</h5>
+<p class="font-body-md text-body-md text-stone-600 mt-0.5">활동 분야와 간단한 이력을 준비해주세요.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-parchment-light shadow-sm flex items-start gap-3.5">
+<span class="w-6 h-6 rounded-full bg-text-dark text-surface-parchment flex items-center justify-center font-eyebrow text-xs shrink-0 mt-0.5">
+          2
+        </span>
+<div class="flex flex-col">
+<h5 class="font-label-strong text-label-strong text-stone-900">대표 작품</h5>
+<p class="font-body-md text-body-md text-stone-600 mt-0.5">최근 작품 사진 또는 포트폴리오 링크를 준비해주세요.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-parchment-light shadow-sm flex items-start gap-3.5">
+<span class="w-6 h-6 rounded-full bg-text-dark text-surface-parchment flex items-center justify-center font-eyebrow text-xs shrink-0 mt-0.5">
+          3
+        </span>
+<div class="flex flex-col">
+<h5 class="font-label-strong text-label-strong text-stone-900">참여 의사</h5>
+<p class="font-body-md text-body-md text-stone-600 mt-0.5">2027년 전시 참여 가능 여부를 함께 알려주세요.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. FOOTER CITATION -->
+<footer class="px-margin py-8 text-center bg-surface-container-lowest">
+<p class="font-caption text-caption text-text-muted tracking-wide">
+      2027 수성아트피아 3인 기획전 · 참여작가 모집 페이지
+    </p>
+</footer>
+</div></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-elevated/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.45)]" data-active-classes="text-primary font-semibold"><div class="flex justify-around items-center h-16 px-space-sm"><a aria-current="page" class="flex flex-col items-center justify-center gap-1 min-w-[56px] h-12 transition-colors text-primary font-semibold" data-path="open-call-overview" href="#overview"><span class="material-symbols-outlined text-[20px]">gallery_thumbnail</span><span class="font-caption text-caption">전시개요</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[56px] h-12 text-on-surface-variant transition-colors" data-path="artist-selection" href="#artist-selection"><span class="material-symbols-outlined text-[20px]">palette</span><span class="font-caption text-caption">작가선정</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[56px] h-12 text-on-surface-variant transition-colors" data-path="application-guidelines" href="#application-guidelines"><span class="material-symbols-outlined text-[20px]">history_edu</span><span class="font-caption text-caption">공모요강</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[56px] h-12 text-on-surface-variant transition-colors" data-path="curatorial-inquiry" href="#how-to-apply"><span class="material-symbols-outlined text-[20px]">contact_support</span><span class="font-caption text-caption">문의·FAQ</span></a></div></nav></body></html>
