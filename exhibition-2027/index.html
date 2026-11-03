@@ -70,6 +70,12 @@
     .quote p{font-family:Georgia,serif;font-size:27px;line-height:1.4;margin:0}
     .artists{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .artist{min-height:320px;background:linear-gradient(160deg,#2d271e,#191510);border:1px solid var(--line);border-radius:8px;padding:26px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+    .artist.has-art{background:#191510;padding:0}
+    .artist.has-art:before{display:none}
+    .artist-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+    .artist-shade{position:absolute;inset:0;background:linear-gradient(to top,rgba(12,10,7,.84) 0%,rgba(12,10,7,.28) 48%,rgba(12,10,7,.04) 72%)}
+    .artist-copy{position:relative;z-index:2;padding:26px}
+    .artist-copy small{display:block;margin-top:7px;color:#d0c7b8;font-size:13px;letter-spacing:.02em}
     .artist:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 60% 25%,rgba(184,154,91,.12),transparent 34%)}
     .artist strong,.artist span{position:relative}
     .artist strong{font-family:Georgia,serif;font-size:25px;font-weight:500}
@@ -154,7 +160,14 @@
         <div class="section-kicker">THREE ARTISTS</div>
         <h2>현재 두 자리 확정,<br>마지막 한 자리</h2>
         <div class="artists">
-          <article class="artist"><strong>ARTIST 01</strong><span>참여작가 · 작품 공개 예정</span></article>
+          <article class="artist has-art">
+            <img class="artist-art" src="/assets/store-mobile-hero-clean.webp" alt="복작소 대표 작품">
+            <div class="artist-shade" aria-hidden="true"></div>
+            <div class="artist-copy">
+              <strong>ARTIST 01</strong>
+              <small>복작소 대표작 · 이원주 作</small>
+            </div>
+          </article>
           <article class="artist"><strong>ARTIST 02</strong><span>참여작가 · 작품 공개 예정</span></article>
           <article class="artist open"><strong>YOUR PLACE</strong><span>함께할 작가 1인을 기다립니다.</span></article>
         </div>
