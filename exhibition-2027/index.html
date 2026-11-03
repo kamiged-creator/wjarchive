@@ -61,14 +61,14 @@
     .btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 22px;border-radius:6px;font-weight:700}
     .btn-primary{background:#d0b06c;color:#17140f}
     .btn-ghost{border:0;color:#cfc7bb;background:transparent;padding:0 4px;min-height:auto;font-weight:600;text-decoration:underline;text-underline-offset:5px;text-decoration-color:rgba(207,199,187,.35)}
-    section{padding:86px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    section{padding:68px 0;border-bottom:1px solid rgba(255,255,255,.08)}
     .section-kicker{font-size:12px;letter-spacing:.26em;color:#c5aa70;margin-bottom:12px}
     h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,6vw,58px);line-height:1.12;margin:0 0 24px;font-weight:500}
     .intro-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:42px}
     .copy{font-size:18px;color:#d7d0c5}
-    .quote{background:var(--paper);color:var(--ink);padding:30px;border-radius:8px;min-height:100%;display:flex;align-items:flex-end}
+    .quote{background:var(--paper);color:var(--ink);padding:26px;border-radius:8px;min-height:auto;display:flex;align-items:flex-end}
     .quote p{font-family:Georgia,serif;font-size:27px;line-height:1.4;margin:0}
-    .artists{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .artists{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .artist{min-height:320px;background:linear-gradient(160deg,#2d271e,#191510);border:1px solid var(--line);border-radius:8px;padding:26px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
     .artist.has-art{background:linear-gradient(160deg,#241e16,#15110d);padding:0}
     .artist.has-art:before{display:none}
@@ -97,10 +97,10 @@
     
     @media(max-width:760px){
       .wrap{padding-left:24px;padding-right:24px}
-      .hero{min-height:88svh;align-items:flex-start}
+      .hero{min-height:auto;align-items:flex-start}
       .hero:after{width:310px;height:310px;right:-92px;top:-40px;opacity:.10}
       .hero-pattern{width:190px;height:190px;right:-26px;top:86px;opacity:.085}
-      .hero-inner{padding-top:72px;padding-bottom:52px;width:100%}
+      .hero-inner{padding-top:58px;padding-bottom:38px;width:100%}
       .eyebrow{font-size:10.5px;line-height:1.7;letter-spacing:.16em;margin-bottom:22px;max-width:100%;overflow-wrap:anywhere}
       h1{font-size:clamp(42px,11.3vw,56px);line-height:1.08;letter-spacing:-.055em;max-width:100%;margin-bottom:28px;word-break:keep-all}
       h1 em{font-size:.94em;line-height:1.1}
@@ -113,7 +113,7 @@
       .artists{grid-template-columns:1fr}
       .artist{min-height:220px}
       .conditions{grid-template-columns:1fr}
-      section{padding:64px 0}
+      section{padding:46px 0}
       h2{font-size:clamp(34px,9vw,46px);word-break:keep-all}
       .copy{font-size:17px;word-break:keep-all}
     }
