@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17140f" />
+  <meta name="description" content="2027 수성아트피아 3인 기획전 참여작가 1인을 모집합니다." />
+  <title>2027 수성아트피아 3인 기획전 · 참여작가 모집</title>
+  <style>
+    :root{
+      --bg:#17140f; --paper:#f3eee3; --ink:#1b1813; --gold:#b89a5b;
+      --line:rgba(184,154,91,.35); --muted:#a89f91; --card:#201b14;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:#f8f5ef;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+    .hero{min-height:92svh;display:flex;align-items:center;position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+    .hero:before{content:"";position:absolute;inset:-20%;background:
+      radial-gradient(circle at 78% 20%,rgba(184,154,91,.16),transparent 28%),
+      radial-gradient(circle at 18% 80%,rgba(255,255,255,.05),transparent 25%)}
+    .hero-inner{position:relative;padding:80px 0 60px}
+    .eyebrow{font-size:12px;letter-spacing:.32em;color:#d8c59a;margin-bottom:24px}
+    h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(44px,9vw,92px);line-height:1.02;font-weight:500;letter-spacing:-.045em;margin:0 0 28px;max-width:900px}
+    h1 em{display:block;font-style:normal;color:#c7aa6d}
+    .lead{font-size:clamp(18px,2.5vw,24px);max-width:670px;color:#d9d2c6;margin:0 0 36px}
+    .hero-meta{display:flex;gap:14px;flex-wrap:wrap;margin:34px 0 44px}
+    .pill{border:1px solid var(--line);padding:9px 14px;border-radius:999px;font-size:13px;color:#e7dfcf;background:rgba(255,255,255,.02)}
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 22px;border-radius:6px;font-weight:700}
+    .btn-primary{background:#d0b06c;color:#17140f}
+    .btn-ghost{border:1px solid rgba(255,255,255,.22);color:#fff}
+    section{padding:86px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .section-kicker{font-size:12px;letter-spacing:.26em;color:#c5aa70;margin-bottom:12px}
+    h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,6vw,58px);line-height:1.12;margin:0 0 24px;font-weight:500}
+    .intro-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:42px}
+    .copy{font-size:18px;color:#d7d0c5}
+    .quote{background:var(--paper);color:var(--ink);padding:30px;border-radius:8px;min-height:100%;display:flex;align-items:flex-end}
+    .quote p{font-family:Georgia,serif;font-size:27px;line-height:1.4;margin:0}
+    .artists{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .artist{min-height:320px;background:linear-gradient(160deg,#2d271e,#191510);border:1px solid var(--line);border-radius:8px;padding:26px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+    .artist:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 60% 25%,rgba(184,154,91,.12),transparent 34%)}
+    .artist strong,.artist span{position:relative}
+    .artist strong{font-family:Georgia,serif;font-size:25px;font-weight:500}
+    .artist span{font-size:13px;color:#aaa194;margin-top:6px}
+    .artist.open{background:var(--paper);color:var(--ink)}
+    .artist.open span{color:#6a6257}
+    .conditions{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1)}
+    .condition{background:var(--bg);padding:24px}
+    .condition b{display:block;color:#cdb276;margin-bottom:6px;font-size:13px}
+    .condition span{color:#e2ddd4;font-size:17px}
+    .apply{background:var(--paper);color:var(--ink)}
+    .apply .section-kicker{color:#846b39}
+    .apply-box{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:start}
+    .steps{counter-reset:step;display:grid;gap:12px}
+    .step{counter-increment:step;padding:18px 18px 18px 58px;border:1px solid rgba(0,0,0,.12);border-radius:7px;position:relative;background:rgba(255,255,255,.35)}
+    .step:before{content:counter(step);position:absolute;left:18px;top:17px;width:26px;height:26px;border-radius:50%;background:#1c1812;color:#fff;display:grid;place-items:center;font-size:12px}
+    .notice{border-left:3px solid var(--gold);padding:4px 0 4px 18px;color:#4e463b}
+    footer{padding:42px 0 60px;color:#8e877c;font-size:13px}
+    .sticky{display:none}
+    @media(max-width:760px){
+      .hero{min-height:88svh}
+      .hero-inner{padding:70px 0 48px}
+      .intro-grid,.apply-box{grid-template-columns:1fr}
+      .artists{grid-template-columns:1fr}
+      .artist{min-height:220px}
+      .conditions{grid-template-columns:1fr}
+      section{padding:64px 0}
+      .sticky{display:block;position:fixed;left:14px;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:20}
+      .sticky .btn{width:100%;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+      body{padding-bottom:78px}
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap hero-inner">
+      <div class="eyebrow">2027 · SUSUNG ARTPia · THREE ARTISTS EXHIBITION</div>
+      <h1>세 사람의 시선이<br><em>하나의 전시가 됩니다.</em></h1>
+      <p class="lead">2027년 대구 수성아트피아에서 열릴 3인 기획전에 함께할 마지막 한 분의 작가를 찾습니다.</p>
+      <div class="hero-meta">
+        <span class="pill">대구 수성아트피아</span>
+        <span class="pill">2027년 개최 예정</span>
+        <span class="pill">현재 2인 확정</span>
+        <span class="pill">1인 추가 모집</span>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#apply">참여 안내 보기</a>
+        <a class="btn btn-ghost" href="#about">전시 소개</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="about">
+      <div class="wrap intro-grid">
+        <div>
+          <div class="section-kicker">ABOUT THE EXHIBITION</div>
+          <h2>단순한 출품이 아니라,<br>함께 완성하는 전시</h2>
+          <p class="copy">이미 두 명의 작가가 참여를 확정했습니다. 남은 한 자리는 작품의 개성과 전시 전체의 조화를 함께 만들어갈 작가를 위해 비워두었습니다. 서로 다른 표현이 만나도 하나의 흐름으로 기억되는, 완성도 있는 3인전을 지향합니다.</p>
+        </div>
+        <div class="quote"><p>“작품을 채우는 한 사람이 아니라,<br>전시의 결을 완성할 한 사람.”</p></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-kicker">THREE ARTISTS</div>
+        <h2>현재 두 자리 확정,<br>마지막 한 자리</h2>
+        <div class="artists">
+          <article class="artist"><strong>ARTIST 01</strong><span>참여작가 · 작품 공개 예정</span></article>
+          <article class="artist"><strong>ARTIST 02</strong><span>참여작가 · 작품 공개 예정</span></article>
+          <article class="artist open"><strong>YOUR PLACE</strong><span>함께할 작가 1인을 기다립니다.</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-kicker">RECRUITMENT</div>
+        <h2>이런 작가를 기다립니다</h2>
+        <div class="conditions">
+          <div class="condition"><b>모집 인원</b><span>1명</span></div>
+          <div class="condition"><b>전시 장소</b><span>대구 수성아트피아</span></div>
+          <div class="condition"><b>전시 시기</b><span>2027년 예정</span></div>
+          <div class="condition"><b>모집 분야</b><span>회화 · 공예 · 현대미술 등 협의</span></div>
+          <div class="condition"><b>선정 방식</b><span>작품 포트폴리오 검토 후 협의</span></div>
+          <div class="condition"><b>참여 조건</b><span>전시 일정·비용 등 개별 협의</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="apply" class="apply">
+      <div class="wrap apply-box">
+        <div>
+          <div class="section-kicker">HOW TO APPLY</div>
+          <h2>당신의 작품을<br>보여주세요.</h2>
+          <p class="copy" style="color:#50493f">포트폴리오를 보고 작품성과 전시 방향의 조화를 중심으로 함께할 한 분을 결정합니다.</p>
+          <p class="notice">지원 연락처와 제출 링크는 모집 게시글에 함께 안내됩니다. 이 페이지는 전시의 상세 소개 페이지입니다.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><strong>작가 소개</strong><br><span>활동 분야와 간단한 이력을 준비해주세요.</span></div>
+          <div class="step"><strong>대표 작품</strong><br><span>최근 작품 사진 또는 포트폴리오 링크를 준비해주세요.</span></div>
+          <div class="step"><strong>참여 의사</strong><br><span>2027년 전시 참여 가능 여부를 함께 알려주세요.</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">2027 수성아트피아 3인 기획전 · 참여작가 모집 페이지</div>
+  </footer>
+
+  <div class="sticky"><a class="btn btn-primary" href="#apply">참여 안내 보기</a></div>
+</body>
+</html>
