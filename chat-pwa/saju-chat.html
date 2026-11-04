@@ -5254,36 +5254,31 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::bef
 </style>
 
 <style>
-/* Kakao-style short corner tail, mirrored for a counselor's incoming greeting. */
+/* One continuous silhouette avoids seams between the bubble and its short curved tail. */
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
+  position:relative!important;
+  isolation:isolate;
   overflow:visible!important;
-  border-top-left-radius:3px!important;
-}
-body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::after{
-  content:"";
-  position:absolute;
-  left:-12px;
-  top:-1px;
-  width:13px;
-  height:15px;
-  z-index:2;
-  pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2213%22%20height%3D%2215%22%20viewBox%3D%220%200%2013%2015%22%3E%3Cpath%20d%3D%22M12.5%201%20C8%201%204%201%201%201%20C3.8%203.5%205%207%205.5%2010.5%20C7.3%2012%209.5%2013%2012.5%2014%22%20fill%3D%22%23281d17%22%20fill-opacity%3D%22.94%22%20stroke%3D%22%23e0c193%22%20stroke-opacity%3D%22.62%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") no-repeat!important;
-  clip-path:none!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:16px!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before{
   content:""!important;
   position:absolute;
-  inset:auto!important;
-  left:-1px!important;
-  top:1px!important;
-  width:2px;
-  height:12px;
-  z-index:1;
+  inset:0 0 0 -10px!important;
+  width:auto!important;
+  height:auto!important;
+  z-index:-1!important;
   pointer-events:none;
-  background:rgba(40,29,23,.94)!important;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20600%20140%22%20preserveAspectRatio%3D%22none%22%3E%3Cpath%20d%3D%22M30%201%20H571%20Q599%201%20599%2029%20V111%20Q599%20139%20571%20139%20H48%20Q20%20139%2020%20111%20V24%20Q9%2020%202%204%20Q15%208%2030%201%20Z%22%20fill%3D%22%23281d17%22%20fill-opacity%3D%22.64%22%20stroke%3D%22%23e0c193%22%20stroke-opacity%3D%22.62%22%20stroke-width%3D%221%22%20vector-effect%3D%22non-scaling-stroke%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat!important;
   clip-path:none!important;
   filter:none!important;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::after{
+  content:none!important;
 }
 </style>
 </body>
