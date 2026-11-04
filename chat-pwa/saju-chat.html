@@ -2977,6 +2977,14 @@ function renderMessages(scrollToEnd=true){
     if(selected.id==="jian"&&conversation.length===1&&
        feed.querySelector(".saju-chat-results")&&scrollSajuReadingStart(feed)){
       // Restored Jiyun readings reopen at the first paragraph, not the last.
+    }else if(scrollToEnd==="reply"){
+      // Open a new answer at the user's question so its first lines stay visible.
+      const questionRow=[...feed.children].filter(row=>row.matches(".message.user")).pop();
+      if(questionRow){
+        const inset=parseFloat(getComputedStyle(feed).scrollPaddingTop)||12;
+        const offset=questionRow.getBoundingClientRect().top-feed.getBoundingClientRect().top;
+        feed.scrollTo({top:Math.max(0,feed.scrollTop+offset-inset),behavior:"instant"});
+      }
     }else if(scrollToEnd==="result"){
       // Show the title at the top of the result card, not its last paragraph.
       const card=feed.querySelector(".saju-chat-results")||feed.querySelector(".intake-card");
@@ -3200,7 +3208,7 @@ async function send(){
     if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
     typingRow.remove();
     $("sajuScene")?.classList.remove("saju-speaking");
-    if(storageKey()===oldKey){save();renderMessages();}
+    if(storageKey()===oldKey){save();renderMessages("reply");}
     sentBusy=false;sendBtn.disabled=false;sendBtn.textContent="전송";
   }
 }
