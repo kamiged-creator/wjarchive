@@ -5210,5 +5210,25 @@ body:is(.ara-cinematic-intro,.ara-portrait-chat,.jiyun-video-chat):not(.jiyun-re
 </style>
 <script defer src="./saju-ara-tone.js"></script>
 <script defer src="./saju-reply-reveal.js"></script>
+
+<style>
+/* Lift Jiyun slightly and reserve two more lines for follow-up conversation. */
+body.jiyun-video-chat:not(.jiyun-report-open):not(.ara-keyboard-open) .chat-full .saju-scene :is(#jiyunSceneVideo,#jiyunSmokeVideo){
+  top:-24px!important;
+  height:calc(100% + 24px)!important;
+}
+body.jiyun-video-chat:not(.jiyun-report-open):not(.ara-keyboard-open) .chat-panel.chat-full > .messages:has(> .saju-chat-results){
+  height:min(calc(42dvh + 60px),470px)!important;
+}
+@media(max-height:650px){
+  body.jiyun-video-chat:not(.jiyun-report-open):not(.ara-keyboard-open) .chat-full .saju-scene :is(#jiyunSceneVideo,#jiyunSmokeVideo){
+    top:-16px!important;
+    height:calc(100% + 16px)!important;
+  }
+  body.jiyun-video-chat:not(.jiyun-report-open):not(.ara-keyboard-open) .chat-panel.chat-full > .messages:has(> .saju-chat-results){
+    height:min(calc(37dvh + 48px),308px)!important;
+  }
+}
+</style>
 </body>
 </html>
