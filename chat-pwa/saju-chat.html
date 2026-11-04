@@ -971,6 +971,15 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
 <script src="/saju-birthplaces.js"></script>
 <script src="/saju-engine.js"></script>
 <link rel="stylesheet" href="./saju-keyboard-space.css">
+
+<style>
+.jiyun-topic-shortcuts{display:flex;gap:8px;max-width:720px;margin:0 auto 8px;padding:0 2px}
+.jiyun-topic-shortcuts[hidden]{display:none!important}
+.jiyun-topic-shortcuts button{min-height:38px;padding:7px 18px;border:1px solid rgba(219,182,132,.55);border-radius:999px;background:rgba(57,42,30,.7);color:#f4dfbf;font:inherit;font-size:14px;cursor:pointer}
+.jiyun-topic-shortcuts button[aria-pressed="true"]{background:#8b6441;border-color:#edcc96;color:#fff4df}
+.jiyun-topic-shortcuts button:focus-visible{outline:2px solid #f4d39b;outline-offset:3px}
+.jiyun-topic-shortcuts button:disabled{opacity:.5;cursor:wait}
+</style>
 </head>
 <body>
 <div class="page">
@@ -1031,7 +1040,7 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
     <div class="jiyun-report-bottom" id="jiyunReportBottom" hidden><button type="button" id="jiyunReportChat">🌸 지윤과 채팅 상담 이어가기 →</button></div>
     <button type="button" class="jiyun-report-reopen" id="jiyunReportReopen" hidden>📜 사주 결과 다시 보기</button>
     <div class="guided-quickbar" id="guidedQuickbar" aria-label="사주 질문 선택" hidden></div>
-    <form class="composer" id="composer" autocomplete="off"><div class="jiyun-consent-gate" id="jiyunConsentGate" hidden role="group" aria-label="지윤 AI 정보 전송 동의"><p>AI 상담을 선택하면 질문·최근 대화·계산된 사주 정보가 OpenAI에 전송됩니다. 동의하지 않으면 전송되지 않아요.</p><div class="jiyun-consent-actions"><button type="button" id="jiyunConsentApprove">동의하고 전송</button><button type="button" id="jiyunConsentCancel">취소</button></div></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
+    <form class="composer" id="composer" autocomplete="off"><div class="jiyun-consent-gate" id="jiyunConsentGate" hidden role="group" aria-label="지윤 AI 정보 전송 동의"><p>AI 상담을 선택하면 질문·최근 대화·계산된 사주 정보가 OpenAI에 전송됩니다. 동의하지 않으면 전송되지 않아요.</p><div class="jiyun-consent-actions"><button type="button" id="jiyunConsentApprove">동의하고 전송</button><button type="button" id="jiyunConsentCancel">취소</button></div></div><div class="jiyun-topic-shortcuts" id="jiyunTopicShortcuts" role="group" aria-label="상담 주제 선택" hidden><button type="button" data-question="제 사업운이 궁금해요." aria-pressed="false">사업운</button><button type="button" data-question="제 재물운이 궁금해요." aria-pressed="false">재물운</button></div><div class="composer-inner"><input id="question" name="saju-chat-message" type="text" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" maxlength="350" placeholder="메시지 입력" enterkeyhint="send" aria-label="상담 질문 입력"><button class="send" id="send" type="submit">전송</button></div></form>
     <p class="tips" id="chatTip">사주 풀이와 AI 상담은 전통적 해석을 참고하는 체험 기능이야. 개인정보 입력을 삼가줘.</p>
   </section>
   </div>
@@ -3051,6 +3060,7 @@ function syncAraAiUi(){
   const jiyunHasBirth=selected.id==="jian"&&Boolean(birthProfiles[birthKey()]);
   if(!jiyunHasBirth)jiyunConsentGate.hidden=true;
   if(jiyunIntroConsent[birthKey()]===true)jiyunConsentGate.hidden=true;
+  $("jiyunTopicShortcuts").hidden=!jiyunHasBirth||!sajuResultCache[birthKey()]?.messages?.length||document.body.classList.contains("jiyun-report-open");
   const chatInput=$("question");
   chatInput.placeholder=ara&&aiAraDirect?"아라 AI 상담 · 메시지 입력":jiyun?"지윤 AI에게 재물·사업 질문":"메시지 입력";
   chatInput.setAttribute("aria-label",ara&&aiAraDirect
@@ -3186,7 +3196,7 @@ async function send(){
     return;
   }
   const oldKey=storageKey(),previous=conversation.slice(-4);
-  sentBusy=true;sendBtn.disabled=true;sendBtn.textContent="대기";
+  sentBusy=true;syncJiyunShortcutSelection();sendBtn.disabled=true;sendBtn.textContent="대기";
   if(selected.id==="ara")araMenuEnabled=false;
   conversation.push(msg("user",content));input.value="";
   // Sending a message dismisses the mobile keyboard so the composer returns to the bottom.
@@ -3209,7 +3219,7 @@ async function send(){
     typingRow.remove();
     $("sajuScene")?.classList.remove("saju-speaking");
     if(storageKey()===oldKey){save();renderMessages("reply");}
-    sentBusy=false;sendBtn.disabled=false;sendBtn.textContent="전송";
+    sentBusy=false;syncJiyunShortcutSelection();sendBtn.disabled=false;sendBtn.textContent="전송";
   }
 }
 // A same-origin serverless route looks up the Simli share link on Vercel.
@@ -3589,6 +3599,21 @@ window.visualViewport?.addEventListener("scroll",syncChatKeyboardViewport);
 window.addEventListener("resize",syncChatKeyboardViewport);
 $("question").addEventListener("focus",()=>{syncChatKeyboardViewport();setTimeout(syncChatKeyboardViewport,250)});
 $("question").addEventListener("blur",()=>{syncChatKeyboardViewport();setTimeout(syncChatKeyboardViewport,250)});
+const jiyunShortcutButtons=[...$("jiyunTopicShortcuts").querySelectorAll("button")];
+function syncJiyunShortcutSelection(){
+  for(const button of jiyunShortcutButtons){
+    button.setAttribute("aria-pressed",String(input.value===button.dataset.question));
+    button.disabled=sentBusy;
+  }
+}
+for(const button of jiyunShortcutButtons){
+  button.addEventListener("click",()=>{
+    if(sentBusy)return;
+    input.value=button.dataset.question;
+    input.dispatchEvent(new Event("input",{bubbles:true}));
+  });
+}
+input.addEventListener("input",syncJiyunShortcutSelection);
 form.addEventListener("submit",e=>{e.preventDefault();send()});
 // Avoid losing the Send tap while the mobile IME is visible; do not refocus after submission.
 sendBtn.addEventListener("pointerdown",e=>{if(e.pointerType!=="mouse"&&e.isPrimary&&document.activeElement===input)e.preventDefault()});
