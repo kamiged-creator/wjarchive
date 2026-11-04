@@ -2900,13 +2900,15 @@ function renderMessages(scrollToEnd=true){
           makeEl("span","jiyun-intro-line jiyun-intro-first","안녕하세요. 복작소 지윤 상담사입니다."),
           makeEl("span","jiyun-intro-line jiyun-intro-second","재물과 사업의 흐름을 차분히 살펴드리겠습니다.")
         );
-        const disclosure=makeEl("small","jiyun-welcome-ai-note","AI 기술을 활용한 사주 해석 서비스");
-        greetingOverlay.append(heading,label,lead,disclosure);
+        greetingOverlay.append(heading,label,lead);
         greetingOverlay.classList.toggle("jiyun-opening-sequence",
           animateWelcome&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
         greetingOverlay.hidden=false;
       }
-      feed.append(makeIntake());
+      const jiyunIntake=makeIntake();
+      const intakeDisclosure=makeEl("small","jiyun-intake-ai-note","AI 기술을 활용한 사주 해석 서비스");
+      jiyunIntake.prepend(intakeDisclosure);
+      feed.append(jiyunIntake);
       continue;
     }
     const row=document.createElement("div");
@@ -5266,6 +5268,21 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before,
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::after{
   content:none!important;
+}
+</style>
+<style>
+body.jiyun-video-chat .chat-full .messages .jiyun-intake-ai-note{
+  display:block;
+  flex-shrink:0;
+  width:100%;
+  margin:0 0 4px;
+  text-align:center;
+  font-size:10.5px;
+  line-height:1.4;
+  font-weight:400;
+  letter-spacing:.01em;
+  color:rgba(255,236,213,.9);
+  text-shadow:0 1px 5px rgba(0,0,0,.95);
 }
 </style>
 </body>
