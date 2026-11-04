@@ -5254,7 +5254,7 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::bef
 </style>
 
 <style>
-/* Raised upper-left speech tail, distinct from the panel's horizontal edge. */
+/* Single thin outline joins the greeting tail to the panel. */
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
   overflow:visible!important;
   border-top-left-radius:16px!important;
@@ -5262,26 +5262,27 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::after{
   content:"";
   position:absolute;
-  left:14px;
-  top:-11px;
-  width:15px;
-  height:12px;
+  left:16px;
+  top:-12px;
+  width:18px;
+  height:13px;
+  z-index:2;
   pointer-events:none;
-  background:rgba(224,193,147,.62);
-  clip-path:polygon(0 0,100% 100%,20% 100%);
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2213%22%20viewBox%3D%220%200%2018%2013%22%3E%3Cpath%20d%3D%22M4%2012%20L1%201%20L17%2012%22%20fill%3D%22%23281d17%22%20fill-opacity%3D%22.94%22%20stroke%3D%22%23e0c193%22%20stroke-opacity%3D%22.62%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E") no-repeat!important;
+  clip-path:none!important;
 }
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before{
   content:""!important;
   position:absolute;
   inset:auto!important;
-  left:15px!important;
-  top:-8px!important;
-  width:12px;
-  height:10px;
+  left:20px!important;
+  top:-1px!important;
+  width:13px;
+  height:2px;
   z-index:1;
   pointer-events:none;
   background:rgba(40,29,23,.94)!important;
-  clip-path:polygon(0 0,100% 100%,20% 100%);
+  clip-path:none!important;
   filter:none!important;
 }
 </style>
