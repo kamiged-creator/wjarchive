@@ -5230,5 +5230,27 @@ body.jiyun-video-chat:not(.jiyun-report-open):not(.ara-keyboard-open) .chat-pane
   }
 }
 </style>
+
+<style>
+/* One quiet speech panel around Jiyun's two greeting lines. */
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
+  display:block!important;
+  width:fit-content;
+  max-width:100%!important;
+  box-sizing:border-box;
+  margin:9px 0 8px!important;
+  padding:12px 14px!important;
+  background:rgba(40,29,23,.64)!important;
+  border:0!important;
+  border-radius:16px!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(3px);
+  text-shadow:0 1px 3px rgba(0,0,0,.55)!important;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before{
+  content:none!important;
+}
+</style>
 </body>
 </html>
