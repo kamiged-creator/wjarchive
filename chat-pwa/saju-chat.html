@@ -973,7 +973,8 @@ body.chat-active{height:var(--saju-chat-height,100dvh)}
 <link rel="stylesheet" href="./saju-keyboard-space.css">
 
 <style>
-.jiyun-topic-shortcuts{display:flex;gap:8px;max-width:720px;margin:0 auto 8px;padding:0 2px}
+body.jiyun-video-chat .chat-full .composer:not([hidden]){flex-direction:column!important;align-items:stretch!important;height:auto!important}
+.jiyun-topic-shortcuts{width:100%;box-sizing:border-box;flex-shrink:0;display:flex;gap:8px;max-width:720px;margin:0 auto 8px;padding:0 2px}
 .jiyun-topic-shortcuts[hidden]{display:none!important}
 .jiyun-topic-shortcuts button{min-height:38px;padding:7px 18px;border:1px solid rgba(219,182,132,.55);border-radius:999px;background:rgba(57,42,30,.7);color:#f4dfbf;font:inherit;font-size:14px;cursor:pointer}
 .jiyun-topic-shortcuts button[aria-pressed="true"]{background:#8b6441;border-color:#edcc96;color:#fff4df}
@@ -1963,6 +1964,7 @@ function makeJiyunReadingAudio(){
 function syncJiyunReportUi(){
  const show=selected.id==="jian"&&jiyunReportVisible&&Boolean(birthProfiles[birthKey()])&&!birthEditing.has(birthKey());
  document.body.classList.toggle("jiyun-report-open",show);
+ $("jiyunTopicShortcuts").hidden=selected.id!=="jian"||show||!birthProfiles[birthKey()]||!sajuResultCache[birthKey()]?.messages?.length;
  $("jiyunReportTop").hidden=!show;
  $("jiyunReportBottom").hidden=!show||!sajuResultCache[birthKey()]?.messages?.length;
  $("jiyunReportReopen").hidden=selected.id!=="jian"||show||!sajuResultCache[birthKey()]?.messages?.length;
@@ -3060,7 +3062,6 @@ function syncAraAiUi(){
   const jiyunHasBirth=selected.id==="jian"&&Boolean(birthProfiles[birthKey()]);
   if(!jiyunHasBirth)jiyunConsentGate.hidden=true;
   if(jiyunIntroConsent[birthKey()]===true)jiyunConsentGate.hidden=true;
-  $("jiyunTopicShortcuts").hidden=!jiyunHasBirth||!sajuResultCache[birthKey()]?.messages?.length||document.body.classList.contains("jiyun-report-open");
   const chatInput=$("question");
   chatInput.placeholder=ara&&aiAraDirect?"아라 AI 상담 · 메시지 입력":jiyun?"지윤 AI에게 재물·사업 질문":"메시지 입력";
   chatInput.setAttribute("aria-label",ara&&aiAraDirect
