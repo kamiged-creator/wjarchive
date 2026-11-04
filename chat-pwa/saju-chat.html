@@ -5252,5 +5252,37 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::bef
   content:none!important;
 }
 </style>
+
+<style>
+/* A small outlined tail on the left of Jiyun's greeting panel. */
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
+  overflow:visible!important;
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::after{
+  content:"";
+  position:absolute;
+  left:-9px;
+  top:19px;
+  width:10px;
+  height:15px;
+  pointer-events:none;
+  background:rgba(224,193,147,.62);
+  clip-path:polygon(100% 0,100% 100%,0 18%);
+}
+body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before{
+  content:""!important;
+  position:absolute;
+  inset:auto!important;
+  left:-7px!important;
+  top:21px!important;
+  width:8px;
+  height:11px;
+  z-index:1;
+  pointer-events:none;
+  background:rgba(40,29,23,.94)!important;
+  clip-path:polygon(100% 0,100% 100%,0 18%);
+  filter:none!important;
+}
+</style>
 </body>
 </html>
