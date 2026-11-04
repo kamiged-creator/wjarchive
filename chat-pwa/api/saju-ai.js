@@ -269,7 +269,7 @@ module.exports=async function handler(req,res){
     const api=await fetch("https://api.openai.com/v1/chat/completions",{
       method:"POST",
       headers:{"Authorization":"Bearer "+process.env.OPENAI_API_KEY,"Content-Type":"application/json"},
-      body:JSON.stringify({model:"gpt-4.1-mini",store:false,max_completion_tokens:firstReading?1000:450,temperature:0.7,
+      body:JSON.stringify({model:"gpt-6.1-sol",store:false,max_completion_tokens:firstReading?3000:2000,reasoning_effort:"low",
         messages:[{role:"system",content:system},...history,{role:"user",content:question}]}),
       signal:controller.signal
     });
@@ -277,7 +277,7 @@ module.exports=async function handler(req,res){
     const obj=await api.json();
     const answer=cleanText(obj?.choices?.[0]?.message?.content,firstReading?2100:1400);
     if(!answer)return send(res,502,{error:"AI가 답변을 만들지 못했어. 다시 시도해 줘."});
-    return send(res,200,{answer,mode:"ai",model:"gpt-4.1-mini",purpose:firstReading?"firstReading":"chat"});
+    return send(res,200,{answer,mode:"ai",model:"gpt-6.1-sol",purpose:firstReading?"firstReading":"chat"});
   }catch(_){
     return send(res,504,{error:"AI 응답 시간이 길어졌어. 잠시 뒤 다시 시도해 줘."});
   }finally{clearTimeout(timer);}
