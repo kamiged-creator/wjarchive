@@ -5254,31 +5254,31 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::bef
 </style>
 
 <style>
-/* Single thin outline joins the greeting tail to the panel. */
+/* Kakao-style short corner tail, mirrored for a counselor's incoming greeting. */
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
   overflow:visible!important;
-  border-top-left-radius:16px!important;
+  border-top-left-radius:3px!important;
 }
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::after{
   content:"";
   position:absolute;
-  left:16px;
-  top:-12px;
-  width:18px;
-  height:13px;
+  left:-12px;
+  top:-1px;
+  width:13px;
+  height:15px;
   z-index:2;
   pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2213%22%20viewBox%3D%220%200%2018%2013%22%3E%3Cpath%20d%3D%22M4%2012%20L1%201%20L17%2012%22%20fill%3D%22%23281d17%22%20fill-opacity%3D%22.94%22%20stroke%3D%22%23e0c193%22%20stroke-opacity%3D%22.62%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E") no-repeat!important;
+  background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2213%22%20height%3D%2215%22%20viewBox%3D%220%200%2013%2015%22%3E%3Cpath%20d%3D%22M12.5%201%20C8%201%204%201%201%201%20C3.8%203.5%205%207%205.5%2010.5%20C7.3%2012%209.5%2013%2012.5%2014%22%20fill%3D%22%23281d17%22%20fill-opacity%3D%22.94%22%20stroke%3D%22%23e0c193%22%20stroke-opacity%3D%22.62%22%20stroke-width%3D%221%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E") no-repeat!important;
   clip-path:none!important;
 }
 body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::before{
   content:""!important;
   position:absolute;
   inset:auto!important;
-  left:20px!important;
-  top:-1px!important;
-  width:13px;
-  height:2px;
+  left:-1px!important;
+  top:1px!important;
+  width:2px;
+  height:12px;
   z-index:1;
   pointer-events:none;
   background:rgba(40,29,23,.94)!important;
