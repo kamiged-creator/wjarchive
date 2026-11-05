@@ -5325,5 +5325,40 @@ body.ara-cinematic-intro:not(.ara-keyboard-open)
   }
 }
 </style>
+
+<style>
+/* Ara heart-chat only: let the seated counselor's hands and wooden desk
+   show through the conversation area. The initial chooser stays unchanged. */
+body.ara-portrait-chat .chat-full .saju-scene::after{
+  background:linear-gradient(180deg,
+    rgba(23,21,19,.07) 0%,
+    rgba(23,21,19,0) 40%,
+    rgba(23,21,19,.03) 55%,
+    rgba(23,21,19,.23) 77%,
+    rgba(23,21,19,.46) 100%)!important;
+}
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
+  background:linear-gradient(to bottom,
+    rgba(23,21,19,0) 0%,
+    rgba(23,21,19,.03) 14%,
+    rgba(23,21,19,.09) 28%,
+    rgba(23,21,19,.20) 52%,
+    rgba(23,21,19,.34) 72%,
+    rgba(23,21,19,.48) 100%)!important;
+}
+/* Only Ara's answers receive a gentle translucent speech bubble.
+   Visitor bubbles, text alignment, scrolling, and quick replies stay as is. */
+body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
+  max-width:min(90%,520px)!important;
+  padding:9px 13px!important;
+  background:rgba(37,28,23,.54)!important;
+  border:1px solid rgba(232,203,164,.19)!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:blur(3px)!important;
+  backdrop-filter:blur(3px)!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.54)!important;
+}
+</style>
 </body>
 </html>
