@@ -5086,10 +5086,12 @@ body.jiyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy::bef
   transition:opacity 800ms cubic-bezier(.22,.8,.25,1);
 }
 body.chat-active .chat-full .saju-scene.ara-seated-ready #araCounselingVideo{opacity:1}
+/* Lift only Ara's seated counselor film by 25px on both the heart
+   welcome and live chat. Fill the added area so no bottom gap appears. */
 body.ara-cinematic-intro .chat-full .saju-scene #araCounselingVideo,
 body.ara-portrait-chat .chat-full .saju-scene #araCounselingVideo{
-  top:0!important;
-  height:100%!important;
+  top:-25px!important;
+  height:calc(100% + 25px)!important;
   object-fit:cover!important;
   object-position:center 42%!important;
   filter:saturate(.96);
