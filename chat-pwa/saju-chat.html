@@ -5298,17 +5298,29 @@ body.jiyun-video-chat .chat-full .messages .jiyun-intake-ai-note{
 </style>
 
 <style>
-/* Ara's first heart-story greeting: keep her face unobstructed.
-   Move only the translucent caption downward, without shifting starter
-   buttons, the composer, or other counselors' captions. */
-body.ara-cinematic-intro:not(.ara-saju-menu):not(.ara-keyboard-open)
-  .chat-full .messages .message.bot .bubble{
+/* Ara heart-story opener: keep the welcome text below her face,
+   while keeping both lines visible above the three quick choice buttons.
+   Scope to heart mode only; do not change the Saju selector, keyboard-open
+   conversation, standing intro, or other counselor layouts. */
+body.ara-cinematic-intro:not(.ara-keyboard-open)
+  .chat-full .messages:has(> .ara-starters.ara-heart-choices) > .message.bot .bubble{
   position:relative;
-  top:calc(clamp(44px,5dvh,66px) + 65px)!important;
+  top:calc(clamp(44px,5dvh,66px) + 55px)!important;
+}
+body.ara-cinematic-intro:not(.ara-keyboard-open)
+  .chat-full .messages > .ara-starters.ara-heart-choices{
+  position:relative;
+  top:35px!important;
 }
 @media(max-height:650px){
-  body.ara-cinematic-intro:not(.ara-saju-menu):not(.ara-keyboard-open)
-    .chat-full .messages .message.bot .bubble{top:89px!important}
+  body.ara-cinematic-intro:not(.ara-keyboard-open)
+    .chat-full .messages:has(> .ara-starters.ara-heart-choices) > .message.bot .bubble{
+    top:54px!important;
+  }
+  body.ara-cinematic-intro:not(.ara-keyboard-open)
+    .chat-full .messages > .ara-starters.ara-heart-choices{
+    top:22px!important;
+  }
 }
 </style>
 </body>
