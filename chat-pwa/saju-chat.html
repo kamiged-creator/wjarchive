@@ -4033,6 +4033,17 @@ body.ara-cinematic-intro .chat-full .messages .message.bot{
     margin-bottom:clamp(55px,10dvh,80px)!important;
   }
 }
+/* Ara heart-story welcome: bring the greeting down onto her chest without
+   moving the three response buttons, changing the Saju chooser, or affecting
+   keyboard-open chat. Leave a comfortable gap above the first button row. */
+body.ara-cinematic-intro:not(.ara-keyboard-open) .chat-full .messages:has(> .ara-starters.ara-heart-choices) > .message.bot{
+  margin-bottom:clamp(32px,6dvh,62px)!important;
+}
+@media(max-height:650px){
+  body.ara-cinematic-intro:not(.ara-keyboard-open) .chat-full .messages:has(> .ara-starters.ara-heart-choices) > .message.bot{
+    margin-bottom:clamp(22px,5dvh,40px)!important;
+  }
+}
 /* While the mobile keyboard is open, return to a compact, scrollable greeting. */
 body.ara-cinematic-intro.ara-keyboard-open .chat-full .messages .message.bot{
   margin-bottom:12px!important;
