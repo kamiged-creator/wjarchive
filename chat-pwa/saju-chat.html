@@ -5360,5 +5360,37 @@ body.ara-portrait-chat .chat-full .messages .message.bot .bubble{
   text-shadow:0 1px 4px rgba(0,0,0,.54)!important;
 }
 </style>
+
+<style>
+/* Ara conversation only: give the latest reply room above the input
+   and let older replies fade out smoothly toward the top of the dock.
+   Keep the welcome screen, bubble colors, desk brightness and IME layout. */
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
+  padding-bottom:86px!important;
+  scroll-padding-bottom:86px!important;
+  -webkit-mask-image:linear-gradient(to bottom,
+    transparent 0px,
+    rgba(0,0,0,.14) 16px,
+    rgba(0,0,0,.42) 37px,
+    rgba(0,0,0,.78) 62px,
+    #000 86px)!important;
+  mask-image:linear-gradient(to bottom,
+    transparent 0px,
+    rgba(0,0,0,.14) 16px,
+    rgba(0,0,0,.42) 37px,
+    rgba(0,0,0,.78) 62px,
+    #000 86px)!important;
+}
+@media(max-height:650px){
+  body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
+    padding-bottom:68px!important;
+    scroll-padding-bottom:68px!important;
+    -webkit-mask-image:linear-gradient(to bottom,
+      transparent 0px,rgba(0,0,0,.42) 26px,#000 60px)!important;
+    mask-image:linear-gradient(to bottom,
+      transparent 0px,rgba(0,0,0,.42) 26px,#000 60px)!important;
+  }
+}
+</style>
 </body>
 </html>
