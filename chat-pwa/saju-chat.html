@@ -2991,12 +2991,32 @@ function renderMessages(scrollToEnd=true){
        feed.querySelector(".saju-chat-results")&&scrollSajuReadingStart(feed)){
       // Restored Jiyun readings reopen at the first paragraph, not the last.
     }else if(scrollToEnd==="reply"){
-      // Open a new answer at the user's question so its first lines stay visible.
-      const questionRow=[...feed.children].filter(row=>row.matches(".message.user")).pop();
-      if(questionRow){
-        const inset=parseFloat(getComputedStyle(feed).scrollPaddingTop)||12;
-        const offset=questionRow.getBoundingClientRect().top-feed.getBoundingClientRect().top;
-        feed.scrollTo({top:Math.max(0,feed.scrollTop+offset-inset),behavior:"instant"});
+      if(document.body.classList.contains("ara-portrait-chat")){
+        // Show Ara's newest complete short reply above the composer.
+        // For a long reply, start at its first line so it remains readable.
+        const lastBot=[...feed.children].filter(row=>row.matches(".message.bot")).pop();
+        if(lastBot){
+          const inset=parseFloat(getComputedStyle(feed).scrollPaddingTop)||78;
+          const available=Math.max(100,feed.clientHeight-inset-36);
+          if(lastBot.getBoundingClientRect().height<=available){
+            feed.scrollTop=feed.scrollHeight;
+            requestAnimationFrame(()=>{
+              if(currentRun===introTypingRun&&document.body.classList.contains("ara-portrait-chat"))
+                feed.scrollTop=feed.scrollHeight;
+            });
+          }else{
+            const offset=lastBot.getBoundingClientRect().top-feed.getBoundingClientRect().top;
+            feed.scrollTop=Math.max(0,feed.scrollTop+offset-inset);
+          }
+        }else feed.scrollTop=feed.scrollHeight;
+      }else{
+        // Leave other counselors' reply positioning unchanged.
+        const questionRow=[...feed.children].filter(row=>row.matches(".message.user")).pop();
+        if(questionRow){
+          const inset=parseFloat(getComputedStyle(feed).scrollPaddingTop)||12;
+          const offset=questionRow.getBoundingClientRect().top-feed.getBoundingClientRect().top;
+          feed.scrollTo({top:Math.max(0,feed.scrollTop+offset-inset),behavior:"instant"});
+        }
       }
     }else if(scrollToEnd==="result"){
       // Show the title at the top of the result card, not its last paragraph.
@@ -5390,6 +5410,28 @@ body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
     mask-image:linear-gradient(to bottom,
       transparent 0px,rgba(0,0,0,.42) 26px,#000 60px)!important;
   }
+}
+</style>
+
+<style>
+/* Ara heart conversation only: extra scroll breathing room lets the
+   newest answer finish above the composer without blocking the desk.
+   Fade older text progressively rather than washing it out too early. */
+body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
+  padding-bottom:80px!important;
+  scroll-padding-bottom:80px;
+  -webkit-mask-image:linear-gradient(to bottom,
+    transparent 0px,
+    rgba(0,0,0,.27) 10px,
+    rgba(0,0,0,.60) 24px,
+    rgba(0,0,0,.87) 43px,
+    #000 63px)!important;
+  mask-image:linear-gradient(to bottom,
+    transparent 0px,
+    rgba(0,0,0,.27) 10px,
+    rgba(0,0,0,.60) 24px,
+    rgba(0,0,0,.87) 43px,
+    #000 63px)!important;
 }
 </style>
 </body>
