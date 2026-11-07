@@ -5436,11 +5436,16 @@ body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
 </style>
 
 <style>
-/* Ara live heart chat only: shift the seated video ~10px to the right.
-   Slight overscan prevents a blank strip at the left edge; video remains
-   clipped by the existing scene. Leave intro, text and controls untouched. */
+/* Ara seated counselor: gently crop the distracting left hanok pillar
+   without editing the actual MP4. Keep Ara centered and preserve overlays. */
+body.ara-cinematic-intro .chat-full .saju-scene #araCounselingVideo{
+  transform:scale(1.11)!important;
+  transform-origin:center center!important;
+}
+/* Keep the previous subtle right shift in live chat while cropping a bit more
+   of the left edge; no changes to messages or the initial chooser controls. */
 body.ara-portrait-chat .chat-full .saju-scene #araCounselingVideo{
-  transform:translateX(clamp(7px,2.5vw,10px)) scale(1.07)!important;
+  transform:translateX(clamp(7px,2.5vw,10px)) scale(1.11)!important;
   transform-origin:center center!important;
 }
 </style>
