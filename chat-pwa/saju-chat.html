@@ -5434,5 +5434,15 @@ body.ara-portrait-chat:not(.ara-keyboard-open) .chat-full .messages{
     #000 63px)!important;
 }
 </style>
+
+<style>
+/* Ara live heart chat only: shift the seated video ~10px to the right.
+   Slight overscan prevents a blank strip at the left edge; video remains
+   clipped by the existing scene. Leave intro, text and controls untouched. */
+body.ara-portrait-chat .chat-full .saju-scene #araCounselingVideo{
+  transform:translateX(clamp(7px,2.5vw,10px)) scale(1.07)!important;
+  transform-origin:center center!important;
+}
+</style>
 </body>
 </html>
