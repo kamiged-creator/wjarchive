@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171411">
+<meta name="robots" content="noindex,nofollow">
+<title>아라 영상상담 | 복작소</title>
+<style>
+:root{color-scheme:dark;--bg:#171411;--panel:#241e19;--line:#6d563e;--gold:#c6a16e;--text:#f7eee2;--muted:#c4b5a3}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Pretendard,"Apple SD Gothic Neo",sans-serif;min-height:100dvh}
+main{width:min(100%,620px);margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:12px 16px calc(18px + env(safe-area-inset-bottom))}
+header{height:48px;display:flex;align-items:center;gap:12px}header a{color:var(--gold);text-decoration:none;font-size:26px}header strong{font-size:16px}
+.scene{position:relative;flex:1;min-height:360px;max-height:72dvh;overflow:hidden;border:1px solid rgba(198,161,110,.35);border-radius:22px;background:#090807}
+.scene video{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center 42%}
+.caption{position:absolute;left:16px;right:16px;bottom:16px;padding:13px 15px;border-radius:15px;background:rgba(0,0,0,.56);backdrop-filter:blur(8px);font-size:15px;line-height:1.6;min-height:48px}
+.intro{text-align:center;padding:17px 4px 12px}.intro h1{font-size:21px;margin:0 0 7px}.intro p{font-size:13px;color:var(--muted);margin:0}
+.transcript{min-height:64px;max-height:150px;overflow:auto;padding:12px 14px;background:var(--panel);border:1px solid rgba(198,161,110,.2);border-radius:15px;line-height:1.6;font-size:14px}
+.controls{display:flex;gap:10px;margin-top:12px}.controls button{border:1px solid var(--line);border-radius:15px;padding:14px 12px;background:#382b20;color:var(--text);font:inherit;font-weight:700;flex:1}
+.controls .primary{background:var(--gold);color:#20170e;border-color:var(--gold)}button:disabled{opacity:.45}
+.status{text-align:center;color:var(--muted);font-size:12px;min-height:34px;padding:9px 2px}
+.note{font-size:11px;color:#a99b8a;line-height:1.5;text-align:center}
+</style>
+</head>
+<body>
+<main>
+<header><a href="/saju-chat.html" aria-label="사주 상담으로 돌아가기">‹</a><strong>복작소 · 아라 영상상담</strong></header>
+<section class="scene" aria-label="아라 상담사 영상">
+<video src="https://pherh2oisbugqyou.public.blob.vercel-storage.com/ara_counselor_final_16s.mp4" autoplay muted loop playsinline preload="auto"></video>
+<div class="caption" id="caption">안녕하세요. 복작소 아라 상담사입니다. 편안하게 말씀해 주세요.</div>
+</section>
+<section class="intro"><h1>아라와 영상대화</h1><p>마이크로 말씀하시면 아라가 듣고 답변해 드려요.</p></section>
+<div class="transcript" id="transcript" aria-live="polite">대화를 시작하면 고객님의 말과 아라의 답변이 여기에 표시됩니다.</div>
+<div class="controls">
+<button class="primary" id="talk" type="button">🎙️ 말하기</button>
+<button id="stop" type="button" disabled>대화 중지</button>
+</div>
+<div class="status" id="status" role="status">마이크 버튼을 눌러 대화를 시작하세요.</div>
+<p class="note">현재는 음성 인식과 상담 답변 연결을 시험하는 미리보기 화면입니다. Laomedeia 음성 출력은 Google Gemini API 키를 서버에 안전하게 설정한 뒤 연결합니다. 기존 아라 영상 원본은 변경하지 않습니다.</p>
+</main>
+<script>
+const talk=document.getElementById("talk"),stop=document.getElementById("stop"),statusEl=document.getElementById("status"),transcript=document.getElementById("transcript"),caption=document.getElementById("caption");
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null,active=false;
+function status(t){statusEl.textContent=t}
+async function askAra(question){
+  transcript.textContent="나: "+question+"\n아라가 답변을 준비하고 있어요…";
+  caption.textContent="잠시만요. 말씀해 주신 이야기를 듣고 있어요.";
+  try{
+    const r=await fetch("/api/saju-ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({consent:true,advisor:"ara",topic:"talk",tone:"formal",question,chart:null,partner:null,flow:null,history:[]}),cache:"no-store"});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok||typeof data.answer!=="string")throw new Error(data.error||"AI 상담 연결을 확인해 주세요.");
+    caption.textContent=data.answer;transcript.textContent="나: "+question+"\n\n아라: "+data.answer;
+    status("답변을 표시했어요. Laomedeia 음성 연결은 서버 설정 후 활성화됩니다.");
+  }catch(e){status(e.message||"상담 연결에 실패했습니다.");}
+}
+function start(){
+ if(!SpeechRecognition){status("이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 또는 Edge에서 이용해 주세요.");return;}
+ recognition=new SpeechRecognition();recognition.lang="ko-KR";recognition.interimResults=false;recognition.maxAlternatives=1;
+ recognition.onstart=()=>{active=true;talk.disabled=true;stop.disabled=false;status("듣고 있어요. 편하게 말씀해 주세요.");};
+ recognition.onresult=e=>{const text=e.results?.[0]?.[0]?.transcript?.trim();if(text)askAra(text);else status("말씀을 인식하지 못했어요. 다시 눌러 주세요.");};
+ recognition.onerror=e=>status(e.error==="not-allowed"?"마이크 권한을 허용해 주세요.":"음성을 인식하지 못했어요. 다시 시도해 주세요.");
+ recognition.onend=()=>{active=false;talk.disabled=false;stop.disabled=true;};
+ try{recognition.start();}catch(_){status("음성 인식을 시작하지 못했습니다.");}
+}
+talk.addEventListener("click",start);
+stop.addEventListener("click",()=>{if(recognition&&active)recognition.stop();status("음성 인식을 중지했어요.");});
+</script>
+</body>
+</html>
