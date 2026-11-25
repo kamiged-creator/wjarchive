@@ -5498,12 +5498,25 @@ body.seoyun-video-chat .chat-full .saju-scene{
    Scoped to Seo-yun so Jiyun's independent scene stays unchanged. */
 body.seoyun-video-chat .chat-full .saju-scene::after{
   background:linear-gradient(180deg,
-    rgba(23,21,19,0) 0%,
-    rgba(23,21,19,0) 48%,
-    rgba(23,21,19,.04) 61%,
-    rgba(23,21,19,.16) 74%,
-    rgba(23,21,19,.42) 88%,
-    #171513 100%)!important;
+    transparent 0%,
+    transparent 72%,
+    rgba(23,21,19,.08) 82%,
+    rgba(23,21,19,.24) 93%,
+    rgba(23,21,19,.42) 100%)!important;
+}
+/* The Jiyun welcome overlay is reused structurally for Seo-yun, but its large
+   220px-tall vignette reaches the face. Keep just the localized readable bubble. */
+body.seoyun-video-chat .chat-full .jiyun-welcome-overlay::before{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+}
+body.seoyun-video-chat .chat-full .jiyun-welcome-overlay{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+body.seoyun-video-chat .chat-full .jiyun-welcome-overlay .jiyun-welcome-copy{
+  background:rgba(40,29,23,.58)!important;
 }
 .saju-scene #seoyunSceneVideo{
   z-index:4;opacity:0;pointer-events:none!important;
