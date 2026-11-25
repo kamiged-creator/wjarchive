@@ -5494,8 +5494,16 @@ body.ara-portrait-chat .chat-full .saju-scene #araCounselingVideo{
 body.seoyun-video-chat .chat-full .saju-scene{
   inset:0 0 62px!important;opacity:1!important;background:#2c2825!important
 }
+/* Keep Seo-yun's face and pink hanbok bright; darken only the lower desk area.
+   Scoped to Seo-yun so Jiyun's independent scene stays unchanged. */
 body.seoyun-video-chat .chat-full .saju-scene::after{
-  background:linear-gradient(180deg,rgba(23,21,19,.12) 0%,rgba(23,21,19,.02) 40%,rgba(23,21,19,.64) 77%,#171513 100%)
+  background:linear-gradient(180deg,
+    rgba(23,21,19,0) 0%,
+    rgba(23,21,19,0) 48%,
+    rgba(23,21,19,.04) 61%,
+    rgba(23,21,19,.16) 74%,
+    rgba(23,21,19,.42) 88%,
+    #171513 100%)!important;
 }
 .saju-scene #seoyunSceneVideo{
   z-index:4;opacity:0;pointer-events:none!important;
