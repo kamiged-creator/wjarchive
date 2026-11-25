@@ -2540,7 +2540,7 @@ function openAdvisorFromAra(id){
     selected=advisor;
     topic=advisor.topics[0];
     conversation=read();
-    renderAll(id==="jian"?"jiyun-entry":undefined);
+    renderAll(id==="jian"?"jiyun-entry":id==="seoyun"?"seoyun-entry":undefined);
   };
   if(id==="jian"&&JIYUN_VIDEO_URL&&!window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){
     araToJiyunSwitching=true;
@@ -2905,7 +2905,9 @@ function renderMessages(scrollToEnd=true){
   closeSajuPopup?.();
   const feed=$("messages");
   document.body.classList.toggle("ara-cinematic-intro",selected.id==="ara"&&conversation.length===1&&conversation[0]?.role==="bot");
-  document.body.classList.toggle("jiyun-video-chat",selected.id==="jian"&&Boolean(JIYUN_VIDEO_URL));
+  document.body.classList.toggle("jiyun-video-chat",
+    (selected.id==="jian"&&Boolean(JIYUN_VIDEO_URL))||
+    (selected.id==="seoyun"&&Boolean(SEOYUN_VIDEO_URL)));
   document.body.classList.toggle("seoyun-video-chat",selected.id==="seoyun"&&Boolean(SEOYUN_VIDEO_URL));
   document.body.classList.toggle("ara-saju-menu",selected.id==="ara"&&araStartMode==="saju"&&araMenuEnabled);
   // Keep Ara's face visible once a conversation begins; older messages stay scrollable below.
@@ -2925,19 +2927,22 @@ function renderMessages(scrollToEnd=true){
   for(const [index,item] of conversation.entries()){
     // Jiyun's opening is an independent branded caption.  Never paint the
     // generic chat bubble first: that caused the earlier "flash below" bug.
-    if(index===0&&selected.id==="jian"&&conversation.length===1&&
+    if(index===0&&(selected.id==="jian"||selected.id==="seoyun")&&conversation.length===1&&
        !birthProfiles[birthKey()]&&!guidedManualMode.has(birthKey())&&greetingOverlay){
       // The large title and greeting belong to the first question only.
       // Once an answer advances the guided interview, the scrolling transcript
       // must never sit on top of a persistent welcome caption.
       const firstQuestion=!guidedDrafts[birthKey()]?.replies?.length;
       if(firstQuestion){
-        const heading=makeEl("h2","jiyun-welcome-title","재물·사업운");
-        const label=makeEl("p","jiyun-welcome-subtitle","복작소 · 지윤 상담사");
+        const isSeoyun=selected.id==="seoyun";
+        const heading=makeEl("h2","jiyun-welcome-title",isSeoyun?"연애·궁합":"재물·사업운");
+        const label=makeEl("p","jiyun-welcome-subtitle",isSeoyun?"복작소 · 서윤 상담사":"복작소 · 지윤 상담사");
         const lead=makeEl("p","jiyun-welcome-copy");
         lead.append(
-          makeEl("span","jiyun-intro-line jiyun-intro-first","안녕하세요. 복작소 지윤 상담사입니다."),
-          makeEl("span","jiyun-intro-line jiyun-intro-second","재물과 사업의 흐름을 차분히 살펴드리겠습니다.")
+          makeEl("span","jiyun-intro-line jiyun-intro-first",
+            isSeoyun?"안녕하세요. 복작소 서윤 상담사입니다.":"안녕하세요. 복작소 지윤 상담사입니다."),
+          makeEl("span","jiyun-intro-line jiyun-intro-second",
+            isSeoyun?"두 분의 인연과 마음의 흐름을 차분히 살펴드릴게요.":"재물과 사업의 흐름을 차분히 살펴드리겠습니다.")
         );
         greetingOverlay.append(heading,label,lead);
         greetingOverlay.classList.toggle("jiyun-opening-sequence",
@@ -2945,7 +2950,7 @@ function renderMessages(scrollToEnd=true){
         greetingOverlay.hidden=false;
       }
       const jiyunIntake=makeIntake();
-      const intakeDisclosure=makeEl("small","jiyun-intake-ai-note","AI 기술을 활용한 사주 해석 서비스");
+      const intakeDisclosure=makeEl("small","jiyun-intake-ai-note",selected.id==="seoyun"?"AI 기술을 활용한 궁합·사주 해석 서비스":"AI 기술을 활용한 사주 해석 서비스");
       jiyunIntake.prepend(intakeDisclosure);
       feed.append(jiyunIntake);
       continue;
@@ -2986,8 +2991,8 @@ function renderMessages(scrollToEnd=true){
   // Jiyun's title is immediate. Stagger the two greeting lines, then reveal
   // the first question and choices together; later questions never wait.
   // Never restart the delay on later guided steps or repeat visits.
-  const jiyunFirstWelcome=selected.id==="jian"&&Boolean(greetingOverlay&&!greetingOverlay.hidden);
-  const sequenceWelcome=animateWelcome&&(selected.id!=="jian"||jiyunFirstWelcome)&&
+  const videoCounselorWelcome=(selected.id==="jian"||selected.id==="seoyun")&&Boolean(greetingOverlay&&!greetingOverlay.hidden);
+  const sequenceWelcome=animateWelcome&&(!(selected.id==="jian"||selected.id==="seoyun")||videoCounselorWelcome)&&
     !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches&&
     Boolean(feed.querySelector(".guided-current"));
   if(sequenceWelcome){
@@ -2995,7 +3000,7 @@ function renderMessages(scrollToEnd=true){
     quickbar.classList.add("intro-await-question");
     quickbar.inert=true;
     quickbar.setAttribute("aria-hidden","true");
-    const greetingMs=selected.id==="jian"?2300:2250;
+    const greetingMs=(selected.id==="jian"||selected.id==="seoyun")?2300:2250;
     setTimeout(()=>{
       if(currentRun!==introTypingRun||!feed.isConnected||location.hash!=="#chat")return;
       feed.classList.remove("intro-await-question");
@@ -3091,14 +3096,14 @@ function renderAll(scrollMode){
   }
   if(araMusicContext&&araMusicProfileId!==selected.id)stopAraMusic();
   document.body.dataset.sajuMusicProfile=selected.id;
-  renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages(scrollMode==="jiyun-entry"?"intro":true);
+  renderAdvisors();renderTopics();syncSimliAdvisor();$("chatTitle").textContent=selected.name+" · "+topic[2];$("chatSpecialty").textContent=selected.specialty+(selected.id==="ara"?"":" · 체험판");$("chatPortrait").replaceChildren(portrait(selected.id,selected.name,"header-portrait"));syncAraAiUi();$("startChat").textContent=selected.id==="harin"?"하린과 음성 상담 시작하기 ↗":selected.name+(selected.id==="ara"?"와":"과")+" "+topic[2]+" 채팅 시작하기 →";$("harinNewWindowHint").hidden=selected.id!=="harin";renderMessages((scrollMode==="jiyun-entry"||scrollMode==="seoyun-entry")?"intro":true);
   if(location.hash==="#chat"&&araMusicAutoWanted)startAraMusic();
   refreshAraMusicToggle();save();}
 function syncChatView(){const open=location.hash==="#chat";const justOpened=open&&!chatPreviouslyOpen;chatPreviouslyOpen=open;
   // First page music waits for one genuine touch; later rooms start automatically.
   // A browser may still block audio if it loses user activation between views.
   if(justOpened)araMusicAutoWanted=true;
-  if(!open)stopAraMusic();if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","ara-chooser-no-input","jiyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro");if(araMusicAutoWanted)startAraMusic();}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
+  if(!open)stopAraMusic();if(!open){stopSimliSession();$("sajuSceneVideo")?.pause();resetAraSeatedPlayback();resetJiyunPlayback();resetSeoyunPlayback();$("jiyunSmokeVideo")?.pause();document.body.classList.remove("ara-cinematic-intro","ara-portrait-chat","ara-chooser-no-input","jiyun-video-chat","seoyun-video-chat","ara-to-jiyun-leaving","jiyun-handoff-entering");}document.body.classList.toggle("chat-active",open);if(open)requestAnimationFrame(syncChatKeyboardViewport);else {document.body.classList.remove("ara-keyboard-open");for(const key of ["--saju-chat-height","--saju-chat-top","--saju-resting-chat-height"])document.body.style.removeProperty(key);chatRestingHeight=0;}$("selectionView").hidden=open;document.querySelector(".top").hidden=open;$("chatView").hidden=!open;if(justOpened){const view=$("chatView");view.classList.remove("chat-entering");void view.offsetWidth;view.classList.add("chat-entering");renderMessages("intro");if(araMusicAutoWanted)startAraMusic();}else if(!open){$("chatView").classList.remove("chat-entering");introTypingRun++;$("question").blur();}}
 function openHarinWindow(){window.open("/api/simli-session","_blank","noopener,noreferrer");}
 function openChat(){if(selected.id==="harin"){openHarinWindow();return;}if(location.hash!=="#chat")location.hash="chat";syncChatView();}
 function closeChat(){if(location.hash==="#chat")history.replaceState(null,"",location.pathname+location.search);syncChatView();}
